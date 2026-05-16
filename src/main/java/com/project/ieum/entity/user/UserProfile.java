@@ -1,0 +1,112 @@
+package com.project.ieum.entity.user;
+
+import com.project.ieum.entity.BasicEntity;
+import com.project.ieum.entity.Gender;
+import com.project.ieum.entity.Region;
+import com.project.ieum.entity.User;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity
+@Table(name = "user_profiles")
+@Builder(toBuilder = true)
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@ToString
+public class UserProfile extends BasicEntity {
+
+  // 사용자 ID (PK, FK → users.id 공유)
+  @Id
+  @Column(name = "user_id")
+  private Long userId;
+
+  // 사용자 (공유 PK)
+  @MapsId
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id")
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  @ToString.Exclude
+  private User user;
+
+  // 이름
+  @Column(name = "full_name", nullable = false, length = 80)
+  private String fullName;
+
+  // 생년월일
+  @Column(name = "birth_date")
+  private LocalDate birthDate;
+
+  // 성별
+  @Enumerated(EnumType.STRING)
+  @Column(length = 16)
+  private Gender gender;
+
+  // 보호자 이름
+  @Column(name = "guardian_name", nullable = false, length = 80)
+  private String guardianName;
+
+  // 보호자 연락처
+  @Column(name = "guardian_phone", nullable = false, length = 20)
+  private String guardianPhone;
+
+  // 지역
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "region_id")
+  @ToString.Exclude
+  private Region region;
+
+  // 상세주소
+  @Column(name = "address_detail", length = 255)
+  private String addressDetail;
+
+  // 이동 보조 기구
+  @Column(name = "mobility_aid", length = 40)
+  private String mobilityAid;
+
+  // 의사소통 방식
+  @Column(name = "communication_method", length = 40)
+  private String communicationMethod;
+
+  // 생활 메모
+  @Column(name = "lifestyle_note", columnDefinition = "TEXT")
+  private String lifestyleNote;
+
+  // 자기소개
+  @Column(name = "intro_text", columnDefinition = "TEXT")
+  private String introText;
+
+  // 보유 장애 유형 (다대다)
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+  @ToString.Exclude
+  @Builder.Default
+  private Set<UserDisabilityType> disabilityTypes = new HashSet<>();
+
+  public void addDisabilityType(DisabilityType type) {
+    disabilityTypes.add(UserDisabilityType.builder().user(this).disabilityType(type).build());
+  }
+
+  public void removeDisabilityType(DisabilityType type) {
+    disabilityTypes.removeIf(udt -> udt.getDisabilityType().getId().equals(type.getId()));
+  }
+
+  public void updateGuardian(String name, String phone) {
+    this.guardianName = name;
+    this.guardianPhone = phone;
+  }
+
+  public void updateRegion(Region region, String addressDetail) {
+    this.region = region;
+    this.addressDetail = addressDetail;
+  }
+
+  public void updateIntro(String introText) {
+    this.introText = introText;
+  }
+}
