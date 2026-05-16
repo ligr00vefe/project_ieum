@@ -71,6 +71,14 @@ public class CaregiverProfile extends BasicEntity {
   @Builder.Default
   private Boolean hasCertification = false;
 
+  // 자격증 종류
+  @Column(name = "certification_type", length = 100)
+  private String certificationType;
+
+  // 경력
+  @Column(name = "experience", columnDefinition = "TEXT")
+  private String experience;
+
   // 평균 평점 (0.00 ~ 5.00)
   @Column(name = "avg_rating", nullable = false, precision = 3, scale = 2)
   @Builder.Default
@@ -88,5 +96,10 @@ public class CaregiverProfile extends BasicEntity {
 
   public void changeAvailability(CaregiverAvailabilityStatus next) {
     this.availabilityStatus = next;
+  }
+
+  public void updateCertificationInfo(String certificationType, String experience) {
+    this.certificationType = certificationType;
+    this.experience = experience;
   }
 }
