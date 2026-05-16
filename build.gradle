@@ -48,7 +48,6 @@ tasks.named('test') {
 // =========================================================================
 // Tailwind CSS 독립형 CLI 빌드 자동화 설정 (Node.js/npm 의존성 없음)
 // =========================================================================
-
 tasks.register('downloadTailwind', Exec) {
     def os = Os.isFamily(Os.FAMILY_WINDOWS) ? "windows-x64.exe" : (Os.isFamily(Os.FAMILY_MAC) ? "macos-x64" : "linux-x64")
     def version = "v3.4.1"
@@ -74,4 +73,5 @@ tasks.register('buildTailwind', Exec) {
 
     commandLine exe, '-i', './src/main/resources/static/css/input.css', '-o', './src/main/resources/static/css/output.css', '--minify'
 }
+
 processResources.dependsOn buildTailwind
