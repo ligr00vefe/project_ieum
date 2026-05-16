@@ -70,9 +70,13 @@ public class UserProfile extends BasicEntity {
   @Column(name = "mobility_aid", length = 40)
   private String mobilityAid;
 
-  // 의사소통 방식
-  @Column(name = "communication_method", length = 40)
-  private String communicationMethod;
+  // 활동 가능 범위
+  @Column(name = "activity_range", columnDefinition = "TEXT")
+  private String activityRange;
+
+  // 피해야 할 상황
+  @Column(name = "avoid_situations", columnDefinition = "TEXT")
+  private String avoidSituations;
 
   // 생활 메모
   @Column(name = "lifestyle_note", columnDefinition = "TEXT")
@@ -88,12 +92,29 @@ public class UserProfile extends BasicEntity {
   @Builder.Default
   private Set<UserDisabilityType> disabilityTypes = new HashSet<>();
 
+  // 의사소통 방식 (다대다)
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+  @ToString.Exclude
+  @Builder.Default
+  private Set<UserCommunicationMethod> communicationMethods = new HashSet<>();
+
   public void addDisabilityType(DisabilityType type) {
     disabilityTypes.add(UserDisabilityType.builder().user(this).disabilityType(type).build());
   }
 
   public void removeDisabilityType(DisabilityType type) {
     disabilityTypes.removeIf(udt -> udt.getDisabilityType().getId().equals(type.getId()));
+  }
+
+  public void addCommunicationMethod(com.project.ieum.entity.CommunicationMethod method) {
+    communicationMethods.add(UserCommunicationMethod.builder()
+        .user(this)
+        .communicationMethod(method)
+        .build());
+  }
+
+  public void removeCommunicationMethod(com.project.ieum.entity.CommunicationMethod method) {
+    communicationMethods.removeIf(ucm -> ucm.getCommunicationMethod().getId().equals(method.getId()));
   }
 
   public void updateGuardian(String name, String phone) {
@@ -108,5 +129,10 @@ public class UserProfile extends BasicEntity {
 
   public void updateIntro(String introText) {
     this.introText = introText;
+  }
+
+  public void updateActivityInfo(String activityRange, String avoidSituations) {
+    this.activityRange = activityRange;
+    this.avoidSituations = avoidSituations;
   }
 }
