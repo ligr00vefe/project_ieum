@@ -1,0 +1,288 @@
+# Windsurf Rules
+
+# Java + Spring Boot + Terraform Agent Rules
+
+## Project Context
+
+You are an expert Java developer working with Spring Boot and Terraform expertise.
+
+This project is a Spring Boot MVC web application using:
+- Java 17+
+- Spring Boot 3.x
+- Spring Data JPA
+- Thymeleaf
+- Tailwind CSS
+- MySQL
+
+Primary goals:
+- maintainability
+- readability
+- accessibility
+- practical MVP delivery
+- stable feature implementation
+
+Avoid unnecessary enterprise-scale abstraction unless explicitly required.
+
+---
+
+# Architecture Principles
+
+## Layered MVC Architecture
+
+Use layered architecture:
+
+Controller → Service → Repository
+
+Rules:
+- Controllers remain thin
+- Business logic belongs in services
+- Repositories only handle persistence
+- Avoid business logic in controllers
+
+---
+
+## Dependency Injection
+
+Use constructor injection only.
+
+Prefer:
+- `@RequiredArgsConstructor`
+- `final` fields
+
+Never use:
+- field injection
+- field-level `@Autowired`
+
+---
+
+## DTO Rules
+
+Always use DTOs for:
+- API requests
+- API responses
+- Thymeleaf rendering models
+- WebSocket payloads
+
+Never expose JPA entities directly to clients or templates.
+
+---
+
+# Java Rules
+
+## Java Defaults
+
+- Follow standard Java naming conventions
+- Use Java 17+ features appropriately
+- Prefer immutable objects
+- Use `final` where practical
+- Use records for simple DTOs/configuration objects
+- Prefer composition over inheritance
+
+---
+
+## Optional Usage
+
+- Never return `null` from public query methods when absence is expected
+- Use `Optional<T>` mainly for repository/query results
+- Avoid excessive Optional usage in:
+  - DTO fields
+  - entity fields
+  - method parameters
+
+---
+
+## Logging
+
+Use:
+- `@Slf4j`
+- structured logging
+
+Never use:
+- `System.out.println()`
+
+Never log:
+- passwords
+- tokens
+- secrets
+
+---
+
+# Spring Boot Rules
+
+## Transaction Boundaries
+
+Apply transactions only in service layer.
+
+Use:
+```java
+@Transactional(readOnly = true)
+```
+
+for read-only operations.
+
+---
+
+## Exception Handling
+
+Use centralized exception handling:
+
+```java
+@RestControllerAdvice
+```
+
+Requirements:
+- consistent error DTOs
+- meaningful messages
+- no stack trace exposure
+
+---
+
+## Configuration
+
+Use:
+- `application-local.yml`
+- `application-dev.yml`
+- `application-prod.yml`
+
+Avoid runtime environment branching logic.
+
+---
+
+# JPA Rules
+
+## Entity Rules
+
+Prefer:
+- `FetchType.LAZY`
+- explicit mutation methods
+- small focused entities
+
+Avoid:
+- unnecessary bidirectional relations
+- Lombok `@Data` on entities
+- unrestricted setters
+
+Prevent N+1 problems using:
+- fetch join
+- EntityGraph
+
+---
+
+# Thymeleaf + Tailwind Rules
+
+## Frontend Stack
+
+Preferred:
+- Thymeleaf
+- Tailwind CSS
+
+Optional:
+- Alpine.js
+- HTMX
+
+Avoid React/Next.js unless explicitly required.
+
+---
+
+## Tailwind Rules
+
+Use:
+- utility-first styling
+- responsive prefixes
+- flex/grid layouts
+- semantic HTML
+
+Avoid:
+- large SCSS architectures
+- excessive arbitrary values
+- fixed-width layouts
+
+---
+
+# Accessibility
+
+Follow WCAG AA.
+
+Requirements:
+- semantic HTML
+- keyboard accessibility
+- visible focus states
+- accessible labels
+- sufficient contrast
+
+---
+
+# Security
+
+Requirements:
+- BCrypt password encoding
+- Bean Validation
+- parameterized queries
+- CSRF protection
+- secure cookies
+- security headers
+
+Never hardcode:
+- passwords
+- API keys
+- secrets
+
+---
+
+# Testing
+
+Use:
+- JUnit 5
+- Mockito
+- Testcontainers
+
+Follow:
+- Arrange
+- Act
+- Assert
+
+Use descriptive test names.
+
+---
+
+# Production Readiness
+
+Provide:
+- `/healthz`
+- `/readyz`
+
+Support:
+- graceful shutdown
+- retry handling
+- timeout handling
+
+---
+
+# Agent Workflow
+
+Before implementation:
+1. Explain implementation plan
+2. Identify affected files
+3. Verify architectural impact
+
+Requirements:
+- small incremental changes
+- frequent verification
+- preserve existing functionality
+
+---
+
+# Engineering Principles
+
+Prioritize:
+- simplicity
+- maintainability
+- readability
+- practical implementation
+- minimal safe changes
+
+Avoid:
+- overengineering
+- premature optimization
+- unnecessary abstraction
+- enterprise-scale complexity
