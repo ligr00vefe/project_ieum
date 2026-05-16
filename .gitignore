@@ -35,3 +35,9 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Spring Boot Configuration ###
+/src/main/resources/application.properties
+
+## Node dependencies
+node_modules/
