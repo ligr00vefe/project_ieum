@@ -159,7 +159,6 @@ Prefer:
 
 Avoid:
 - unnecessary bidirectional relations
-- Lombok `@Data` on entities
 - unrestricted setters
 
 Prevent N+1 problems using:

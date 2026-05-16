@@ -937,9 +937,6 @@ Prefer:
 Avoid:
 
 
-
-- Lombok `@Data`
-
 - unrestricted setters
 
 - unnecessary bidirectional relations
