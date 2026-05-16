@@ -3,6 +3,7 @@ package com.project.ieum.dto;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+@Data
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
