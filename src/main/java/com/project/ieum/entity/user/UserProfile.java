@@ -31,7 +31,6 @@ public class UserProfile extends BasicEntity {
   @MapsId
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
-  @OnDelete(action = OnDeleteAction.CASCADE)
   @ToString.Exclude
   private User user;
 
@@ -108,6 +107,7 @@ public class UserProfile extends BasicEntity {
 
   public void addCommunicationMethod(com.project.ieum.entity.CommunicationMethod method) {
     communicationMethods.add(UserCommunicationMethod.builder()
+        .id(new UserCommunicationMethodId(userId, method.getId()))
         .user(this)
         .communicationMethod(method)
         .build());
