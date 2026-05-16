@@ -3,6 +3,7 @@ package com.project.ieum.dto;
 import com.project.ieum.entity.UserRole;
 import lombok.*;
 
+@Data
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
