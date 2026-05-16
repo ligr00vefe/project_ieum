@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '4.0.6'
@@ -42,3 +44,34 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// =========================================================================
+// Tailwind CSS 독립형 CLI 빌드 자동화 설정 (Node.js/npm 의존성 없음)
+// =========================================================================
+
+tasks.register('downloadTailwind', Exec) {
+    def os = Os.isFamily(Os.FAMILY_WINDOWS) ? "windows-x64.exe" : (Os.isFamily(Os.FAMILY_MAC) ? "macos-x64" : "linux-x64")
+    def version = "v3.4.1"
+
+    workingDir projectDir
+    commandLine 'curl', '-sLO', "https://github.com/tailwindlabs/tailwindcss/releases/download/${version}/tailwindcss-${os}"
+
+    doLast {
+        def file = new File(projectDir, "tailwindcss-${os}")
+        if (file.exists()) {
+            file.renameTo(new File(projectDir, Os.isFamily(Os.FAMILY_WINDOWS) ? "tailwindcss.exe" : "tailwindcss"))
+            if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+                "chmod +x tailwindcss".execute()
+            }
+        }
+    }
+    outputs.file(Os.isFamily(Os.FAMILY_WINDOWS) ? "tailwindcss.exe" : "tailwindcss")
+}
+
+tasks.register('buildTailwind', Exec) {
+    dependsOn 'downloadTailwind'
+    def exe = Os.isFamily(Os.FAMILY_WINDOWS) ? "tailwindcss.exe" : "./tailwindcss"
+
+    commandLine exe, '-i', './src/main/resources/static/css/input.css', '-o', './src/main/resources/static/css/output.css', '--minify'
+}
+processResources.dependsOn buildTailwind
