@@ -7,7 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class IeumApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(IeumApplication.class, args);
+        SpringApplication.run(IeumApplication.class, args);
+        System.out.println("http://localhost:8080/ieum");
 	}
 
 }
