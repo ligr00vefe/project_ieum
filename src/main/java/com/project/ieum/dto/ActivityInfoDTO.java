@@ -5,6 +5,7 @@ import lombok.*;
 import java.time.LocalTime;
 import java.util.List;
 
+@Data
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
