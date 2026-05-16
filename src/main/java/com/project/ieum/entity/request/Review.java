@@ -13,7 +13,6 @@ import org.hibernate.annotations.Check;
 @Table(name = "reviews",
     uniqueConstraints = @UniqueConstraint(name = "uq_review_help_request", columnNames = "help_request_id"),
     indexes = @Index(name = "idx_review_target", columnList = "target_id,created_at"))
-@Check(name = "ck_review_rating", constraints = "rating BETWEEN 1 AND 5")
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
@@ -46,7 +45,7 @@ public class Review extends BasicEntity {
 
   // 평점 (1~5)
   @Min(1) @Max(5)
-  @Column(nullable = false)
+  @Column(nullable = false, columnDefinition = "SMALLINT CHECK (rating BETWEEN 1 AND 5)")
   private Short rating;
 
   // 후기 본문
