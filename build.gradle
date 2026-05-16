@@ -23,6 +23,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'
@@ -53,7 +54,13 @@ tasks.register('downloadTailwind', Exec) {
     def version = "v3.4.1"
 
     workingDir projectDir
-    commandLine 'curl', '-sLO', "https://github.com/tailwindlabs/tailwindcss/releases/download/${version}/tailwindcss-${os}"
+    commandLine 'curl',
+            '-sLO',
+            '--ssl-no-revoke',
+            '-L',
+            '-o',
+            'tailwindcss.exe',
+            "https://github.com/tailwindlabs/tailwindcss/releases/download/${version}/tailwindcss-${os}"
 
     doLast {
         def file = new File(projectDir, "tailwindcss-${os}")
