@@ -1,306 +1,288 @@
 # Windsurf Rules
 
-## Java + Spring Boot + Terraform Agent Rules
+# Java + Spring Boot + Terraform Agent Rules
 
 ## Project Context
-You are an expert Java developer working with Spring Boot with expertise in Terraform. This project is a Web App.
 
-## Code Style & Structure
+You are an expert Java developer working with Spring Boot and Terraform expertise.
+
+This project is a Spring Boot MVC web application using:
+- Java 17+
+- Spring Boot 3.x
+- Spring Data JPA
+- Thymeleaf
+- Tailwind CSS
+- MySQL
+
+Primary goals:
+- maintainability
+- readability
+- accessibility
+- practical MVP delivery
+- stable feature implementation
+
+Avoid unnecessary enterprise-scale abstraction unless explicitly required.
+
+---
+
+# Architecture Principles
+
+## Layered MVC Architecture
+
+Use layered architecture:
+
+Controller → Service → Repository
+
+Rules:
+- Controllers remain thin
+- Business logic belongs in services
+- Repositories only handle persistence
+- Avoid business logic in controllers
+
+---
+
+## Dependency Injection
+
+Use constructor injection only.
+
+Prefer:
+- `@RequiredArgsConstructor`
+- `final` fields
+
+Never use:
+- field injection
+- field-level `@Autowired`
+
+---
+
+## DTO Rules
+
+Always use DTOs for:
+- API requests
+- API responses
+- Thymeleaf rendering models
+- WebSocket payloads
+
+Never expose JPA entities directly to clients or templates.
+
+---
+
+# Java Rules
+
 ## Java Defaults
-- Follow Java naming conventions: `camelCase` for methods/variables, `PascalCase` for classes, `UPPER_SNAKE_CASE` for constants.
-- Use Java 17+ features: records, sealed classes, pattern matching, text blocks.
-- Use `Optional<T>` for method returns that may be empty — never return null from methods. Use `Optional.of()`, `Optional.empty()`, `Optional.ofNullable()`.
-- Use records (`record Point(int x, int y) {}`) for simple data carriers — they auto-generate constructor, equals, hashCode, toString.
-- Prefer immutable objects. Use `final` on fields, parameters, and local variables by default.
-- Use `Optional<T>` for return types that may be absent — never return `null` from public methods.
-- Prefer composition over inheritance. Use interfaces for abstraction.
-- Use `try-with-resources` for all `AutoCloseable` resources (streams, connections, files).
-- Use `var` for local variables when the type is obvious from the right-hand side.
 
-## Mixed Patterns
-- Use classes for stateful domain entities and services; use plain functions for stateless transformations and utilities.
-- Prefer immutable data flows between components; mutate state only inside well-encapsulated objects.
-- Choose the simplest paradigm for each task: OOP for modeling, FP for data pipelines, imperative for performance-critical loops.
-- Encapsulate complex state and lifecycle in classes (repositories, services, controllers); keep business logic in pure functions.
-- Use functional patterns (map, filter, reduce, composition) for data transformations instead of method chains on mutable collections.
-- Apply dependency injection for wiring services together; prefer constructor injection for clarity and testability.
-- Favor interfaces and protocols over concrete class hierarchies; combine with higher-order functions for flexible behavior customization.
+- Follow standard Java naming conventions
+- Use Java 17+ features appropriately
+- Prefer immutable objects
+- Use `final` where practical
+- Use records for simple DTOs/configuration objects
+- Prefer composition over inheritance
 
-## Spring Boot
-- Use constructor injection (not `@Autowired` on fields) for all dependencies — it makes classes testable and immutable.
-- Use Spring profiles (`@Profile`, `application-{profile}.yml`) to separate dev/staging/prod configuration — never use runtime `if` checks.
-- Apply `@Transactional` on service methods, not on controllers or repositories — keep transaction boundaries at the business logic layer.
-- Use `@RestControllerAdvice` with `@ExceptionHandler` methods for centralized error handling — return consistent error response DTOs.
-- Use `@RestController` for REST APIs and `@Service` for business logic. Keep controllers thin.
-- Use `application.yml` for configuration with Spring profiles for environment-specific overrides.
-- Use `@Transactional` on service methods, not controllers or repositories.
-- Use Spring Data repositories for CRUD — define custom queries with `@Query` only when needed.
-- In Java: Use layered architecture: @RestController for request/response handling, @Service for business logic delegating to @Repository for data access.
-- Employ DTOs for API endpoints; map entities to/from DTOs using custom utilities in services.
-- Prefer constructor injection for dependency injection.
-- Apply @Transactional at the service layer, not repositories.
-- Handle exceptions globally with @ControllerAdvice.
-- In Java: Use `@RestController` with `@RequestMapping("/api/v1/users")` for RESTful endpoints — return `ResponseEntity<T>` for typed responses with status codes.
-- Inject dependencies with constructor injection: `public UserService(UserRepository repo)` — Spring auto-wires single-constructor beans.
-- Use `@Transactional` on service methods for database transaction management — set `readOnly = true` on query-only methods.
-- Configure properties with `@ConfigurationProperties(prefix = "app")` bound to a record: `record AppConfig(String name, int port) {}`.
+---
 
-## Architecture
-## Architecture Fundamentals
-- Separate concerns into layers (presentation, business logic, data access) — each layer should depend only on the layer below it.
-- Design for testability: inject dependencies, avoid global state, use interfaces for external services.
-- Use dependency injection to decouple components — pass dependencies through constructors or function parameters, not global imports.
-- Keep modules loosely coupled with well-defined interfaces between them.
-- Use dependency injection for external services and cross-cutting concerns.
-- Prefer composition over inheritance for flexible, testable designs.
+## Optional Usage
 
-## Production Readiness
-- Handle edge cases and failures gracefully — never assume the happy path.
-- Add structured logging for all critical operations and error states.
-- Use health check endpoints (`/healthz`, `/readyz`) for load balancers and orchestrators to verify service availability.
-- Validate all external inputs at system boundaries. Trust nothing from users, APIs, or files.
-- Add health check endpoints and readiness probes for all services.
-- Use feature flags for risky rollouts — deploy dark, enable incrementally.
-- Write code that fails loudly in development and recovers gracefully in production.
+- Never return `null` from public query methods when absence is expected
+- Use `Optional<T>` mainly for repository/query results
+- Avoid excessive Optional usage in:
+  - DTO fields
+  - entity fields
+  - method parameters
 
-## Clean Architecture
-- Organize into modules: `domain` (entities, repository interfaces), `application` (use cases), `infrastructure` (Spring, JPA, APIs).
-- Domain module has no Spring annotations, no JPA, no framework dependencies.
-- Use cases return domain objects — mapping to DTOs happens in the controller/adapter layer, not in the business logic.
-- Define repository interfaces in domain. Implement with Spring Data JPA in infrastructure.
-- Use cases are `@Service` classes in the application layer. They orchestrate domain logic.
-- Use DTOs for API request/response. Map to domain entities at the infrastructure boundary.
-- Use constructor injection everywhere. Wire dependencies via Spring's DI container.
+---
 
-## Web Accessibility
-- Use semantic HTML elements (<nav>, <main>, <article>, <button>) instead of generic <div> and <span> with click handlers.
-- Add alt text to all images. Decorative images get alt="". Informational images get descriptive text.
-- Ensure all interactive elements are keyboard accessible. Never remove focus outlines without providing a visible alternative.
-- Use ARIA attributes only when native HTML semantics are insufficient — aria-label, aria-live, aria-expanded for dynamic content.
-- Structure pages with a single <h1> and logically nested heading levels (h2, h3) — never skip heading levels for styling purposes.
-- Maintain a color contrast ratio of at least 4.5:1 for normal text and 3:1 for large text (WCAG AA). Test with a contrast checker tool.
-- Make all form inputs have associated <label> elements. Use aria-describedby for help text and aria-invalid for error states.
-- Announce dynamic content changes (toasts, alerts, live updates) with aria-live regions — use "polite" for non-urgent and "assertive" for critical updates.
-- Set interactive target sizes to at least 44x44 CSS pixels for touch devices and users with motor impairments.
-- Respect user preferences: honor prefers-reduced-motion, prefers-color-scheme, and prefers-contrast media queries.
+## Logging
 
-## API Architecture
-- Use consistent URL patterns: plural nouns for resources, nested routes for relationships. Avoid verbs in URLs.
-- Return proper HTTP status codes: 200 OK, 201 Created, 400 Bad Request, 401 Unauthorized, 404 Not Found, 500 Internal Server Error.
-- Version your API from day one. Use URL prefix (/v1/) or Accept header versioning.
-- Validate all request bodies and query parameters at the boundary. Return structured error responses with error codes.
-- Implement pagination for all list endpoints: cursor-based (preferred) or offset-based. Include total count and next/prev links.
-- Use consistent error response format: { "error": { "code": "VALIDATION_ERROR", "message": "...", "details": [...] } }.
-- Add rate limiting with clear headers: X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset.
-- Support filtering, sorting, and field selection on list endpoints. Use query params: ?sort=-created_at&fields=id,name.
-- Use ETags or Last-Modified for caching. Return 304 Not Modified when the resource has not changed.
+Use:
+- `@Slf4j`
+- structured logging
 
-## Responsive Design & SCSS Rules
-- **SCSS Modules Only**: Use SCSS Modules (`*.module.scss`) exclusively to isolate component and page styles.
-- **Naming Convention**: Write all class names in `kebab-case` inside HTML/Thymeleaf and SCSS files (e.g., `.main-wrapper`, `.img-area`, `.text-box`).
-- **Global Constraint**: Global styles enforce `html { font-size: 10px; }` as the fixed root baseline.
-- **Unit Principle**: All layout dimensions, font sizes, paddings, and margins must be declared strictly in `rem` units based on the 10px decimal scale (e.g., 14px must be written as 1.4rem).
-  - Arbitrary usage of `px` or other fixed units is strictly prohibited. If absolutely necessary, obtain user confirmation first and document the explicit justification as an inline comment in the SCSS file.
-  - Using relative fluid units like `vw` or `vh` is permissible purely for responsive sizing adjustments.
-- **Responsive Mixins**: Always utilize `@mixin pc`, `@mixin tablet`, and `@mixin mobile` declared inside `src/styles/_mixins.scss`. Call them within each page's localized `.module.scss` via `@include pc { ... }`, `@include tablet { ... }`, or `@include mobile { ... }`.
-- **Consistent Page Layout**: Wrap every webpage inside a centralized, common `Container` component/fragment structure to ensure uniform responsive behavior across the entire site.
-- **Hierarchical Layout Layering**: Enforce the structural class hierarchy naming convention: `wrapper > area > box`
-  - `wrapper`: Top-level/outermost structural group containment (e.g., `.main-wrapper`, `.list-wrapper`, `.mypage-wrapper`).
-  - `area`: High-level semantic context zones (e.g., `.sec01-img-area`, `.list-filter-area`).
-  - `box`: Concrete block/leaf component elements (e.g., `.text-box`, `.card-box`, `.badge-box`).
-- **Main Page Section Rules**: Explicitly structure content blocks using semantic `<section>` tags. The root class of each section must follow sequential order naming (`.sec01`, `.sec02`, etc.), and child nodes must preserve the parent section prefix (e.g., `.sec01-banner`, `.sec01-text-box`).
-- **Sub Page Scoping**: Prefix inner areas of dedicated inner pages with explicit routing keywords to eliminate styling overlaps across modules (e.g., `.list-filter-area`, `.detail-info-box`).
-- **Style Segmentation**: Manage distinct boundaries between main, sub-pages, and global configurations respectively.
+Never use:
+- `System.out.println()`
 
-## Responsive Design
-- Design mobile-first: write base styles for small screens and use min-width media queries to enhance for larger viewports.
-- Use relative units (rem, em, %, vw/vh) instead of fixed pixels for layout dimensions, font sizes, and spacing.
-- Set the viewport meta tag: <meta name="viewport" content="width=device-width, initial-scale=1">.
-- Test on real devices at common breakpoints (320px, 768px, 1024px, 1440px) — browser resize alone misses touch and rendering differences.
-- Use CSS Grid or Flexbox for layouts instead of floats or absolute positioning. Grid for two-dimensional layouts, Flexbox for one-dimensional alignment.
-- Implement fluid typography with clamp() — e.g., font-size: clamp(1rem, 2.5vw, 2rem) — to scale text smoothly between breakpoints.
-- Make images responsive with max-width: 100% and height: auto. Use <picture> with srcset for art direction and resolution switching.
-- Design touch-friendly interactions: minimum 44px tap targets, adequate spacing between interactive elements, no hover-only interactions.
-- Use container queries (@container) for component-level responsiveness instead of relying solely on viewport-based media queries.
-- Hide or reorganize navigation for small screens — use a hamburger menu or bottom navigation pattern. Never horizontally scroll the main layout.
+Never log:
+- passwords
+- tokens
+- secrets
 
-## MVC
-- Use `@RestController` for API controllers, `@Service` for business logic, `@Repository` for data access.
-- Keep controllers thin: parse request, validate, call service, return response.
-- Use DTOs (Data Transfer Objects) for request/response — never expose JPA entities directly in controllers.
-- Use `@RequestBody` with `@Valid` for automatic input validation via Bean Validation annotations.
-- Use `@ExceptionHandler` or `@ControllerAdvice` for centralized error handling.
-- Use DTOs for request/response. Never expose JPA entities directly in API responses.
-- Use Spring Data repositories for standard CRUD. Add custom query methods only when needed.
+---
 
-## Web App Architecture
-- Separate UI components, business logic, and data fetching into distinct layers.
-- Choose rendering strategy intentionally: SSR for SEO, CSR for interactivity, SSG for static content.
-- Use server-side rendering (SSR) or static generation (SSG) for initial page loads — hydrate on the client for interactivity.
-- Implement client-side routing with proper loading and error states for each route.
-- Use a state management approach appropriate to complexity — local state first, global store when needed.
+# Spring Boot Rules
 
-## Modular Architecture
-- Keep modules small, focused, and decoupled. Each module should have a single clear responsibility.
-- Define explicit public interfaces — hide implementation details behind well-defined boundaries.
-- Define clear module boundaries with explicit public APIs — modules communicate through interfaces, not direct imports of internal classes.
-- Use dependency injection to manage dependencies between modules — never hardcode concrete implementations.
-- Enforce unidirectional dependencies. If A depends on B, B must never depend on A.
-- Group related functionality into cohesive packages. A module should change for one reason only.
-- Expose the minimum public API surface — internal implementation details should stay internal.
+## Transaction Boundaries
 
-## Performance
-## Java Performance
-- Profile before optimizing: use JMH for microbenchmarks, async-profiler or JFR for production profiling.
-- Use `StringBuilder` for string concatenation in loops — `+` creates new objects on each iteration.
-- Use JMH (`@Benchmark`) for microbenchmarks — avoid premature optimization based on intuition, measure with JVM warm-up.
-- Use `ArrayList` over `LinkedList` in almost all cases — cache locality dominates pointer chasing.
-- Use `HashMap` initial capacity to avoid rehashing: `new HashMap<>(expectedSize * 4 / 3 + 1)`.
-- Use `Stream.parallel()` only for CPU-heavy operations on large datasets — parallelism has overhead.
-- Use primitive specializations (`IntStream`, `LongStream`) to avoid boxing in numeric streams.
+Apply transactions only in service layer.
 
-## Security
-## Security Guidelines
-- Validate and sanitize all user inputs from external sources.
-- NEVER hardcode secrets (API keys, passwords) in the codebase. Use environment variables.
-- Use parameterized queries for all database access — never concatenate user input into SQL, command strings, or template expressions.
-- If you detect a hardcoded secret, stop immediately and prompt the user to remove it.
-- Use parameterized queries or ORMs to prevent SQL injection.
-- Ensure code handles edge cases and failures gracefully, not just the happy path.
+Use:
+```java
+@Transactional(readOnly = true)
+```
 
-## Web App Security
-- Set security headers (CSP, HSTS, X-Frame-Options) on all responses.
-- Escape all user-generated output to prevent XSS — use framework-provided sanitization, never raw HTML insertion.
-- Set HTTP security headers: `Content-Security-Policy`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Strict-Transport-Security`.
-- Set cookies with `HttpOnly`, `Secure`, and `SameSite=Strict` flags.
+for read-only operations.
 
-## API Security
-- Authenticate every API request. Use short-lived tokens (JWT) or API keys with scoping.
-- Validate and sanitize all input at the API boundary — reject malformed payloads before processing.
-- Implement rate limiting per IP and per API key — use exponential backoff for retry-after headers on 429 responses.
-- Implement rate limiting per client/IP to prevent abuse and DDoS.
-- Validate and sanitize all input at the API boundary — never trust client data.
+---
 
-## Java Security
-- Use prepared statements for all SQL queries — never concatenate user input into SQL strings to prevent injection.
-- Validate and sanitize all external input at system boundaries with Bean Validation (`@Valid`, `@NotNull`, `@Size`).
-- Store secrets in environment variables or a vault (HashiCorp Vault, AWS Secrets Manager) — never in source code or properties files committed to git.
-- Use prepared statements (`PreparedStatement`) for all SQL.
-- Validate input with Bean Validation annotations.
-- Store secrets in env vars or vault, never in source code.
-- Use `java.security.SecureRandom` for cryptographic operations.
-- Enable CSRF protection in Spring Security for web apps.
+## Exception Handling
 
-## Error Handling
-## Terraform Error Handling
-- Use `precondition` blocks inside `lifecycle` to validate variable values before apply: `condition = var.environment != "" error_message = "environment must not be empty"`.
-- Use `postcondition` blocks to assert that created resource attributes meet expected contracts — catch API-returned values that violate assumptions.
-- Set `prevent_destroy = true` in `lifecycle` for stateful resources (databases, S3 buckets) to prevent accidental destruction by plan changes.
-- Use `ignore_changes` in `lifecycle` to suppress drift detection for attributes managed outside Terraform — document every `ignore_changes` entry with a comment explaining why.
+Use centralized exception handling:
 
-## Mixed
-- Combine exceptions for unexpected failures with Result/Either types for expected business errors.
-- Use exceptions for infrastructure failures (network, I/O, OOM) and result types for domain validation errors.
-- Never swallow exceptions silently — always log or propagate with context.
-- Use exceptions for truly exceptional conditions (infrastructure failures, programming errors) and Result/Either types for expected business-logic failures (validation, not-found, permission denied).
-- Wrap third-party library exceptions at module boundaries into your own domain-specific error types.
-- Always attach context (operation name, input values, timestamps) when re-throwing or wrapping errors.
-- Use a centralized error handler for cross-cutting concerns (logging, monitoring, user-facing messages).
-- Prefer typed error enums or union types over generic error strings for pattern matching and exhaustiveness checks.
-- Never use exceptions for control flow — reserve them for truly unexpected states.
+```java
+@RestControllerAdvice
+```
 
-## Testing
-## Java Testing
-- Follow the Arrange-Act-Assert pattern. One assertion concept per test method.
-- Name tests descriptively: `shouldReturnErrorWhenUserNotFound` not `test1`.
-- Use Mockito's `@Mock` and `@InjectMocks` annotations with `@ExtendWith(MockitoExtension.class)` — verify interactions with `verify(mock).method()`.
-- Use parameterized tests for data-driven scenarios with multiple input/output combinations.
-- Use mocking for dependency isolation: mock interfaces, not concrete classes.
-- Use nested test classes to group related test scenarios within a test class.
-- Test expected exceptions with the appropriate assertion and verify the exception message.
+Requirements:
+- consistent error DTOs
+- meaningful messages
+- no stack trace exposure
 
-## JUnit 5
-- In Java: Use `@Test` for test methods with descriptive, backtick-quoted names like `should handle null input`.
-- Mock all dependencies to isolate the unit under test and avoid testing multiple classes.
-- Prefer inline initialization of test data over `@BeforeEach`.
-- Define constants like test addresses in a private companion object.
-- In Java: Limit `@BeforeEach` to shared setup such as test dispatchers or resettable state to reduce test interdependence.
-- Use data class `.copy()` to efficiently create variations of test objects without recreation.
-- Ensure tests cover failure states with descriptive error expectations.
-- Structure tests to mimic real usage while maintaining strict isolation.
+---
 
-## Libraries & Tools
-## Lombok
-- Use `@Data` for DTOs (generates getters, setters, equals, hashCode, toString) — use `@Value` for immutable classes.
-- Use `@Builder` for complex object construction — combine with `@AllArgsConstructor(access = AccessLevel.PRIVATE)` to enforce builder usage.
-- Use `@Slf4j` for logging instead of manually creating logger fields — it generates `private static final Logger log = LoggerFactory.getLogger()`.
-- Use `@Value` for immutable data classes (all fields `final`, no setters).
-- Use `@RequiredArgsConstructor` with `final` fields for constructor injection (Spring-compatible).
-- Use `@Builder.Default` for default values in builder patterns.
-- Avoid `@Data` on JPA entities — implement `equals`/`hashCode` manually using business keys.
+## Configuration
 
-## Agent Workflow
-## Planning & Task Execution
-- Always plan before coding — break complex tasks into small, verifiable steps before writing code.
-- After each step, verify the result works (run tests, check output) before moving to the next.
-- Break tasks into verifiable subtasks — each subtask should produce a testable output that can be validated before proceeding.
-- Decompose large tasks into subtasks of 1–3 files each — smaller scope means fewer errors.
-- State assumptions explicitly before starting — verify them with the user if uncertain.
-- When exploring unfamiliar code, read tests first — they document intended behavior.
+Use:
+- `application-local.yml`
+- `application-dev.yml`
+- `application-prod.yml`
 
-## Incremental Development
-- Make small, incremental changes — commit working states frequently rather than large rewrites.
-- If something breaks, revert to the last working state rather than adding more fixes on top.
-- Commit working changes frequently — never have more than one feature in progress. Each commit should leave the codebase in a working state.
-- Build features in vertical slices — deliver a thin working end-to-end flow before adding depth.
-- When refactoring, verify behavior is preserved after each step — run tests between moves.
-- Don't optimize prematurely — get it working correctly first, then optimize with profiling data.
+Avoid runtime environment branching logic.
 
-## Plan Mode Default
-- Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions).
-- If something goes sideways, STOP and re-plan immediately — don't keep pushing.
-- If something goes sideways mid-execution, STOP immediately and re-plan — do not push through blockers.
-- Use plan mode for verification steps, not just building.
-- Write detailed specs upfront to reduce ambiguity before touching code.
+---
 
-## Verification Before Done
-- Never mark a task complete without proving it works.
-- Run tests, check logs, and demonstrate correctness before declaring done.
-- Never mark a task complete without proving it works — run tests, check logs, and demonstrate the expected behavior.
-- Diff behavior between main and your changes when relevant to catch regressions.
-- Ask yourself: "Would a staff engineer approve this?" before marking anything done.
-- Verification is part of the task, not optional cleanup.
+# JPA Rules
 
-## Task Management
-- Write plan to `tasks/todo.md` with checkable items before starting.
-- Mark items complete as you go and capture lessons in `tasks/lessons.md` after corrections.
-2. **Verify Plan**: Check in before starting implementation.
-3. **Track Progress**: Mark items complete as you go.
-4. **Explain Changes**: High-level summary at each step.
-5. **Document Results**: Add review section to `tasks/todo.md` when done.
-6. **Capture Lessons**: Update `tasks/lessons.md` after any correction.
+## Entity Rules
 
-## Core Principles
-- **Simplicity First**: Make every change as simple as possible. Impact minimal code.
-- **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
-- **Minimal Impact**: Changes should only touch what's necessary.
-- **Simplicity First**: Make every change as simple as possible. The minimum complexity that solves the problem is the right amount.
-- **No Laziness**: Find root causes, not symptoms. No temporary fixes or workarounds. Apply senior developer standards to every change.
-- **Minimal Impact**: Changes should only touch what's necessary. Avoid introducing bugs in adjacent code by limiting scope.
+Prefer:
+- `FetchType.LAZY`
+- explicit mutation methods
+- small focused entities
 
-## Context Management
-## Context Management
-- Provide only the exact files and lines of code necessary for the current task to the AI to prevent distraction and token bloat.
-- Ask targeted, specific questions rather than open-ended "look at my codebase" prompts.
-- Aggressively manage context windows: only include files directly related to the active task. Remove old files from context when switching tasks.
-- Keep agent prompts targeted and isolated. Break complex refactoring tasks into smaller, independent sub-tasks to avoid context dilution.
-- Supply high-level architecture documents to the agent initially, but remove them from active workspace context once execution begins.
+Avoid:
+- unnecessary bidirectional relations
+- Lombok `@Data` on entities
+- unrestricted setters
 
-## Project Management
-## Task Decomposition
-- Break every feature into tasks that can be completed in 1–2 days maximum.
-- Define acceptance criteria for every task before starting — know what "done" looks like.
-- Each task should be completable in 1-4 hours — if a task takes longer, it needs further decomposition into smaller pieces.
-- Order tasks by dependency — identify what must be done first and what can be parallelized.
-- Separate research/spike tasks from implementation tasks — time-box exploration.
-- Create follow-up tasks for known technical debt rather than expanding scope of current work.
+Prevent N+1 problems using:
+- fetch join
+- EntityGraph
+
+---
+
+# Thymeleaf + Tailwind Rules
+
+## Frontend Stack
+
+Preferred:
+- Thymeleaf
+- Tailwind CSS
+
+Optional:
+- Alpine.js
+- HTMX
+
+Avoid React/Next.js unless explicitly required.
+
+---
+
+## Tailwind Rules
+
+Use:
+- utility-first styling
+- responsive prefixes
+- flex/grid layouts
+- semantic HTML
+
+Avoid:
+- large SCSS architectures
+- excessive arbitrary values
+- fixed-width layouts
+
+---
+
+# Accessibility
+
+Follow WCAG AA.
+
+Requirements:
+- semantic HTML
+- keyboard accessibility
+- visible focus states
+- accessible labels
+- sufficient contrast
+
+---
+
+# Security
+
+Requirements:
+- BCrypt password encoding
+- Bean Validation
+- parameterized queries
+- CSRF protection
+- secure cookies
+- security headers
+
+Never hardcode:
+- passwords
+- API keys
+- secrets
+
+---
+
+# Testing
+
+Use:
+- JUnit 5
+- Mockito
+- Testcontainers
+
+Follow:
+- Arrange
+- Act
+- Assert
+
+Use descriptive test names.
+
+---
+
+# Production Readiness
+
+Provide:
+- `/healthz`
+- `/readyz`
+
+Support:
+- graceful shutdown
+- retry handling
+- timeout handling
+
+---
+
+# Agent Workflow
+
+Before implementation:
+1. Explain implementation plan
+2. Identify affected files
+3. Verify architectural impact
+
+Requirements:
+- small incremental changes
+- frequent verification
+- preserve existing functionality
+
+---
+
+# Engineering Principles
+
+Prioritize:
+- simplicity
+- maintainability
+- readability
+- practical implementation
+- minimal safe changes
+
+Avoid:
+- overengineering
+- premature optimization
+- unnecessary abstraction
+- enterprise-scale complexity
