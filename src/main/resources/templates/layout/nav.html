@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="nav">
+    <th:block th:if="${#authorization.expression('isAuthenticated()')}">
+        <nav class="bg-blue-50 border-b" role="navigation" aria-label="메인 네비게이션">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-12">
+                    <!-- User Role Menu -->
+                    <div class="flex items-center space-x-1 overflow-x-auto">
+                        <th:block th:if="${#authorization.expression('hasRole(''USER'')')}">
+                            <a href="/requests/create" class="text-gray-700 hover:text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">요청 작성</a>
+                            <a href="/requests/my" class="text-gray-700 hover:text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">내 요청</a>
+                            <a href="/matching" class="text-gray-700 hover:text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">매칭</a>
+                            <a href="/chat" class="text-gray-700 hover:text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">채팅</a>
+                        </th:block>
+                        <th:block th:if="${#authorization.expression('hasRole(''CAREGIVER'')')}">
+                            <a href="/requests/list" class="text-gray-700 hover:text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">요청 목록</a>
+                            <a href="/matching" class="text-gray-700 hover:text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">매칭</a>
+                            <a href="/chat" class="text-gray-700 hover:text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">채팅</a>
+                            <a href="/schedule" class="text-gray-700 hover:text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">일정 관리</a>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </th:block>
+</th:block>
+</html>
