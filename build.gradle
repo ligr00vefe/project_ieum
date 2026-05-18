@@ -24,6 +24,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.springframework.security:spring-security-messaging'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -83,3 +85,20 @@ tasks.register('buildTailwind', Exec) {
 }
 
 processResources.dependsOn buildTailwind
+
+// Querydsl QClass 생성 경로
+sourceSets {
+    main {
+        java {
+            srcDirs += layout.buildDirectory.dir("generated/querydsl")
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.generatedSourceOutputDirectory = layout.buildDirectory.dir("generated/querydsl").get().asFile
+}
+
+clean {
+    delete layout.buildDirectory.dir("generated/querydsl")
+}
