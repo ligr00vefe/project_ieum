@@ -33,7 +33,7 @@ public class AuthController {
 
     private static final String REGISTRATION_SESSION_KEY = "registrationSession";
 
-    @GetMapping
+    @GetMapping("/type-select")
     public String registerTypeSelect() {
         return "register/type-select";
     }

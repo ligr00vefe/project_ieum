@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="header">
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-1" tabindex="0">
+                        <img th:src="@{/assets/헤더.jpg}" alt="이음 로고" class="h-10 w-auto">
+                        <span class="text-xl font-bold text-gray-800">이음</span>
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <th:block>
+                        <a href="/login" class="text-gray-700 hover:text-blue-600 transition font-medium px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">로그인</a>
+                        <a href="/register/type-select" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" tabindex="0">회원가입</a>
+                    </th:block>
+                    <th:block>
+                        <a href="/mypage" class="text-gray-700 hover:text-blue-600 transition font-medium px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">마이페이지</a>
+                        <form th:action="@{/logout}" method="post" class="inline">
+                            <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" tabindex="0">로그아웃</button>
+                        </form>
+                    </th:block>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button type="button" 
+                            onclick="toggleMobileMenu()" 
+                            class="text-gray-700 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-2"
+                            aria-label="메뉴 열기"
+                            aria-expanded="false"
+                            aria-controls="mobile-menu"
+                            tabindex="0">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t" role="menu" aria-label="모바일 메뉴">
+            <div class="px-4 py-3 space-y-2">
+                <th:block>
+                    <a href="/login" class="block text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-lg transition font-medium focus:outline-none focus:ring-2 focus:ring-blue-500" role="menuitem" tabindex="0">로그인</a>
+                    <a href="/register/type-select" class="block text-center bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition font-medium focus:outline-none focus:ring-2 focus:ring-blue-500" role="menuitem" tabindex="0">회원가입</a>
+                </th:block>
+                <th:block>
+                    <a href="/mypage" class="block text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-lg transition font-medium focus:outline-none focus:ring-2 focus:ring-blue-500" role="menuitem" tabindex="0">마이페이지</a>
+                    <form th:action="@{/logout}" method="post" class="block">
+                        <button type="submit" class="w-full text-center bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition font-medium focus:outline-none focus:ring-2 focus:ring-red-500" role="menuitem" tabindex="0">로그아웃</button>
+                    </form>
+                </th:block>
+            </div>
+        </div>
+    </header>
+
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const button = document.querySelector('[aria-controls="mobile-menu"]');
+            const isHidden = menu.classList.toggle('hidden');
+            
+            button.setAttribute('aria-expanded', !isHidden);
+            button.setAttribute('aria-label', isHidden ? '메뉴 열기' : '메뉴 닫기');
+        }
+    </script>
+</th:block>
+</html>
