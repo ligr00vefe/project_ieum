@@ -10,4 +10,5 @@ public class IeumApplication {
         SpringApplication.run(IeumApplication.class, args);
         System.out.println("http://localhost:8080/ieum");
 	}
+
 }
