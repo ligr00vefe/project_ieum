@@ -3,6 +3,7 @@ package com.project.ieum.service;
 import com.project.ieum.entity.CommunicationMethod;
 import com.project.ieum.entity.PersonalityTag;
 import com.project.ieum.entity.Region;
+import com.project.ieum.entity.request.ServiceCategory;
 import com.project.ieum.entity.user.DisabilityType;
 import com.project.ieum.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class MasterDataService {
     private final CommunicationMethodRepository communicationMethodRepository;
     private final PersonalityTagRepository personalityTagRepository;
     private final RegionRepository regionRepository;
+    private final ServiceCategoryRepository serviceCategoryRepository;
 
     public List<DisabilityType> getAllDisabilityTypes() {
         return disabilityTypeRepository.findAllByOrderBySortOrderAsc();
@@ -37,5 +39,9 @@ public class MasterDataService {
 
     public List<Region> getAllRegions() {
         return regionRepository.findAllByOrderBySidoAscSigunguAscDongAsc();
+    }
+
+    public List<ServiceCategory> getAllServiceCategories() {
+        return serviceCategoryRepository.findAllByOrderByIdAsc();
     }
 }
