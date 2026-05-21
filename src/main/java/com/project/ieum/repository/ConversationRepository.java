@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface ConversationRepository extends JpaRepository<Conversation, Long> {
@@ -40,4 +41,8 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
         where c.requester.userId = :userId or c.caregiver.userId = :userId
     """)
     Page<Conversation> findMyConversations(@Param("userId") Long userId, Pageable pageable);
+
+    Optional<Conversation> findByApplication_Id(Long applicationId);
+
+    List<Conversation> findByApplication_IdIn(List<Long> applicationIds);
 }

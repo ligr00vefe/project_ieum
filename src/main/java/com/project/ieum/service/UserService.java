@@ -56,13 +56,12 @@ public class UserService {
 
     public UserProfile registerUserProfile(User user, BasicInfoDTO basicInfo) {
         UserProfile profile = UserProfile.builder()
-                .userId(user.getId())
                 .user(user)
                 .fullName(basicInfo.getName())
                 .birthDate(basicInfo.getBirthDate())
                 .gender(basicInfo.getGender())
-                .guardianName(basicInfo.getGuardianName())
-                .guardianPhone(basicInfo.getGuardianPhone())
+                .guardianName(blankIfNull(basicInfo.getGuardianName()))
+                .guardianPhone(blankIfNull(basicInfo.getGuardianPhone()))
                 .build();
 
         return userProfileRepository.save(profile);
@@ -70,7 +69,6 @@ public class UserService {
 
     public CaregiverProfile registerCaregiverProfile(User user, BasicInfoDTO basicInfo) {
         CaregiverProfile profile = CaregiverProfile.builder()
-                .userId(user.getId())
                 .user(user)
                 .fullName(basicInfo.getName())
                 .birthDate(basicInfo.getBirthDate())
@@ -184,5 +182,9 @@ public class UserService {
 
     public User findUserByEmail(String email) {
         return userRepository.findByEmail(email).orElse(null);
+    }
+
+    private String blankIfNull(String value) {
+        return value == null ? "" : value;
     }
 }

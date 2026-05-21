@@ -18,7 +18,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -69,12 +68,13 @@ public class AuthController {
     @PostMapping("/{type}/step1")
     public String step1Submit(
             @PathVariable String type,
-            @Valid @ModelAttribute BasicInfoDTO basicInfo,
+            @Valid @ModelAttribute("basicInfo") BasicInfoDTO basicInfo,
             BindingResult bindingResult,
-            HttpSession session,
-            RedirectAttributes redirectAttributes) {
+            Model model,
+            HttpSession session) {
 
         if (bindingResult.hasErrors()) {
+            model.addAttribute("userType", type);
             return "register/step1";
         }
 
@@ -114,8 +114,8 @@ public class AuthController {
     @PostMapping("/{type}/step2")
     public String step2Submit(
             @PathVariable String type,
-            @RequestParam(required = false) DisabilityInfoDTO disabilityInfo,
-            @RequestParam(required = false) CertificationDTO certificationInfo,
+            @ModelAttribute DisabilityInfoDTO disabilityInfo,
+            @ModelAttribute CertificationDTO certificationInfo,
             HttpSession session) {
 
         RegistrationSessionDTO sessionData = getSession(session);
@@ -162,8 +162,8 @@ public class AuthController {
     @PostMapping("/{type}/step3")
     public String step3Submit(
             @PathVariable String type,
-            @RequestParam(required = false) CommunicationDTO communicationInfo,
-            @RequestParam(required = false) ActivityInfoDTO activityInfo,
+            @ModelAttribute CommunicationDTO communicationInfo,
+            @ModelAttribute ActivityInfoDTO activityInfo,
             HttpSession session) {
 
         RegistrationSessionDTO sessionData = getSession(session);
@@ -204,13 +204,20 @@ public class AuthController {
         RegistrationSessionDTO sessionData = getSession(session);
         sessionData.setPersonalityTags(personalityTagInfo);
 
-        return "redirect:/register/" + type + "/complete";
+        return completeRegistration(type, sessionData, session);
     }
 
     @GetMapping("/{type}/complete")
     public String complete(@PathVariable String type, HttpSession session) {
-        RegistrationSessionDTO sessionData = getSession(session);
+        RegistrationSessionDTO sessionData = (RegistrationSessionDTO) session.getAttribute(REGISTRATION_SESSION_KEY);
+        if (sessionData == null) {
+            return "redirect:/";
+        }
 
+        return completeRegistration(type, sessionData, session);
+    }
+
+    private String completeRegistration(String type, RegistrationSessionDTO sessionData, HttpSession session) {
         try {
             if ("disabled".equals(type)) {
                 completeDisabledRegistration(sessionData);
@@ -219,7 +226,7 @@ public class AuthController {
             }
 
             session.removeAttribute(REGISTRATION_SESSION_KEY);
-            return "register/complete";
+            return "redirect:/";
 
         } catch (Exception e) {
             log.error("회원가입 실패", e);

@@ -81,4 +81,25 @@ public class HelpRequest extends BasicEntity {
   private HelpRequestStatus status;
 
   public void changeStatus(HelpRequestStatus next) { this.status = next; }
+
+  public void updateDetails(
+      ServiceCategory serviceCategory,
+      Region region,
+      String title,
+      String body,
+      LocalDate desiredDate,
+      LocalTime desiredStartTime,
+      LocalTime desiredEndTime,
+      String addressDetail,
+      String specialNotes) {
+    this.serviceCategory = serviceCategory;
+    this.region = region;
+    this.title = title;
+    this.body = body;
+    this.desiredDate = desiredDate;
+    this.desiredStartTime = desiredStartTime;
+    this.desiredEndTime = desiredEndTime;
+    this.addressDetail = addressDetail;
+    this.specialNotes = specialNotes;
+  }
 }

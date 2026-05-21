@@ -59,4 +59,5 @@ public class Conversation {
   private LocalDateTime createdAt;
 
   public void touchLastMessage() { this.lastMessageAt = LocalDateTime.now(); }
+  public void close() { this.status = ConversationStatus.CLOSED; }
 }
