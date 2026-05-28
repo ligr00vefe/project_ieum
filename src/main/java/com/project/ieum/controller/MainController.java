@@ -13,4 +13,9 @@ public class MainController {
     model.addAttribute("content", "home/index");
     return "layout/layout";
   }
+
+  @GetMapping("/login")
+  public String login() {
+    return "auth/login";
+  }
 }
