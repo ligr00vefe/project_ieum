@@ -3,22 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title}">이음</title>
+    <title th:text="${title != null ? title + ' - 이음' : '이음 Care Match'}">이음 Care Match</title>
     <link th:href="@{/css/output.css}" rel="stylesheet">
+    <meta name="description" th:content="${description != null ? description : '장애인·보호자와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼'}">
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
     <!-- Header -->
     <div th:replace="~{layout/header :: header}"></div>
-    
-    <!-- Navigation -->
+
+    <!-- Sub Navigation (authenticated users only) -->
     <div th:replace="~{layout/nav :: nav}"></div>
-    
+
     <!-- Main Content -->
-    <main class="flex-grow">
+    <main class="flex-1">
         <div th:replace="~{__${content}__ :: content}"></div>
     </main>
-    
+
     <!-- Footer -->
     <div th:replace="~{layout/footer :: footer}"></div>
+
 </body>
 </html>
