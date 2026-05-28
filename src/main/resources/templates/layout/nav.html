@@ -1,25 +1,84 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <th:block th:fragment="nav">
-    <th:block th:if="${#authorization.expression('isAuthenticated()')}">
-        <nav class="bg-blue-50 border-b" role="navigation" aria-label="메인 네비게이션">
+    <th:block sec:authorize="isAuthenticated()">
+        <nav class="bg-white border-b border-gray-100" role="navigation" aria-label="서비스 메뉴">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between h-12">
-                    <!-- User Role Menu -->
-                    <div class="flex items-center space-x-1 overflow-x-auto">
-                        <th:block th:if="${#authorization.expression('hasRole(''USER'')')}">
-                            <a href="/requests/create" class="text-gray-700 hover:text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">요청 작성</a>
-                            <a href="/requests/my" class="text-gray-700 hover:text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">내 요청</a>
-                            <a href="/matching" class="text-gray-700 hover:text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">매칭</a>
-                            <a href="/chat" class="text-gray-700 hover:text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">채팅</a>
-                        </th:block>
-                        <th:block th:if="${#authorization.expression('hasRole(''CAREGIVER'')')}">
-                            <a href="/requests/list" class="text-gray-700 hover:text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">요청 목록</a>
-                            <a href="/matching" class="text-gray-700 hover:text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">매칭</a>
-                            <a href="/chat" class="text-gray-700 hover:text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">채팅</a>
-                            <a href="/schedule" class="text-gray-700 hover:text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg transition text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500" tabindex="0">일정 관리</a>
-                        </th:block>
-                    </div>
+                <div class="flex items-center gap-1 h-11 overflow-x-auto scrollbar-hide">
+
+                    <!-- 이음인 (장애인/보호자) 메뉴 -->
+                    <th:block sec:authorize="hasRole('USER')">
+                        <a th:href="@{/requests/create}"
+                           th:classappend="${#httpServletRequest.requestURI.contains('/requests/create')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                           class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            요청 작성
+                        </a>
+                        <a th:href="@{/requests/my}"
+                           th:classappend="${#httpServletRequest.requestURI.contains('/requests/my')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                           class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                            내 요청
+                        </a>
+                        <a th:href="@{/matching}"
+                           th:classappend="${#httpServletRequest.requestURI.contains('/matching')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                           class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            매칭
+                        </a>
+                        <a th:href="@{/chat}"
+                           th:classappend="${#httpServletRequest.requestURI.contains('/chat')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                           class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                            </svg>
+                            채팅
+                        </a>
+                    </th:block>
+
+                    <!-- 활동지원사 메뉴 -->
+                    <th:block sec:authorize="hasRole('CAREGIVER')">
+                        <a th:href="@{/requests/list}"
+                           th:classappend="${#httpServletRequest.requestURI.contains('/requests/list')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                           class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                            </svg>
+                            요청 목록
+                        </a>
+                        <a th:href="@{/matching}"
+                           th:classappend="${#httpServletRequest.requestURI.contains('/matching')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                           class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            매칭
+                        </a>
+                        <a th:href="@{/chat}"
+                           th:classappend="${#httpServletRequest.requestURI.contains('/chat')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                           class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                            </svg>
+                            채팅
+                        </a>
+                        <a th:href="@{/schedule}"
+                           th:classappend="${#httpServletRequest.requestURI.contains('/schedule')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                           class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            일정 관리
+                        </a>
+                    </th:block>
+
                 </div>
             </div>
         </nav>

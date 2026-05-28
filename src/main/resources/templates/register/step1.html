@@ -1,54 +1,274 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>기본 정보 입력</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기본 정보 입력 - 이음 Care Match</title>
     <link th:href="@{/css/output.css}" rel="stylesheet">
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center">
-    <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-        <h1 class="text-2xl font-bold text-center mb-8">기본 정보 입력</h1>
-        <form th:action="@{/register/{type}/step1(type=${userType})}" method="post" th:object="${basicInfo}" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">이메일</label>
-                <input type="email" th:field="*{email}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-red-500 text-sm"></span>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">비밀번호</label>
-                <input type="password" th:field="*{password}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-red-500 text-sm"></span>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">이름</label>
-                <input type="text" th:field="*{name}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">생년월일</label>
-                <input type="date" th:field="*{birthDate}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">성별</label>
-                <select th:field="*{gender}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">선택</option>
-                    <option th:each="g : ${T(com.project.ieum.entity.Gender).values()}" th:value="${g}" th:text="${g}"></option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">전화번호</label>
-                <input type="tel" th:field="*{phone}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <span th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="text-red-500 text-sm"></span>
-            </div>
-            <div th:if="${userType == 'disabled'}">
-                <label class="block text-sm font-medium text-gray-700 mb-1">보호자 이름</label>
-                <input type="text" th:field="*{guardianName}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            <div th:if="${userType == 'disabled'}">
-                <label class="block text-sm font-medium text-gray-700 mb-1">보호자 연락처</label>
-                <input type="tel" th:field="*{guardianPhone}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition">다음</button>
-        </form>
+<body class="min-h-screen bg-slate-50 flex flex-col">
+
+    <!-- Top bar -->
+    <div class="bg-white border-b border-gray-100 px-4 py-3.5">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a th:href="@{/}" class="flex items-center gap-2.5 group">
+                <div class="w-8 h-8 bg-teal-500 rounded-xl flex items-center justify-center group-hover:bg-teal-600 transition-colors">
+                    <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/>
+                    </svg>
+                </div>
+                <div class="leading-tight">
+                    <div class="text-[14px] font-bold text-gray-900">이음</div>
+                    <div class="text-[9px] text-gray-400 font-medium tracking-wide -mt-0.5">Care Match</div>
+                </div>
+            </a>
+            <!-- Type badge -->
+            <span th:if="${userType == 'caregiver'}"
+                  class="px-3 py-1 bg-teal-50 text-teal-700 text-xs font-semibold rounded-full border border-teal-100">
+                활동지원사 가입
+            </span>
+            <span th:if="${userType == 'disabled'}"
+                  class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-full border border-indigo-100">
+                이음인 가입
+            </span>
+        </div>
     </div>
+
+    <!-- Main -->
+    <main class="flex-1 flex items-start justify-center px-4 py-8">
+        <div class="w-full max-w-lg">
+
+            <!-- Step indicator -->
+            <div class="flex items-center gap-2 mb-6 px-1">
+                <div th:each="i : ${#numbers.sequence(1, 4)}"
+                     class="flex items-center gap-2">
+                    <div th:classappend="${i == 1} ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' : 'bg-gray-200 text-gray-400'"
+                         class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all flex-shrink-0"
+                         th:text="${i}">1</div>
+                    <div th:if="${i < 4}"
+                         th:classappend="${i < 1} ? 'bg-indigo-600' : 'bg-gray-200'"
+                         class="flex-1 h-0.5 min-w-[2rem] rounded-full"></div>
+                </div>
+            </div>
+
+            <!-- Card -->
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                <!-- Progress bar -->
+                <div class="h-1 bg-gray-100">
+                    <div class="h-1 bg-indigo-600 rounded-full transition-all duration-500" style="width: 25%"></div>
+                </div>
+
+                <div class="p-7 sm:p-8">
+                    <!-- Step label -->
+                    <div class="flex items-center justify-between mb-6">
+                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">STEP 1 / 4</span>
+                        <span class="text-xs text-gray-400 font-medium">기본 정보</span>
+                    </div>
+
+                    <h2 class="text-2xl font-extrabold text-gray-900 mb-1">기본 정보를 입력해주세요</h2>
+                    <p class="text-sm text-gray-500 mb-7">이음 서비스 가입을 위한 필수 정보입니다.</p>
+
+                    <form th:action="@{/register/{type}/step1(type=${userType})}"
+                          method="post"
+                          th:object="${basicInfo}"
+                          class="space-y-5"
+                          novalidate>
+
+                        <!-- Name -->
+                        <div class="space-y-1.5">
+                            <label for="name" class="block text-sm font-semibold text-gray-700">
+                                이름 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text"
+                                   id="name"
+                                   th:field="*{name}"
+                                   placeholder="홍길동"
+                                   autocomplete="name"
+                                   class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                   th:classappend="${#fields.hasErrors('name')} ? 'border-red-300 focus:ring-red-500'"
+                                   required>
+                            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}"
+                               class="text-xs text-red-500 flex items-center gap-1 mt-1">
+                            </p>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="space-y-1.5">
+                            <label for="email" class="block text-sm font-semibold text-gray-700">
+                                이메일 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="email"
+                                   id="email"
+                                   th:field="*{email}"
+                                   placeholder="example@email.com"
+                                   autocomplete="email"
+                                   class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                   th:classappend="${#fields.hasErrors('email')} ? 'border-red-300 focus:ring-red-500'"
+                                   required>
+                            <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}"
+                               class="text-xs text-red-500 mt-1"></p>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="space-y-1.5">
+                            <label for="phone" class="block text-sm font-semibold text-gray-700">
+                                전화번호 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="tel"
+                                   id="phone"
+                                   th:field="*{phone}"
+                                   placeholder="010-0000-0000"
+                                   autocomplete="tel"
+                                   class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                   th:classappend="${#fields.hasErrors('phone')} ? 'border-red-300 focus:ring-red-500'"
+                                   required>
+                            <p th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"
+                               class="text-xs text-red-500 mt-1"></p>
+                        </div>
+
+                        <!-- Birth date + Gender (row) -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-1.5">
+                                <label for="birthDate" class="block text-sm font-semibold text-gray-700">
+                                    생년월일 <span class="text-red-500">*</span>
+                                </label>
+                                <input type="date"
+                                       id="birthDate"
+                                       th:field="*{birthDate}"
+                                       class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                       required>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label for="gender" class="block text-sm font-semibold text-gray-700">
+                                    성별 <span class="text-red-500">*</span>
+                                </label>
+                                <select id="gender"
+                                        th:field="*{gender}"
+                                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all appearance-none bg-white"
+                                        required>
+                                    <option value="">선택</option>
+                                    <option value="M">남성</option>
+                                    <option value="F">여성</option>
+                                    <option value="OTHER">기타</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="space-y-1.5">
+                            <label for="password" class="block text-sm font-semibold text-gray-700">
+                                비밀번호 <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <input type="password"
+                                       id="password"
+                                       th:field="*{password}"
+                                       placeholder="8자 이상 입력"
+                                       autocomplete="new-password"
+                                       class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                       th:classappend="${#fields.hasErrors('password')} ? 'border-red-300'"
+                                       required>
+                            </div>
+                            <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}"
+                               class="text-xs text-red-500 mt-1"></p>
+                        </div>
+
+                        <!-- Password Confirm -->
+                        <div class="space-y-1.5">
+                            <label for="passwordConfirm" class="block text-sm font-semibold text-gray-700">
+                                비밀번호 확인 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="password"
+                                   id="passwordConfirm"
+                                   name="passwordConfirm"
+                                   placeholder="한번 더 입력해 주세요"
+                                   autocomplete="new-password"
+                                   class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                   required>
+                            <p id="pw-match-msg" class="text-xs mt-1 hidden"></p>
+                        </div>
+
+                        <!-- Guardian fields (disabled user only) -->
+                        <div th:if="${userType == 'disabled'}"
+                             class="space-y-4 pt-4 border-t border-gray-100">
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">보호자 정보 (선택)</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="space-y-1.5">
+                                    <label for="guardianName" class="block text-sm font-semibold text-gray-700">보호자 이름</label>
+                                    <input type="text"
+                                           id="guardianName"
+                                           th:field="*{guardianName}"
+                                           placeholder="이름"
+                                           class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label for="guardianPhone" class="block text-sm font-semibold text-gray-700">보호자 연락처</label>
+                                    <input type="tel"
+                                           id="guardianPhone"
+                                           th:field="*{guardianPhone}"
+                                           placeholder="010-0000-0000"
+                                           class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Agreement -->
+                        <div class="pt-2">
+                            <label class="flex items-start gap-3 cursor-pointer group">
+                                <input type="checkbox"
+                                       id="agreement"
+                                       name="agreement"
+                                       class="w-4 h-4 mt-0.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer flex-shrink-0"
+                                       required>
+                                <span class="text-sm text-gray-600 leading-relaxed">
+                                    <a href="#" class="text-indigo-600 hover:underline font-semibold">이용약관</a> 및
+                                    <a href="#" class="text-indigo-600 hover:underline font-semibold">개인정보 처리방침</a>에 동의합니다.
+                                    <span class="text-red-500 ml-0.5">*</span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit"
+                                class="w-full py-3.5 bg-indigo-600 text-white font-semibold text-sm rounded-xl hover:bg-indigo-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all shadow-sm shadow-indigo-100 mt-2 flex items-center justify-center gap-2">
+                            다음 단계
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <p class="text-center mt-5 text-sm text-gray-400">
+                이미 계정이 있으신가요?
+                <a th:href="@{/login}" class="text-indigo-600 font-semibold hover:underline ml-1">로그인</a>
+            </p>
+        </div>
+    </main>
+
+    <script>
+        // Password match validation
+        const pw = document.getElementById('password');
+        const pwConfirm = document.getElementById('passwordConfirm');
+        const msg = document.getElementById('pw-match-msg');
+
+        function checkPwMatch() {
+            if (!pwConfirm.value) { msg.classList.add('hidden'); return; }
+            if (pw.value === pwConfirm.value) {
+                msg.textContent = '✓ 비밀번호가 일치합니다.';
+                msg.className = 'text-xs mt-1 text-green-600';
+                pwConfirm.classList.remove('border-red-300');
+                pwConfirm.classList.add('border-green-300');
+            } else {
+                msg.textContent = '비밀번호가 일치하지 않습니다.';
+                msg.className = 'text-xs mt-1 text-red-500';
+                pwConfirm.classList.add('border-red-300');
+                pwConfirm.classList.remove('border-green-300');
+            }
+        }
+        pwConfirm.addEventListener('input', checkPwMatch);
+        pw.addEventListener('input', checkPwMatch);
+    </script>
 </body>
 </html>

@@ -111,23 +111,26 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/{type}/step2")
-    public String step2Submit(
-            @PathVariable String type,
-            @RequestParam(required = false) DisabilityInfoDTO disabilityInfo,
-            @RequestParam(required = false) CertificationDTO certificationInfo,
+    @PostMapping("/disabled/step2")
+    public String disabledStep2Submit(
+            @ModelAttribute DisabilityInfoDTO disabilityInfo,
             HttpSession session) {
 
         RegistrationSessionDTO sessionData = getSession(session);
-
-        if ("disabled".equals(type)) {
-            sessionData.setDisabilityInfo(disabilityInfo);
-        } else {
-            sessionData.setCertificationInfo(certificationInfo);
-        }
-
+        sessionData.setDisabilityInfo(disabilityInfo);
         sessionData.incrementStep();
-        return "redirect:/register/" + type + "/step3";
+        return "redirect:/register/disabled/step3";
+    }
+
+    @PostMapping("/caregiver/step2")
+    public String caregiverStep2Submit(
+            @ModelAttribute CertificationDTO certificationInfo,
+            HttpSession session) {
+
+        RegistrationSessionDTO sessionData = getSession(session);
+        sessionData.setCertificationInfo(certificationInfo);
+        sessionData.incrementStep();
+        return "redirect:/register/caregiver/step3";
     }
 
     @GetMapping("/{type}/step3")
@@ -159,23 +162,26 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/{type}/step3")
-    public String step3Submit(
-            @PathVariable String type,
-            @RequestParam(required = false) CommunicationDTO communicationInfo,
-            @RequestParam(required = false) ActivityInfoDTO activityInfo,
+    @PostMapping("/disabled/step3")
+    public String disabledStep3Submit(
+            @ModelAttribute CommunicationDTO communicationInfo,
             HttpSession session) {
 
         RegistrationSessionDTO sessionData = getSession(session);
-
-        if ("disabled".equals(type)) {
-            sessionData.setCommunicationInfo(communicationInfo);
-        } else {
-            sessionData.setActivityInfo(activityInfo);
-        }
-
+        sessionData.setCommunicationInfo(communicationInfo);
         sessionData.incrementStep();
-        return "redirect:/register/" + type + "/step4";
+        return "redirect:/register/disabled/step4";
+    }
+
+    @PostMapping("/caregiver/step3")
+    public String caregiverStep3Submit(
+            @ModelAttribute ActivityInfoDTO activityInfo,
+            HttpSession session) {
+
+        RegistrationSessionDTO sessionData = getSession(session);
+        sessionData.setActivityInfo(activityInfo);
+        sessionData.incrementStep();
+        return "redirect:/register/caregiver/step4";
     }
 
     @GetMapping("/{type}/step4")

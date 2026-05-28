@@ -1,33 +1,225 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>자격증 입력</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자격증 입력 - 이음 Care Match</title>
     <link th:href="@{/css/output.css}" rel="stylesheet">
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center">
-    <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-        <h1 class="text-2xl font-bold text-center mb-8">자격증 입력</h1>
-        <form th:action="@{/register/caregiver/step2}" method="post" th:object="${certificationInfo}" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">자격증 보유 여부</label>
-                <div class="space-x-4">
-                    <label class="inline-flex items-center">
-                        <input type="radio" th:field="*{hasCertification}" value="true" required class="mr-2">
-                        <span>예</span>
-                    </label>
-                    <label class="inline-flex items-center">
-                        <input type="radio" th:field="*{hasCertification}" value="false" class="mr-2">
-                        <span>아니오</span>
-                    </label>
+<body class="min-h-screen bg-slate-50 flex flex-col">
+
+    <!-- Top bar -->
+    <div class="bg-white border-b border-gray-100 px-4 py-3.5">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a th:href="@{/}" class="flex items-center gap-2.5 group">
+                <div class="w-8 h-8 bg-teal-500 rounded-xl flex items-center justify-center group-hover:bg-teal-600 transition-colors">
+                    <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/>
+                    </svg>
+                </div>
+                <div class="leading-tight">
+                    <div class="text-[14px] font-bold text-gray-900">이음</div>
+                    <div class="text-[9px] text-gray-400 font-medium tracking-wide -mt-0.5">Care Match</div>
+                </div>
+            </a>
+            <span class="px-3 py-1 bg-teal-50 text-teal-700 text-xs font-semibold rounded-full border border-teal-100">활동지원사 가입</span>
+        </div>
+    </div>
+
+    <main class="flex-1 flex items-start justify-center px-4 py-8">
+        <div class="w-full max-w-lg">
+
+            <!-- Step indicator -->
+            <div class="flex items-center gap-2 mb-6 px-1">
+                <th:block th:each="i : ${#numbers.sequence(1, 4)}">
+                    <div th:classappend="${i == 2} ? 'bg-teal-500 text-white shadow-md shadow-teal-200' : (${i < 2} ? 'bg-teal-200 text-teal-600' : 'bg-gray-200 text-gray-400')"
+                         class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all flex-shrink-0">
+                        <th:block th:if="${i < 2}">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </th:block>
+                        <th:block th:if="${i >= 2}" th:text="${i}"></th:block>
+                    </div>
+                    <div th:if="${i < 4}"
+                         th:classappend="${i < 2} ? 'bg-teal-200' : 'bg-gray-200'"
+                         class="flex-1 h-0.5 min-w-[2rem] rounded-full"></div>
+                </th:block>
+            </div>
+
+            <!-- Card -->
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="h-1 bg-gray-100">
+                    <div class="h-1 bg-teal-500 rounded-full transition-all duration-500" style="width: 50%"></div>
+                </div>
+
+                <div class="p-7 sm:p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <span class="text-xs font-bold text-teal-600 uppercase tracking-wider">STEP 2 / 4</span>
+                        <span class="text-xs text-gray-400 font-medium">자격증 정보</span>
+                    </div>
+
+                    <h2 class="text-2xl font-extrabold text-gray-900 mb-1">자격증을 보유하고 계신가요?</h2>
+                    <p class="text-sm text-gray-500 mb-7">이음 신뢰를 위한 자격증 검증 단계입니다.</p>
+
+                    <form th:action="@{/register/caregiver/step2}"
+                          method="post"
+                          th:object="${certificationInfo}"
+                          class="space-y-6"
+                          novalidate>
+
+                        <!-- Has Certification toggle -->
+                        <div class="space-y-3">
+                            <label class="block text-sm font-semibold text-gray-700">
+                                자격증 보유 여부 <span class="text-red-500">*</span>
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="relative">
+                                    <input type="radio"
+                                           th:field="*{hasCertification}"
+                                           value="true"
+                                           id="cert_yes"
+                                           class="sr-only peer"
+                                           onchange="toggleCertFields(true)">
+                                    <label for="cert_yes"
+                                           class="flex items-center justify-center gap-2.5 w-full py-3.5 border-2 border-gray-200 rounded-xl cursor-pointer select-none transition-all hover:border-teal-300 peer-checked:border-teal-500 peer-checked:bg-teal-50 font-semibold text-sm text-gray-700 peer-checked:text-teal-700">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                                        </svg>
+                                        예, 보유 중
+                                    </label>
+                                </div>
+                                <div class="relative">
+                                    <input type="radio"
+                                           th:field="*{hasCertification}"
+                                           value="false"
+                                           id="cert_no"
+                                           class="sr-only peer"
+                                           onchange="toggleCertFields(false)">
+                                    <label for="cert_no"
+                                           class="flex items-center justify-center gap-2.5 w-full py-3.5 border-2 border-gray-200 rounded-xl cursor-pointer select-none transition-all hover:border-gray-300 peer-checked:border-gray-400 peer-checked:bg-gray-50 font-semibold text-sm text-gray-700">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                        아니오
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Certificate list (shown when hasCertification = true) -->
+                        <div id="cert-fields"
+                             th:classappend="${certificationInfo?.hasCertification == true} ? '' : 'hidden'"
+                             class="space-y-4">
+                            <div class="p-4 bg-teal-50 border border-teal-100 rounded-xl">
+                                <p class="text-xs text-teal-700 font-medium flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    동적 생성 영역 — "예" 선택 시 자격증 입력 필드가 생성됩니다.
+                                </p>
+                            </div>
+
+                            <!-- Certificate inputs container -->
+                            <div id="cert-list" class="space-y-3">
+                                <div class="flex items-center gap-2">
+                                    <div class="flex-1">
+                                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">자격증 1</label>
+                                        <input type="text"
+                                               th:field="*{certificationType}"
+                                               placeholder="예: 사회복지사 2급"
+                                               class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Add more certs -->
+                            <button type="button"
+                                    onclick="addCertField()"
+                                    class="w-full py-3 border-2 border-dashed border-gray-200 text-gray-500 text-sm font-semibold rounded-xl hover:border-teal-300 hover:text-teal-600 hover:bg-teal-50 transition-all flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                자격증 추가하기
+                            </button>
+                        </div>
+
+                        <!-- No cert info box -->
+                        <div id="no-cert-info"
+                             th:classappend="${certificationInfo?.hasCertification == false or certificationInfo?.hasCertification == null} ? '' : 'hidden'"
+                             class="p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                            <p class="text-sm text-gray-500 leading-relaxed">
+                                자격증이 없어도 가입 가능합니다.<br>
+                                <span class="text-gray-400 text-xs">단, 자격증 보유 시 매칭 우선순위가 높아집니다.</span>
+                            </p>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="flex gap-3 pt-2">
+                            <a th:href="@{/register/caregiver/step1}"
+                               class="flex-1 py-3.5 border-2 border-gray-200 text-gray-700 font-semibold text-sm rounded-xl hover:border-gray-300 hover:bg-gray-50 active:scale-[0.98] transition-all text-center flex items-center justify-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                                이전
+                            </a>
+                            <button type="submit"
+                                    class="flex-[2] py-3.5 bg-teal-500 text-white font-semibold text-sm rounded-xl hover:bg-teal-600 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-all flex items-center justify-center gap-1.5">
+                                다음 단계
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">자격증 종류</label>
-                <input type="text" th:field="*{certificationType}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition">다음</button>
-        </form>
-    </div>
+        </div>
+    </main>
+
+    <script>
+        let certCount = 1;
+
+        function toggleCertFields(hasCert) {
+            const certFields = document.getElementById('cert-fields');
+            const noCertInfo = document.getElementById('no-cert-info');
+            if (hasCert) {
+                certFields.classList.remove('hidden');
+                noCertInfo.classList.add('hidden');
+            } else {
+                certFields.classList.add('hidden');
+                noCertInfo.classList.remove('hidden');
+            }
+        }
+
+        function addCertField() {
+            certCount++;
+            const list = document.getElementById('cert-list');
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2';
+            div.innerHTML = `
+                <div class="flex-1">
+                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">자격증 ${certCount}</label>
+                    <input type="text" name="additionalCertification" placeholder="자격증명을 입력하세요"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all">
+                </div>
+                <button type="button" onclick="this.parentElement.remove(); certCount--;"
+                        class="mt-6 w-9 h-9 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            `;
+            list.appendChild(div);
+        }
+
+        // Init state on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const certYes = document.getElementById('cert_yes');
+            const certNo = document.getElementById('cert_no');
+            if (certYes.checked) toggleCertFields(true);
+            else if (certNo.checked) toggleCertFields(false);
+        });
+    </script>
 </body>
 </html>
