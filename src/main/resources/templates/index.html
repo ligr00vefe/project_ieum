@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이음 - 장애인과 활동지원사를 잇다</title>
+    <link th:href="@{/css/output.css}" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center px-4">
+    <main class="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
+        <h1 class="text-3xl font-bold mb-4">이음</h1>
+        <p class="text-gray-600 mb-8">장애인과 활동지원사를 잇는 매칭 서비스</p>
+        <nav>
+            <a th:href="@{/register}"
+               class="inline-block w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                시작하기
+            </a>
+        </nav>
+    </main>
+</body>
+</html>
