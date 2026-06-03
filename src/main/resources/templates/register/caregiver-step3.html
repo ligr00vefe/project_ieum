@@ -66,7 +66,9 @@
                           method="post"
                           th:object="${activityInfo}"
                           class="space-y-7"
+                          id="step3Form"
                           novalidate>
+                        <input type="hidden" id="direction" name="direction" value="forward">
 
                         <!-- Experience -->
                         <div class="space-y-3">
@@ -103,6 +105,7 @@
                                                th:id="${'cat_' + stat.index}"
                                                name="serviceCategories"
                                                th:value="${cat}"
+                                               th:checked="${activityInfo?.serviceCategories != null and #lists.contains(activityInfo.serviceCategories, cat)}"
                                                class="sr-only peer">
                                         <label th:for="${'cat_' + stat.index}"
                                                class="inline-flex items-center px-4 py-2.5 rounded-xl border-2 border-gray-200 text-gray-700 text-sm font-medium cursor-pointer select-none transition-all hover:border-teal-300 peer-checked:bg-teal-500 peer-checked:border-teal-500 peer-checked:text-white"
@@ -125,6 +128,7 @@
                                                th:id="${'time_' + stat.index}"
                                                name="availableTimeSlots"
                                                th:value="${slot}"
+                                               th:checked="${activityInfo?.availableTimeSlots != null and #lists.contains(activityInfo.availableTimeSlots, slot)}"
                                                class="sr-only peer">
                                         <label th:for="${'time_' + stat.index}"
                                                class="inline-flex items-center px-4 py-2.5 rounded-xl border-2 border-gray-200 text-gray-700 text-sm font-medium cursor-pointer select-none transition-all hover:border-teal-300 peer-checked:bg-teal-500 peer-checked:border-teal-500 peer-checked:text-white"
@@ -188,13 +192,13 @@
 
                         <!-- Buttons -->
                         <div class="flex gap-3 pt-2">
-                            <a th:href="@{/register/caregiver/step2}"
-                               class="flex-1 py-3.5 border-2 border-gray-200 text-gray-700 font-semibold text-sm rounded-xl hover:border-gray-300 hover:bg-gray-50 active:scale-[0.98] transition-all text-center flex items-center justify-center gap-1.5">
+                            <button type="button" onclick="goBack()"
+                                    class="flex-1 py-3.5 border-2 border-gray-200 text-gray-700 font-semibold text-sm rounded-xl hover:border-gray-300 hover:bg-gray-50 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
                                 </svg>
                                 이전
-                            </a>
+                            </button>
                             <button type="submit"
                                     class="flex-[2] py-3.5 bg-teal-500 text-white font-semibold text-sm rounded-xl hover:bg-teal-600 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-all flex items-center justify-center gap-1.5">
                                 다음 단계
@@ -265,6 +269,11 @@
             const placeholder = document.getElementById('region-placeholder');
             const tags = container.querySelectorAll('[id^="region-tag-"]');
             if (tags.length === 0 && placeholder) placeholder.classList.remove('hidden');
+        }
+
+        function goBack() {
+            document.getElementById('direction').value = 'back';
+            document.getElementById('step3Form').submit();
         }
     </script>
 </body>

@@ -67,7 +67,9 @@
                           method="post"
                           th:object="${disabilityInfo}"
                           class="space-y-7"
+                          id="step2Form"
                           novalidate>
+                        <input type="hidden" id="direction" name="direction" value="forward">
 
                         <!-- Disability Types -->
                         <div class="space-y-3">
@@ -134,13 +136,13 @@
 
                         <!-- Buttons -->
                         <div class="flex gap-3 pt-2">
-                            <a th:href="@{/register/disabled/step1}"
-                               class="flex-1 py-3.5 border-2 border-gray-200 text-gray-700 font-semibold text-sm rounded-xl hover:border-gray-300 hover:bg-gray-50 active:scale-[0.98] transition-all text-center flex items-center justify-center gap-1.5">
+                            <button type="button" onclick="goBack()"
+                                    class="flex-1 py-3.5 border-2 border-gray-200 text-gray-700 font-semibold text-sm rounded-xl hover:border-gray-300 hover:bg-gray-50 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
                                 </svg>
                                 이전
-                            </a>
+                            </button>
                             <button type="submit"
                                     class="flex-[2] py-3.5 bg-indigo-600 text-white font-semibold text-sm rounded-xl hover:bg-indigo-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all flex items-center justify-center gap-1.5">
                                 다음 단계
@@ -154,6 +156,11 @@
             </div>
         </div>
     </main>
-
+    <script>
+        function goBack() {
+            document.getElementById('direction').value = 'back';
+            document.getElementById('step2Form').submit();
+        }
+    </script>
 </body>
 </html>
