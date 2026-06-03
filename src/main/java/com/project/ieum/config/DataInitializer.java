@@ -48,11 +48,11 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void initCommunicationMethods() {
-        communicationMethodRepository.save(CommunicationMethod.builder().nameKo("구어").sortOrder((short) 1).build());
-        communicationMethodRepository.save(CommunicationMethod.builder().nameKo("수어").sortOrder((short) 2).build());
-        communicationMethodRepository.save(CommunicationMethod.builder().nameKo("글자").sortOrder((short) 3).build());
-        communicationMethodRepository.save(CommunicationMethod.builder().nameKo("그림").sortOrder((short) 4).build());
-        communicationMethodRepository.save(CommunicationMethod.builder().nameKo("전자기기").sortOrder((short) 5).build());
+        communicationMethodRepository.save(CommunicationMethod.builder().nameKo("구어").description("말로 충분히 의사소통을 할 수 있어요").sortOrder((short) 1).build());
+        communicationMethodRepository.save(CommunicationMethod.builder().nameKo("수어").description("수화를 사용하는 활동지원사를 선호해요").sortOrder((short) 2).build());
+        communicationMethodRepository.save(CommunicationMethod.builder().nameKo("글자").description("글로 의사소통을 해요").sortOrder((short) 3).build());
+        communicationMethodRepository.save(CommunicationMethod.builder().nameKo("그림").description("그림이나 AAC를 활용해요").sortOrder((short) 4).build());
+        communicationMethodRepository.save(CommunicationMethod.builder().nameKo("전자기기").description("전자기기(태블릿, 앱 등)를 이용해요").sortOrder((short) 5).build());
         log.info("의사소통 방식 초기화 완료");
     }
 
