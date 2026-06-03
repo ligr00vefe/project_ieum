@@ -17,7 +17,7 @@
 
     <!-- Main Content -->
     <main class="flex-1">
-        <div th:replace="~{__${content}__ :: content}"></div>
+        <th:block th:replace="~{__${content}__ :: content}"></th:block>
     </main>
 
     <!-- Footer -->

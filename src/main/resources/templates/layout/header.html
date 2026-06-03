@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="header">
     <header class="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -42,7 +41,7 @@
                 <!-- Auth Buttons -->
                 <div class="hidden md:flex items-center gap-2.5">
                     <!-- 비로그인 상태 -->
-                    <th:block sec:authorize="!isAuthenticated()">
+                    <th:block th:if="${!isAuthenticated}">
                         <a th:href="@{/login}"
                            class="px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all">
                             로그인
@@ -54,7 +53,7 @@
                     </th:block>
 
                     <!-- 로그인 상태 -->
-                    <th:block sec:authorize="isAuthenticated()">
+                    <th:block th:if="${isAuthenticated}">
                         <a th:href="@{/mypage}"
                            class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -113,7 +112,7 @@
                 </a>
                 <div class="pt-3 mt-3 border-t border-gray-100 space-y-2">
                     <!-- 비로그인 -->
-                    <th:block sec:authorize="!isAuthenticated()">
+                    <th:block th:if="${!isAuthenticated}">
                         <a th:href="@{/login}"
                            class="flex items-center justify-center w-full px-4 py-3 text-sm font-semibold text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
                             로그인
@@ -124,7 +123,7 @@
                         </a>
                     </th:block>
                     <!-- 로그인 -->
-                    <th:block sec:authorize="isAuthenticated()">
+                    <th:block th:if="${isAuthenticated}">
                         <a th:href="@{/mypage}"
                            class="flex items-center justify-center w-full px-4 py-3 text-sm font-semibold text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
                             마이페이지
