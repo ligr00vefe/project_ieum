@@ -1,17 +1,136 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>회원가입 - 유형 선택</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 - 이음 Care Match</title>
     <link th:href="@{/css/output.css}" rel="stylesheet">
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center">
-    <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-        <h1 class="text-2xl font-bold text-center mb-8">회원가입</h1>
-        <form th:action="@{/register/type}" method="post" class="space-y-4">
-            <button type="submit" name="type" value="disabled" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition">장애인</button>
-            <button type="submit" name="type" value="caregiver" class="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition">활동지원사</button>
-        </form>
+<body class="min-h-screen bg-slate-50 flex flex-col">
+
+    <!-- Top bar -->
+    <div class="bg-white border-b border-gray-100 px-4 py-3.5">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a th:href="@{/}" class="flex items-center gap-2.5 group">
+                <div class="w-8 h-8 bg-teal-500 rounded-xl flex items-center justify-center group-hover:bg-teal-600 transition-colors">
+                    <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/>
+                    </svg>
+                </div>
+                <div class="leading-tight">
+                    <div class="text-[14px] font-bold text-gray-900">이음</div>
+                    <div class="text-[9px] text-gray-400 font-medium tracking-wide -mt-0.5">Care Match</div>
+                </div>
+            </a>
+            <a th:href="@{/login}" class="text-sm text-gray-500 hover:text-indigo-600 font-medium transition-colors">
+                이미 계정이 있으신가요?
+                <span class="text-indigo-600 font-semibold ml-1">로그인 →</span>
+            </a>
+        </div>
     </div>
+
+    <!-- Main -->
+    <main class="flex-1 flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-2xl">
+
+            <!-- Header -->
+            <div class="text-center mb-10">
+                <h1 class="text-3xl font-extrabold text-gray-900 mb-2">이음에 오신 것을 환영합니다</h1>
+                <p class="text-gray-500">어떤 회원으로 가입하시겠어요?</p>
+            </div>
+
+            <!-- Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+                <!-- 이음인 Card -->
+                <form th:action="@{/register/type}" method="post">
+                    <button type="submit" name="type" value="disabled"
+                            class="group w-full text-left bg-white rounded-3xl border-2 border-gray-100 shadow-sm hover:border-indigo-400 hover:shadow-lg hover:shadow-indigo-50 active:scale-[0.98] transition-all duration-200 p-8 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+
+                        <!-- Icon -->
+                        <div class="w-16 h-16 bg-indigo-50 group-hover:bg-indigo-100 rounded-2xl flex items-center justify-center mb-6 transition-colors">
+                            <svg class="w-8 h-8 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="mb-6">
+                            <h2 class="text-xl font-bold text-gray-900 mb-1.5">장애인 / 보호자</h2>
+                            <p class="text-sm text-gray-500 leading-relaxed">
+                                케어 도움이 필요한 분 또는<br>
+                                보호자로 이음 서비스를 이용하세요.
+                            </p>
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 text-xs font-medium rounded-lg">이동보조</span>
+                            <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 text-xs font-medium rounded-lg">병원 동행</span>
+                            <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 text-xs font-medium rounded-lg">일상생활</span>
+                        </div>
+
+                        <!-- CTA -->
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-semibold text-indigo-600">이음인으로 가입하기</span>
+                            <div class="w-8 h-8 bg-indigo-600 group-hover:bg-indigo-700 rounded-lg flex items-center justify-center transition-colors">
+                                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </button>
+                </form>
+
+                <!-- 활동지원사 Card -->
+                <form th:action="@{/register/type}" method="post">
+                    <button type="submit" name="type" value="caregiver"
+                            class="group w-full text-left bg-white rounded-3xl border-2 border-gray-100 shadow-sm hover:border-teal-400 hover:shadow-lg hover:shadow-teal-50 active:scale-[0.98] transition-all duration-200 p-8 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2">
+
+                        <!-- Icon -->
+                        <div class="w-16 h-16 bg-teal-50 group-hover:bg-teal-100 rounded-2xl flex items-center justify-center mb-6 transition-colors">
+                            <svg class="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                            </svg>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="mb-6">
+                            <h2 class="text-xl font-bold text-gray-900 mb-1.5">활동지원사</h2>
+                            <p class="text-sm text-gray-500 leading-relaxed">
+                                케어 서비스를 제공하는<br>
+                                전문 활동지원사로 가입하세요.
+                            </p>
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <span class="px-2.5 py-1 bg-teal-50 text-teal-600 text-xs font-medium rounded-lg">전문 케어</span>
+                            <span class="px-2.5 py-1 bg-teal-50 text-teal-600 text-xs font-medium rounded-lg">유연한 일정</span>
+                            <span class="px-2.5 py-1 bg-teal-50 text-teal-600 text-xs font-medium rounded-lg">신뢰 매칭</span>
+                        </div>
+
+                        <!-- CTA -->
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-semibold text-teal-600">활동지원사로 가입하기</span>
+                            <div class="w-8 h-8 bg-teal-500 group-hover:bg-teal-600 rounded-lg flex items-center justify-center transition-colors">
+                                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </button>
+                </form>
+
+            </div>
+
+            <!-- Bottom -->
+            <p class="text-center mt-8 text-sm text-gray-400">
+                이미 계정이 있으신가요?
+                <a th:href="@{/login}" class="text-indigo-600 font-semibold hover:underline ml-1">로그인</a>
+            </p>
+        </div>
+    </main>
+
 </body>
 </html>
