@@ -32,8 +32,10 @@ public class SecurityConfig {
             .userDetailsService(userDetailsService)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/login", "/register/**").permitAll()
+                .requestMatchers("/board/create", "/board/*/applicants").hasRole("USER")
                 .requestMatchers("/disabled/**").hasRole("USER")
                 .requestMatchers("/caregiver/**").hasRole("CAREGIVER")
+                .requestMatchers("/board/**", "/chat/**", "/matching/**", "/schedule/**", "/mypage/**").authenticated()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
