@@ -2,20 +2,33 @@
 
 > 기준 브랜치: `claude/competent-davinci-2d5c43` (User-Profile JOINED 상속 반영본)
 > 이 문서는 **현재 코드 기준 전체 스키마**를 4요소(키 · 컬럼명(영어) · 속성 · 설명(한글))로 정리한 ERD 레퍼런스입니다.
-> 제안/논의(region 스냅샷, 시간필드 통합 등)는 → `docs/entity-model.md` 참조.
+> 두 종류의 변경을 마커로 가시화: **① JOINED 상속**(코드 반영) + **② region 개편**(결정·미구현).
+> 그 밖의 제안/논의(시간필드 통합 등)는 → `docs/entity-model.md` 참조.
 
 ## 범례 (변경 마커)
 
-이번 워크트리 변경(User-Profile 상호 배타 → JOINED 상속)으로 바뀐 부분만 표시합니다.
+두 종류의 변경을 **구분해서** 표시합니다.
+
+**① 이미 반영됨** — 이번 워크트리 코드에 적용된 User-Profile JOINED 상속 변경:
 
 | 마커 | 의미 |
 |---|---|
-| `(신규)` | 이번 변경으로 새로 추가된 테이블/컬럼 |
+| `(신규)` | 새로 추가된 테이블/컬럼 |
 | `(승격)` | 자식 테이블 → 부모 `profiles`로 끌어올린 공통 컬럼 |
 | `(FK변경)` | PK/FK 참조 대상이 `users.id` → `profiles.user_id`로 변경 |
-| (마커 없음) | **변경 없음** (기존 구조 그대로) |
 
-🔶 **이번 변경 영향 테이블**: `profiles`(신규) · `user_profiles`(컬럼 승격+FK변경) · `caregiver_profiles`(동일) · `users`(profile 1:1 관계 추가). 그 외 16개 테이블은 변경 없음.
+**② 결정·미구현** — region 모델링 개편(D1=(i)·D2=(b) 확정, **코드 미반영** · 출처 `docs/entity-model.md` §4.1/§6):
+
+| 마커 | 의미 |
+|---|---|
+| `(제거예정)` | 결정에 따라 제거될 테이블/컬럼/관계 |
+| `(신규예정)` | 추가될 컬럼 (주소 스냅샷) |
+| `(강등예정)` | 역할 축소 (표시명 캐시) |
+
+(마커 없음) = **변경 없음** (기존 구조 그대로)
+
+🔶 **① 영향**: `profiles`(신규) · `user_profiles`(승격+FK변경) · `caregiver_profiles`(동일) · `users`(관계 추가).
+🔻 **② 영향**: `help_requests`(region_id 제거 + 주소 스냅샷 추가) · `caregiver_service_regions`(테이블 제거) · `regions`(역할 강등).
 
 ---
 
@@ -36,14 +49,14 @@ erDiagram
 
     %% ===== 지원사 속성 =====
     caregiver_profiles ||--o{ caregiver_availability : has
-    caregiver_profiles ||--o{ caregiver_service_regions : serves
-    regions ||--o{ caregiver_service_regions : in
+    caregiver_profiles ||--o{ caregiver_service_regions : "serves (제거예정)"
+    regions ||--o{ caregiver_service_regions : "in (제거예정)"
     caregiver_profiles ||--o{ caregiver_personality_tags : has
     personality_tags ||--o{ caregiver_personality_tags : in
 
     %% ===== 매칭 흐름 (백엔드 A 종축) =====
     service_categories ||--o{ help_requests : categorizes
-    regions ||--o{ help_requests : locates
+    regions ||--o{ help_requests : "locates (제거예정)"
     user_profiles ||--o{ help_requests : requester
     help_requests ||--o{ help_request_applications : receives
     caregiver_profiles ||--o{ help_request_applications : applies
@@ -145,8 +158,8 @@ erDiagram
     }
 
     caregiver_service_regions {
-        bigint caregiver_id PK,FK "지원사 프로필 → caregiver_profiles"
-        bigint region_id PK,FK "활동 지역 → regions"
+        bigint caregiver_id PK,FK "지원사 프로필 → caregiver_profiles (테이블 제거예정)"
+        bigint region_id PK,FK "활동 지역 → regions (테이블 제거예정)"
     }
 
     caregiver_personality_tags {
@@ -155,7 +168,7 @@ erDiagram
     }
 
     regions {
-        bigint id PK "식별자"
+        bigint id PK "식별자 (역할 강등예정: 표시명 캐시)"
         varchar code UK "지역 코드 NOT NULL"
         varchar sido "시/도 NOT NULL"
         varchar sigungu "시/군/구 NOT NULL"
@@ -175,13 +188,21 @@ erDiagram
         bigint id PK "식별자"
         bigint requester_id FK "요청자 → user_profiles NOT NULL"
         bigint service_category_id FK "서비스 분류 → service_categories NOT NULL"
-        bigint region_id FK "지역 → regions NOT NULL"
+        bigint region_id FK "지역 → regions NOT NULL (제거예정)"
         varchar title "제목 NOT NULL"
         text body "내용"
         date desired_date "희망 날짜 NOT NULL (uq: requester+date)"
         time desired_start_time "시작 시각"
         time desired_end_time "예상 종료 시각"
-        varchar address_detail "상세주소"
+        varchar road_address "도로명주소 스냅샷 (신규예정)"
+        varchar address_detail "상세주소 (건물명+상세)"
+        varchar sido "시/도 스냅샷 (신규예정)"
+        varchar sigungu "시/군/구 스냅샷 (신규예정)"
+        varchar bname "법정동 스냅샷 (신규예정)"
+        char zonecode "우편번호 (신규예정)"
+        char bcode "법정동코드 선택 (신규예정)"
+        decimal latitude "위도 지오코딩 (신규예정)"
+        decimal longitude "경도 지오코딩 (신규예정)"
         text special_notes "특이사항"
         varchar status "상태 OPEN/MATCHED/IN_PROGRESS/COMPLETED/CANCELLED/CLOSED"
         datetime created_at "생성 시각"
@@ -238,7 +259,7 @@ erDiagram
 
 ---
 
-## 변경 요약 (이번 워크트리)
+## 변경 요약 ① — JOINED 상속 (이번 워크트리, 코드 반영)
 
 | 구분 | 대상 | 내용 |
 |---|---|---|
@@ -249,9 +270,25 @@ erDiagram
 | 🔁 FK 변경 | `user_profiles.user_id`, `caregiver_profiles.user_id` | 참조 `users.id` → `profiles.user_id` |
 | ❌ 제거 | 자식의 `full_name`/`birth_date`/`gender`/`created_at`/`updated_at` | `profiles`로 승격되어 자식 테이블에서 삭제 |
 | ➕ 관계 | `users` 1:0..1 `profiles` | `User.profile` 역방향 매핑 추가 (ADMIN은 null) |
-| ✅ 불변 | 의존 테이블 16종 | 자식 `user_id` 유지 → 기존 FK 그대로 유효 |
+| ✅ 불변 | 의존 테이블 16종 | (① 기준) 자식 `user_id` 유지 → 기존 FK 그대로 유효 |
 
 **작동 원리**: `profiles.user_id`가 PK → 한 User당 한 행 → `profile_type`이 USER/CAREGIVER 중 하나로 확정 → 두 자식 테이블에 동시 존재 불가능(상호 배타).
+
+---
+
+## 변경 요약 ② — region 개편 (결정·미구현)
+
+> D1=(i)·D2=(b) 확정에 따른 위치/거리 모델 개편. **아직 코드 미반영** — 위 다이어그램에 `(제거예정)`/`(신규예정)`/`(강등예정)` 마커로 표시했습니다. 상세 근거 → `docs/entity-model.md` §4.1 / §6.
+
+| 구분 | 대상 | 현재 → 목표 |
+|---|---|---|
+| 🔻 컬럼 제거 | `help_requests.region_id` (FK) | 지역 FK → 제거 |
+| 🔺 컬럼 추가 | `help_requests`: `road_address` · `sido` · `sigungu` · `bname` · `zonecode` · `bcode` · `latitude` · `longitude` | 자기완결 **주소 스냅샷** 비정규화 (write-once) |
+| 🔻 테이블 제거 | `caregiver_service_regions` (M:N) | 거리 비게이트 → 미사용 → 제거 |
+| 🔻 관계 제거 | `regions─help_requests`, `regions─caregiver_service_regions`, `caregiver_profiles─caregiver_service_regions` | 위 제거에 수반 |
+| 🔅 역할 강등 | `regions` (테이블 유지) | 매칭/필터 기준 → **표시명 캐시**. `user_profiles.region_id`는 최소 보유로 잔존 |
+
+**핵심**: 거리는 매칭 게이트가 아니라 발견/정렬용. `HelpRequest`는 불변(write-once)이므로 생성 시점 주소/좌표 스냅샷을 직접 보유하는 것이 최적(갱신 이상 0).
 
 ---
 
@@ -278,4 +315,4 @@ erDiagram
 ## 부록 C — 주의/후속
 
 - ⚠️ **`Users.java` 레거시**: `User.java`와 별개로 존재하는 미사용 중복 엔티티(컴파일 경고 발생, 참조 0). 본 ERD에서 제외. 정리(삭제) 대상 — `docs/entity-model.md` §4 #2.
-- 🔜 **향후 변경 예정**(이 워크트리 범위 밖, 별도 결정): region 모델링 개편으로 `help_requests.region_id` 제거 + 주소 스냅샷 비정규화, `caregiver_service_regions` 제거가 결정됨. 상세 → `docs/entity-model.md` §4.1 / §6.
+- 🔜 **region 개편**(결정·미구현, 이 워크트리 범위 밖)은 위 다이어그램에 `(제거예정)`/`(신규예정)`/`(강등예정)` 마커 + "변경 요약 ②" 절로 가시화했습니다. 코드 반영은 별도 작업. 상세 근거 → `docs/entity-model.md` §4.1 / §6.
