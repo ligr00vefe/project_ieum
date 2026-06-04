@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+<section class="max-w-lg mx-auto px-4 sm:px-6 py-10">
+
+    <!-- 공통: 매칭 확정 축하 카드 -->
+    <div class="bg-indigo-600 rounded-3xl p-8 text-center text-white mb-6 shadow-lg shadow-indigo-200">
+        <div class="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/>
+            </svg>
+        </div>
+        <h1 class="text-2xl font-bold mb-2">축하해요! 매칭이 확정되었습니다</h1>
+        <p class="text-indigo-200 text-sm">
+            <!-- 장애인 뷰 -->
+            <th:block th:if="${isUser}">김지원 이용자님과 박이민 활동지원사님의 매칭이 확정되었어요.</th:block>
+            <!-- 활동지원사 뷰 -->
+            <th:block th:if="${isCaregiver}">김지원 이용자님과 함께할 활동이 확정되었어요.</th:block>
+        </p>
+    </div>
+
+    <!-- 활동 일정 카드 -->
+    <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-4">
+        <div class="flex items-center justify-between mb-5">
+            <h2 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                <svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                활동 일정
+            </h2>
+            <button class="px-3 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-all">확인함</button>
+        </div>
+
+        <div class="space-y-3 text-sm">
+            <div class="flex items-center gap-3 text-gray-600">
+                <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span><span class="font-semibold text-gray-900">날짜</span> · 2024.11.16 (토)</span>
+            </div>
+            <div class="flex items-center gap-3 text-gray-600">
+                <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span><span class="font-semibold text-gray-900">시간</span> · 14:00 ~ 16:00 (2시간)</span>
+            </div>
+            <div class="flex items-center gap-3 text-gray-600">
+                <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                <span><span class="font-semibold text-gray-900">장소</span> · 서울 강남구 ○○병원</span>
+            </div>
+            <div class="flex items-center gap-3 text-gray-600">
+                <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span><span class="font-semibold text-gray-900">내용</span> · 외래진료 동행, 의사소통 보조</span>
+            </div>
+        </div>
+
+        <!-- 매칭 파트너 정보 -->
+        <div class="mt-5 pt-4 border-t border-gray-50 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
+                 th:classappend="${isCaregiver} ? 'bg-indigo-100 text-indigo-600' : 'bg-teal-100 text-teal-600'">
+                <th:block th:if="${isCaregiver}">김</th:block>
+                <th:block th:if="${isUser}">박</th:block>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-900">
+                    <th:block th:if="${isCaregiver}">김지원 이용자</th:block>
+                    <th:block th:if="${isUser}">박이민 활동지원사</th:block>
+                </p>
+                <p class="text-xs text-gray-400">
+                    <th:block th:if="${isCaregiver}">외래진료 동행, 의사소통 보조</th:block>
+                    <th:block th:if="${isUser}">수어 가능 · 경력 5년 · ⭐ 4.9</th:block>
+                </p>
+            </div>
+            <a th:href="@{/chat/1}"
+               class="px-3 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-all flex-shrink-0">
+                채팅 계속
+            </a>
+        </div>
+    </div>
+
+    <!-- 활동지원사 뷰: 안전 케어 가이드 -->
+    <th:block th:if="${isCaregiver}">
+        <div class="bg-amber-50 border border-amber-100 rounded-2xl p-5 mb-4">
+            <div class="flex items-center gap-2 mb-3">
+                <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                <h3 class="text-sm font-bold text-amber-800">안전 케어 가이드</h3>
+            </div>
+            <ul class="space-y-2 text-xs text-amber-700">
+                <li class="flex items-start gap-2">
+                    <svg class="w-3.5 h-3.5 text-amber-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    활동 30분 전 이용자에게 안내 메시지 발송 권장
+                </li>
+                <li class="flex items-start gap-2">
+                    <svg class="w-3.5 h-3.5 text-amber-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    응급 상황 시 24/7 안전 지원 센터 연락
+                </li>
+                <li class="flex items-start gap-2">
+                    <svg class="w-3.5 h-3.5 text-amber-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    활동 종료 후 "서비스 완료" 버튼을 눌러주세요
+                </li>
+            </ul>
+        </div>
+    </th:block>
+
+    <!-- 장애인 뷰: 매칭 완료 후 리뷰 작성 섹션 -->
+    <th:block th:if="${isUser}">
+        <div id="reviewSection" class="hidden bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-4">
+            <div class="text-center mb-5">
+                <div class="w-14 h-14 bg-teal-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-7 h-7 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <h2 class="text-base font-bold text-gray-900">서비스가 완료되었나요?</h2>
+                <p class="text-sm text-gray-500 mt-1">박이민 활동지원사님의 리뷰를 남겨주세요.</p>
+            </div>
+
+            <!-- 별점 -->
+            <div class="flex items-center justify-center gap-2 mb-5">
+                <button class="text-3xl text-yellow-400 hover:scale-110 transition-transform" onclick="setRating(1)">★</button>
+                <button class="text-3xl text-yellow-400 hover:scale-110 transition-transform" onclick="setRating(2)">★</button>
+                <button class="text-3xl text-yellow-400 hover:scale-110 transition-transform" onclick="setRating(3)">★</button>
+                <button class="text-3xl text-yellow-400 hover:scale-110 transition-transform" onclick="setRating(4)">★</button>
+                <button class="text-3xl text-gray-200 hover:scale-110 transition-transform" onclick="setRating(5)">★</button>
+            </div>
+
+            <!-- 성향 태그 -->
+            <div class="mb-5">
+                <p class="text-xs font-semibold text-gray-500 mb-2.5 text-center">어떠셨나요? (복수 선택 가능)</p>
+                <div class="flex flex-wrap justify-center gap-2">
+                    <label class="cursor-pointer"><input type="checkbox" class="sr-only peer"><span class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-100 peer-checked:text-indigo-700 peer-checked:border-indigo-200 transition-all">친절했어요</span></label>
+                    <label class="cursor-pointer"><input type="checkbox" class="sr-only peer"><span class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-100 peer-checked:text-indigo-700 peer-checked:border-indigo-200 transition-all">전문적이에요</span></label>
+                    <label class="cursor-pointer"><input type="checkbox" class="sr-only peer"><span class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-100 peer-checked:text-indigo-700 peer-checked:border-indigo-200 transition-all">시간을 잘 지켜요</span></label>
+                    <label class="cursor-pointer"><input type="checkbox" class="sr-only peer"><span class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-100 peer-checked:text-indigo-700 peer-checked:border-indigo-200 transition-all">또 만나고 싶어요</span></label>
+                    <label class="cursor-pointer"><input type="checkbox" class="sr-only peer"><span class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-100 peer-checked:text-indigo-700 peer-checked:border-indigo-200 transition-all">소통이 잘 됐어요</span></label>
+                </div>
+            </div>
+
+            <!-- 한줄 리뷰 -->
+            <div class="mb-5">
+                <textarea rows="3" placeholder="활동지원사님에 대한 솔직한 후기를 남겨주세요."
+                          class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all resize-none"></textarea>
+            </div>
+
+            <button class="w-full py-3 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100">
+                리뷰 등록하기
+            </button>
+        </div>
+    </th:block>
+
+    <!-- 하단 버튼 -->
+    <div class="flex gap-3">
+        <a th:href="@{/board}"
+           class="flex-1 py-3 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl text-center hover:bg-gray-50 transition-all">
+            게시판으로
+        </a>
+        <!-- 장애인: 리뷰 버튼 -->
+        <th:block th:if="${isUser}">
+            <button onclick="document.getElementById('reviewSection').classList.toggle('hidden')"
+                    class="flex-1 py-3 text-sm font-bold text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-all shadow-sm shadow-teal-100">
+                리뷰 작성하기
+            </button>
+        </th:block>
+        <!-- 활동지원사: 마이페이지 이동 -->
+        <th:block th:if="${isCaregiver}">
+            <a th:href="@{/mypage}"
+               class="flex-1 py-3 text-sm font-bold text-white bg-indigo-600 rounded-xl text-center hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100">
+                마이페이지로
+            </a>
+        </th:block>
+    </div>
+
+</section>
+</th:block>
+</html>
