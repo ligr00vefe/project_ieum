@@ -12,9 +12,6 @@
     <!-- Header -->
     <div th:replace="~{layout/header :: header}"></div>
 
-    <!-- Sub Navigation (authenticated users only) -->
-    <div th:replace="~{layout/nav :: nav}"></div>
-
     <!-- Main Content -->
     <main class="flex-1">
         <th:block th:replace="~{__${content}__ :: content}"></th:block>
