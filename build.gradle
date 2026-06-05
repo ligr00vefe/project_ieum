@@ -22,6 +22,7 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -77,9 +78,15 @@ tasks.register('downloadTailwind', Exec) {
 
 tasks.register('buildTailwind', Exec) {
     dependsOn 'downloadTailwind'
-    def exe = Os.isFamily(Os.FAMILY_WINDOWS) ? "tailwindcss.exe" : "./tailwindcss"
+    workingDir projectDir
+    def exe = Os.isFamily(Os.FAMILY_WINDOWS)
+            ? "${projectDir}/tailwindcss.exe"
+            : "${projectDir}/tailwindcss"
 
-    commandLine exe, '-i', './src/main/resources/static/css/input.css', '-o', './src/main/resources/static/css/output.css', '--minify'
+    commandLine exe,
+            '-i', "${projectDir}/src/main/resources/static/css/input.css",
+            '-o', "${projectDir}/src/main/resources/static/css/output.css",
+            '--minify'
 }
 
 processResources.dependsOn buildTailwind
