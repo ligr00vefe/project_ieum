@@ -16,7 +16,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Setter
 @ToString(callSuper = true)
 public class CaregiverProfile extends Profile {
 
