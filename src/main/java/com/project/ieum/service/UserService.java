@@ -2,14 +2,10 @@ package com.project.ieum.service;
 
 import com.project.ieum.dto.*;
 import com.project.ieum.entity.*;
-import com.project.ieum.entity.caregiver.CaregiverAvailability;
 import com.project.ieum.entity.caregiver.CaregiverPersonalityTag;
 import com.project.ieum.entity.caregiver.CaregiverProfile;
 import com.project.ieum.entity.caregiver.CaregiverServiceRegion;
-import com.project.ieum.entity.user.DisabilityType;
-import com.project.ieum.entity.user.UserCommunicationMethod;
-import com.project.ieum.entity.user.UserDisabilityType;
-import com.project.ieum.entity.user.UserProfile;
+import com.project.ieum.entity.user.*;
 import com.project.ieum.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,15 +13,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalTime;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
@@ -37,152 +29,156 @@ public class UserService {
     private final RegionRepository regionRepository;
     private final UserDisabilityTypeRepository userDisabilityTypeRepository;
     private final UserCommunicationMethodRepository userCommunicationMethodRepository;
-    private final CaregiverAvailabilityRepository caregiverAvailabilityRepository;
     private final CaregiverServiceRegionRepository caregiverServiceRegionRepository;
     private final CaregiverPersonalityTagRepository caregiverPersonalityTagRepository;
+    private final UserPersonalityTagRepository userPersonalityTagRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public User registerUser(BasicInfoDTO basicInfo, UserRole role) {
-        User user = User.builder()
-                .email(basicInfo.getEmail())
-                .passwordHash(passwordEncoder.encode(basicInfo.getPassword()))
-                .phone(basicInfo.getPhone())
-                .role(role)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 장애인 전체 등록 (단일 트랜잭션)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    @Transactional
+    public void registerDisabledUser(RegistrationSessionDTO session) {
+        BasicInfoDTO info       = session.getBasicInfo();
+        DisabilityInfoDTO dis   = session.getDisabilityInfo();
+        CommunicationDTO comm   = session.getCommunicationInfo();
+        PersonalityTagDTO tags  = session.getPersonalityTags();
+
+        /* 1. users */
+        User user = userRepository.save(User.builder()
+                .email(info.getEmail())
+                .passwordHash(passwordEncoder.encode(info.getPassword()))
+                .phone(info.getPhone())
+                .role(UserRole.USER)
                 .status(UserStatus.ACTIVE)
-                .build();
+                .build());
 
-        return userRepository.save(user);
-    }
-
-    public UserProfile registerUserProfile(User user, BasicInfoDTO basicInfo) {
-        UserProfile profile = UserProfile.builder()
-                .userId(user.getId())
+        /* 2. user_profiles
+         * @MapsId가 user.id → userId 를 자동 설정하므로 .userId() 명시 금지
+         * (명시하면 isNew=false → merge() 호출 → merged entity의 userId가 null이 되는 버그)
+         */
+        UserProfile profile = userProfileRepository.save(UserProfile.builder()
                 .user(user)
-                .fullName(basicInfo.getName())
-                .birthDate(basicInfo.getBirthDate())
-                .gender(basicInfo.getGender())
-                .guardianName(basicInfo.getGuardianName())
-                .guardianPhone(basicInfo.getGuardianPhone())
-                .build();
+                .fullName(info.getName())
+                .birthDate(info.getBirthDate())
+                .gender(info.getGender())
+                .guardianName(info.getGuardianName() != null ? info.getGuardianName() : "")
+                .guardianPhone(info.getGuardianPhone() != null ? info.getGuardianPhone() : "")
+                .build());
 
-        return userProfileRepository.save(profile);
-    }
-
-    public CaregiverProfile registerCaregiverProfile(User user, BasicInfoDTO basicInfo) {
-        CaregiverProfile profile = CaregiverProfile.builder()
-                .userId(user.getId())
-                .user(user)
-                .fullName(basicInfo.getName())
-                .birthDate(basicInfo.getBirthDate())
-                .gender(basicInfo.getGender())
-                .build();
-
-        return caregiverProfileRepository.save(profile);
-    }
-
-    public void addDisabilityTypes(UserProfile profile, DisabilityInfoDTO disabilityInfo) {
-        if (disabilityInfo.getDisabilityTypeIds() == null || disabilityInfo.getDisabilityTypeIds().isEmpty()) {
-            return;
+        /* 3. user_disability_types + activity info */
+        if (dis != null) {
+            if (dis.getDisabilityTypeIds() != null && !dis.getDisabilityTypeIds().isEmpty()) {
+                List<DisabilityType> types = disabilityTypeRepository.findAllById(dis.getDisabilityTypeIds());
+                for (DisabilityType type : types) {
+                    userDisabilityTypeRepository.save(
+                            UserDisabilityType.builder().user(profile).disabilityType(type).build());
+                }
+            }
+            // activity_range, avoid_situations → user_profiles 업데이트
+            profile.updateActivityInfo(dis.getActivityRange(), dis.getAvoidSituations());
+            userProfileRepository.save(profile);
         }
 
-        List<DisabilityType> types = disabilityTypeRepository.findAllById(disabilityInfo.getDisabilityTypeIds());
-
-        for (DisabilityType type : types) {
-            UserDisabilityType udt = UserDisabilityType.builder()
-                    .user(profile)
-                    .disabilityType(type)
-                    .build();
-            userDisabilityTypeRepository.save(udt);
-        }
-
-        profile.updateActivityInfo(disabilityInfo.getActivityRange(), disabilityInfo.getAvoidSituations());
-        userProfileRepository.save(profile);
-    }
-
-    public void addCommunicationMethods(UserProfile profile, CommunicationDTO communicationInfo) {
-        if (communicationInfo.getCommunicationMethodIds() == null || communicationInfo.getCommunicationMethodIds().isEmpty()) {
-            return;
-        }
-
-        List<CommunicationMethod> methods = communicationMethodRepository.findAllById(communicationInfo.getCommunicationMethodIds());
-
-        for (CommunicationMethod method : methods) {
-            UserCommunicationMethod ucm = UserCommunicationMethod.builder()
-                    .user(profile)
-                    .communicationMethod(method)
-                    .build();
-            userCommunicationMethodRepository.save(ucm);
-        }
-    }
-
-    public void updateCertificationInfo(CaregiverProfile profile, CertificationDTO certificationInfo) {
-        profile.setHasCertification(certificationInfo.getHasCertification());
-        profile.setCertificationType(certificationInfo.getCertificationType());
-        caregiverProfileRepository.save(profile);
-    }
-
-    public void updateActivityInfo(CaregiverProfile profile, ActivityInfoDTO activityInfo) {
-        profile.setExperience(activityInfo.getExperience());
-        caregiverProfileRepository.save(profile);
-
-        if (activityInfo.getAvailabilityTimes() != null) {
-            for (ActivityInfoDTO.AvailabilityTimeDTO time : activityInfo.getAvailabilityTimes()) {
-                CaregiverAvailability availability = CaregiverAvailability.builder()
-                        .caregiver(profile)
-                        .dayOfWeek(time.getDayOfWeek())
-                        .startTime(time.getStartTime())
-                        .endTime(time.getEndTime())
+        /* 4. user_communication_methods */
+        if (comm != null && comm.getCommunicationMethodIds() != null && !comm.getCommunicationMethodIds().isEmpty()) {
+            List<CommunicationMethod> methods = communicationMethodRepository.findAllById(comm.getCommunicationMethodIds());
+            for (CommunicationMethod method : methods) {
+                UserCommunicationMethodId id = UserCommunicationMethodId.builder()
+                        .userId(profile.getUserId())
+                        .communicationMethodId(method.getId())
                         .build();
-                caregiverAvailabilityRepository.save(availability);
+                userCommunicationMethodRepository.save(UserCommunicationMethod.builder()
+                        .id(id).user(profile).communicationMethod(method).build());
             }
         }
 
-        if (activityInfo.getRegionIds() != null && !activityInfo.getRegionIds().isEmpty()) {
-            List<Region> regions = regionRepository.findAllById(activityInfo.getRegionIds());
+        /* 5. user_personality_tags */
+        if (tags != null && tags.getPersonalityTagIds() != null && !tags.getPersonalityTagIds().isEmpty()) {
+            List<PersonalityTag> tagList = personalityTagRepository.findAllById(tags.getPersonalityTagIds());
+            for (PersonalityTag tag : tagList) {
+                userPersonalityTagRepository.save(
+                        UserPersonalityTag.builder().user(profile).tag(tag).build());
+            }
+        }
 
+        log.info("장애인 회원가입 완료 - userId={}", user.getId());
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 활동지원사 전체 등록 (단일 트랜잭션)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    @Transactional
+    public void registerCaregiverUser(RegistrationSessionDTO session) {
+        BasicInfoDTO info            = session.getBasicInfo();
+        CertificationDTO cert        = session.getCertificationInfo();
+        ActivityInfoDTO activity     = session.getActivityInfo();
+        PersonalityTagDTO tags       = session.getPersonalityTags();
+
+        /* 1. users */
+        User user = userRepository.save(User.builder()
+                .email(info.getEmail())
+                .passwordHash(passwordEncoder.encode(info.getPassword()))
+                .phone(info.getPhone())
+                .role(UserRole.CAREGIVER)
+                .status(UserStatus.ACTIVE)
+                .build());
+
+        /* 2. caregiver_profiles (기본 + 자격증 + 경력 + 가능업무/시간) */
+        Boolean hasCert = (cert != null && cert.getHasCertification() != null)
+                ? cert.getHasCertification() : false;
+        String certType = (cert != null) ? cert.getCertificationType() : null;
+
+        String experience      = (activity != null) ? activity.getExperience() : null;
+        String serviceCategories = (activity != null && activity.getServiceCategories() != null)
+                ? String.join(",", activity.getServiceCategories()) : null;
+        String availableSlots = (activity != null && activity.getAvailableTimeSlots() != null)
+                ? String.join(",", activity.getAvailableTimeSlots()) : null;
+
+        /* 2. caregiver_profiles — @MapsId에 위임, .userId() 명시 금지 */
+        CaregiverProfile profile = caregiverProfileRepository.save(CaregiverProfile.builder()
+                .user(user)
+                .fullName(info.getName())
+                .birthDate(info.getBirthDate())
+                .gender(info.getGender())
+                .hasCertification(hasCert)
+                .certificationType(certType)
+                .experience(experience)
+                .serviceCategories(serviceCategories)
+                .availableTimeSlots(availableSlots)
+                .build());
+
+        /* 3. caregiver_service_regions */
+        if (activity != null && activity.getRegionIds() != null && !activity.getRegionIds().isEmpty()) {
+            List<Region> regions = regionRepository.findAllById(activity.getRegionIds());
             for (Region region : regions) {
-                CaregiverServiceRegion csr = CaregiverServiceRegion.builder()
-                        .caregiver(profile)
-                        .region(region)
-                        .build();
-                caregiverServiceRegionRepository.save(csr);
+                caregiverServiceRegionRepository.save(
+                        CaregiverServiceRegion.builder().caregiver(profile).region(region).build());
             }
         }
+
+        /* 4. caregiver_personality_tags */
+        if (tags != null && tags.getPersonalityTagIds() != null && !tags.getPersonalityTagIds().isEmpty()) {
+            List<PersonalityTag> tagList = personalityTagRepository.findAllById(tags.getPersonalityTagIds());
+            for (PersonalityTag tag : tagList) {
+                caregiverPersonalityTagRepository.save(
+                        CaregiverPersonalityTag.builder().caregiver(profile).tag(tag).build());
+            }
+        }
+
+        log.info("활동지원사 회원가입 완료 - userId={}", user.getId());
     }
 
-    public void addPersonalityTagsForUser(UserProfile profile, PersonalityTagDTO personalityTagInfo) {
-        if (personalityTagInfo.getPersonalityTagIds() == null || personalityTagInfo.getPersonalityTagIds().isEmpty()) {
-            return;
-        }
-
-        List<PersonalityTag> tags = personalityTagRepository.findAllById(personalityTagInfo.getPersonalityTagIds());
-
-        for (PersonalityTag tag : tags) {
-            com.project.ieum.entity.request.HelpRequestPersonalityTag hrpt = 
-                com.project.ieum.entity.request.HelpRequestPersonalityTag.builder()
-                    .helpRequest(null)
-                    .tag(tag)
-                    .build();
-        }
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 유틸리티
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    @Transactional(readOnly = true)
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
     }
 
-    public void addPersonalityTagsForCaregiver(CaregiverProfile profile, PersonalityTagDTO personalityTagInfo) {
-        if (personalityTagInfo.getPersonalityTagIds() == null || personalityTagInfo.getPersonalityTagIds().isEmpty()) {
-            return;
-        }
-
-        List<PersonalityTag> tags = personalityTagRepository.findAllById(personalityTagInfo.getPersonalityTagIds());
-
-        for (PersonalityTag tag : tags) {
-            CaregiverPersonalityTag cpt = CaregiverPersonalityTag.builder()
-                    .caregiver(profile)
-                    .tag(tag)
-                    .build();
-            caregiverPersonalityTagRepository.save(cpt);
-        }
-    }
-
-    public User findUserByEmail(String email) {
-        return userRepository.findByEmail(email).orElse(null);
+    @Transactional(readOnly = true)
+    public boolean existsByPhone(String phone) {
+        return userRepository.existsByPhone(phone);
     }
 }

@@ -8,9 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@ToString(exclude = "writer")
-// @ManyToOne(fetch = FetchType.LAZY)는
-// toString에서 제외할 때 사용하는 세트 어노테이션 속성이다.
+@ToString
 public class Users extends BasicEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+<div class="max-w-2xl mx-auto px-4 sm:px-6 py-6 flex flex-col" style="height: calc(100vh - 140px); min-height: 600px;">
+
+    <!-- 채팅 헤더 -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-4 flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <a th:href="@{/board/1}" class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </a>
+            <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm flex-shrink-0">김</div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                    <p class="text-sm font-bold text-gray-900">김지원 이용자</p>
+                    <span class="w-2 h-2 bg-teal-400 rounded-full flex-shrink-0"></span>
+                    <span class="text-xs text-teal-500 font-medium">온라인</span>
+                </div>
+                <p class="text-xs text-gray-400 truncate">병원 동행이 필요해요 (외래진료)</p>
+            </div>
+            <!-- 활동지원사 뷰: 매칭률 뱃지 -->
+            <th:block th:if="${isCaregiver}">
+                <div class="flex-shrink-0 flex flex-col items-center bg-indigo-600 text-white rounded-xl px-2.5 py-1.5">
+                    <span class="text-[9px] font-medium opacity-80 leading-none">매칭률</span>
+                    <span class="text-sm font-bold leading-none">95%</span>
+                </div>
+            </th:block>
+            <!-- 장애인 뷰: 매칭 확정 버튼 -->
+            <th:block th:if="${isUser}">
+                <button onclick="showMatchConfirmModal()"
+                        class="flex-shrink-0 px-3.5 py-2 text-xs font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100">
+                    매칭 확정
+                </button>
+            </th:block>
+        </div>
+
+        <!-- 게시물 요약 -->
+        <div class="mt-3 pt-3 border-t border-gray-50 flex items-center gap-2 text-xs text-gray-500">
+            <svg class="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span>2024.11.16 (월) 14:00~16:00</span>
+            <span class="text-gray-300">·</span>
+            <svg class="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+            <span>서울 강남구 ○○병원</span>
+            <span class="ml-auto px-2 py-0.5 bg-indigo-50 text-indigo-500 font-semibold rounded-full">매칭률 95%</span>
+        </div>
+    </div>
+
+    <!-- 채팅 메시지 영역 -->
+    <div id="chatMessages" class="flex-1 overflow-y-auto space-y-4 pb-2 pr-1">
+
+        <!-- 날짜 구분선 -->
+        <div class="flex items-center gap-3 my-2">
+            <div class="flex-1 h-px bg-gray-100"></div>
+            <span class="text-xs text-gray-400 font-medium flex-shrink-0">오늘 오전 2시 25분</span>
+            <div class="flex-1 h-px bg-gray-100"></div>
+        </div>
+
+        <!-- 상대방 메시지 (이용자/활동지원사 공통: 상대방 메시지는 왼쪽) -->
+        <div class="flex items-end gap-2.5">
+            <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xs flex-shrink-0 mb-1">김</div>
+            <div class="max-w-[72%]">
+                <div class="bg-white border border-gray-100 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
+                    <p class="text-sm text-gray-800">안녕하세요, 박이민 활동지원사님! 공고를 보고 연락드렸어요. 저도 지원해 주셔서 감사합니다.</p>
+                </div>
+                <p class="text-[11px] text-gray-400 mt-1 ml-1">오전 2:25</p>
+            </div>
+        </div>
+
+        <!-- 내 메시지 (오른쪽) -->
+        <div class="flex items-end gap-2.5 flex-row-reverse">
+            <div class="max-w-[72%]">
+                <div class="bg-indigo-600 rounded-2xl rounded-br-md px-4 py-3 shadow-sm shadow-indigo-100">
+                    <p class="text-sm text-white">안녕하세요! 네, 병원 동행이라면 자신 있어요. 외래진료 동행은 여러 번 해봤고요, 간호사와 의사 소통 보조도 잘 할 수 있을 것 같아요.</p>
+                </div>
+                <p class="text-[11px] text-gray-400 mt-1 mr-1 text-right">오전 2:26</p>
+            </div>
+        </div>
+
+        <div class="flex items-end gap-2.5">
+            <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xs flex-shrink-0 mb-1">김</div>
+            <div class="max-w-[72%]">
+                <div class="bg-white border border-gray-100 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
+                    <p class="text-sm text-gray-800">수어 가능하신가요?</p>
+                </div>
+                <p class="text-[11px] text-gray-400 mt-1 ml-1">오전 2:31</p>
+            </div>
+        </div>
+
+        <div class="flex items-end gap-2.5 flex-row-reverse">
+            <div class="max-w-[72%]">
+                <div class="bg-indigo-600 rounded-2xl rounded-br-md px-4 py-3 shadow-sm shadow-indigo-100">
+                    <p class="text-sm text-white">네, 가능합니다. 보건복지부 인정 수어 통역사 자격도 있어요. 당일 오전에 출발하면 되는지 혹은 어디서 만날까요?</p>
+                </div>
+                <p class="text-[11px] text-gray-400 mt-1 mr-1 text-right">오전 2:33</p>
+            </div>
+        </div>
+
+        <!-- 활동지원사 뷰: 매칭 가능 시스템 메시지 -->
+        <th:block th:if="${isCaregiver}">
+            <div class="flex justify-center">
+                <div class="bg-teal-50 border border-teal-100 rounded-2xl px-4 py-3 max-w-xs text-center">
+                    <p class="text-xs font-semibold text-teal-700">🎯 매칭이 가능합니다!</p>
+                    <p class="text-xs text-teal-500 mt-0.5">활동지원사는 매칭이 가능하지만, 최종 결정은 이용자에게 있습니다.<br>상세한 일정 안내 등 최선을 다해 알리세요.</p>
+                </div>
+            </div>
+        </th:block>
+
+    </div>
+
+    <!-- 메시지 입력창 -->
+    <div class="flex-shrink-0 mt-4">
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm flex items-end gap-3 p-3">
+            <textarea id="messageInput" rows="1" placeholder="메시지를 입력하세요..."
+                      oninput="autoResize(this)"
+                      onkeydown="handleKeydown(event)"
+                      class="flex-1 text-sm text-gray-800 placeholder-gray-400 border-0 focus:outline-none resize-none max-h-32 leading-relaxed"></textarea>
+            <button onclick="sendMessage()"
+                    class="w-9 h-9 bg-indigo-600 text-white rounded-xl flex items-center justify-center hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100 flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<!-- 매칭 확정 모달 (장애인 뷰) -->
+<div id="matchConfirmModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="hideMatchConfirmModal()"></div>
+    <div class="relative bg-white rounded-3xl shadow-2xl p-7 w-full max-w-sm text-center z-10">
+        <div class="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <svg class="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            </svg>
+        </div>
+        <h2 class="text-lg font-bold text-gray-900 mb-2">매칭을 확정하시겠어요?</h2>
+        <p class="text-sm text-gray-500 leading-relaxed mb-6">
+            ✔ 활동지원사에게 매칭 확정 알림이 발송됩니다.<br>
+            ✔ 활동 일정이 마이페이지에 등록됩니다.
+        </p>
+        <div class="flex gap-3">
+            <button onclick="hideMatchConfirmModal()"
+                    class="flex-1 py-3 text-sm font-semibold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all">
+                취소
+            </button>
+            <a th:href="@{/matching/confirmed}"
+               class="flex-1 py-3 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100 flex items-center justify-center">
+                → 매칭 확정하기
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 128) + 'px';
+}
+function handleKeydown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const text = input.value.trim();
+    if (!text) return;
+    const msgs = document.getElementById('chatMessages');
+    const now = new Date().toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'});
+    const div = document.createElement('div');
+    div.className = 'flex items-end gap-2.5 flex-row-reverse';
+    div.innerHTML = `
+        <div class="max-w-[72%]">
+            <div class="bg-indigo-600 rounded-2xl rounded-br-md px-4 py-3 shadow-sm shadow-indigo-100">
+                <p class="text-sm text-white">${text.replace(/</g,'&lt;')}</p>
+            </div>
+            <p class="text-[11px] text-gray-400 mt-1 mr-1 text-right">${now}</p>
+        </div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    input.value = '';
+    input.style.height = 'auto';
+}
+function showMatchConfirmModal() {
+    document.getElementById('matchConfirmModal').classList.remove('hidden');
+}
+function hideMatchConfirmModal() {
+    document.getElementById('matchConfirmModal').classList.add('hidden');
+}
+</script>
+</th:block>
+</html>
