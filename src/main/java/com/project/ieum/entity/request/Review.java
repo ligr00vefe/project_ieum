@@ -57,4 +57,15 @@ public class Review extends BasicEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 16)
   private ReviewVisibility visibility;
+
+  // 작성자 수정(오타·평점 정정). 인가/수정가능기간/평점 재집계는 서비스 책임(Q2 후속).
+  public void edit(Short rating, String body) {
+    this.rating = rating;
+    this.body = body;
+  }
+
+  // 공개/숨김 전환 — 하드삭제 대신 PRIVATE 소프트숨김에 사용(집계 무결성 보존).
+  public void changeVisibility(ReviewVisibility visibility) {
+    this.visibility = visibility;
+  }
 }
