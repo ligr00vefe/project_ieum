@@ -37,6 +37,14 @@ public class SecurityModelAdvice {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_CAREGIVER"));
     }
 
+    /** 관리자 여부 */
+    @ModelAttribute("isAdmin")
+    public boolean isAdmin(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) return false;
+        return auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+    }
+
     /**
      * 현재 요청 URI — nav.html 등에서 active 상태 판단에 사용.
      * Thymeleaf 3.1+에서 #httpServletRequest 직접 접근이 제한되므로 모델로 주입.
