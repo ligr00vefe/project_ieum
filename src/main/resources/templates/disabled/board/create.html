@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+<section class="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+
+    <div class="flex items-center gap-2 text-sm text-gray-400 mb-6">
+        <a th:href="@{/disabled/board}" class="hover:text-indigo-600 transition-colors">게시판</a>
+        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span class="text-gray-600 font-medium">요청 글 작성</span>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="h-1 bg-indigo-600 rounded-full"></div>
+        <div class="p-7 sm:p-8">
+
+            <div class="mb-7">
+                <h1 class="text-xl font-bold text-gray-900">도움 요청 작성</h1>
+                <p class="text-sm text-gray-500 mt-1">필요한 도움 내용을 자세히 작성해주세요.</p>
+            </div>
+
+            <form th:action="@{/disabled/board/create}" method="post" class="space-y-6">
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">제목 <span class="text-red-500">*</span></label>
+                    <input type="text" name="title" placeholder="예: 병원 동행이 필요해요 (외래진료)"
+                           class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">날짜 <span class="text-red-500">*</span></label>
+                        <input type="date" name="date"
+                               class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">시간대 <span class="text-red-500">*</span></label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="time" name="startTime"
+                                   class="w-full px-3 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all">
+                            <input type="time" name="endTime"
+                                   class="w-full px-3 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">활동 지역 <span class="text-red-500">*</span></label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <select name="regionCity"
+                                class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all bg-white">
+                            <option value="">시/도 선택</option>
+                            <option>서울</option>
+                            <option>경기</option>
+                            <option>인천</option>
+                            <option>부산</option>
+                            <option>대구</option>
+                            <option>기타</option>
+                        </select>
+                        <input type="text" name="regionDetail" placeholder="상세 지역 (예: 강남구 역삼동)"
+                               class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">필요한 도움 <span class="text-red-500">*</span></label>
+                    <div class="flex flex-wrap gap-2">
+                        <label class="cursor-pointer"><input type="checkbox" name="serviceCategories" value="이동 보조" class="sr-only peer"><span class="px-3.5 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:border-indigo-300 transition-all">이동 보조</span></label>
+                        <label class="cursor-pointer"><input type="checkbox" name="serviceCategories" value="병원 동행" class="sr-only peer"><span class="px-3.5 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:border-indigo-300 transition-all">병원 동행</span></label>
+                        <label class="cursor-pointer"><input type="checkbox" name="serviceCategories" value="약소름 보조" class="sr-only peer"><span class="px-3.5 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:border-indigo-300 transition-all">약소름 보조</span></label>
+                        <label class="cursor-pointer"><input type="checkbox" name="serviceCategories" value="대기 동행" class="sr-only peer"><span class="px-3.5 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:border-indigo-300 transition-all">대기 동행</span></label>
+                        <label class="cursor-pointer"><input type="checkbox" name="serviceCategories" value="가사 도움" class="sr-only peer"><span class="px-3.5 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:border-indigo-300 transition-all">가사 도움</span></label>
+                        <label class="cursor-pointer"><input type="checkbox" name="serviceCategories" value="외출 지원" class="sr-only peer"><span class="px-3.5 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:border-indigo-300 transition-all">외출 지원</span></label>
+                        <label class="cursor-pointer"><input type="checkbox" name="serviceCategories" value="수어 통역" class="sr-only peer"><span class="px-3.5 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:border-indigo-300 transition-all">수어 통역</span></label>
+                        <label class="cursor-pointer"><input type="checkbox" name="serviceCategories" value="기타" class="sr-only peer"><span class="px-3.5 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:border-indigo-300 transition-all">기타</span></label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">원하는 활동지원사 성향 <span class="text-xs font-normal text-gray-400">(선택)</span></label>
+                    <p class="text-xs text-gray-400 mb-3">함께 활동하고 싶은 활동지원사의 성향을 선택해 주세요.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <label class="cursor-pointer"><input type="checkbox" class="sr-only peer"><span class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-100 peer-checked:text-indigo-700 peer-checked:border-indigo-200 hover:border-indigo-200 transition-all">#다정함</span></label>
+                        <label class="cursor-pointer"><input type="checkbox" class="sr-only peer"><span class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-100 peer-checked:text-indigo-700 peer-checked:border-indigo-200 hover:border-indigo-200 transition-all">#꼼꼼함</span></label>
+                        <label class="cursor-pointer"><input type="checkbox" class="sr-only peer"><span class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-100 peer-checked:text-indigo-700 peer-checked:border-indigo-200 hover:border-indigo-200 transition-all">#활발함</span></label>
+                        <label class="cursor-pointer"><input type="checkbox" class="sr-only peer"><span class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-100 peer-checked:text-indigo-700 peer-checked:border-indigo-200 hover:border-indigo-200 transition-all">#조용함</span></label>
+                        <label class="cursor-pointer"><input type="checkbox" class="sr-only peer"><span class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-100 peer-checked:text-indigo-700 peer-checked:border-indigo-200 hover:border-indigo-200 transition-all">#경험많음</span></label>
+                        <label class="cursor-pointer"><input type="checkbox" class="sr-only peer"><span class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-100 peer-checked:text-indigo-700 peer-checked:border-indigo-200 hover:border-indigo-200 transition-all">#수어가능</span></label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">상세 내용 <span class="text-red-500">*</span></label>
+                    <textarea name="content" rows="5" placeholder="필요한 도움에 대해 자세히 설명해주세요."
+                              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all resize-none"></textarea>
+                </div>
+
+                <div class="flex items-center gap-3 p-4 bg-orange-50 rounded-2xl border border-orange-100">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="urgent" class="sr-only peer">
+                        <div class="w-10 h-6 bg-gray-200 rounded-full peer peer-checked:bg-orange-400 peer-focus:ring-2 peer-focus:ring-orange-200 transition-all after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-4"></div>
+                    </label>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-800">급구 표시</p>
+                        <p class="text-xs text-gray-500">활성화하면 게시글에 '급구' 배지가 표시됩니다.</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <a th:href="@{/disabled/board}"
+                       class="flex-1 py-3 text-sm font-semibold text-gray-600 bg-gray-100 rounded-xl text-center hover:bg-gray-200 transition-all">
+                        취소
+                    </a>
+                    <button type="submit"
+                            class="flex-1 py-3 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100">
+                        도움 요청 등록하기
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</section>
+</th:block>
+</html>
