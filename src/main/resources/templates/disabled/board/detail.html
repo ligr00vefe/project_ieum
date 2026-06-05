@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+<section class="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+
+    <div class="flex items-center gap-2 text-sm text-gray-400 mb-6">
+        <a th:href="@{/disabled/board}" class="hover:text-indigo-600 transition-colors">게시판</a>
+        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span class="text-gray-600 font-medium">게시물 상세</span>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mb-4">
+        <div class="p-6 sm:p-7">
+
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm flex-shrink-0">김</div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900">김지원 이용자</p>
+                        <p class="text-xs text-gray-400">24시간 전</p>
+                    </div>
+                </div>
+                <button class="px-3 py-1.5 text-xs font-medium text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all">수정</button>
+            </div>
+
+            <div class="flex items-start gap-3 mb-4">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-xs font-semibold rounded-full">모집중</span>
+                        <span class="px-2 py-0.5 bg-orange-50 text-orange-600 text-xs font-medium rounded-full">급구</span>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">병원 동행이 필요해요 (외래진료)</h1>
+                </div>
+            </div>
+
+            <div class="space-y-2 mb-5">
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span>2024.11.16 (월) 14:00 ~ 16:00</span>
+                </div>
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span>서울 강남구 ○○병원</span>
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">필요한 도움</p>
+                <div class="flex flex-wrap gap-1.5">
+                    <span class="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-xl border border-indigo-100">이동 보조</span>
+                    <span class="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-xl border border-indigo-100">약소름 보조</span>
+                    <span class="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-xl border border-indigo-100">대기 동행</span>
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">상세 내용</p>
+                <p class="text-sm text-gray-700 leading-relaxed">
+                    남편과 외래진료를 함께 가야 합니다. 간호사와 의사에게 소통을 보조해 주실 분이 필요합니다.
+                    진료 후 처방전 픽업까지 도와주세요.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 지원자 리스트 버튼 -->
+    <div class="bg-white rounded-2xl border border-indigo-100 p-5 mb-4 flex items-center justify-between">
+        <div>
+            <p class="text-sm font-semibold text-gray-900">지원자 리스트 보기 · <span class="text-indigo-600">5명 지원</span></p>
+            <p class="text-xs text-gray-400 mt-0.5">매칭률 순으로 정렬되어 있습니다.</p>
+        </div>
+        <a th:href="@{/disabled/board/1/applicants}"
+           class="flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100">
+            리스트 보기
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+    </div>
+
+    <!-- 댓글 -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-5">
+        <p class="text-sm font-semibold text-gray-700 mb-4">댓글 2</p>
+        <div class="space-y-4">
+            <div class="flex gap-3">
+                <div class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 font-bold text-xs flex-shrink-0">박</div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-sm font-semibold text-gray-900">박이민 (활동지원사)</span>
+                        <span class="text-xs text-gray-400">3시간 전</span>
+                    </div>
+                    <p class="text-sm text-gray-600">수어 가능합니다. 진료 동행 경험 많아요!</p>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <div class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 font-bold text-xs flex-shrink-0">이</div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-sm font-semibold text-gray-900">이한주 (활동지원사)</span>
+                        <span class="text-xs text-gray-400">2시간 전</span>
+                    </div>
+                    <p class="text-sm text-gray-600">비슷한 케이스 여러 번 도와드렸습니다.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+</th:block>
+</html>
