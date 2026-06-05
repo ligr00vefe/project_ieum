@@ -23,8 +23,8 @@ public class ServiceCategory {
   private String code;
 
   // 분류명
-  @Column(name = "name_ko", nullable = false, length = 40)
-  private String nameKo;
+  @Column(name = "name", nullable = false, length = 40)
+  private String name;
 
   // 설명
   @Column(length = 255)

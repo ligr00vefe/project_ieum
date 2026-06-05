@@ -1,21 +1,16 @@
 package com.project.ieum.entity.user;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import java.io.Serializable;
 import lombok.*;
 
-@Embeddable
+import java.io.Serializable;
+
+// @IdClass 복합키 — 엔티티의 @Id 연관필드명(user, communicationMethod)과 동일,
+// 타입은 각 연관의 PK 타입(Long). 다른 조인 엔티티(@IdClass)와 매핑 전략 통일.
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode // 💡 복합키 클래스는 동등성 비교를 위해 equals & hashCode 구현이 필수입니다.
+@EqualsAndHashCode
 public class UserCommunicationMethodId implements Serializable {
-
-    @Column(name = "user_id") // ⭕ 명시적 컬럼 매핑으로 꼬임 방지
-    private Long userId;
-
-    @Column(name = "communication_method_id") // ⭕ 명시적 컬럼 매핑으로 꼬임 방지
-    private Long communicationMethodId;
+  private Long user;
+  private Long communicationMethod;
 }
