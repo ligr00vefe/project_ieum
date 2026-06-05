@@ -37,34 +37,34 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void initDisabilityTypes() {
-        disabilityTypeRepository.save(DisabilityType.builder().code("DT001").nameKo("지체장애").sortOrder((short) 1).build());
-        disabilityTypeRepository.save(DisabilityType.builder().code("DT002").nameKo("시각장애").sortOrder((short) 2).build());
-        disabilityTypeRepository.save(DisabilityType.builder().code("DT003").nameKo("청각장애").sortOrder((short) 3).build());
-        disabilityTypeRepository.save(DisabilityType.builder().code("DT004").nameKo("언어장애").sortOrder((short) 4).build());
-        disabilityTypeRepository.save(DisabilityType.builder().code("DT005").nameKo("자폐성장애").sortOrder((short) 5).build());
-        disabilityTypeRepository.save(DisabilityType.builder().code("DT006").nameKo("지적장애").sortOrder((short) 6).build());
-        disabilityTypeRepository.save(DisabilityType.builder().code("DT007").nameKo("뇌병변장애").sortOrder((short) 7).build());
+        disabilityTypeRepository.save(DisabilityType.builder().code("DT001").name("지체장애").sortOrder((short) 1).build());
+        disabilityTypeRepository.save(DisabilityType.builder().code("DT002").name("시각장애").sortOrder((short) 2).build());
+        disabilityTypeRepository.save(DisabilityType.builder().code("DT003").name("청각장애").sortOrder((short) 3).build());
+        disabilityTypeRepository.save(DisabilityType.builder().code("DT004").name("언어장애").sortOrder((short) 4).build());
+        disabilityTypeRepository.save(DisabilityType.builder().code("DT005").name("자폐성장애").sortOrder((short) 5).build());
+        disabilityTypeRepository.save(DisabilityType.builder().code("DT006").name("지적장애").sortOrder((short) 6).build());
+        disabilityTypeRepository.save(DisabilityType.builder().code("DT007").name("뇌병변장애").sortOrder((short) 7).build());
         log.info("장애 유형 초기화 완료");
     }
 
     private void initCommunicationMethods() {
-        communicationMethodRepository.save(CommunicationMethod.builder().nameKo("구어").description("말로 충분히 의사소통을 할 수 있어요").sortOrder((short) 1).build());
-        communicationMethodRepository.save(CommunicationMethod.builder().nameKo("수어").description("수화를 사용하는 활동지원사를 선호해요").sortOrder((short) 2).build());
-        communicationMethodRepository.save(CommunicationMethod.builder().nameKo("글자").description("글로 의사소통을 해요").sortOrder((short) 3).build());
-        communicationMethodRepository.save(CommunicationMethod.builder().nameKo("그림").description("그림이나 AAC를 활용해요").sortOrder((short) 4).build());
-        communicationMethodRepository.save(CommunicationMethod.builder().nameKo("전자기기").description("전자기기(태블릿, 앱 등)를 이용해요").sortOrder((short) 5).build());
+        communicationMethodRepository.save(CommunicationMethod.builder().name("구어").description("말로 충분히 의사소통을 할 수 있어요").sortOrder((short) 1).build());
+        communicationMethodRepository.save(CommunicationMethod.builder().name("수어").description("수화를 사용하는 활동지원사를 선호해요").sortOrder((short) 2).build());
+        communicationMethodRepository.save(CommunicationMethod.builder().name("글자").description("글로 의사소통을 해요").sortOrder((short) 3).build());
+        communicationMethodRepository.save(CommunicationMethod.builder().name("그림").description("그림이나 AAC를 활용해요").sortOrder((short) 4).build());
+        communicationMethodRepository.save(CommunicationMethod.builder().name("전자기기").description("전자기기(태블릿, 앱 등)를 이용해요").sortOrder((short) 5).build());
         log.info("의사소통 방식 초기화 완료");
     }
 
     private void initPersonalityTags() {
-        personalityTagRepository.save(PersonalityTag.builder().nameKo("차분함").build());
-        personalityTagRepository.save(PersonalityTag.builder().nameKo("활발함").build());
-        personalityTagRepository.save(PersonalityTag.builder().nameKo("친절함").build());
-        personalityTagRepository.save(PersonalityTag.builder().nameKo("세심함").build());
-        personalityTagRepository.save(PersonalityTag.builder().nameKo("유머러스함").build());
-        personalityTagRepository.save(PersonalityTag.builder().nameKo("책임감").build());
-        personalityTagRepository.save(PersonalityTag.builder().nameKo("인내심").build());
-        personalityTagRepository.save(PersonalityTag.builder().nameKo("적극성").build());
+        personalityTagRepository.save(PersonalityTag.builder().name("차분함").build());
+        personalityTagRepository.save(PersonalityTag.builder().name("활발함").build());
+        personalityTagRepository.save(PersonalityTag.builder().name("친절함").build());
+        personalityTagRepository.save(PersonalityTag.builder().name("세심함").build());
+        personalityTagRepository.save(PersonalityTag.builder().name("유머러스함").build());
+        personalityTagRepository.save(PersonalityTag.builder().name("책임감").build());
+        personalityTagRepository.save(PersonalityTag.builder().name("인내심").build());
+        personalityTagRepository.save(PersonalityTag.builder().name("적극성").build());
         log.info("성향 태그 초기화 완료");
     }
 
