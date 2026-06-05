@@ -1,5 +1,6 @@
 package com.project.ieum.entity.caregiver;
 
+import com.project.ieum.entity.UserRole;
 import com.project.ieum.entity.profile.Profile;
 import jakarta.persistence.*;
 import lombok.*;
@@ -80,5 +81,10 @@ public class CaregiverProfile extends Profile {
   public void updateCertificationInfo(String certificationType, String experience) {
     this.certificationType = certificationType;
     this.experience = experience;
+  }
+
+  @Override
+  protected UserRole expectedRole() {
+    return UserRole.CAREGIVER;
   }
 }

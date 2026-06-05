@@ -1,6 +1,7 @@
 package com.project.ieum.entity.user;
 
 import com.project.ieum.entity.Region;
+import com.project.ieum.entity.UserRole;
 import com.project.ieum.entity.profile.Profile;
 import jakarta.persistence.*;
 import lombok.*;
@@ -105,5 +106,10 @@ public class UserProfile extends Profile {
   public void updateActivityInfo(String activityRange, String avoidSituations) {
     this.activityRange = activityRange;
     this.avoidSituations = avoidSituations;
+  }
+
+  @Override
+  protected UserRole expectedRole() {
+    return UserRole.USER;
   }
 }
