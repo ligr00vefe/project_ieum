@@ -5,7 +5,7 @@ import lombok.*;
 
 @Entity
 @Table(name = "communication_methods",
-    uniqueConstraints = @UniqueConstraint(name = "uq_cm_name", columnNames = "name_ko"))
+    uniqueConstraints = @UniqueConstraint(name = "uq_cm_name", columnNames = "name"))
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,8 +17,8 @@ public class CommunicationMethod {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name_ko", nullable = false, length = 40)
-    private String nameKo;
+    @Column(name = "name", nullable = false, length = 40)
+    private String name;
 
     @Column(name = "description", length = 100)
     private String description;

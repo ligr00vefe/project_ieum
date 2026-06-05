@@ -1,51 +1,24 @@
 package com.project.ieum.entity.user;
 
-import com.project.ieum.entity.BasicEntity;
-import com.project.ieum.entity.Gender;
 import com.project.ieum.entity.Region;
-import com.project.ieum.entity.User;
+import com.project.ieum.entity.UserRole;
+import com.project.ieum.entity.profile.Profile;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "user_profiles")
-@Builder(toBuilder = true)
+@DiscriminatorValue("USER")
+@SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@ToString
-public class UserProfile extends BasicEntity {
-
-  // 사용자 ID (PK, FK → users.id 공유)
-  @Id
-  @Column(name = "user_id")
-  private Long userId;
-
-  // 사용자 (공유 PK)
-  @MapsId
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
-  @ToString.Exclude
-  private User user;
-
-  // 이름
-  @Column(name = "full_name", nullable = false, length = 80)
-  private String fullName;
-
-  // 생년월일
-  @Column(name = "birth_date")
-  private LocalDate birthDate;
-
-  // 성별
-  @Enumerated(EnumType.STRING)
-  @Column(length = 16)
-  private Gender gender;
+@ToString(callSuper = true)
+public class UserProfile extends Profile {
 
   // 보호자 이름 (선택)
   @Column(name = "guardian_name", nullable = true, length = 80)
@@ -107,7 +80,6 @@ public class UserProfile extends BasicEntity {
 
   public void addCommunicationMethod(com.project.ieum.entity.CommunicationMethod method) {
     communicationMethods.add(UserCommunicationMethod.builder()
-        .id(new UserCommunicationMethodId(userId, method.getId()))
         .user(this)
         .communicationMethod(method)
         .build());
@@ -134,5 +106,10 @@ public class UserProfile extends BasicEntity {
   public void updateActivityInfo(String activityRange, String avoidSituations) {
     this.activityRange = activityRange;
     this.avoidSituations = avoidSituations;
+  }
+
+  @Override
+  protected UserRole expectedRole() {
+    return UserRole.USER;
   }
 }

@@ -3,6 +3,7 @@ package com.project.ieum.entity.conversation;
 import com.project.ieum.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -53,7 +54,8 @@ public class Message {
   @Builder.Default
   private Boolean hasRead = false;
 
-  // 보낸 시각
+  // 보낸 시각 (Hibernate 자동 주입)
+  @CreationTimestamp
   @Column(name = "sent_at", nullable = false, updatable = false)
   private LocalDateTime sentAt;
 
