@@ -19,12 +19,12 @@ import java.util.Set;
 @ToString(callSuper = true)
 public class UserProfile extends Profile {
 
-  // 보호자 이름
-  @Column(name = "guardian_name", nullable = false, length = 80)
+  // 보호자 이름 (선택)
+  @Column(name = "guardian_name", nullable = true, length = 80)
   private String guardianName;
 
-  // 보호자 연락처
-  @Column(name = "guardian_phone", nullable = false, length = 20)
+  // 보호자 연락처 (선택)
+  @Column(name = "guardian_phone", nullable = true, length = 20)
   private String guardianPhone;
 
   // 지역

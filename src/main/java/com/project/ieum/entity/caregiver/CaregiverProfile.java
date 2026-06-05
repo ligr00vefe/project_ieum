@@ -51,6 +51,14 @@ public class CaregiverProfile extends Profile {
   @Column(name = "experience", columnDefinition = "TEXT")
   private String experience;
 
+  // 가능 업무 (쉼표 구분 텍스트: "이동 보조,병원 동행,...")
+  @Column(name = "service_categories", columnDefinition = "TEXT")
+  private String serviceCategories;
+
+  // 가능 시간대 (쉼표 구분 텍스트: "오전 (09-12),주말,...")
+  @Column(name = "available_time_slots", columnDefinition = "TEXT")
+  private String availableTimeSlots;
+
   // 평균 평점 (0.00 ~ 5.00)
   @Column(name = "avg_rating", nullable = false, precision = 3, scale = 2)
   @Builder.Default

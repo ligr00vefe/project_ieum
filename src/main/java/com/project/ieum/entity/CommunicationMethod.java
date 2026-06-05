@@ -20,6 +20,9 @@ public class CommunicationMethod {
     @Column(name = "name_ko", nullable = false, length = 40)
     private String nameKo;
 
+    @Column(name = "description", length = 100)
+    private String description;
+
     @Column(name = "sort_order")
     private Short sortOrder;
 }
