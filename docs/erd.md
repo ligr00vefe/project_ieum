@@ -1,15 +1,15 @@
-# 이음(ieum) 전체 ER 다이어그램 — 현재(예상) 구조
+# 이음(ieum) 전체 ER 다이어그램 — 통합(예상) 구조
 
-> 기준 브랜치: `claude/competent-davinci-2d5c43` (User-Profile JOINED 상속 반영본)
-> 이 문서는 **현재 코드 기준 전체 스키마**를 4요소(키 · 컬럼명(영어) · 속성 · 설명(한글))로 정리한 ERD 레퍼런스입니다.
-> 두 종류의 변경을 마커로 가시화: **① JOINED 상속**(코드 반영) + **② region 개편**(결정·미구현).
+> 통합 기준: `origin/main`(e3fa15a) ⊕ 워크트리 `claude/competent-davinci-2d5c43`(JOINED 상속)
+> 이 문서는 **머지 후 목표 스키마**를 4요소(키 · 컬럼명(영어) · 속성 · 설명(한글))로 정리한 ERD 레퍼런스입니다.
+> 세 종류의 변경을 마커로 가시화: **① JOINED 상속**(우리, 코드 반영) + **② region 개편**(결정·미구현) + **③ origin/main 유입**(머지 시 우리 브랜치 반영).
 > 그 밖의 제안/논의(시간필드 통합 등)는 → `docs/entity-model.md` 참조.
 
 ## 범례 (변경 마커)
 
-두 종류의 변경을 **구분해서** 표시합니다.
+세 종류의 변경을 **구분해서** 표시합니다.
 
-**① 이미 반영됨** — 이번 워크트리 코드에 적용된 User-Profile JOINED 상속 변경:
+**① 이미 반영됨(우리)** — 워크트리 코드에 적용된 User-Profile JOINED 상속 변경:
 
 | 마커 | 의미 |
 |---|---|
@@ -25,10 +25,18 @@
 | `(신규예정)` | 추가될 컬럼 (주소 스냅샷) |
 | `(강등예정)` | 역할 축소 (표시명 캐시) |
 
+**③ origin/main 유입** — origin/main(e3fa15a)이 추가/변경했고 우리 브랜치가 **머지 시 흡수**(현재 우리 코드엔 미반영, 머지 충돌·컴파일 영향 없음 검증 완료):
+
+| 마커 | 의미 |
+|---|---|
+| `(origin신규)` | origin/main이 추가한 테이블/컬럼 |
+| `(origin변경)` | origin/main이 기존 컬럼 속성 변경 |
+
 (마커 없음) = **변경 없음** (기존 구조 그대로)
 
 🔶 **① 영향**: `profiles`(신규) · `user_profiles`(승격+FK변경) · `caregiver_profiles`(동일) · `users`(관계 추가).
 🔻 **② 영향**: `help_requests`(region_id 제거 + 주소 스냅샷 추가) · `caregiver_service_regions`(테이블 제거) · `regions`(역할 강등).
+🟦 **③ 영향**: `user_personality_tags`(신규 테이블) · `caregiver_profiles`(서비스/시간 TEXT 2컬럼) · `user_profiles`(보호자 nullable화) · `Gender`(OTHER 제거).
 
 ---
 
@@ -46,6 +54,8 @@ erDiagram
     disability_types ||--o{ user_disability_types : in
     user_profiles ||--o{ user_communication_methods : has
     communication_methods ||--o{ user_communication_methods : in
+    user_profiles ||--o{ user_personality_tags : "has (origin신규)"
+    personality_tags ||--o{ user_personality_tags : "in (origin신규)"
 
     %% ===== 지원사 속성 =====
     caregiver_profiles ||--o{ caregiver_availability : has
@@ -91,15 +101,15 @@ erDiagram
         varchar profile_type "프로필 구분자 USER/CAREGIVER·상호배타 강제 (신규)"
         varchar full_name "이름 NOT NULL (승격)"
         date birth_date "생년월일 (승격)"
-        varchar gender "성별 M/F/OTHER (승격)"
+        varchar gender "성별 M/F (승격 · origin변경: OTHER 제거)"
         datetime created_at "생성 시각 (승격)"
         datetime updated_at "수정 시각 (승격)"
     }
 
     user_profiles {
         bigint user_id PK,FK "→ profiles.user_id (FK변경)"
-        varchar guardian_name "보호자 이름 NOT NULL"
-        varchar guardian_phone "보호자 연락처 NOT NULL"
+        varchar guardian_name "보호자 이름 (origin변경: NOT NULL→선택)"
+        varchar guardian_phone "보호자 연락처 (origin변경: NOT NULL→선택)"
         bigint region_id FK "지역 → regions.id"
         varchar address_detail "상세주소"
         varchar mobility_aid "이동 보조 기구"
@@ -118,6 +128,8 @@ erDiagram
         boolean has_certification "자격증 보유 여부 NOT NULL"
         varchar certification_type "자격증 종류"
         text experience "경력"
+        text service_categories "가능 업무 (쉼표구분 TEXT) (origin신규)"
+        text available_time_slots "가능 시간대 (쉼표구분 TEXT) (origin신규)"
         decimal avg_rating "평균 평점 0.00~5.00 NOT NULL"
         int total_reviews "완료한 도움 요청 수 NOT NULL"
     }
@@ -143,6 +155,11 @@ erDiagram
     user_communication_methods {
         bigint user_id PK,FK "이용자 프로필 → user_profiles"
         bigint communication_method_id PK,FK "의사소통 방식 → communication_methods"
+    }
+
+    user_personality_tags {
+        bigint user_id PK,FK "이용자 프로필 → user_profiles (origin신규)"
+        bigint tag_id PK,FK "성향 태그 → personality_tags (origin신규)"
     }
 
     personality_tags {
@@ -270,7 +287,7 @@ erDiagram
 | 🔁 FK 변경 | `user_profiles.user_id`, `caregiver_profiles.user_id` | 참조 `users.id` → `profiles.user_id` |
 | ❌ 제거 | 자식의 `full_name`/`birth_date`/`gender`/`created_at`/`updated_at` | `profiles`로 승격되어 자식 테이블에서 삭제 |
 | ➕ 관계 | `users` 1:0..1 `profiles` | `User.profile` 역방향 매핑 추가 (ADMIN은 null) |
-| ✅ 불변 | 의존 테이블 16종 | (① 기준) 자식 `user_id` 유지 → 기존 FK 그대로 유효 |
+| ✅ 불변 | 의존 테이블 16종 (③ 머지 후 17종) | (① 기준) 자식 `user_id` 유지 → 기존 FK 그대로 유효 |
 
 **작동 원리**: `profiles.user_id`가 PK → 한 User당 한 행 → `profile_type`이 USER/CAREGIVER 중 하나로 확정 → 두 자식 테이블에 동시 존재 불가능(상호 배타).
 
@@ -292,13 +309,29 @@ erDiagram
 
 ---
 
+## 변경 요약 ③ — origin/main 동기화 (e3fa15a, 머지 대상)
+
+> origin/main이 `5e41e2e → e3fa15a`(13커밋: 인증·회원가입, 게시판/채팅/매칭 뷰)로 전진하며 추가/변경한 항목. 우리 워크트리와 **텍스트 충돌 0 · 머지 후 컴파일 통과**(검증 완료) — JOINED 상속 변경과 자동 병합됨. 우리 브랜치 코드엔 머지 전까지 미반영이므로 `(origin신규)`/`(origin변경)`으로 구분.
+
+| 구분 | 대상 | 내용 |
+|---|---|---|
+| 🆕 신규 테이블 | `user_personality_tags` | 이용자 성향 태그 M:N (`user_profiles`↔`personality_tags`). 기존 caregiver 측만 있던 성향 태그가 user 측에도 정식 엔티티화 |
+| 🆕 신규 컬럼 | `caregiver_profiles.service_categories`, `.available_time_slots` | 가능 업무/시간대를 **denormalized TEXT**(쉼표구분)로 보유 |
+| ✏️ 속성 변경 | `user_profiles.guardian_name`, `.guardian_phone` | `NOT NULL` → **nullable**(보호자 정보 선택화) |
+| ✏️ enum 축소 | `Gender` | `M, F, OTHER` → **`M, F`** (OTHER 제거) |
+| ↩️ 미사용화 | `caregiver_availability`(엔티티 존치) | origin이 회원가입에서 `available_time_slots` TEXT로 대체 → 정규화 테이블 **고아화**(아래 §정합성 참고) |
+
+> ⚠️ **모델 정합성 신호**: 팀이 caregiver "가능 시간대"를 정규화 테이블(`caregiver_availability`) 대신 **TEXT 컬럼**으로 denormalize. 이는 우리 region 개편(② `caregiver_service_regions` 제거)과 **같은 단순화 방향**이지만, 두 정규화 테이블(`caregiver_availability`·`caregiver_service_regions`)이 코드상 고아/제거 대상으로 갈리는 중 → 구현 전 팀 합의 필요.
+
+---
+
 ## 부록 A — 열거형(Enum)
 
 | Enum | 값 | 사용 컬럼 |
 |---|---|---|
 | `UserRole` | USER, CAREGIVER, ADMIN | `users.role` |
 | `UserStatus` | ACTIVE, PAUSED, BANNED, DELETED | `users.status` |
-| `Gender` | M, F, OTHER | `profiles.gender` |
+| `Gender` | M, F  *(origin: OTHER 제거)* | `profiles.gender` |
 | `CaregiverAvailabilityStatus` | AVAILABLE, BUSY, OFFLINE | `caregiver_profiles.availability_status` |
 | `HelpRequestStatus` | OPEN, MATCHED, IN_PROGRESS, COMPLETED, CANCELLED, CLOSED | `help_requests.status` |
 | `ApplicationStatus` | PENDING, ACCEPTED, REJECTED, WITHDRAWN, COMPLETED, CANCELLED | `help_request_applications.status` |
@@ -310,9 +343,9 @@ erDiagram
 - **`BasicEntity`** (`@MappedSuperclass`): `created_at`, `updated_at` 감사 컬럼 제공. 상속: `User`, `Profile`(→ `UserProfile`/`CaregiverProfile`), `HelpRequest`, `HelpRequestApplication`, `Review`.
   - → 이 워크트리 변경으로 감사 컬럼이 `user_profiles`/`caregiver_profiles`에서 `profiles`로 이동.
 - **`Conversation`/`Message`**: `BasicEntity` 미상속 — 각각 `created_at`/`sent_at`만 수동 보유(`updated_at` 없음).
-- **복합 PK 매핑**: `caregiver_availability`/`caregiver_service_regions`/`caregiver_personality_tags`/`user_disability_types`/`help_request_personality_tags`는 `@IdClass`, `user_communication_methods`는 `@EmbeddedId` 사용.
+- **복합 PK 매핑**: `caregiver_availability`/`caregiver_service_regions`/`caregiver_personality_tags`/`user_disability_types`/`user_personality_tags`(③ origin)/`help_request_personality_tags`는 `@IdClass`, `user_communication_methods`는 `@EmbeddedId` 사용.
 
 ## 부록 C — 주의/후속
 
-- ⚠️ **`Users.java` 레거시**: `User.java`와 별개로 존재하는 미사용 중복 엔티티(컴파일 경고 발생, 참조 0). 본 ERD에서 제외. 정리(삭제) 대상 — `docs/entity-model.md` §4 #2.
+- ⚠️ **`Users.java` 레거시**: `User.java`와 별개로 존재하는 미사용 중복 엔티티. 본 ERD에서 제외. origin/main이 삭제 대신 `@ToString` 경고만 수정(`c3e8f49`)하여 **존치** — 중복 엔티티 우려는 남으나 우선순위 낮음(`docs/entity-model.md` §4 #2).
 - 🔜 **region 개편**(결정·미구현, 이 워크트리 범위 밖)은 위 다이어그램에 `(제거예정)`/`(신규예정)`/`(강등예정)` 마커 + "변경 요약 ②" 절로 가시화했습니다. 코드 반영은 별도 작업. 상세 근거 → `docs/entity-model.md` §4.1 / §6.
