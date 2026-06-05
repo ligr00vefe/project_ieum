@@ -6,6 +6,7 @@ import lombok.*;
 
 @Entity
 @Table(name = "user_communication_methods")
+@IdClass(UserCommunicationMethodId.class)
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,18 +14,17 @@ import lombok.*;
 @ToString
 public class UserCommunicationMethod {
 
-    @EmbeddedId
-    private UserCommunicationMethodId id;
-
-    // 복합키(UserCommunicationMethodId) 내의 user_id 컬럼과 매핑되는 읽기전용 연관관계
+    // 이용자 프로필 (PK, FK)
+    @Id
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JoinColumn(name = "user_id")
     @ToString.Exclude
     private UserProfile user;
 
-    // 복합키(UserCommunicationMethodId) 내의 communication_method_id 컬럼과 매핑되는 읽기전용 연관관계
+    // 의사소통 방식 (PK, FK)
+    @Id
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "communication_method_id", insertable = false, updatable = false)
+    @JoinColumn(name = "communication_method_id")
     @ToString.Exclude
     private CommunicationMethod communicationMethod;
 }
