@@ -3,6 +3,7 @@ package com.project.ieum.entity.profile;
 import com.project.ieum.entity.BasicEntity;
 import com.project.ieum.entity.Gender;
 import com.project.ieum.entity.User;
+import com.project.ieum.entity.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -49,4 +50,18 @@ public abstract class Profile extends BasicEntity {
   @Enumerated(EnumType.STRING)
   @Column(length = 16)
   private Gender gender;
+
+  // 하위 타입이 요구하는 User.role (USER/CAREGIVER) — 서브클래스가 구현
+  protected abstract UserRole expectedRole();
+
+  // User.role ↔ 프로필 타입(discriminator) 정합성 가드.
+  // 둘이 어긋난 채 persist/update되는 것을 차단(이중 진실원 방지).
+  @PrePersist
+  @PreUpdate
+  private void verifyRoleConsistency() {
+    if (user != null && user.getRole() != null && user.getRole() != expectedRole()) {
+      throw new IllegalStateException(
+          "User.role(" + user.getRole() + ")와 프로필 타입(" + expectedRole() + ")이 불일치합니다");
+    }
+  }
 }
