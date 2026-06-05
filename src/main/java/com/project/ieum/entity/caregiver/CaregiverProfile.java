@@ -1,53 +1,24 @@
 package com.project.ieum.entity.caregiver;
 
-import com.project.ieum.entity.BasicEntity;
-import com.project.ieum.entity.Gender;
-import com.project.ieum.entity.User;
+import com.project.ieum.entity.UserRole;
+import com.project.ieum.entity.profile.Profile;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Check;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "caregiver_profiles")
+@DiscriminatorValue("CAREGIVER")
 @Check(name = "ck_caregiver_avg_rating", constraints = "avg_rating BETWEEN 0 AND 5")
-@Builder(toBuilder = true)
+@SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Setter
-@ToString
-public class CaregiverProfile extends BasicEntity {
-
-  // 사용자 ID (PK, FK → users.id 공유)
-  @Id
-  @Column(name = "user_id")
-  private Long userId;
-
-  // 사용자 (공유 PK)
-  @MapsId
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  @ToString.Exclude
-  private User user;
-
-  // 이름
-  @Column(name = "full_name", nullable = false, length = 80)
-  private String fullName;
-
-  // 생년월일
-  @Column(name = "birth_date")
-  private LocalDate birthDate;
-
-  // 성별
-  @Enumerated(EnumType.STRING)
-  @Column(length = 16)
-  private Gender gender;
+@ToString(callSuper = true)
+public class CaregiverProfile extends Profile {
 
   // 프로필 사진 URL
   @Column(name = "profile_image_url", length = 500)
@@ -110,5 +81,10 @@ public class CaregiverProfile extends BasicEntity {
   public void updateCertificationInfo(String certificationType, String experience) {
     this.certificationType = certificationType;
     this.experience = experience;
+  }
+
+  @Override
+  protected UserRole expectedRole() {
+    return UserRole.CAREGIVER;
   }
 }
