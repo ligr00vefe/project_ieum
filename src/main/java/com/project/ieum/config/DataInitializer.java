@@ -1,13 +1,12 @@
 package com.project.ieum.config;
 
-import com.project.ieum.entity.CommunicationMethod;
-import com.project.ieum.entity.PersonalityTag;
-import com.project.ieum.entity.Region;
+import com.project.ieum.entity.*;
 import com.project.ieum.entity.user.DisabilityType;
 import com.project.ieum.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -19,6 +18,8 @@ public class DataInitializer implements CommandLineRunner {
     private final CommunicationMethodRepository communicationMethodRepository;
     private final PersonalityTagRepository personalityTagRepository;
     private final RegionRepository regionRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) {
@@ -34,6 +35,7 @@ public class DataInitializer implements CommandLineRunner {
         if (regionRepository.count() == 0) {
             initRegions();
         }
+        initAdminAccount();
     }
 
     private void initDisabilityTypes() {
@@ -80,5 +82,21 @@ public class DataInitializer implements CommandLineRunner {
         regionRepository.save(Region.builder().code("3100000000").sido("대구광역시").sigungu("수성구").dong("범어동").build());
         regionRepository.save(Region.builder().code("4100000000").sido("인천광역시").sigungu("남동구").dong("구월동").build());
         log.info("지역 데이터 초기화 완료");
+    }
+
+    private void initAdminAccount() {
+        String adminEmail = "admin@test.com";
+        if (!userRepository.existsByEmail(adminEmail)) {
+            userRepository.save(User.builder()
+                    .email(adminEmail)
+                    .passwordHash(passwordEncoder.encode("1234"))
+                    .phone(null)
+                    .role(UserRole.ADMIN)
+                    .status(UserStatus.ACTIVE)
+                    .build());
+            log.info("관리자 계정 생성 완료 - email={}", adminEmail);
+        } else {
+            log.info("관리자 계정이 이미 존재합니다 - email={}", adminEmail);
+        }
     }
 }
