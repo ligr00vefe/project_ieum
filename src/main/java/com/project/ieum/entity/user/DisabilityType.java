@@ -23,8 +23,8 @@ public class DisabilityType {
   private String code;
 
   // 유형명
-  @Column(name = "name_ko", nullable = false, length = 80)
-  private String nameKo;
+  @Column(name = "name", nullable = false, length = 80)
+  private String name;
 
   // 정렬 순서
   @Column(name = "sort_order", nullable = false)
