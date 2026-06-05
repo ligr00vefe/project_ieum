@@ -5,6 +5,7 @@ import com.project.ieum.entity.request.HelpRequestApplication;
 import com.project.ieum.entity.user.UserProfile;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -54,7 +55,8 @@ public class Conversation {
   @Column(name = "last_message_at")
   private LocalDateTime lastMessageAt;
 
-  // 생성 시각
+  // 생성 시각 (Hibernate 자동 주입)
+  @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
