@@ -84,12 +84,8 @@ public class UserService {
         if (comm != null && comm.getCommunicationMethodIds() != null && !comm.getCommunicationMethodIds().isEmpty()) {
             List<CommunicationMethod> methods = communicationMethodRepository.findAllById(comm.getCommunicationMethodIds());
             for (CommunicationMethod method : methods) {
-                UserCommunicationMethodId id = UserCommunicationMethodId.builder()
-                        .userId(profile.getUserId())
-                        .communicationMethodId(method.getId())
-                        .build();
                 userCommunicationMethodRepository.save(UserCommunicationMethod.builder()
-                        .id(id).user(profile).communicationMethod(method).build());
+                        .user(profile).communicationMethod(method).build());
             }
         }
 

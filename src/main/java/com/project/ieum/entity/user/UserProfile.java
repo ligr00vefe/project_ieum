@@ -79,7 +79,6 @@ public class UserProfile extends Profile {
 
   public void addCommunicationMethod(com.project.ieum.entity.CommunicationMethod method) {
     communicationMethods.add(UserCommunicationMethod.builder()
-        .id(new UserCommunicationMethodId(getUserId(), method.getId()))
         .user(this)
         .communicationMethod(method)
         .build());
