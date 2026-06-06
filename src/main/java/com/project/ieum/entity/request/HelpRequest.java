@@ -56,7 +56,10 @@ public class HelpRequest extends BasicEntity {
   private LocalDateTime desiredEndDatetime;
 
   // ── 위치 스냅샷 (write-once 비정규화 · region FK 대체, #10/D1=i·D2=b) ──
-  // TODO(region 개편): 주소검색기(Daum/Kakao 우편번호) + 지오코딩으로 생성 시점에 채움. 거리는 정렬용(매칭 게이트 아님).
+  // TODO(region 개편): 생성 시점에 채움 — 역할 분담:
+  //   · 주소 구성요소(road_address·sido·sigungu·bname·zonecode·bcode) = 주소검색 위젯(Daum/Kakao 우편번호 서비스)
+  //   · 좌표(latitude·longitude) = TMap 지오코딩(GeocodingService)  ← TMap은 좌표만, 우편/법정동코드는 미제공
+  //   거리는 발견/정렬용(매칭 게이트 아님).
 
   // 도로명주소
   @Column(name = "road_address", length = 255)
