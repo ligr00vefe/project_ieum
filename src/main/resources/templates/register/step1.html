@@ -53,7 +53,8 @@
             <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                 <!-- Progress bar -->
                 <div class="h-1 bg-gray-100">
-                    <div class="h-1 bg-indigo-600 rounded-full transition-all duration-500" style="width: 25%"></div>
+                    <div th:classappend="${userType == 'caregiver'} ? 'bg-teal-500' : 'bg-indigo-600'"
+                         class="h-1 rounded-full transition-all duration-500" style="width: 25%"></div>
                 </div>
 
                 <div class="p-7 sm:p-8">
@@ -230,7 +231,8 @@
                         <!-- Submit -->
                         <button type="button"
                                 onclick="submitForm()"
-                                class="w-full py-3.5 bg-indigo-600 text-white font-semibold text-sm rounded-xl hover:bg-indigo-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all shadow-sm shadow-indigo-100 mt-2 flex items-center justify-center gap-2">
+                                th:classappend="${userType == 'caregiver'} ? 'bg-teal-500 hover:bg-teal-600 focus:ring-teal-500 shadow-teal-100' : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 shadow-indigo-100'"
+                                class="w-full py-3.5 text-white font-semibold text-sm rounded-xl active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all shadow-sm mt-2 flex items-center justify-center gap-2">
                             다음 단계
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
