@@ -21,19 +21,24 @@
                 <!-- Desktop Navigation -->
                 <nav class="hidden md:flex items-center gap-1" aria-label="주요 메뉴">
                     <a th:href="@{/board}"
-                       th:classappend="${currentUri.startsWith('/board')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                       th:classappend="${currentUri.startsWith('/board') or currentUri.startsWith('/disabled/board') or currentUri.startsWith('/caregiver/board')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
                        class="px-3.5 py-2 text-sm font-medium rounded-lg transition-all">
                         매칭게시판
                     </a>
-                    <a th:href="@{/community}"
-                       th:classappend="${currentUri.startsWith('/community')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                    <a th:href="@{/how-to-use}"
+                       th:classappend="${currentUri.startsWith('/how-to-use')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
                        class="px-3.5 py-2 text-sm font-medium rounded-lg transition-all">
-                        커뮤니티
+                        이용방법
                     </a>
-                    <a th:href="@{/schedule}"
-                       th:classappend="${currentUri.startsWith('/schedule')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                    <a th:href="@{/safe-meeting}"
+                       th:classappend="${currentUri.startsWith('/safe-meeting')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
                        class="px-3.5 py-2 text-sm font-medium rounded-lg transition-all">
-                        일정관리
+                        첫만남 안심서비스
+                    </a>
+                    <a th:href="@{/contact}"
+                       th:classappend="${currentUri.startsWith('/contact')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                       class="px-3.5 py-2 text-sm font-medium rounded-lg transition-all">
+                        문의
                     </a>
                 </nav>
 
@@ -51,8 +56,25 @@
                         </a>
                     </th:block>
 
-                    <!-- 로그인 상태 -->
-                    <th:block th:if="${isAuthenticated}">
+                    <!-- 로그인 상태 - 관리자 -->
+                    <th:block th:if="${isAuthenticated and isAdmin}">
+                        <a th:href="@{/admin}"
+                           class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gray-800 rounded-xl hover:bg-gray-900 transition-all">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            관리자
+                        </a>
+                        <form th:action="@{/logout}" method="post" class="inline">
+                            <button type="submit"
+                                    class="px-4 py-2 text-sm font-semibold text-red-600 border border-red-100 rounded-xl hover:bg-red-50 hover:border-red-200 transition-all">
+                                로그아웃
+                            </button>
+                        </form>
+                    </th:block>
+                    <!-- 로그인 상태 - 일반 사용자 -->
+                    <th:block th:if="${isAuthenticated and !isAdmin}">
                         <a th:href="@{/mypage}"
                            class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -93,9 +115,10 @@
              role="dialog"
              aria-label="모바일 메뉴">
             <div class="max-w-7xl mx-auto px-4 py-4 space-y-1">
-                <a th:href="@{/board}"     class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">매칭게시판</a>
-                <a th:href="@{/community}" class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">커뮤니티</a>
-                <a th:href="@{/schedule}"  class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">일정관리</a>
+                <a th:href="@{/board}"         class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">매칭게시판</a>
+                <a th:href="@{/how-to-use}"    class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">이용방법</a>
+                <a th:href="@{/safe-meeting}"  class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">첫만남 안심서비스</a>
+                <a th:href="@{/contact}"       class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">문의</a>
                 <div class="pt-3 mt-3 border-t border-gray-100 space-y-2">
                     <!-- 비로그인 -->
                     <th:block th:if="${!isAuthenticated}">
@@ -108,8 +131,21 @@
                             회원가입
                         </a>
                     </th:block>
-                    <!-- 로그인 -->
-                    <th:block th:if="${isAuthenticated}">
+                    <!-- 로그인 - 관리자 -->
+                    <th:block th:if="${isAuthenticated and isAdmin}">
+                        <a th:href="@{/admin}"
+                           class="flex items-center justify-center w-full px-4 py-3 text-sm font-semibold text-white bg-gray-800 rounded-xl hover:bg-gray-900 transition-all">
+                            관리자
+                        </a>
+                        <form th:action="@{/logout}" method="post">
+                            <button type="submit"
+                                    class="w-full px-4 py-3 text-sm font-semibold text-red-600 border border-red-100 rounded-xl hover:bg-red-50 transition-all">
+                                로그아웃
+                            </button>
+                        </form>
+                    </th:block>
+                    <!-- 로그인 - 일반 사용자 -->
+                    <th:block th:if="${isAuthenticated and !isAdmin}">
                         <a th:href="@{/mypage}"
                            class="flex items-center justify-center w-full px-4 py-3 text-sm font-semibold text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
                             마이페이지
