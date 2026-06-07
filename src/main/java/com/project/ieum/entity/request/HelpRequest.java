@@ -61,20 +61,20 @@ public class HelpRequest extends BasicEntity {
   //   · 좌표(latitude·longitude) = TMap 지오코딩(GeocodingService)  ← TMap은 좌표만, 우편/법정동코드는 미제공
   //   거리는 발견/정렬용(매칭 게이트 아님).
 
-  // 도로명주소
-  @Column(name = "road_address", length = 255)
+  // 도로명주소 (위치 식별 필수 — 주소검색 위젯이 채움)
+  @Column(name = "road_address", nullable = false, length = 255)
   private String roadAddress;
 
-  // 상세주소 (건물명+상세)
+  // 상세주소 (건물명+상세 · 사용자 입력 선택)
   @Column(name = "address_detail", length = 255)
   private String addressDetail;
 
-  // 시/도 (표시·그룹)
-  @Column(name = "sido", length = 20)
+  // 시/도 (표시·그룹 · 필수)
+  @Column(name = "sido", nullable = false, length = 20)
   private String sido;
 
-  // 시/군/구 (표시·그룹)
-  @Column(name = "sigungu", length = 40)
+  // 시/군/구 (표시·그룹 · 필수)
+  @Column(name = "sigungu", nullable = false, length = 40)
   private String sigungu;
 
   // 법정동

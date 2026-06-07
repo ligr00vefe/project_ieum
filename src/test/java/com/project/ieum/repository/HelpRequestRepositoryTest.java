@@ -17,6 +17,7 @@ import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -141,12 +142,19 @@ class HelpRequestRepositoryTest {
 
     private HelpRequest persistRequest(UserProfile who, LocalDateTime start, LocalDateTime end,
                                        HelpRequestStatus status) {
+        // 위치 스냅샷: road_address/sido/sigungu는 NOT NULL. 좌표(BigDecimal)도 채워
+        // #10 스냅샷 컬럼의 매핑·persist 라운드트립을 함께 가드한다.
         return em.persist(HelpRequest.builder()
                 .requester(who)
                 .serviceCategory(category)
                 .title("도움 요청")
                 .desiredStartDatetime(start)
                 .desiredEndDatetime(end)
+                .roadAddress("서울특별시 강남구 테헤란로 152")
+                .sido("서울특별시")
+                .sigungu("강남구")
+                .latitude(new BigDecimal("37.500123"))
+                .longitude(new BigDecimal("127.036456"))
                 .status(status)
                 .build());
     }
