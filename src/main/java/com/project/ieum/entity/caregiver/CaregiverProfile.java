@@ -55,9 +55,8 @@ public class CaregiverProfile extends Profile {
   @Column(name = "service_categories", columnDefinition = "TEXT")
   private String serviceCategories;
 
-  // 가능 시간대 (쉼표 구분 텍스트: "오전 (09-12),주말,...")
-  @Column(name = "available_time_slots", columnDefinition = "TEXT")
-  private String availableTimeSlots;
+  // 가능 시간대: available_time_slots(쉼표 문자열) 컬럼은 정규화(#15)로 제거.
+  // 요일·시작·종료는 caregiver_availability 테이블(CaregiverAvailability)로 일원화한다.
 
   // 평균 평점 (0.00 ~ 5.00)
   @Column(name = "avg_rating", nullable = false, precision = 3, scale = 2)
@@ -88,10 +87,11 @@ public class CaregiverProfile extends Profile {
     this.certificationType = hasCertification != null && hasCertification ? certificationType : null;
   }
 
-  public void updateActivity(String experience, String serviceCategories, String availableTimeSlots) {
+  // 가능 시간대(availableTimeSlots)는 caregiver_availability로 분리되어 더 이상 프로필 컬럼이 아니다.
+  // 가용시간 갱신은 CaregiverAvailabilityRepository 경로로 처리한다.
+  public void updateActivity(String experience, String serviceCategories) {
     this.experience = experience;
     this.serviceCategories = serviceCategories;
-    this.availableTimeSlots = availableTimeSlots;
   }
 
   public void updateIntro(String introShort, String introLong) {
