@@ -58,6 +58,10 @@ public class UserProfile extends Profile {
   @Column(name = "intro_text", columnDefinition = "TEXT")
   private String introText;
 
+  // 프로필 사진 URL
+  @Column(name = "profile_image_url", length = 500)
+  private String profileImageUrl;
+
   // 보유 장애 유형 (다대다)
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
   @ToString.Exclude
@@ -106,6 +110,10 @@ public class UserProfile extends Profile {
   public void updateActivityInfo(String activityRange, String avoidSituations) {
     this.activityRange = activityRange;
     this.avoidSituations = avoidSituations;
+  }
+
+  public void updateProfileImage(String profileImageUrl) {
+    this.profileImageUrl = profileImageUrl;
   }
 
   @Override
