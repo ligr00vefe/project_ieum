@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/layout :: layout(~{::content})}">
 <th:block th:fragment="content">
-<section class="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     <!-- 장애인: 내 요청 게시판 -->
     <th:block th:if="${isUser}">
@@ -58,7 +58,7 @@
                 </div>
                 <div class="flex items-center gap-1.5 mt-3 pt-3 border-t border-gray-50">
                     <span class="px-2 py-0.5 bg-gray-50 text-gray-500 text-xs rounded-md">이동 보조</span>
-                    <span class="px-2 py-0.5 bg-gray-50 text-gray-500 text-xs rounded-md">약소름 보조</span>
+                    <span class="px-2 py-0.5 bg-gray-50 text-gray-500 text-xs rounded-md">약복용 보조</span>
                     <span class="px-2 py-0.5 bg-gray-50 text-gray-500 text-xs rounded-md">대기 동행</span>
                 </div>
             </a>
@@ -177,7 +177,7 @@
                         </div>
                         <div class="flex items-center gap-1.5 mt-3">
                             <span class="px-2 py-0.5 bg-gray-50 text-gray-500 text-xs rounded-md">이동 보조</span>
-                            <span class="px-2 py-0.5 bg-gray-50 text-gray-500 text-xs rounded-md">약소름 보조</span>
+                            <span class="px-2 py-0.5 bg-gray-50 text-gray-500 text-xs rounded-md">약복용 보조</span>
                             <span class="px-2 py-0.5 bg-gray-50 text-gray-500 text-xs rounded-md">대기 동행</span>
                         </div>
                     </div>
