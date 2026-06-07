@@ -31,7 +31,7 @@ public class SecurityConfig {
         http
             .userDetailsService(userDetailsService)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/register/**").permitAll()
+                .requestMatchers("/", "/login", "/register/**", "/how-to-use", "/safe-meeting", "/contact").permitAll()
                 .requestMatchers("/disabled/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/caregiver/**").hasAnyRole("CAREGIVER", "ADMIN")
                 .requestMatchers("/chat/**", "/matching/**", "/schedule/**", "/mypage/**").authenticated()
