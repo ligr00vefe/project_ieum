@@ -3,7 +3,6 @@ package com.project.ieum.config;
 import com.project.ieum.entity.*;
 import com.project.ieum.entity.caregiver.CaregiverPersonalityTag;
 import com.project.ieum.entity.caregiver.CaregiverProfile;
-import com.project.ieum.entity.caregiver.CaregiverServiceRegion;
 import com.project.ieum.entity.user.*;
 import com.project.ieum.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,6 @@ public class DataInitializer implements CommandLineRunner {
     private final UserCommunicationMethodRepository userCommunicationMethodRepository;
     private final UserPersonalityTagRepository userPersonalityTagRepository;
     private final CaregiverPersonalityTagRepository caregiverPersonalityTagRepository;
-    private final CaregiverServiceRegionRepository caregiverServiceRegionRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -186,16 +184,11 @@ public class DataInitializer implements CommandLineRunner {
                 .certificationType("사회복지사 1급")
                 .experience("1-3년")
                 .serviceCategories("이동 보조,병원 동행,야간 보호")
-                .availableTimeSlots("오전 (09-12),오후 (12-18),야간")
                 .build());
+        // 가용시간 시드: available_time_slots(문자열)·CaregiverServiceRegion 제거(#15/#11)로 생략.
+        // caregiver_availability 시드가 필요하면 구조화 행으로 별도 추가한다.
 
-        // 3. 활동 가능 지역: 부산광역시 남구 대연동
-        regionRepository.findAllByOrderBySidoAscSigunguAscDongAsc().stream()
-                .filter(r -> r.getSido().equals("부산광역시") && r.getSigungu().equals("남구"))
-                .forEach(r -> caregiverServiceRegionRepository.save(
-                        CaregiverServiceRegion.builder().caregiver(profile).region(r).build()));
-
-        // 4. 성향: 차분함, 친절함, 세심함, 인내심, 책임감, 적극성
+        // 3. 성향: 차분함, 친절함, 세심함, 인내심, 책임감, 적극성
         List<String> caregiverTagNames = List.of("차분함", "친절함", "세심함", "인내심", "책임감", "적극성");
         personalityTagRepository.findAllByOrderByIdAsc().stream()
                 .filter(t -> caregiverTagNames.contains(t.getName()))
