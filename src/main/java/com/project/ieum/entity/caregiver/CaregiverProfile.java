@@ -83,6 +83,26 @@ public class CaregiverProfile extends Profile {
     this.experience = experience;
   }
 
+  public void updateCertification(Boolean hasCertification, String certificationType) {
+    this.hasCertification = hasCertification != null ? hasCertification : false;
+    this.certificationType = hasCertification != null && hasCertification ? certificationType : null;
+  }
+
+  public void updateActivity(String experience, String serviceCategories, String availableTimeSlots) {
+    this.experience = experience;
+    this.serviceCategories = serviceCategories;
+    this.availableTimeSlots = availableTimeSlots;
+  }
+
+  public void updateIntro(String introShort, String introLong) {
+    this.introShort = introShort;
+    this.introLong = introLong;
+  }
+
+  public void updateProfileImage(String profileImageUrl) {
+    this.profileImageUrl = profileImageUrl;
+  }
+
   @Override
   protected UserRole expectedRole() {
     return UserRole.CAREGIVER;

@@ -54,6 +54,12 @@ public abstract class Profile extends BasicEntity {
   // 하위 타입이 요구하는 User.role (USER/CAREGIVER) — 서브클래스가 구현
   protected abstract UserRole expectedRole();
 
+  public void updateBasicInfo(String fullName, LocalDate birthDate, Gender gender) {
+    this.fullName = fullName;
+    this.birthDate = birthDate;
+    this.gender = gender;
+  }
+
   // User.role ↔ 프로필 타입(discriminator) 정합성 가드.
   // 둘이 어긋난 채 persist/update되는 것을 차단(이중 진실원 방지).
   @PrePersist
