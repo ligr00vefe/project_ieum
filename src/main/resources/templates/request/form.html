@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head(${title})}"></head>
+<body class="min-h-screen bg-[#f6f7ff] text-slate-900">
+<div th:replace="~{layout/header :: header}"></div>
+<div th:replace="~{layout/nav :: nav}"></div>
+<main class="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
+    <section class="rounded-lg border border-indigo-100 bg-white p-6 shadow-sm">
+        <p class="text-sm font-semibold text-indigo-700">도움 요청</p>
+        <h1 class="mt-2 text-2xl font-bold" th:text="${title}">도움 요청 작성</h1>
+        <p class="mt-2 text-sm text-slate-600">필요한 도움, 시간, 장소, 피해야 할 상황을 구체적으로 적어주세요.</p>
+
+        <form th:action="${requestId == null} ? @{/requests} : @{/my/requests/{id}/edit(id=${requestId})}" method="post" th:object="${form}" class="mt-6 space-y-5">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+            <div>
+                <label for="title" class="mb-1 block text-sm font-semibold">제목</label>
+                <input id="title" th:field="*{title}" type="text" required class="w-full rounded-md border border-slate-300 px-3 py-3 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                <p th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="mt-1 text-sm text-red-700"></p>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="serviceCategoryId" class="mb-1 block text-sm font-semibold">서비스 종류</label>
+                    <select id="serviceCategoryId" th:field="*{serviceCategoryId}" required class="w-full rounded-md border border-slate-300 px-3 py-3 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                        <option value="">선택해주세요</option>
+                        <option th:each="category : ${serviceCategories}" th:value="${category.id}" th:text="${category.nameKo}">외출 보조</option>
+                    </select>
+                    <p th:if="${#fields.hasErrors('serviceCategoryId')}" th:errors="*{serviceCategoryId}" class="mt-1 text-sm text-red-700"></p>
+                </div>
+                <div>
+                    <label for="regionId" class="mb-1 block text-sm font-semibold">지역</label>
+                    <select id="regionId" th:field="*{regionId}" required class="w-full rounded-md border border-slate-300 px-3 py-3 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                        <option value="">선택해주세요</option>
+                        <option th:each="region : ${regions}" th:value="${region.id}" th:text="${region.sido + ' ' + region.sigungu + ' ' + region.dong}">서울 강남구</option>
+                    </select>
+                    <p th:if="${#fields.hasErrors('regionId')}" th:errors="*{regionId}" class="mt-1 text-sm text-red-700"></p>
+                </div>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-3">
+                <div>
+                    <label for="desiredDate" class="mb-1 block text-sm font-semibold">희망 날짜</label>
+                    <input id="desiredDate" th:field="*{desiredDate}" type="date" required class="w-full rounded-md border border-slate-300 px-3 py-3 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                </div>
+                <div>
+                    <label for="desiredStartTime" class="mb-1 block text-sm font-semibold">시작 시간</label>
+                    <input id="desiredStartTime" th:field="*{desiredStartTime}" type="time" class="w-full rounded-md border border-slate-300 px-3 py-3 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                </div>
+                <div>
+                    <label for="desiredEndTime" class="mb-1 block text-sm font-semibold">종료 시간</label>
+                    <input id="desiredEndTime" th:field="*{desiredEndTime}" type="time" class="w-full rounded-md border border-slate-300 px-3 py-3 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                </div>
+            </div>
+
+            <div>
+                <label for="addressDetail" class="mb-1 block text-sm font-semibold">상세 장소</label>
+                <input id="addressDetail" th:field="*{addressDetail}" type="text" class="w-full rounded-md border border-slate-300 px-3 py-3 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600">
+            </div>
+
+            <fieldset>
+                <legend class="mb-2 text-sm font-semibold">선호하는 활동지원사 성향</legend>
+                <div class="grid gap-2 sm:grid-cols-2">
+                    <label th:each="tag : ${personalityTags}" class="flex items-center gap-2 rounded-md border border-indigo-100 px-3 py-2">
+                        <input type="checkbox" th:field="*{personalityTagIds}" th:value="${tag.id}" class="h-4 w-4 rounded border-slate-300 text-indigo-700 focus:ring-indigo-600">
+                        <span th:text="${tag.nameKo}">차분함</span>
+                    </label>
+                </div>
+            </fieldset>
+
+            <div>
+                <label for="body" class="mb-1 block text-sm font-semibold">도움 내용</label>
+                <textarea id="body" th:field="*{body}" rows="4" class="w-full rounded-md border border-slate-300 px-3 py-3 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600"></textarea>
+            </div>
+
+            <div>
+                <label for="specialNotes" class="mb-1 block text-sm font-semibold">주의사항</label>
+                <textarea id="specialNotes" th:field="*{specialNotes}" rows="3" class="w-full rounded-md border border-slate-300 px-3 py-3 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600"></textarea>
+            </div>
+
+            <div class="flex flex-wrap justify-end gap-3">
+                <a th:href="@{/my/requests}" class="rounded-md border border-slate-300 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-600">취소</a>
+                <button type="submit" class="rounded-md bg-indigo-700 px-5 py-3 font-semibold text-white hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2">저장하기</button>
+            </div>
+        </form>
+    </section>
+</main>
+<div th:replace="~{layout/footer :: footer}"></div>
+</body>
+</html>
