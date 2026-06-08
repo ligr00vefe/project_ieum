@@ -1,13 +1,11 @@
 package com.project.ieum.controller;
 
 import com.project.ieum.dto.*;
-import com.project.ieum.entity.UserRole;
-import com.project.ieum.entity.user.DisabilityType;
-import com.project.ieum.entity.caregiver.CaregiverProfile;
-import com.project.ieum.entity.user.UserProfile;
 import com.project.ieum.entity.CommunicationMethod;
 import com.project.ieum.entity.PersonalityTag;
 import com.project.ieum.entity.Region;
+import com.project.ieum.entity.UserRole;
+import com.project.ieum.entity.user.DisabilityType;
 import com.project.ieum.service.MasterDataService;
 import com.project.ieum.service.UserService;
 import jakarta.servlet.http.HttpSession;
@@ -18,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -32,7 +31,9 @@ public class AuthController {
 
     private static final String REGISTRATION_SESSION_KEY = "registrationSession";
 
-    @GetMapping
+    // ─── 유형 선택 ──────────────────────────────────────────────────────────────
+
+    @GetMapping("/type-select")
     public String registerTypeSelect() {
         return "register/type-select";
     }
@@ -47,20 +48,17 @@ public class AuthController {
                 .build();
 
         session.setAttribute(REGISTRATION_SESSION_KEY, sessionData);
-
         return "redirect:/register/" + type + "/step1";
     }
+
+    // ─── STEP 1: 기본 정보 ──────────────────────────────────────────────────────
 
     @GetMapping("/{type}/step1")
     public String step1(@PathVariable String type, Model model, HttpSession session) {
         RegistrationSessionDTO sessionData = getOrCreateSession(session, type);
 
-        if (sessionData.getBasicInfo() == null) {
-            model.addAttribute("basicInfo", new BasicInfoDTO());
-        } else {
-            model.addAttribute("basicInfo", sessionData.getBasicInfo());
-        }
-
+        model.addAttribute("basicInfo",
+                sessionData.getBasicInfo() != null ? sessionData.getBasicInfo() : new BasicInfoDTO());
         model.addAttribute("userType", type);
         return "register/step1";
     }
@@ -78,119 +76,130 @@ public class AuthController {
             return "register/step1";
         }
 
-        RegistrationSessionDTO sessionData = getSession(session);
+        if (userService.existsByEmail(basicInfo.getEmail())) {
+            bindingResult.rejectValue("email", "duplicate", "이미 사용 중인 이메일입니다.");
+            model.addAttribute("userType", type);
+            return "register/step1";
+        }
+
+        if (userService.existsByPhone(basicInfo.getPhone())) {
+            bindingResult.rejectValue("phone", "duplicate", "이미 사용 중인 전화번호입니다.");
+            model.addAttribute("userType", type);
+            return "register/step1";
+        }
+
+        RegistrationSessionDTO sessionData = getOrCreateSession(session, type);
         sessionData.setBasicInfo(basicInfo);
         sessionData.incrementStep();
 
         return "redirect:/register/" + type + "/step2";
     }
 
+    // ─── STEP 2 ─────────────────────────────────────────────────────────────────
+
     @GetMapping("/{type}/step2")
     public String step2(@PathVariable String type, Model model, HttpSession session) {
-        RegistrationSessionDTO sessionData = getSession(session);
+        RegistrationSessionDTO sessionData = getSessionOrRedirect(session);
+        if (sessionData == null) return "redirect:/register/" + type + "/step1";
 
         if ("disabled".equals(type)) {
-            List<DisabilityType> disabilityTypes = masterDataService.getAllDisabilityTypes();
-            model.addAttribute("disabilityTypes", disabilityTypes);
-
-            if (sessionData.getDisabilityInfo() == null) {
-                model.addAttribute("disabilityInfo", new DisabilityInfoDTO());
-            } else {
-                model.addAttribute("disabilityInfo", sessionData.getDisabilityInfo());
-            }
-
+            model.addAttribute("disabilityTypes", masterDataService.getAllDisabilityTypes());
+            model.addAttribute("disabilityInfo",
+                    sessionData.getDisabilityInfo() != null ? sessionData.getDisabilityInfo() : new DisabilityInfoDTO());
             return "register/disabled-step2";
         } else {
-            if (sessionData.getCertificationInfo() == null) {
-                model.addAttribute("certificationInfo", new CertificationDTO());
-            } else {
-                model.addAttribute("certificationInfo", sessionData.getCertificationInfo());
-            }
-
+            model.addAttribute("certificationInfo",
+                    sessionData.getCertificationInfo() != null ? sessionData.getCertificationInfo() : new CertificationDTO());
             return "register/caregiver-step2";
         }
     }
 
-    @PostMapping("/{type}/step2")
-    public String step2Submit(
-            @PathVariable String type,
+    @PostMapping("/disabled/step2")
+    public String disabledStep2Submit(
             @ModelAttribute DisabilityInfoDTO disabilityInfo,
-            @ModelAttribute CertificationDTO certificationInfo,
+            @RequestParam(defaultValue = "forward") String direction,
             HttpSession session) {
 
-        RegistrationSessionDTO sessionData = getSession(session);
-
-        if ("disabled".equals(type)) {
-            sessionData.setDisabilityInfo(disabilityInfo);
-        } else {
-            sessionData.setCertificationInfo(certificationInfo);
-        }
-
-        sessionData.incrementStep();
-        return "redirect:/register/" + type + "/step3";
+        RegistrationSessionDTO sessionData = getSessionOrRedirect(session);
+        if (sessionData == null) return "redirect:/register/disabled/step1";
+        sessionData.setDisabilityInfo(disabilityInfo);
+        return "back".equals(direction)
+                ? "redirect:/register/disabled/step1"
+                : "redirect:/register/disabled/step3";
     }
+
+    @PostMapping("/caregiver/step2")
+    public String caregiverStep2Submit(
+            @ModelAttribute CertificationDTO certificationInfo,
+            @RequestParam(defaultValue = "forward") String direction,
+            HttpSession session) {
+
+        RegistrationSessionDTO sessionData = getSessionOrRedirect(session);
+        if (sessionData == null) return "redirect:/register/caregiver/step1";
+        sessionData.setCertificationInfo(certificationInfo);
+        return "back".equals(direction)
+                ? "redirect:/register/caregiver/step1"
+                : "redirect:/register/caregiver/step3";
+    }
+
+    // ─── STEP 3 ─────────────────────────────────────────────────────────────────
 
     @GetMapping("/{type}/step3")
     public String step3(@PathVariable String type, Model model, HttpSession session) {
-        RegistrationSessionDTO sessionData = getSession(session);
+        RegistrationSessionDTO sessionData = getSessionOrRedirect(session);
+        if (sessionData == null) return "redirect:/register/" + type + "/step1";
 
         if ("disabled".equals(type)) {
-            List<CommunicationMethod> communicationMethods = masterDataService.getAllCommunicationMethods();
-            model.addAttribute("communicationMethods", communicationMethods);
-
-            if (sessionData.getCommunicationInfo() == null) {
-                model.addAttribute("communicationInfo", new CommunicationDTO());
-            } else {
-                model.addAttribute("communicationInfo", sessionData.getCommunicationInfo());
-            }
-
+            model.addAttribute("communicationMethods", masterDataService.getAllCommunicationMethods());
+            model.addAttribute("communicationInfo",
+                    sessionData.getCommunicationInfo() != null ? sessionData.getCommunicationInfo() : new CommunicationDTO());
             return "register/disabled-step3";
         } else {
-            List<Region> regions = masterDataService.getAllRegions();
-            model.addAttribute("regions", regions);
-
-            if (sessionData.getActivityInfo() == null) {
-                model.addAttribute("activityInfo", new ActivityInfoDTO());
-            } else {
-                model.addAttribute("activityInfo", sessionData.getActivityInfo());
-            }
-
+            model.addAttribute("regions", masterDataService.getAllRegions());
+            model.addAttribute("activityInfo",
+                    sessionData.getActivityInfo() != null ? sessionData.getActivityInfo() : new ActivityInfoDTO());
             return "register/caregiver-step3";
         }
     }
 
-    @PostMapping("/{type}/step3")
-    public String step3Submit(
-            @PathVariable String type,
+    @PostMapping("/disabled/step3")
+    public String disabledStep3Submit(
             @ModelAttribute CommunicationDTO communicationInfo,
-            @ModelAttribute ActivityInfoDTO activityInfo,
+            @RequestParam(defaultValue = "forward") String direction,
             HttpSession session) {
 
-        RegistrationSessionDTO sessionData = getSession(session);
-
-        if ("disabled".equals(type)) {
-            sessionData.setCommunicationInfo(communicationInfo);
-        } else {
-            sessionData.setActivityInfo(activityInfo);
-        }
-
-        sessionData.incrementStep();
-        return "redirect:/register/" + type + "/step4";
+        RegistrationSessionDTO sessionData = getSessionOrRedirect(session);
+        if (sessionData == null) return "redirect:/register/disabled/step1";
+        sessionData.setCommunicationInfo(communicationInfo);
+        return "back".equals(direction)
+                ? "redirect:/register/disabled/step2"
+                : "redirect:/register/disabled/step4";
     }
+
+    @PostMapping("/caregiver/step3")
+    public String caregiverStep3Submit(
+            @ModelAttribute ActivityInfoDTO activityInfo,
+            @RequestParam(defaultValue = "forward") String direction,
+            HttpSession session) {
+
+        RegistrationSessionDTO sessionData = getSessionOrRedirect(session);
+        if (sessionData == null) return "redirect:/register/caregiver/step1";
+        sessionData.setActivityInfo(activityInfo);
+        return "back".equals(direction)
+                ? "redirect:/register/caregiver/step2"
+                : "redirect:/register/caregiver/step4";
+    }
+
+    // ─── STEP 4: 성향 태그 ───────────────────────────────────────────────────────
 
     @GetMapping("/{type}/step4")
     public String step4(@PathVariable String type, Model model, HttpSession session) {
-        RegistrationSessionDTO sessionData = getSession(session);
+        RegistrationSessionDTO sessionData = getSessionOrRedirect(session);
+        if (sessionData == null) return "redirect:/register/" + type + "/step1";
 
-        List<PersonalityTag> personalityTags = masterDataService.getAllPersonalityTags();
-        model.addAttribute("personalityTags", personalityTags);
-
-        if (sessionData.getPersonalityTags() == null) {
-            model.addAttribute("personalityTagInfo", new PersonalityTagDTO());
-        } else {
-            model.addAttribute("personalityTagInfo", sessionData.getPersonalityTags());
-        }
-
+        model.addAttribute("personalityTags", masterDataService.getAllPersonalityTags());
+        model.addAttribute("personalityTagInfo",
+                sessionData.getPersonalityTags() != null ? sessionData.getPersonalityTags() : new PersonalityTagDTO());
         model.addAttribute("userType", type);
         return "register/step4";
     }
@@ -199,95 +208,62 @@ public class AuthController {
     public String step4Submit(
             @PathVariable String type,
             @ModelAttribute PersonalityTagDTO personalityTagInfo,
+            @RequestParam(defaultValue = "forward") String direction,
             HttpSession session) {
 
-        RegistrationSessionDTO sessionData = getSession(session);
+        RegistrationSessionDTO sessionData = getSessionOrRedirect(session);
+        if (sessionData == null) return "redirect:/register/" + type + "/step1";
+
         sessionData.setPersonalityTags(personalityTagInfo);
 
-        return completeRegistration(type, sessionData, session);
+        if ("back".equals(direction)) {
+            return "redirect:/register/" + type + "/step3";
+        }
+        return "redirect:/register/" + type + "/complete";
     }
+
+    // ─── 완료 ───────────────────────────────────────────────────────────────────
 
     @GetMapping("/{type}/complete")
-    public String complete(@PathVariable String type, HttpSession session) {
-        RegistrationSessionDTO sessionData = (RegistrationSessionDTO) session.getAttribute(REGISTRATION_SESSION_KEY);
-        if (sessionData == null) {
-            return "redirect:/";
-        }
+    public String complete(@PathVariable String type, HttpSession session,
+                           RedirectAttributes redirectAttributes) {
+        RegistrationSessionDTO sessionData = getSessionOrRedirect(session);
+        if (sessionData == null) return "redirect:/register/" + type + "/step1";
 
-        return completeRegistration(type, sessionData, session);
+        return completeRegistration(type, sessionData, session, redirectAttributes);
     }
 
-    private String completeRegistration(String type, RegistrationSessionDTO sessionData, HttpSession session) {
+    private String completeRegistration(String type, RegistrationSessionDTO sessionData,
+                                        HttpSession session, RedirectAttributes redirectAttributes) {
         try {
             if ("disabled".equals(type)) {
-                completeDisabledRegistration(sessionData);
+                userService.registerDisabledUser(sessionData);
             } else {
-                completeCaregiverRegistration(sessionData);
+                userService.registerCaregiverUser(sessionData);
             }
 
             session.removeAttribute(REGISTRATION_SESSION_KEY);
             return "redirect:/";
 
         } catch (Exception e) {
-            log.error("회원가입 실패", e);
-            return "redirect:/register/" + type + "/step4?error=true";
+            log.error("회원가입 실패: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "회원가입 처리 중 오류가 발생했습니다: " + e.getMessage());
+            return "redirect:/register/" + type + "/step4";
         }
     }
 
-    private void completeDisabledRegistration(RegistrationSessionDTO sessionData) {
-        BasicInfoDTO basicInfo = sessionData.getBasicInfo();
-        DisabilityInfoDTO disabilityInfo = sessionData.getDisabilityInfo();
-        CommunicationDTO communicationInfo = sessionData.getCommunicationInfo();
-        PersonalityTagDTO personalityTagInfo = sessionData.getPersonalityTags();
+    // ─── 세션 유틸 ───────────────────────────────────────────────────────────────
 
-        var user = userService.registerUser(basicInfo, UserRole.USER);
-        var profile = userService.registerUserProfile(user, basicInfo);
-
-        if (disabilityInfo != null) {
-            userService.addDisabilityTypes(profile, disabilityInfo);
-        }
-
-        if (communicationInfo != null) {
-            userService.addCommunicationMethods(profile, communicationInfo);
-        }
-
-        if (personalityTagInfo != null) {
-            userService.addPersonalityTagsForUser(profile, personalityTagInfo);
-        }
+    /** 세션 없으면 null 반환 (호출 측에서 redirect 처리) */
+    private RegistrationSessionDTO getSessionOrRedirect(HttpSession session) {
+        return (RegistrationSessionDTO) session.getAttribute(REGISTRATION_SESSION_KEY);
     }
 
-    private void completeCaregiverRegistration(RegistrationSessionDTO sessionData) {
-        BasicInfoDTO basicInfo = sessionData.getBasicInfo();
-        CertificationDTO certificationInfo = sessionData.getCertificationInfo();
-        ActivityInfoDTO activityInfo = sessionData.getActivityInfo();
-        PersonalityTagDTO personalityTagInfo = sessionData.getPersonalityTags();
-
-        var user = userService.registerUser(basicInfo, UserRole.CAREGIVER);
-        var profile = userService.registerCaregiverProfile(user, basicInfo);
-
-        if (certificationInfo != null) {
-            userService.updateCertificationInfo(profile, certificationInfo);
-        }
-
-        if (activityInfo != null) {
-            userService.updateActivityInfo(profile, activityInfo);
-        }
-
-        if (personalityTagInfo != null) {
-            userService.addPersonalityTagsForCaregiver(profile, personalityTagInfo);
-        }
-    }
-
-    private RegistrationSessionDTO getSession(HttpSession session) {
-        RegistrationSessionDTO sessionData = (RegistrationSessionDTO) session.getAttribute(REGISTRATION_SESSION_KEY);
-        if (sessionData == null) {
-            throw new IllegalStateException("세션이 만료되었습니다. 다시 시작해주세요.");
-        }
-        return sessionData;
-    }
-
+    /** 세션 없으면 새로 생성 */
     private RegistrationSessionDTO getOrCreateSession(HttpSession session, String type) {
-        RegistrationSessionDTO sessionData = (RegistrationSessionDTO) session.getAttribute(REGISTRATION_SESSION_KEY);
+        RegistrationSessionDTO sessionData =
+                (RegistrationSessionDTO) session.getAttribute(REGISTRATION_SESSION_KEY);
         if (sessionData == null) {
             UserRole userRole = "caregiver".equalsIgnoreCase(type) ? UserRole.CAREGIVER : UserRole.USER;
             sessionData = RegistrationSessionDTO.builder()

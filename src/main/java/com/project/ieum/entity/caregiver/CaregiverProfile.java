@@ -1,53 +1,24 @@
 package com.project.ieum.entity.caregiver;
 
-import com.project.ieum.entity.BasicEntity;
-import com.project.ieum.entity.Gender;
-import com.project.ieum.entity.User;
+import com.project.ieum.entity.UserRole;
+import com.project.ieum.entity.profile.Profile;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Check;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "caregiver_profiles")
+@DiscriminatorValue("CAREGIVER")
 @Check(name = "ck_caregiver_avg_rating", constraints = "avg_rating BETWEEN 0 AND 5")
-@Builder(toBuilder = true)
+@SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Setter
-@ToString
-public class CaregiverProfile extends BasicEntity {
-
-  // 사용자 ID (PK, FK → users.id 공유)
-  @Id
-  @Column(name = "user_id")
-  private Long userId;
-
-  // 사용자 (공유 PK)
-  @MapsId
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  @ToString.Exclude
-  private User user;
-
-  // 이름
-  @Column(name = "full_name", nullable = false, length = 80)
-  private String fullName;
-
-  // 생년월일
-  @Column(name = "birth_date")
-  private LocalDate birthDate;
-
-  // 성별
-  @Enumerated(EnumType.STRING)
-  @Column(length = 16)
-  private Gender gender;
+@ToString(callSuper = true)
+public class CaregiverProfile extends Profile {
 
   // 프로필 사진 URL
   @Column(name = "profile_image_url", length = 500)
@@ -80,6 +51,13 @@ public class CaregiverProfile extends BasicEntity {
   @Column(name = "experience", columnDefinition = "TEXT")
   private String experience;
 
+  // 가능 업무 (쉼표 구분 텍스트: "이동 보조,병원 동행,...")
+  @Column(name = "service_categories", columnDefinition = "TEXT")
+  private String serviceCategories;
+
+  // 가능 시간대: available_time_slots(쉼표 문자열) 컬럼은 정규화(#15)로 제거.
+  // 요일·시작·종료는 caregiver_availability 테이블(CaregiverAvailability)로 일원화한다.
+
   // 평균 평점 (0.00 ~ 5.00)
   @Column(name = "avg_rating", nullable = false, precision = 3, scale = 2)
   @Builder.Default
@@ -102,5 +80,31 @@ public class CaregiverProfile extends BasicEntity {
   public void updateCertificationInfo(String certificationType, String experience) {
     this.certificationType = certificationType;
     this.experience = experience;
+  }
+
+  public void updateCertification(Boolean hasCertification, String certificationType) {
+    this.hasCertification = hasCertification != null ? hasCertification : false;
+    this.certificationType = hasCertification != null && hasCertification ? certificationType : null;
+  }
+
+  // 가능 시간대(availableTimeSlots)는 caregiver_availability로 분리되어 더 이상 프로필 컬럼이 아니다.
+  // 가용시간 갱신은 CaregiverAvailabilityRepository 경로로 처리한다.
+  public void updateActivity(String experience, String serviceCategories) {
+    this.experience = experience;
+    this.serviceCategories = serviceCategories;
+  }
+
+  public void updateIntro(String introShort, String introLong) {
+    this.introShort = introShort;
+    this.introLong = introLong;
+  }
+
+  public void updateProfileImage(String profileImageUrl) {
+    this.profileImageUrl = profileImageUrl;
+  }
+
+  @Override
+  protected UserRole expectedRole() {
+    return UserRole.CAREGIVER;
   }
 }

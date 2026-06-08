@@ -1,69 +1,93 @@
 package com.project.ieum.exception;
 
-import com.project.ieum.dto.error.ErrorResponse;
-import jakarta.servlet.http.HttpServletRequest;
+import com.project.ieum.dto.ErrorResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException exception) {
+    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
+        log.error("Business exception occurred: code={}, message={}", e.getCode(), e.getMessage());
         return ResponseEntity
-                .status(exception.getStatus())
-                .body(ErrorResponse.of(exception.getCode(), exception.getMessage()));
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorResponse.of(e.getCode(), e.getMessage()));
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException e) {
+        log.warn("Resource not found: message={}", e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponse.of(e.getCode(), e.getMessage()));
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenException e) {
+        log.warn("Access forbidden: message={}", e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ErrorResponse.of(e.getCode(), e.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException exception) {
-        List<ErrorResponse.FieldErrorDetail> fieldErrors = exception.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(this::toFieldErrorDetail)
-                .toList();
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
+        String errorMessage = e.getBindingResult().getFieldErrors().stream()
+                .map(FieldError::getDefaultMessage)
+                .collect(Collectors.joining(", "));
 
+        log.warn("Validation failed: errors={}", errorMessage);
         return ResponseEntity
-                .badRequest()
-                .body(ErrorResponse.of("VALIDATION_FAILED", "입력값을 확인해주세요.", fieldErrors));
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.of("VALIDATION_FAILED", errorMessage));
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDeniedException() {
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        log.warn("Type mismatch: parameter={}, value={}", e.getName(), e.getValue());
         return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body(ErrorResponse.of("FORBIDDEN", "접근 권한이 없습니다."));
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.of("INVALID_PARAMETER", "잘못된 파라미터 형식입니다: " + e.getName()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException exception) {
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+        log.warn("Illegal argument: message={}", e.getMessage());
         return ResponseEntity
-                .badRequest()
-                .body(ErrorResponse.of("BAD_REQUEST", exception.getMessage()));
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.of("INVALID_ARGUMENT", e.getMessage()));
     }
 
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException exception) {
+    public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException e) {
+        log.warn("Illegal state: message={}", e.getMessage());
         return ResponseEntity
-                .badRequest()
-                .body(ErrorResponse.of("INVALID_STATE", exception.getMessage()));
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.of("INVALID_STATE", e.getMessage()));
+    }
+
+    // favicon.ico 등 정적 리소스 미존재 요청 — ERROR 로그 방지
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Void> handleNoResourceFound(NoResourceFoundException e) {
+        return ResponseEntity.notFound().build();
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleUnexpectedException(Exception exception, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleUnexpectedException(Exception e) {
+        log.error("Unexpected exception occurred", e);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse.of("INTERNAL_SERVER_ERROR", "요청을 처리하는 중 문제가 발생했습니다."));
-    }
-
-    private ErrorResponse.FieldErrorDetail toFieldErrorDetail(FieldError fieldError) {
-        return new ErrorResponse.FieldErrorDetail(fieldError.getField(), fieldError.getDefaultMessage());
+                .body(ErrorResponse.of("INTERNAL_SERVER_ERROR", "서버 내부 오류가 발생했습니다."));
     }
 }

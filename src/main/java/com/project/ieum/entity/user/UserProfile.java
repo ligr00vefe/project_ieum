@@ -1,58 +1,31 @@
 package com.project.ieum.entity.user;
 
-import com.project.ieum.entity.BasicEntity;
-import com.project.ieum.entity.Gender;
 import com.project.ieum.entity.Region;
-import com.project.ieum.entity.User;
+import com.project.ieum.entity.UserRole;
+import com.project.ieum.entity.profile.Profile;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "user_profiles")
-@Builder(toBuilder = true)
+@DiscriminatorValue("USER")
+@SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@ToString
-public class UserProfile extends BasicEntity {
+@ToString(callSuper = true)
+public class UserProfile extends Profile {
 
-  // 사용자 ID (PK, FK → users.id 공유)
-  @Id
-  @Column(name = "user_id")
-  private Long userId;
-
-  // 사용자 (공유 PK)
-  @MapsId
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
-  @ToString.Exclude
-  private User user;
-
-  // 이름
-  @Column(name = "full_name", nullable = false, length = 80)
-  private String fullName;
-
-  // 생년월일
-  @Column(name = "birth_date")
-  private LocalDate birthDate;
-
-  // 성별
-  @Enumerated(EnumType.STRING)
-  @Column(length = 16)
-  private Gender gender;
-
-  // 보호자 이름
-  @Column(name = "guardian_name", nullable = false, length = 80)
+  // 보호자 이름 (선택)
+  @Column(name = "guardian_name", nullable = true, length = 80)
   private String guardianName;
 
-  // 보호자 연락처
-  @Column(name = "guardian_phone", nullable = false, length = 20)
+  // 보호자 연락처 (선택)
+  @Column(name = "guardian_phone", nullable = true, length = 20)
   private String guardianPhone;
 
   // 지역
@@ -85,6 +58,10 @@ public class UserProfile extends BasicEntity {
   @Column(name = "intro_text", columnDefinition = "TEXT")
   private String introText;
 
+  // 프로필 사진 URL
+  @Column(name = "profile_image_url", length = 500)
+  private String profileImageUrl;
+
   // 보유 장애 유형 (다대다)
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
   @ToString.Exclude
@@ -107,7 +84,6 @@ public class UserProfile extends BasicEntity {
 
   public void addCommunicationMethod(com.project.ieum.entity.CommunicationMethod method) {
     communicationMethods.add(UserCommunicationMethod.builder()
-        .id(new UserCommunicationMethodId(userId, method.getId()))
         .user(this)
         .communicationMethod(method)
         .build());
@@ -134,5 +110,14 @@ public class UserProfile extends BasicEntity {
   public void updateActivityInfo(String activityRange, String avoidSituations) {
     this.activityRange = activityRange;
     this.avoidSituations = avoidSituations;
+  }
+
+  public void updateProfileImage(String profileImageUrl) {
+    this.profileImageUrl = profileImageUrl;
+  }
+
+  @Override
+  protected UserRole expectedRole() {
+    return UserRole.USER;
   }
 }
