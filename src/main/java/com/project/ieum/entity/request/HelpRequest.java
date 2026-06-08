@@ -107,4 +107,15 @@ public class HelpRequest extends BasicEntity {
   private HelpRequestStatus status;
 
   public void changeStatus(HelpRequestStatus next) { this.status = next; }
+
+  // 시간 구간 불변식: 종료가 있으면 시작 이후여야 한다.
+  // existsOverlapping(반열림 겹침)이 "start <= end"를 전제하므로, end < start인 행은
+  // 겹침을 조용히 누락시킨다. 이 콜백이 우회 불가 최종 방어선이다.
+  @PrePersist
+  @PreUpdate
+  protected void verifyTimeRange() {
+    if (desiredEndDatetime != null && desiredEndDatetime.isBefore(desiredStartDatetime)) {
+      throw new IllegalStateException("종료 시간은 시작 시간 이후여야 합니다.");
+    }
+  }
 }
