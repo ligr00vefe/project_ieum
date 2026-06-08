@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long> {
+public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long>, com.project.ieum.repository.search.HelpRequestSearchRepository {
 
     // (#9) 시간대 겹침 검사
     @Query("""
