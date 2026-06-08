@@ -134,7 +134,7 @@ public class MatchingService {
         if (!application.getCaregiver().getUserId().equals(currentUser.getId())) {
             throw new ForbiddenException("본인의 지원만 취소할 수 있습니다.");
         }
-        application.withdraw();
+        application.cancel();
         conversationRepository.findByApplication_Id(applicationId).ifPresent(Conversation::close);
     }
 

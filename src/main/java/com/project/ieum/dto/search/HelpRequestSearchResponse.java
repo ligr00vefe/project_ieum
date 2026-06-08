@@ -5,8 +5,7 @@ import com.project.ieum.entity.request.HelpRequestStatus;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -16,24 +15,22 @@ public class HelpRequestSearchResponse {
     private String requesterName;
     private String regionName;
     private String serviceCategoryName;
-    private LocalDate desiredDate;
-    private LocalTime desiredStartTime;
-    private LocalTime desiredEndTime;
+    private LocalDateTime desiredStartDatetime;
+    private LocalDateTime desiredEndDatetime;
     private HelpRequestStatus status;
 
     public static HelpRequestSearchResponse from(HelpRequest request) {
-        String regionName = request.getRegion().getSido() + " " + request.getRegion().getSigungu()
-                + (request.getRegion().getDong() == null ? "" : " " + request.getRegion().getDong());
+        String regionName = request.getSido() + " " + request.getSigungu()
+                + (request.getBname() == null ? "" : " " + request.getBname());
 
         return HelpRequestSearchResponse.builder()
                 .helpRequestId(request.getId())
                 .title(request.getTitle())
                 .requesterName(request.getRequester().getFullName())
                 .regionName(regionName)
-                .serviceCategoryName(request.getServiceCategory().getNameKo())
-                .desiredDate(request.getDesiredDate())
-                .desiredStartTime(request.getDesiredStartTime())
-                .desiredEndTime(request.getDesiredEndTime())
+                .serviceCategoryName(request.getServiceCategory().getName())
+                .desiredStartDatetime(request.getDesiredStartDatetime())
+                .desiredEndDatetime(request.getDesiredEndDatetime())
                 .status(request.getStatus())
                 .build();
     }
