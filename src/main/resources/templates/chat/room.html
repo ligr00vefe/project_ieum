@@ -1,56 +1,232 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>대화방</title>
-    <link rel="stylesheet" th:href="@{/css/output.css}">
-</head>
-<body class="bg-gray-50 min-h-screen">
-<main class="max-w-3xl mx-auto p-6">
-    <h1 class="text-2xl font-bold mb-4">대화방</h1>
-    <div id="messages" class="bg-white border rounded-xl p-4 h-[520px] overflow-y-auto space-y-2"></div>
-    <form id="sendForm" class="mt-4 flex gap-2">
-        <input id="messageInput" class="flex-1 border rounded-lg px-3 py-2" placeholder="메시지를 입력하세요">
-        <button class="px-4 py-2 rounded-lg bg-blue-600 text-white">전송</button>
-    </form>
-</main>
-<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
-<script th:inline="javascript">
-    const conversationId = /*[[${conversationId}]]*/ 0;
-    const messages = document.querySelector('#messages');
-    const input = document.querySelector('#messageInput');
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="flex gap-5" style="height: calc(100vh - 160px); min-height: 600px;">
 
-    function addMessage(message) {
-        const div = document.createElement('div');
-        div.className = message.mine ? 'text-right' : 'text-left';
-        div.innerHTML = `<span class="inline-block rounded-xl px-3 py-2 bg-gray-100">${message.body}</span>`;
-        messages.appendChild(div);
-        messages.scrollTop = messages.scrollHeight;
-    }
+        <!-- 왼쪽: 프로필 카드 (장애인 뷰) -->
+        <th:block th:if="${isUser}">
+        <div class="w-72 flex-shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col items-center text-center">
+            <!-- 아바타 -->
+            <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-2xl mb-3"
+                 th:text="${partnerInitial ?: '박'}">박</div>
+            <!-- 이름 / 직함 -->
+            <p class="text-lg font-bold text-gray-900" th:text="${partnerName ?: '박서연'}">박서연</p>
+            <p class="text-sm text-gray-400 mt-0.5 mb-4" th:text="${partnerSubtitle ?: '활동지원사'}">사회복지사 2급 · 경력 5년</p>
 
-    fetch(`/api/chat/conversations/${conversationId}/messages?size=30`)
-        .then(res => res.json())
-        .then(data => (data.content || []).reverse().forEach(addMessage));
+            <!-- 매칭률 뱃지 -->
+            <div class="w-20 h-20 bg-indigo-600 rounded-full flex flex-col items-center justify-center mb-5 shadow-md shadow-indigo-100">
+                <span class="text-xl font-extrabold text-white leading-none">95%</span>
+                <span class="text-[10px] font-semibold text-indigo-200 mt-0.5 tracking-wider">MATCH</span>
+            </div>
 
-    const client = new StompJs.Client({
-        webSocketFactory: () => new SockJS('/ws'),
-        onConnect: () => {
-            client.subscribe(`/topic/conversations/${conversationId}`, frame => addMessage(JSON.parse(frame.body)));
-        }
-    });
-    client.activate();
+            <!-- 자격·검증 -->
+            <div class="w-full text-left mb-5">
+                <p class="text-xs font-semibold text-gray-400 mb-2">자격 · 검증</p>
+                <ul class="space-y-1.5">
+                    <li class="text-sm text-gray-700">🔒 신원 확인 완료</li>
+                    <li class="text-sm text-gray-700">📋 사회복지사 2급 검증</li>
+                    <li class="text-sm text-gray-700">🤟 수어 통역 자격</li>
+                    <li class="text-sm text-gray-700">⭐ 후기 4.9 (32건)</li>
+                </ul>
+            </div>
 
-    document.querySelector('#sendForm').addEventListener('submit', e => {
-        e.preventDefault();
-        const body = input.value.trim();
-        if (!body) return;
-        client.publish({
-            destination: `/app/chat/${conversationId}/send`,
-            body: JSON.stringify({ body })
-        });
-        input.value = '';
-    });
+            <!-- 액션 버튼 -->
+            <div class="w-full space-y-2 mt-auto">
+                <button onclick="showMatchConfirmModal()"
+                        class="w-full py-3 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100">
+                    ✓ 매칭 확정하기
+                </button>
+                <a th:href="@{/caregiver/profile}"
+                   class="block w-full py-3 text-sm font-semibold text-indigo-600 border border-indigo-200 rounded-xl hover:bg-indigo-50 transition-all text-center">
+                    프로필 자세히 보기
+                </a>
+            </div>
+        </div>
+        </th:block>
+
+        <!-- 오른쪽: 채팅 영역 -->
+        <div class="flex-1 flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+
+            <!-- 채팅 헤더 -->
+            <div class="flex-shrink-0 flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+                <!-- 활동지원사 뷰: 뒤로가기 버튼 -->
+                <th:block th:if="${isCaregiver}">
+                    <a th:href="@{/board/1}" class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    </a>
+                </th:block>
+
+                <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm flex-shrink-0"
+                     th:text="${partnerInitial ?: '박'}">박</div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-gray-900" th:text="${partnerName ?: '박서연 활동지원사'}">박서연 활동지원사</p>
+                    <div class="flex items-center gap-1.5 mt-0.5">
+                        <span class="w-2 h-2 bg-teal-400 rounded-full flex-shrink-0"></span>
+                        <span class="text-xs text-teal-500 font-medium">지금 접속 중</span>
+                    </div>
+                </div>
+
+                <!-- 안심 통화 버튼 -->
+                <button class="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-rose-500 border border-rose-200 bg-rose-50 rounded-xl hover:bg-rose-100 transition-all flex-shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                    안심 통화
+                </button>
+
+                <!-- 활동지원사 뷰: 매칭률 뱃지 -->
+                <th:block th:if="${isCaregiver}">
+                    <div class="flex-shrink-0 flex flex-col items-center bg-indigo-600 text-white rounded-xl px-2.5 py-1.5">
+                        <span class="text-[9px] font-medium opacity-80 leading-none">매칭률</span>
+                        <span class="text-sm font-bold leading-none">95%</span>
+                    </div>
+                </th:block>
+            </div>
+
+            <!-- 안전 안내 배너 -->
+            <div class="flex-shrink-0 mx-5 mt-4 px-4 py-3 bg-amber-50 border border-amber-100 rounded-xl text-center">
+                <p class="text-xs text-amber-700 font-medium">🔒 매칭 확정 전 첫 만남은 공공장소에서 진행하실 것을 권장드려요.</p>
+            </div>
+
+            <!-- 채팅 메시지 영역 -->
+            <div id="chatMessages" class="flex-1 overflow-y-auto space-y-4 px-5 py-4">
+
+                <!-- 날짜 구분선 -->
+                <div class="flex items-center gap-3 my-2">
+                    <div class="flex-1 h-px bg-gray-100"></div>
+                    <span class="text-xs text-gray-400 font-medium flex-shrink-0">오늘</span>
+                    <div class="flex-1 h-px bg-gray-100"></div>
+                </div>
+
+                <!-- 상대방 메시지 -->
+                <div class="flex items-end gap-2.5">
+                    <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xs flex-shrink-0 mb-1"
+                         th:text="${partnerInitial ?: '박'}">박</div>
+                    <div class="max-w-[70%]">
+                        <div class="bg-gray-50 border border-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
+                            <p class="text-sm text-gray-800">안녕하세요 김지원님! 토요일 외래진료 동행 가능합니다.</p>
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-1 ml-1">14:02</p>
+                    </div>
+                </div>
+
+                <div class="flex items-end gap-2.5">
+                    <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xs flex-shrink-0 mb-1"
+                         th:text="${partnerInitial ?: '박'}">박</div>
+                    <div class="max-w-[70%]">
+                        <div class="bg-gray-50 border border-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
+                            <p class="text-sm text-gray-800">수어 통역 자격증도 있어서 진료 시 의사소통 도와드릴 수 있어요 😊</p>
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-1 ml-1">14:02</p>
+                    </div>
+                </div>
+
+                <!-- 내 메시지 -->
+                <div class="flex items-end gap-2.5 flex-row-reverse">
+                    <div class="max-w-[70%]">
+                        <div class="bg-indigo-600 rounded-2xl rounded-br-md px-4 py-3 shadow-sm shadow-indigo-100">
+                            <p class="text-sm text-white">안녕하세요! 수어 가능하시다니 든든해요. 진료 후 약국까지 동행 가능하실까요?</p>
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-1 mr-1 text-right">14:05</p>
+                    </div>
+                </div>
+
+                <div class="flex items-end gap-2.5">
+                    <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xs flex-shrink-0 mb-1"
+                         th:text="${partnerInitial ?: '박'}">박</div>
+                    <div class="max-w-[70%]">
+                        <div class="bg-gray-50 border border-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
+                            <p class="text-sm text-gray-800">물론입니다. 처방전 픽업까지 함께 가요. 진료 끝나고 잠깐 쉬실 카페도 근처에 있어요.</p>
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-1 ml-1">14:06</p>
+                    </div>
+                </div>
+
+                <!-- 활동지원사 뷰: 매칭 가능 시스템 메시지 -->
+                <th:block th:if="${isCaregiver}">
+                    <div class="flex justify-center">
+                        <div class="bg-teal-50 border border-teal-100 rounded-2xl px-4 py-3 max-w-xs text-center">
+                            <p class="text-xs font-semibold text-teal-700">🎯 매칭이 가능합니다!</p>
+                            <p class="text-xs text-teal-500 mt-0.5">최종 결정은 이용자에게 있습니다.<br>상세한 일정 안내 등 최선을 다해 알리세요.</p>
+                        </div>
+                    </div>
+                </th:block>
+
+            </div>
+
+            <!-- 메시지 입력창 -->
+            <div class="flex-shrink-0 px-5 py-4 border-t border-gray-100">
+                <div class="flex items-center gap-3">
+                    <input id="messageInput" type="text" placeholder="메시지를 입력해주세요"
+                           onkeydown="handleKeydown(event)"
+                           class="flex-1 text-sm text-gray-800 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-full px-5 py-3 focus:outline-none focus:border-indigo-300 focus:bg-white transition-all"/>
+                    <button onclick="sendMessage()"
+                            class="flex-shrink-0 px-5 py-3 bg-indigo-600 text-white text-sm font-bold rounded-full hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100 whitespace-nowrap">
+                        전송 →
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- 매칭 확정 모달 (장애인 뷰) -->
+<div id="matchConfirmModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="hideMatchConfirmModal()"></div>
+    <div class="relative bg-white rounded-3xl shadow-2xl p-7 w-full max-w-sm text-center z-10">
+        <div class="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <svg class="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            </svg>
+        </div>
+        <h2 class="text-lg font-bold text-gray-900 mb-2">매칭을 확정하시겠어요?</h2>
+        <p class="text-sm text-gray-500 leading-relaxed mb-6">
+            ✔ 활동지원사에게 매칭 확정 알림이 발송됩니다.<br>
+            ✔ 활동 일정이 마이페이지에 등록됩니다.
+        </p>
+        <div class="flex gap-3">
+            <button onclick="hideMatchConfirmModal()"
+                    class="flex-1 py-3 text-sm font-semibold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all">
+                취소
+            </button>
+            <a th:href="@{/matching/confirmed}"
+               class="flex-1 py-3 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100 flex items-center justify-center">
+                → 매칭 확정하기
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+function handleKeydown(e) {
+    if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+}
+function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const text = input.value.trim();
+    if (!text) return;
+    const msgs = document.getElementById('chatMessages');
+    const now = new Date().toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'});
+    const div = document.createElement('div');
+    div.className = 'flex items-end gap-2.5 flex-row-reverse';
+    div.innerHTML = `
+        <div class="max-w-[70%]">
+            <div class="bg-indigo-600 rounded-2xl rounded-br-md px-4 py-3 shadow-sm shadow-indigo-100">
+                <p class="text-sm text-white">${text.replace(/</g,'&lt;')}</p>
+            </div>
+            <p class="text-[11px] text-gray-400 mt-1 mr-1 text-right">${now}</p>
+        </div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    input.value = '';
+}
+function showMatchConfirmModal() {
+    document.getElementById('matchConfirmModal').classList.remove('hidden');
+}
+function hideMatchConfirmModal() {
+    document.getElementById('matchConfirmModal').classList.add('hidden');
+}
 </script>
-</body>
+</th:block>
 </html>

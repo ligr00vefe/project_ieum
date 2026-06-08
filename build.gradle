@@ -22,6 +22,7 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
@@ -32,10 +33,15 @@ dependencies {
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	testRuntimeOnly 'com.h2database:h2'
 	annotationProcessor 'org.projectlombok:lombok'
+	// Spring Boot 4는 테스트 슬라이스를 모듈별 스타터로 분리한다(@DataJpaTest는 data-jpa-test에 포함).
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+	// (#9 슬라이스 테스트) @DataJpaTest용 인메모리 DB. H2 사용 + 테스트 전용 H2 방언으로 enum→varchar.
+	//   H2 2.4.240은 @Enumerated(STRING)을 native ENUM 컬럼으로 만들고(Hibernate 7 H2Dialect),
+	//   그 ENUM 컬럼 + prepared statement가 같은 행의 다른 CHECK 평가를 오염시키는 마찰이 있다.
+	//   → H2VarcharEnumDialect가 enum 선언을 varchar로 바꿔 이 문제를 제거한다(엔티티 무수정).
 	testCompileOnly 'org.projectlombok:lombok'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testAnnotationProcessor 'org.projectlombok:lombok'
@@ -81,9 +87,15 @@ tasks.register('downloadTailwind', Exec) {
 
 tasks.register('buildTailwind', Exec) {
     dependsOn 'downloadTailwind'
-    def exe = Os.isFamily(Os.FAMILY_WINDOWS) ? "tailwindcss.exe" : "./tailwindcss"
+    workingDir projectDir
+    def exe = Os.isFamily(Os.FAMILY_WINDOWS)
+            ? "${projectDir}/tailwindcss.exe"
+            : "${projectDir}/tailwindcss"
 
-    commandLine exe, '-i', './src/main/resources/static/css/input.css', '-o', './src/main/resources/static/css/output.css', '--minify'
+    commandLine exe,
+            '-i', "${projectDir}/src/main/resources/static/css/input.css",
+            '-o', "${projectDir}/src/main/resources/static/css/output.css",
+            '--minify'
 }
 
 processResources.dependsOn buildTailwind

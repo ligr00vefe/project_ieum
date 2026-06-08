@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "personality_tags",
-    uniqueConstraints = @UniqueConstraint(name = "uq_pt_name", columnNames = "name_ko"))
+    uniqueConstraints = @UniqueConstraint(name = "uq_pt_name", columnNames = "name"))
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,6 +21,6 @@ public class PersonalityTag {
   private Long id;
 
   // 태그명
-  @Column(name = "name_ko", nullable = false, length = 40)
-  private String nameKo;
+  @Column(name = "name", nullable = false, length = 40)
+  private String name;
 }
