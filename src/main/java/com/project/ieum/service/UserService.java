@@ -399,4 +399,8 @@ public class UserService {
             throw new RuntimeException("프로필 이미지 저장에 실패했습니다.", e);
         }
     }
+
+    private String blankIfNull(String value) {
+        return value == null ? "" : value;
+    }
 }

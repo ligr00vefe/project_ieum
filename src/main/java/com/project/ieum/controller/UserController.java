@@ -12,10 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -26,6 +23,24 @@ public class UserController {
     private final UserRepository userRepository;
     private final UserService userService;
     private final MasterDataService masterDataService;
+
+    @GetMapping("/")
+    public String index(Model model) {
+        model.addAttribute("title", "이음");
+        return "index";
+    }
+
+    @GetMapping("/healthz")
+    @ResponseBody
+    public String healthz() {
+        return "ok";
+    }
+
+    @GetMapping("/readyz")
+    @ResponseBody
+    public String readyz() {
+        return "ok";
+    }
 
     @GetMapping("/how-to-use")
     public String howToUse(Model model) {

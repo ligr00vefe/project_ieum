@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${IEUM_DB_URL:jdbc:mysql://localhost:3306/db7?serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
+    username: ${IEUM_DB_USERNAME:db7}
+    password: ${IEUM_DB_PASSWORD:1234}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+server:
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax

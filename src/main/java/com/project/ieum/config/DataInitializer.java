@@ -114,7 +114,6 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
-        // 1. users
         User user = userRepository.save(User.builder()
                 .email(email)
                 .passwordHash(passwordEncoder.encode("1"))
@@ -123,7 +122,6 @@ public class DataInitializer implements CommandLineRunner {
                 .status(UserStatus.ACTIVE)
                 .build());
 
-        // 2. user_profiles
         UserProfile profile = userProfileRepository.save(UserProfile.builder()
                 .user(user)
                 .fullName("장애인 테스트")
@@ -133,23 +131,19 @@ public class DataInitializer implements CommandLineRunner {
                 .guardianPhone("010-5555-5555")
                 .build());
 
-        // 3. 활동 가능 범위 / 피해야 할 상황
         profile.updateActivityInfo("집 근처", "큰 소음");
         userProfileRepository.save(profile);
 
-        // 4. 장애 유형: 시각장애(DT002), 언어장애(DT004)
         disabilityTypeRepository.findAllByOrderBySortOrderAsc().stream()
                 .filter(t -> t.getCode().equals("DT002") || t.getCode().equals("DT004"))
                 .forEach(t -> userDisabilityTypeRepository.save(
                         UserDisabilityType.builder().user(profile).disabilityType(t).build()));
 
-        // 5. 의사소통 방식: 구어, 글자
         communicationMethodRepository.findAllByOrderBySortOrderAsc().stream()
                 .filter(m -> m.getName().equals("구어") || m.getName().equals("글자"))
                 .forEach(m -> userCommunicationMethodRepository.save(
                         UserCommunicationMethod.builder().user(profile).communicationMethod(m).build()));
 
-        // 6. 성향: 예민함, 산만함
         personalityTagRepository.findAllByOrderByIdAsc().stream()
                 .filter(t -> t.getName().equals("예민함") || t.getName().equals("산만함"))
                 .forEach(t -> userPersonalityTagRepository.save(
@@ -165,7 +159,6 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
-        // 1. users
         User user = userRepository.save(User.builder()
                 .email(email)
                 .passwordHash(passwordEncoder.encode("1"))
@@ -174,7 +167,6 @@ public class DataInitializer implements CommandLineRunner {
                 .status(UserStatus.ACTIVE)
                 .build());
 
-        // 2. caregiver_profiles
         CaregiverProfile profile = caregiverProfileRepository.save(CaregiverProfile.builder()
                 .user(user)
                 .fullName("활동지원사 테스트")
@@ -185,10 +177,7 @@ public class DataInitializer implements CommandLineRunner {
                 .experience("1-3년")
                 .serviceCategories("이동 보조,병원 동행,야간 보호")
                 .build());
-        // 가용시간 시드: available_time_slots(문자열)·CaregiverServiceRegion 제거(#15/#11)로 생략.
-        // caregiver_availability 시드가 필요하면 구조화 행으로 별도 추가한다.
 
-        // 3. 성향: 차분함, 친절함, 세심함, 인내심, 책임감, 적극성
         List<String> caregiverTagNames = List.of("차분함", "친절함", "세심함", "인내심", "책임감", "적극성");
         personalityTagRepository.findAllByOrderByIdAsc().stream()
                 .filter(t -> caregiverTagNames.contains(t.getName()))
