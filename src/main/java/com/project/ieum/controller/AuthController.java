@@ -68,23 +68,20 @@ public class AuthController {
             @PathVariable String type,
             @Valid @ModelAttribute("basicInfo") BasicInfoDTO basicInfo,
             BindingResult bindingResult,
-            HttpSession session,
-            Model model) {
+            Model model,
+            HttpSession session) {
 
-        // 유효성 검사 실패 시 userType 포함해서 폼 재렌더링
         if (bindingResult.hasErrors()) {
             model.addAttribute("userType", type);
             return "register/step1";
         }
 
-        // 이메일 중복 확인
         if (userService.existsByEmail(basicInfo.getEmail())) {
             bindingResult.rejectValue("email", "duplicate", "이미 사용 중인 이메일입니다.");
             model.addAttribute("userType", type);
             return "register/step1";
         }
 
-        // 전화번호 중복 확인
         if (userService.existsByPhone(basicInfo.getPhone())) {
             bindingResult.rejectValue("phone", "duplicate", "이미 사용 중인 전화번호입니다.");
             model.addAttribute("userType", type);
@@ -217,7 +214,6 @@ public class AuthController {
         RegistrationSessionDTO sessionData = getSessionOrRedirect(session);
         if (sessionData == null) return "redirect:/register/" + type + "/step1";
 
-        // 이전/완료 어느 방향이든 선택값을 세션에 저장
         sessionData.setPersonalityTags(personalityTagInfo);
 
         if ("back".equals(direction)) {
@@ -230,10 +226,15 @@ public class AuthController {
 
     @GetMapping("/{type}/complete")
     public String complete(@PathVariable String type, HttpSession session,
-                           RedirectAttributes ra) {
+                           RedirectAttributes redirectAttributes) {
         RegistrationSessionDTO sessionData = getSessionOrRedirect(session);
         if (sessionData == null) return "redirect:/register/" + type + "/step1";
 
+        return completeRegistration(type, sessionData, session, redirectAttributes);
+    }
+
+    private String completeRegistration(String type, RegistrationSessionDTO sessionData,
+                                        HttpSession session, RedirectAttributes redirectAttributes) {
         try {
             if ("disabled".equals(type)) {
                 userService.registerDisabledUser(sessionData);
@@ -242,11 +243,11 @@ public class AuthController {
             }
 
             session.removeAttribute(REGISTRATION_SESSION_KEY);
-            return "register/complete";
+            return "redirect:/";
 
         } catch (Exception e) {
             log.error("회원가입 실패: {}", e.getMessage(), e);
-            ra.addFlashAttribute("errorMessage",
+            redirectAttributes.addFlashAttribute("errorMessage",
                     "회원가입 처리 중 오류가 발생했습니다: " + e.getMessage());
             return "redirect:/register/" + type + "/step4";
         }

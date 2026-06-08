@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
         String errorMessage = e.getBindingResult().getFieldErrors().stream()
                 .map(FieldError::getDefaultMessage)
                 .collect(Collectors.joining(", "));
-        
+
         log.warn("Validation failed: errors={}", errorMessage);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -67,6 +67,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResponse.of("INVALID_ARGUMENT", e.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException e) {
+        log.warn("Illegal state: message={}", e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.of("INVALID_STATE", e.getMessage()));
     }
 
     // favicon.ico 등 정적 리소스 미존재 요청 — ERROR 로그 방지
