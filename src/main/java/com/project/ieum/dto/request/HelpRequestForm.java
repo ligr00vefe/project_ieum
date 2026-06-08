@@ -7,8 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,21 +23,29 @@ public class HelpRequestForm {
     @NotNull(message = "서비스 종류를 선택해주세요.")
     private Long serviceCategoryId;
 
-    @NotNull(message = "지역을 선택해주세요.")
-    private Long regionId;
+    @NotNull(message = "희망 시작 일시를 선택해주세요.")
+    @FutureOrPresent(message = "희망 일시는 현재 이후여야 합니다.")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime desiredStartDatetime;
 
-    @NotNull(message = "희망 날짜를 선택해주세요.")
-    @FutureOrPresent(message = "희망 날짜는 오늘 이후여야 합니다.")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate desiredDate;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime desiredEndDatetime;
 
-    @DateTimeFormat(pattern = "HH:mm")
-    private LocalTime desiredStartTime;
-
-    @DateTimeFormat(pattern = "HH:mm")
-    private LocalTime desiredEndTime;
+    @NotBlank(message = "도로명주소를 입력해주세요.")
+    private String roadAddress;
 
     private String addressDetail;
+
+    @NotBlank(message = "시/도를 입력해주세요.")
+    private String sido;
+
+    @NotBlank(message = "시/군/구를 입력해주세요.")
+    private String sigungu;
+
+    private String bname;
+    private String zonecode;
+    private String bcode;
+
     private String specialNotes;
     private List<Long> personalityTagIds = new ArrayList<>();
 }

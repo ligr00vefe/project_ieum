@@ -8,13 +8,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long> {
+public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long>, com.project.ieum.repository.search.HelpRequestSearchRepository {
 
-    // (#9) DB unique(requester, desired_start_datetime) 제거에 따른 시간대 겹침 검사 지원 조회.
+    // (#9) 시간대 겹침 검사
     @Query("""
         select (count(hr) > 0) from HelpRequest hr
         where hr.requester = :requester
@@ -26,4 +29,8 @@ public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long> 
                               @Param("start") LocalDateTime start,
                               @Param("end") LocalDateTime end,
                               @Param("activeStatuses") List<HelpRequestStatus> activeStatuses);
+
+    List<HelpRequest> findByRequesterOrderByCreatedAtDesc(UserProfile requester);
+
+    Page<HelpRequest> findByStatusOrderByDesiredStartDatetimeAscIdDesc(HelpRequestStatus status, Pageable pageable);
 }

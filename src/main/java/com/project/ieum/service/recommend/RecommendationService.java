@@ -1,13 +1,11 @@
 package com.project.ieum.service.recommend;
 
-import com.project.ieum.dto.search.CaregiverSearchCondition;
 import com.project.ieum.dto.recommend.CaregiverRecommendationResponse;
 import com.project.ieum.dto.recommend.RecommendationScoreDetail;
+import com.project.ieum.dto.search.CaregiverSearchCondition;
 import com.project.ieum.entity.PersonalityTag;
-import com.project.ieum.entity.caregiver.CaregiverAvailability;
 import com.project.ieum.entity.caregiver.CaregiverPersonalityTag;
 import com.project.ieum.entity.caregiver.CaregiverProfile;
-import com.project.ieum.entity.caregiver.CaregiverServiceRegion;
 import com.project.ieum.entity.request.HelpRequest;
 import com.project.ieum.entity.request.HelpRequestPersonalityTag;
 import com.project.ieum.repository.*;
@@ -30,7 +28,6 @@ public class RecommendationService {
 
     private final HelpRequestRepository helpRequestRepository;
     private final CaregiverProfileRepository caregiverProfileRepository;
-    private final CaregiverServiceRegionRepository caregiverServiceRegionRepository;
     private final CaregiverAvailabilityRepository caregiverAvailabilityRepository;
     private final CaregiverPersonalityTagRepository caregiverPersonalityTagRepository;
     private final HelpRequestPersonalityTagRepository helpRequestPersonalityTagRepository;
@@ -40,10 +37,13 @@ public class RecommendationService {
                 .orElseThrow(() -> new IllegalArgumentException("도움 요청을 찾을 수 없습니다."));
 
         CaregiverSearchCondition condition = new CaregiverSearchCondition();
-        condition.setRegionId(request.getRegion().getId());
-        condition.setDayOfWeek((short) (request.getDesiredDate().getDayOfWeek().getValue() % 7));
-        condition.setStartTime(request.getDesiredStartTime());
-        condition.setEndTime(request.getDesiredEndTime());
+        if (request.getDesiredStartDatetime() != null) {
+            condition.setDayOfWeek((short) (request.getDesiredStartDatetime().getDayOfWeek().getValue() % 7));
+            condition.setStartTime(request.getDesiredStartDatetime().toLocalTime());
+            if (request.getDesiredEndDatetime() != null) {
+                condition.setEndTime(request.getDesiredEndDatetime().toLocalTime());
+            }
+        }
 
         List<CaregiverProfile> candidates = caregiverProfileRepository
                 .searchCaregivers(condition, PageRequest.of(0, Math.max(limit * 5, 30)))
@@ -88,17 +88,24 @@ public class RecommendationService {
                 .build();
     }
 
+    // 서비스권역 정규화(#11) 이후 지역 매칭은 전역 검색으로 전환됨
+    // TODO(region-score): 근거리 정렬(위/경도 거리)로 대체 예정
     private int calculateRegionScore(HelpRequest request, CaregiverProfile caregiver) {
-        return caregiverServiceRegionRepository.findByCaregiver_UserId(caregiver.getUserId()).stream()
-                .anyMatch(region -> region.getRegion().getId().equals(request.getRegion().getId())) ? 30 : 0;
+        return 0;
     }
 
     private int calculateTimeScore(HelpRequest request, CaregiverProfile caregiver) {
-        Short day = (short) (request.getDesiredDate().getDayOfWeek().getValue() % 7);
-        LocalTime start = request.getDesiredStartTime();
-        LocalTime end = request.getDesiredEndTime();
+        if (request.getDesiredStartDatetime() == null) {
+            return 10;
+        }
 
-        if (start == null || end == null) {
+        Short day = (short) (request.getDesiredStartDatetime().getDayOfWeek().getValue() % 7);
+        LocalTime start = request.getDesiredStartDatetime().toLocalTime();
+        LocalTime end = request.getDesiredEndDatetime() != null
+                ? request.getDesiredEndDatetime().toLocalTime()
+                : null;
+
+        if (end == null) {
             return 10;
         }
 
@@ -114,7 +121,7 @@ public class RecommendationService {
             return 0;
         }
 
-        Set<Long> caregiverTagIds = caregiverPersonalityTagRepository.findByCaregiver_UserId(caregiver.getUserId()).stream()
+        Set<Long> caregiverTagIds = caregiverPersonalityTagRepository.findByCaregiver(caregiver).stream()
                 .map(CaregiverPersonalityTag::getTag)
                 .map(PersonalityTag::getId)
                 .collect(Collectors.toSet());
