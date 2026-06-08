@@ -25,9 +25,10 @@ public class UserController {
     private final MasterDataService masterDataService;
 
     @GetMapping("/")
-    public String index(Model model) {
-        model.addAttribute("title", "이음");
-        return "index";
+    public String home(Model model) {
+        model.addAttribute("title", "메인");
+        model.addAttribute("content", "home/index");
+        return "layout/layout";
     }
 
     @GetMapping("/healthz")
@@ -42,24 +43,24 @@ public class UserController {
         return "ok";
     }
 
-    @GetMapping("/how-to-use")
-    public String howToUse(Model model) {
-        model.addAttribute("content", "guide/how-to-use");
-        model.addAttribute("title", "이용방법");
+    @GetMapping("/safe-meeting")
+    public String safeMeeting(Model model) {
+        model.addAttribute("content", "guide/safe-meeting");
+        model.addAttribute("title", "첫만남 안심가이드");
         return "layout/layout";
     }
 
-    @GetMapping("/disabled/home")
-    public String disabledHome(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        model.addAttribute("email", userDetails.getUsername());
-        return "home/disabled-home";
-    }
-
-    @GetMapping("/caregiver/home")
-    public String caregiverHome(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        model.addAttribute("email", userDetails.getUsername());
-        return "home/caregiver-home";
-    }
+//    @GetMapping("/disabled/home")
+//    public String disabledHome(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+//        model.addAttribute("email", userDetails.getUsername());
+//        return "home/disabled-home";
+//    }
+//
+//    @GetMapping("/caregiver/home")
+//    public String caregiverHome(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+//        model.addAttribute("email", userDetails.getUsername());
+//        return "home/caregiver-home";
+//    }
 
     @GetMapping("/mypage")
     public String mypage(@AuthenticationPrincipal UserDetails userDetails) {
