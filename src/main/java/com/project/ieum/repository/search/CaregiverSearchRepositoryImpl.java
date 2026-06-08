@@ -6,7 +6,6 @@ import com.project.ieum.entity.caregiver.CaregiverProfile;
 import com.project.ieum.entity.caregiver.QCaregiverAvailability;
 import com.project.ieum.entity.caregiver.QCaregiverPersonalityTag;
 import com.project.ieum.entity.caregiver.QCaregiverProfile;
-import com.project.ieum.entity.caregiver.QCaregiverServiceRegion;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,6 @@ public class CaregiverSearchRepositoryImpl implements CaregiverSearchRepository 
     @Override
     public Page<CaregiverProfile> searchCaregivers(CaregiverSearchCondition condition, Pageable pageable) {
         QCaregiverProfile caregiver = QCaregiverProfile.caregiverProfile;
-        QCaregiverServiceRegion serviceRegion = QCaregiverServiceRegion.caregiverServiceRegion;
         QCaregiverAvailability availability = QCaregiverAvailability.caregiverAvailability;
         QCaregiverPersonalityTag personalityTag = QCaregiverPersonalityTag.caregiverPersonalityTag;
 
@@ -37,9 +35,7 @@ public class CaregiverSearchRepositoryImpl implements CaregiverSearchRepository 
         if (condition.getHasCertification() != null) {
             where.and(caregiver.hasCertification.eq(condition.getHasCertification()));
         }
-        if (condition.getRegionId() != null) {
-            where.and(serviceRegion.region.id.eq(condition.getRegionId()));
-        }
+        // 서비스권역 정규화(#11)로 regionId 필터 제거 — 전역 검색으로 전환
         if (condition.getDayOfWeek() != null) {
             where.and(availability.dayOfWeek.eq(condition.getDayOfWeek()));
         }
@@ -54,7 +50,6 @@ public class CaregiverSearchRepositoryImpl implements CaregiverSearchRepository 
         List<CaregiverProfile> content = queryFactory
                 .selectDistinct(caregiver)
                 .from(caregiver)
-                .leftJoin(serviceRegion).on(serviceRegion.caregiver.eq(caregiver))
                 .leftJoin(availability).on(availability.caregiver.eq(caregiver))
                 .leftJoin(personalityTag).on(personalityTag.caregiver.eq(caregiver))
                 .where(where)
@@ -66,7 +61,6 @@ public class CaregiverSearchRepositoryImpl implements CaregiverSearchRepository 
         Long total = queryFactory
                 .select(caregiver.countDistinct())
                 .from(caregiver)
-                .leftJoin(serviceRegion).on(serviceRegion.caregiver.eq(caregiver))
                 .leftJoin(availability).on(availability.caregiver.eq(caregiver))
                 .leftJoin(personalityTag).on(personalityTag.caregiver.eq(caregiver))
                 .where(where)
