@@ -1,8 +1,8 @@
 package com.project.ieum.repository.search;
 
 import com.project.ieum.dto.search.HelpRequestSearchCondition;
-import com.project.ieum.entity.request.QHelpRequest;
 import com.project.ieum.entity.request.HelpRequest;
+import com.project.ieum.entity.request.QHelpRequest;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -22,17 +22,15 @@ public class HelpRequestSearchRepositoryImpl implements HelpRequestSearchReposit
         QHelpRequest request = QHelpRequest.helpRequest;
         BooleanBuilder where = new BooleanBuilder();
 
-        if (condition.getRegionId() != null) {
-            where.and(request.region.id.eq(condition.getRegionId()));
-        }
+        // regionId 필터 제거 — 서비스권역 정규화(#11)로 region FK 삭제됨
         if (condition.getServiceCategoryId() != null) {
             where.and(request.serviceCategory.id.eq(condition.getServiceCategoryId()));
         }
         if (condition.getFromDate() != null) {
-            where.and(request.desiredDate.goe(condition.getFromDate()));
+            where.and(request.desiredStartDatetime.goe(condition.getFromDate().atStartOfDay()));
         }
         if (condition.getToDate() != null) {
-            where.and(request.desiredDate.loe(condition.getToDate()));
+            where.and(request.desiredStartDatetime.loe(condition.getToDate().atTime(23, 59, 59)));
         }
         if (condition.getStatus() != null) {
             where.and(request.status.eq(condition.getStatus()));
@@ -41,10 +39,9 @@ public class HelpRequestSearchRepositoryImpl implements HelpRequestSearchReposit
         List<HelpRequest> content = queryFactory
                 .selectFrom(request)
                 .leftJoin(request.requester).fetchJoin()
-                .leftJoin(request.region).fetchJoin()
                 .leftJoin(request.serviceCategory).fetchJoin()
                 .where(where)
-                .orderBy(request.desiredDate.asc(), request.id.desc())
+                .orderBy(request.desiredStartDatetime.asc(), request.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
