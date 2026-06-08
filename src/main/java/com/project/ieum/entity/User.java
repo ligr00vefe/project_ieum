@@ -1,5 +1,6 @@
 package com.project.ieum.entity;
 
+import com.project.ieum.entity.profile.Profile;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -52,6 +53,11 @@ public class User extends BasicEntity {
   // 삭제 시각 (soft delete)
   @Column(name = "deleted_at")
   private LocalDateTime deletedAt;
+
+  // 프로필 — USER/CAREGIVER 중 하나만 (ADMIN은 null 허용)
+  @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+  @ToString.Exclude
+  private Profile profile;
 
   public void changeEmail(String email) { this.email = email; }
   public void changePhone(String phone) { this.phone = phone; }

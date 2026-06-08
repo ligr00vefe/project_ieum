@@ -1,10 +1,14 @@
 package com.project.ieum.exception;
 
-import org.springframework.http.HttpStatus;
-
 public class ForbiddenException extends BusinessException {
 
+    private static final String DEFAULT_CODE = "FORBIDDEN";
+
     public ForbiddenException(String message) {
-        super("FORBIDDEN", message, HttpStatus.FORBIDDEN);
+        super(DEFAULT_CODE, message);
+    }
+
+    public ForbiddenException(String message, Throwable cause) {
+        super(DEFAULT_CODE, message, cause);
     }
 }

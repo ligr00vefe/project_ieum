@@ -1,11 +1,14 @@
 package com.project.ieum.config;
 
 import com.project.ieum.entity.UserRole;
+import com.project.ieum.service.CustomUserDetailsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,18 +18,32 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final CustomUserDetailsService userDetailsService;
+
+    /** favicon, 정적 자원은 Security 필터 체인 자체를 건너뜀 */
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> web.ignoring()
+                .requestMatchers("/favicon.ico", "/css/**", "/js/**", "/images/**", "/assets/**", "/uploads/**");
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             AuthenticationSuccessHandler authenticationSuccessHandler) throws Exception {
         http
+            .userDetailsService(userDetailsService)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                         "/",
                         "/login",
                         "/register/**",
+                        "/how-to-use",
+                        "/safe-meeting",
+                        "/contact",
                         "/css/**",
                         "/js/**",
                         "/images/**",
@@ -35,6 +52,9 @@ public class SecurityConfig {
                         "/readyz",
                         "/error").permitAll()
                 .requestMatchers("/admin/**").hasRole(UserRole.ADMIN.name())
+                .requestMatchers("/disabled/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/caregiver/**").hasAnyRole("CAREGIVER", "ADMIN")
+                .requestMatchers("/chat/**", "/matching/**", "/schedule/**", "/mypage/**").authenticated()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

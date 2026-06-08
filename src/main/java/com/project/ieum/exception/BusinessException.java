@@ -1,23 +1,19 @@
 package com.project.ieum.exception;
 
-import org.springframework.http.HttpStatus;
+import lombok.Getter;
 
+@Getter
 public class BusinessException extends RuntimeException {
 
-    private final HttpStatus status;
     private final String code;
 
-    public BusinessException(String code, String message, HttpStatus status) {
+    public BusinessException(String code, String message) {
         super(message);
         this.code = code;
-        this.status = status;
     }
 
-    public HttpStatus getStatus() {
-        return status;
-    }
-
-    public String getCode() {
-        return code;
+    public BusinessException(String code, String message, Throwable cause) {
+        super(message, cause);
+        this.code = code;
     }
 }

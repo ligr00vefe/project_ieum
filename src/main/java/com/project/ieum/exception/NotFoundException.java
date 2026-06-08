@@ -1,10 +1,14 @@
 package com.project.ieum.exception;
 
-import org.springframework.http.HttpStatus;
-
 public class NotFoundException extends BusinessException {
 
+    private static final String DEFAULT_CODE = "NOT_FOUND";
+
     public NotFoundException(String message) {
-        super("NOT_FOUND", message, HttpStatus.NOT_FOUND);
+        super(DEFAULT_CODE, message);
+    }
+
+    public NotFoundException(String message, Throwable cause) {
+        super(DEFAULT_CODE, message, cause);
     }
 }
