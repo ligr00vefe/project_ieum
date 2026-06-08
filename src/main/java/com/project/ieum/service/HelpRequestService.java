@@ -2,7 +2,6 @@ package com.project.ieum.service;
 
 import com.project.ieum.dto.request.HelpRequestForm;
 import com.project.ieum.entity.PersonalityTag;
-import com.project.ieum.entity.Region;
 import com.project.ieum.entity.User;
 import com.project.ieum.entity.UserRole;
 import com.project.ieum.entity.request.HelpRequest;
@@ -20,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -30,7 +30,6 @@ public class HelpRequestService {
     private final HelpRequestRepository helpRequestRepository;
     private final UserProfileRepository userProfileRepository;
     private final ServiceCategoryRepository serviceCategoryRepository;
-    private final RegionRepository regionRepository;
     private final PersonalityTagRepository personalityTagRepository;
     private final HelpRequestPersonalityTagRepository helpRequestPersonalityTagRepository;
     private final CurrentUserService currentUserService;
@@ -40,21 +39,32 @@ public class HelpRequestService {
         UserProfile requester = userProfileRepository.findById(currentUser.getId())
                 .orElseThrow(() -> new NotFoundException("이용자 프로필을 찾을 수 없습니다."));
 
-        if (helpRequestRepository.existsByRequester_UserIdAndDesiredDateAndStatusNot(
-                currentUser.getId(), form.getDesiredDate(), HelpRequestStatus.CANCELLED)) {
-            throw new IllegalStateException("같은 날짜에는 하나의 도움 요청만 작성할 수 있습니다.");
+        // 시간대 겹침 검사
+        LocalDateTime start = form.getDesiredStartDatetime();
+        LocalDateTime end = form.getDesiredEndDatetime() != null
+                ? form.getDesiredEndDatetime()
+                : start.plusHours(1);
+
+        if (helpRequestRepository.existsOverlapping(
+                requester, start, end,
+                List.of(HelpRequestStatus.OPEN, HelpRequestStatus.MATCHED, HelpRequestStatus.IN_PROGRESS))) {
+            throw new IllegalStateException("해당 시간대에 이미 다른 도움 요청이 있습니다.");
         }
 
         HelpRequest helpRequest = HelpRequest.builder()
                 .requester(requester)
                 .serviceCategory(getServiceCategory(form.getServiceCategoryId()))
-                .region(getRegion(form.getRegionId()))
                 .title(form.getTitle())
                 .body(form.getBody())
-                .desiredDate(form.getDesiredDate())
-                .desiredStartTime(form.getDesiredStartTime())
-                .desiredEndTime(form.getDesiredEndTime())
+                .desiredStartDatetime(start)
+                .desiredEndDatetime(form.getDesiredEndDatetime())
+                .roadAddress(form.getRoadAddress())
                 .addressDetail(form.getAddressDetail())
+                .sido(form.getSido())
+                .sigungu(form.getSigungu())
+                .bname(form.getBname())
+                .zonecode(form.getZonecode())
+                .bcode(form.getBcode())
                 .specialNotes(form.getSpecialNotes())
                 .status(HelpRequestStatus.OPEN)
                 .build();
@@ -73,13 +83,14 @@ public class HelpRequestService {
 
         helpRequest.updateDetails(
                 getServiceCategory(form.getServiceCategoryId()),
-                getRegion(form.getRegionId()),
                 form.getTitle(),
                 form.getBody(),
-                form.getDesiredDate(),
-                form.getDesiredStartTime(),
-                form.getDesiredEndTime(),
+                form.getDesiredStartDatetime(),
+                form.getDesiredEndDatetime(),
+                form.getRoadAddress(),
                 form.getAddressDetail(),
+                form.getSido(),
+                form.getSigungu(),
                 form.getSpecialNotes());
         replaceTags(helpRequest, form.getPersonalityTagIds());
         return helpRequest;
@@ -112,12 +123,14 @@ public class HelpRequestService {
     @Transactional(readOnly = true)
     public List<HelpRequest> getMyRequests() {
         User currentUser = requireRole(UserRole.USER);
-        return helpRequestRepository.findByRequester_UserIdOrderByCreatedAtDesc(currentUser.getId());
+        UserProfile requester = userProfileRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new NotFoundException("이용자 프로필을 찾을 수 없습니다."));
+        return helpRequestRepository.findByRequesterOrderByCreatedAtDesc(requester);
     }
 
     @Transactional(readOnly = true)
     public Page<HelpRequest> getOpenRequests(Pageable pageable) {
-        return helpRequestRepository.findByStatusOrderByDesiredDateAscIdDesc(HelpRequestStatus.OPEN, pageable);
+        return helpRequestRepository.findByStatusOrderByDesiredStartDatetimeAscIdDesc(HelpRequestStatus.OPEN, pageable);
     }
 
     public HelpRequestForm toForm(HelpRequest helpRequest) {
@@ -125,11 +138,15 @@ public class HelpRequestService {
         form.setTitle(helpRequest.getTitle());
         form.setBody(helpRequest.getBody());
         form.setServiceCategoryId(helpRequest.getServiceCategory().getId());
-        form.setRegionId(helpRequest.getRegion().getId());
-        form.setDesiredDate(helpRequest.getDesiredDate());
-        form.setDesiredStartTime(helpRequest.getDesiredStartTime());
-        form.setDesiredEndTime(helpRequest.getDesiredEndTime());
+        form.setDesiredStartDatetime(helpRequest.getDesiredStartDatetime());
+        form.setDesiredEndDatetime(helpRequest.getDesiredEndDatetime());
+        form.setRoadAddress(helpRequest.getRoadAddress());
         form.setAddressDetail(helpRequest.getAddressDetail());
+        form.setSido(helpRequest.getSido());
+        form.setSigungu(helpRequest.getSigungu());
+        form.setBname(helpRequest.getBname());
+        form.setZonecode(helpRequest.getZonecode());
+        form.setBcode(helpRequest.getBcode());
         form.setSpecialNotes(helpRequest.getSpecialNotes());
         form.setPersonalityTagIds(helpRequestPersonalityTagRepository.findByHelpRequest_Id(helpRequest.getId())
                 .stream()
@@ -164,10 +181,5 @@ public class HelpRequestService {
     private ServiceCategory getServiceCategory(Long id) {
         return serviceCategoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("서비스 종류를 찾을 수 없습니다."));
-    }
-
-    private Region getRegion(Long id) {
-        return regionRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("지역을 찾을 수 없습니다."));
     }
 }
