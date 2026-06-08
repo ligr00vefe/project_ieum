@@ -17,3 +17,7 @@
 - 앱의 실제 context-path는 `/`인데 시작 클래스에서 `http://localhost:8080/ieum`을 직접 출력하고 있었다.
 - Controller 매핑과 DB 흐름은 정상이라 원본 구조는 유지하고, 시작 로그만 실제 `server.port`와 `server.servlet.context-path` 기준으로 출력하도록 바꿨다.
 - 실행 확인은 `./gradlew.bat test`와 임시 포트 `18082`의 `/`, `/login`, `/healthz`, `/readyz` 응답으로 검증했다.
+## 2026-06-08 main 병합 검증
+- 같은 URL을 여러 Controller가 처리하면 Spring MVC가 `Ambiguous mapping`으로 시작하지 못한다.
+- `@DataJpaTest`는 필요한 설정만 얇게 올리므로 Querydsl custom repository 테스트에서는 `QuerydslConfig`를 명시적으로 import해야 한다.
+- 회원가입 완료처럼 DB 상태를 바꾸는 흐름은 GET 완료 페이지가 아니라 마지막 POST 요청에서 처리하는 편이 테스트와 보안 관점에서 안전하다.

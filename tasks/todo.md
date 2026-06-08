@@ -23,3 +23,8 @@
 - [x] Gradle 테스트와 bootRun으로 실행 상태 확인
 - [x] 시작 로그의 잘못된 접속 URL 수정
 - [x] 수정 후 테스트 및 임시 실행 확인
+## 2026-06-08 main 최종 반영
+- [x] origin/main 최신 상태 확인
+- [x] origin/kimjiwon/dev 최신 커밋을 main에 병합
+- [x] /login 중복 매핑과 Querydsl 테스트 설정 보완
+- [x] 회원가입 마지막 POST 단계에서 UserService 가입 처리로 정리

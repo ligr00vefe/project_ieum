@@ -14,8 +14,4 @@ public class MainController {
     return "layout/layout";
   }
 
-  @GetMapping("/login")
-  public String login() {
-    return "auth/login";
-  }
 }
