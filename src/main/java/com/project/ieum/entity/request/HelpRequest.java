@@ -110,22 +110,24 @@ public class HelpRequest extends BasicEntity {
 
   public void updateDetails(
       ServiceCategory serviceCategory,
-      Region region,
       String title,
       String body,
-      LocalDate desiredDate,
-      LocalTime desiredStartTime,
-      LocalTime desiredEndTime,
+      LocalDateTime desiredStartDatetime,
+      LocalDateTime desiredEndDatetime,
+      String roadAddress,
       String addressDetail,
+      String sido,
+      String sigungu,
       String specialNotes) {
     this.serviceCategory = serviceCategory;
-    this.region = region;
     this.title = title;
     this.body = body;
-    this.desiredDate = desiredDate;
-    this.desiredStartTime = desiredStartTime;
-    this.desiredEndTime = desiredEndTime;
+    this.desiredStartDatetime = desiredStartDatetime;
+    this.desiredEndDatetime = desiredEndDatetime;
+    this.roadAddress = roadAddress;
     this.addressDetail = addressDetail;
+    this.sido = sido;
+    this.sigungu = sigungu;
     this.specialNotes = specialNotes;
   }
 }
