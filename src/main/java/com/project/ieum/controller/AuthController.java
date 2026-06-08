@@ -209,7 +209,8 @@ public class AuthController {
             @PathVariable String type,
             @ModelAttribute PersonalityTagDTO personalityTagInfo,
             @RequestParam(defaultValue = "forward") String direction,
-            HttpSession session) {
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
 
         RegistrationSessionDTO sessionData = getSessionOrRedirect(session);
         if (sessionData == null) return "redirect:/register/" + type + "/step1";
@@ -219,7 +220,7 @@ public class AuthController {
         if ("back".equals(direction)) {
             return "redirect:/register/" + type + "/step3";
         }
-        return "redirect:/register/" + type + "/complete";
+        return completeRegistration(type, sessionData, session, redirectAttributes);
     }
 
     // ─── 완료 ───────────────────────────────────────────────────────────────────
@@ -228,7 +229,7 @@ public class AuthController {
     public String complete(@PathVariable String type, HttpSession session,
                            RedirectAttributes redirectAttributes) {
         RegistrationSessionDTO sessionData = getSessionOrRedirect(session);
-        if (sessionData == null) return "redirect:/register/" + type + "/step1";
+        if (sessionData == null) return "redirect:/";
 
         return completeRegistration(type, sessionData, session, redirectAttributes);
     }
