@@ -1,7 +1,7 @@
 package com.project.ieum.config;
 
 import com.project.ieum.entity.UserRole;
-import com.project.ieum.service.CustomUserDetailsService;
+import com.project.ieum.service.security.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
