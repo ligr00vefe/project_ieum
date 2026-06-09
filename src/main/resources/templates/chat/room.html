@@ -5,12 +5,15 @@
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
     <div class="flex gap-5" style="height: calc(100vh - 160px); min-height: 600px;">
 
-        <!-- 왼쪽: 프로필 카드 (장애인 뷰) -->
+        <!-- 왼쪽: 프로필 카드 (장애인 뷰, 모바일에서 숨김) -->
         <th:block th:if="${isUser}">
-        <div class="w-72 flex-shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col items-center text-center">
+        <div class="chat-profile-sidebar w-72 flex-shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col items-center text-center">
             <!-- 아바타 -->
-            <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-2xl mb-3"
-                 th:text="${partnerInitial ?: '박'}">박</div>
+            <div class="w-28 h-28 rounded-2xl overflow-hidden mb-3 flex-shrink-0 shadow-sm">
+                <img th:src="${partnerProfileImage ?: '/assets/profile_thumb_img/m01_thumb.png'}"
+                     alt="프로필" class="w-full h-full object-cover object-top"
+                     style="transform:translateZ(0);">
+            </div>
             <!-- 이름 / 직함 -->
             <p class="text-lg font-bold text-gray-900" th:text="${partnerName ?: '박서연'}">박서연</p>
             <p class="text-sm text-gray-400 mt-0.5 mb-4" th:text="${partnerSubtitle ?: '활동지원사'}">사회복지사 2급 · 경력 5년</p>
@@ -58,8 +61,11 @@
                     </a>
                 </th:block>
 
-                <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm flex-shrink-0"
-                     th:text="${partnerInitial ?: '박'}">박</div>
+                <div class="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 shadow-sm">
+                    <img th:src="${partnerProfileImage ?: '/assets/profile_thumb_img/m01_thumb.png'}"
+                         alt="프로필" class="w-full h-full object-cover object-top"
+                         style="transform:translateZ(0);">
+                </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-bold text-gray-900" th:text="${partnerName ?: '박서연 활동지원사'}">박서연 활동지원사</p>
                     <div class="flex items-center gap-1.5 mt-0.5">
@@ -100,8 +106,11 @@
 
                 <!-- 상대방 메시지 -->
                 <div class="flex items-end gap-2.5">
-                    <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xs flex-shrink-0 mb-1"
-                         th:text="${partnerInitial ?: '박'}">박</div>
+                    <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 mb-1 shadow-sm">
+                        <img th:src="${partnerProfileImage ?: '/assets/profile_thumb_img/m01_thumb.png'}"
+                             alt="프로필" class="w-full h-full object-cover object-top"
+                             style="transform:translateZ(0);">
+                    </div>
                     <div class="max-w-[70%]">
                         <div class="bg-gray-50 border border-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
                             <p class="text-sm text-gray-800">안녕하세요 김지원님! 토요일 외래진료 동행 가능합니다.</p>
@@ -111,8 +120,11 @@
                 </div>
 
                 <div class="flex items-end gap-2.5">
-                    <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xs flex-shrink-0 mb-1"
-                         th:text="${partnerInitial ?: '박'}">박</div>
+                    <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 mb-1 shadow-sm">
+                        <img th:src="${partnerProfileImage ?: '/assets/profile_thumb_img/m01_thumb.png'}"
+                             alt="프로필" class="w-full h-full object-cover object-top"
+                             style="transform:translateZ(0);">
+                    </div>
                     <div class="max-w-[70%]">
                         <div class="bg-gray-50 border border-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
                             <p class="text-sm text-gray-800">수어 통역 자격증도 있어서 진료 시 의사소통 도와드릴 수 있어요 😊</p>
@@ -132,8 +144,11 @@
                 </div>
 
                 <div class="flex items-end gap-2.5">
-                    <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xs flex-shrink-0 mb-1"
-                         th:text="${partnerInitial ?: '박'}">박</div>
+                    <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 mb-1 shadow-sm">
+                        <img th:src="${partnerProfileImage ?: '/assets/profile_thumb_img/m01_thumb.png'}"
+                             alt="프로필" class="w-full h-full object-cover object-top"
+                             style="transform:translateZ(0);">
+                    </div>
                     <div class="max-w-[70%]">
                         <div class="bg-gray-50 border border-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
                             <p class="text-sm text-gray-800">물론입니다. 처방전 픽업까지 함께 가요. 진료 끝나고 잠깐 쉬실 카페도 근처에 있어요.</p>
@@ -197,6 +212,12 @@
         </div>
     </div>
 </div>
+
+<style>
+@media (max-width: 767px) {
+    .chat-profile-sidebar { display: none !important; }
+}
+</style>
 
 <script>
 function handleKeydown(e) {

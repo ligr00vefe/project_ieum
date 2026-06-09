@@ -43,4 +43,6 @@ public class CaregiverEditDTO {
     private List<Long> regionIds;
 
     private List<Long> personalityTagIds;
+
+    private String profileImageUrl;
 }

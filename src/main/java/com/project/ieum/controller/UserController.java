@@ -75,6 +75,9 @@ public class UserController {
     public String disabledMypage(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
         model.addAttribute("userEmail", user.getEmail());
+        model.addAttribute("userName", userService.getDisplayName(user));
+        model.addAttribute("profileImageUrl", userService.getProfileImageUrl(user));
+        model.addAttribute("profileThumbUrl", userService.getProfileThumbUrl(user));
         model.addAttribute("content", "disabled/mypage");
         model.addAttribute("title", "마이페이지");
         return "layout/layout";
@@ -84,6 +87,9 @@ public class UserController {
     public String caregiverMypage(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
         model.addAttribute("userEmail", user.getEmail());
+        model.addAttribute("userName", userService.getDisplayName(user));
+        model.addAttribute("profileImageUrl", userService.getProfileImageUrl(user));
+        model.addAttribute("profileThumbUrl", userService.getProfileThumbUrl(user));
         model.addAttribute("content", "caregiver/mypage");
         model.addAttribute("title", "마이페이지");
         return "layout/layout";
@@ -122,9 +128,10 @@ public class UserController {
             @AuthenticationPrincipal UserDetails userDetails,
             @ModelAttribute("editDTO") DisabledEditDTO editDTO,
             @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestParam(value = "presetImage", required = false) String presetImage,
             RedirectAttributes redirectAttributes) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
-        userService.updateDisabledUser(user, editDTO, profileImage);
+        userService.updateDisabledUser(user, editDTO, profileImage, presetImage);
         redirectAttributes.addFlashAttribute("successMessage", "회원정보가 수정되었습니다.");
         return "redirect:/disabled/mypage";
     }
@@ -150,9 +157,10 @@ public class UserController {
             @AuthenticationPrincipal UserDetails userDetails,
             @ModelAttribute("editDTO") CaregiverEditDTO editDTO,
             @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestParam(value = "presetImage", required = false) String presetImage,
             RedirectAttributes redirectAttributes) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
-        userService.updateCaregiverUser(user, editDTO, profileImage);
+        userService.updateCaregiverUser(user, editDTO, profileImage, presetImage);
         redirectAttributes.addFlashAttribute("successMessage", "회원정보가 수정되었습니다.");
         return "redirect:/caregiver/mypage";
     }

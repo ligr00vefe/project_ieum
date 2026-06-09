@@ -12,10 +12,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        Path uploadDir = Paths.get("uploads/profiles");
-        String uploadPath = uploadDir.toFile().getAbsolutePath();
-
         registry.addResourceHandler("/uploads/profiles/**")
-                .addResourceLocations("file:" + uploadPath + "/");
+                .addResourceLocations("file:" + Paths.get("uploads/profiles").toAbsolutePath() + "/");
+        registry.addResourceHandler("/uploads/profile_custom/**")
+                .addResourceLocations("file:" + Paths.get("uploads/profile_custom").toAbsolutePath() + "/");
+        registry.addResourceHandler("/uploads/profile_thumb/**")
+                .addResourceLocations("file:" + Paths.get("uploads/profile_thumb").toAbsolutePath() + "/");
     }
 }
