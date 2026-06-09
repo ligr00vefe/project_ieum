@@ -22,7 +22,6 @@ public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long> 
     // 같은 요청자의 활성 요청 중 후보 구간 [start, end)와 시간대가 겹치는 건이 있는지 검사.
     // 겹침 조건: 기존.start < 후보.end  AND  후보.start < coalesce(기존.end, 기존.start)
     // 활성 상태(activeStatuses)만 충돌 대상으로 본다(COMPLETED/CLOSED 제외 권장).
-    // TODO(HelpRequestService): 생성/수정 시 이 메서드로 겹침을 확인하고 도메인 예외 발행.
     @Query("""
         select (count(hr) > 0) from HelpRequest hr
         where hr.requester = :requester
@@ -36,10 +35,11 @@ public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long> 
                               @Param("activeStatuses") List<HelpRequestStatus> activeStatuses);
 
     // 도움 요청 리스트 — 특정 상태를 시작시각 오름차순으로(페이지네이션).
+    @EntityGraph(attributePaths = {"serviceCategory"})
     Page<HelpRequest> findByStatusOrderByDesiredStartDatetimeAsc(HelpRequestStatus status, Pageable pageable);
 
     // 내 도움 요청 관리 — 요청자(userId)의 요청을 최근 작성 순으로(페이지네이션).
-    @EntityGraph(attributePaths = {"requester"})
+    @EntityGraph(attributePaths = {"serviceCategory", "requester"})
     Page<HelpRequest> findByRequester_UserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
     // 도움 요청 상세 — id로 1건 조회하며 serviceCategory·requester를 함께 로딩(N+1 방지).
