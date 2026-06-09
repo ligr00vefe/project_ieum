@@ -101,10 +101,11 @@ public class HelpRequest extends BasicEntity {
   @Column(name = "special_notes", columnDefinition = "TEXT")
   private String specialNotes;
 
-  // 상태 (open/matched/in_progress/completed/cancelled/closed)
+  // 상태 (open/matched/in_progress/completed/closed)
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 24)
-  private HelpRequestStatus status;
+  @Builder.Default
+  private HelpRequestStatus status = HelpRequestStatus.OPEN;
 
   public void changeStatus(HelpRequestStatus next) { this.status = next; }
 
