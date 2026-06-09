@@ -35,4 +35,6 @@ public class DisabledEditDTO {
     private List<Long> communicationMethodIds;
 
     private List<Long> personalityTagIds;
+
+    private String profileImageUrl;
 }

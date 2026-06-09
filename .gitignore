@@ -41,3 +41,9 @@ src/main/resources/application-secret.properties
 
 ## Node dependencies
 node_modules/
+
+## 런타임 업로드 파일 (사용자 업로드, git 제외)
+uploads/
+
+## Claude Code 메모리
+.claude/
