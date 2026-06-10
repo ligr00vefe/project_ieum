@@ -145,7 +145,7 @@ public class UserController {
 
         model.addAttribute("editDTO", editDTO);
         model.addAttribute("userEmail", user.getEmail());
-        model.addAttribute("personalityTags", masterDataService.getAllPersonalityTags());
+        model.addAttribute("personalityTags", masterDataService.getCaregiverPersonalityTags());
         model.addAttribute("regions", masterDataService.getAllRegions());
         model.addAttribute("content", "caregiver/edit");
         model.addAttribute("title", "회원정보 수정");

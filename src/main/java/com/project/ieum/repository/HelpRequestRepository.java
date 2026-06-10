@@ -42,6 +42,9 @@ public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long>,
     @EntityGraph(attributePaths = {"serviceCategory"})
     List<HelpRequest> findByRequesterOrderByCreatedAtDesc(UserProfile requester);
 
+    // 전체 활성 요청 목록 — 매칭 게시판 전체 조회용 (OPEN/MATCHED 상태).
+    List<HelpRequest> findByStatusInOrderByCreatedAtDesc(List<HelpRequestStatus> statuses);
+
     // 도움 요청 상세 — id로 1건 조회하며 serviceCategory·requester를 함께 로딩(N+1 방지).
     @EntityGraph(attributePaths = {"serviceCategory", "requester"})
     Optional<HelpRequest> getHelpRequestById(Long id);
