@@ -32,5 +32,7 @@ public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long>,
 
     List<HelpRequest> findByRequesterOrderByCreatedAtDesc(UserProfile requester);
 
+    List<HelpRequest> findByStatusInOrderByCreatedAtDesc(List<HelpRequestStatus> statuses);
+
     Page<HelpRequest> findByStatusOrderByDesiredStartDatetimeAscIdDesc(HelpRequestStatus status, Pageable pageable);
 }

@@ -6,6 +6,8 @@
     <title th:text="${title != null ? title + ' - 이음' : '이음 Care Match'}">이음 Care Match</title>
     <link th:href="@{/css/output.css}" rel="stylesheet">
     <meta name="description" th:content="${description != null ? description : '장애인·보호자와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼'}">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col">
 

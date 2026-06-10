@@ -1,28 +1,67 @@
 package com.project.ieum.controller;
 
+import com.project.ieum.dto.request.ApplyRequest;
+import com.project.ieum.service.HelpRequestService;
+import com.project.ieum.service.MatchingService;
+import com.project.ieum.service.common.CurrentUserService;
+import com.project.ieum.service.recommend.RecommendationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/caregiver/board")
 @RequiredArgsConstructor
 public class CaregiverBoardController {
 
+    private final HelpRequestService helpRequestService;
+    private final MatchingService matchingService;
+    private final RecommendationService recommendationService;
+    private final CurrentUserService currentUserService;
+
     @GetMapping({"", "/"})
-    public String list(Model model) {
+    public String list(@PageableDefault(size = 20) Pageable pageable, Model model) {
         model.addAttribute("title", "매칭 게시판");
+        model.addAttribute("requests", helpRequestService.getOpenRequests(pageable));
         model.addAttribute("content", "caregiver/board/list");
         return "layout/layout";
     }
 
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
+        Long currentUserId = currentUserService.getCurrentUser().getId();
+        boolean alreadyApplied = matchingService.hasApplied(id, currentUserId);
         model.addAttribute("title", "게시물 상세");
+        model.addAttribute("request", helpRequestService.get(id));
+        model.addAttribute("applyRequest", new ApplyRequest());
+        model.addAttribute("alreadyApplied", alreadyApplied);
+        if (alreadyApplied) {
+            matchingService.getMyConversationId(id, currentUserId).ifPresent(cid ->
+                model.addAttribute("myConversationId", cid));
+        }
+        model.addAttribute("recommendations", recommendationService.recommendCaregivers(id, 5));
         model.addAttribute("content", "caregiver/board/detail");
         return "layout/layout";
+    }
+
+    @PostMapping("/{id}/apply")
+    public String apply(
+            @PathVariable Long id,
+            @Valid @ModelAttribute ApplyRequest applyRequest,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("message", "첫 메시지는 500자 이하로 입력해주세요.");
+            return "redirect:/caregiver/board/" + id;
+        }
+        matchingService.apply(id, applyRequest);
+        redirectAttributes.addFlashAttribute("applied", true);
+        return "redirect:/caregiver/board/" + id;
     }
 }

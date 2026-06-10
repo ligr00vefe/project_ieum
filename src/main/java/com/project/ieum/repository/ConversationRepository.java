@@ -21,6 +21,8 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
         join fetch r.user ru
         join fetch c.caregiver cg
         join fetch cg.user cu
+        join fetch c.application a
+        join fetch a.helpRequest hr
         where c.id = :id
     """)
     Optional<Conversation> findWithParticipantsById(@Param("id") Long id);
