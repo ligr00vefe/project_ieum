@@ -1,30 +1,104 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>대화방 목록</title>
-    <link rel="stylesheet" th:href="@{/css/output.css}">
-</head>
-<body class="bg-gray-50 min-h-screen">
-<main class="max-w-3xl mx-auto p-6">
-    <h1 class="text-2xl font-bold mb-4">대화방</h1>
-    <div id="conversationList" class="space-y-3"></div>
-</main>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+<section class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-xl font-bold text-gray-900">채팅</h1>
+            <p class="text-sm text-gray-400 mt-0.5">지원자와 나눈 대화 목록입니다.</p>
+        </div>
+    </div>
+
+    <div id="conversationList" class="space-y-3">
+        <div class="flex justify-center py-12">
+            <div class="w-6 h-6 border-2 border-indigo-300 border-t-indigo-600 rounded-full animate-spin"></div>
+        </div>
+    </div>
+
+    <div id="emptyState" class="hidden text-center py-16">
+        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+        </div>
+        <p class="text-sm font-semibold text-gray-500">아직 대화가 없습니다</p>
+        <p class="text-xs text-gray-400 mt-1">지원자가 생기면 여기에 표시됩니다.</p>
+    </div>
+
+</section>
+
 <script>
-    fetch('/api/chat/conversations')
-        .then(res => res.json())
-        .then(data => {
-            const box = document.querySelector('#conversationList');
-            box.innerHTML = (data.content || []).map(item => `
-                <a href="/chat/conversations/${item.conversationId}" class="block bg-white border rounded-xl p-4 hover:bg-gray-50">
-                    <div class="flex justify-between gap-3">
-                        <strong>${item.opponentName || '상대방'}</strong>
-                        <span class="text-sm text-gray-500">미읽음 ${item.unreadCount}</span>
+function fmt(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date(Date.now() - 86400000);
+    if (d.toDateString() === today.toDateString())
+        return d.toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'});
+    if (d.toDateString() === yesterday.toDateString()) return '어제';
+    return d.toLocaleDateString('ko-KR', {month: 'long', day: 'numeric'});
+}
+
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="_csrf"]');
+    if (meta) return meta.getAttribute('content');
+    const cookie = document.cookie.split(';').find(c => c.trim().startsWith('XSRF-TOKEN='));
+    return cookie ? decodeURIComponent(cookie.split('=')[1]) : '';
+}
+
+async function loadConversations() {
+    try {
+        const res = await fetch('/api/chat/conversations?page=0&size=50&sort=lastMessageAt,desc');
+        if (!res.ok) return;
+        const data = await res.json();
+        const list = data.content || [];
+
+        const box = document.getElementById('conversationList');
+        const empty = document.getElementById('emptyState');
+
+        if (list.length === 0) {
+            box.innerHTML = '';
+            empty.classList.remove('hidden');
+            return;
+        }
+
+        empty.classList.add('hidden');
+        box.innerHTML = list.map(item => {
+            const unread = item.unreadCount > 0
+                ? `<span class="ml-1 min-w-[20px] h-5 bg-indigo-600 text-white text-[11px] font-bold rounded-full flex items-center justify-center px-1.5">${item.unreadCount > 99 ? '99+' : item.unreadCount}</span>`
+                : '';
+            const lastMsg = item.lastMessage
+                ? item.lastMessage.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                : '아직 메시지가 없습니다.';
+            return `
+            <a href="/chat/conversations/${item.conversationId}"
+               class="flex items-center gap-4 bg-white border border-gray-100 rounded-2xl px-5 py-4 hover:border-indigo-200 hover:shadow-sm transition-all">
+                <div class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 font-bold text-lg flex-shrink-0">
+                    ${(item.opponentName || '?').charAt(0)}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-0.5">
+                        <div class="flex items-center gap-1">
+                            <p class="text-sm font-bold text-gray-900 truncate">${item.opponentName || '상대방'}</p>
+                            ${unread}
+                        </div>
+                        <span class="text-[11px] text-gray-400 flex-shrink-0 ml-2">${fmt(item.lastMessageAt)}</span>
                     </div>
-                    <p class="text-gray-600 mt-1">${item.lastMessage || '아직 메시지가 없습니다.'}</p>
-                </a>
-            `).join('');
-        });
+                    <p class="text-xs text-gray-500 truncate">${lastMsg}</p>
+                </div>
+                <svg class="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </a>`;
+        }).join('');
+    } catch (e) {
+        console.error('대화 목록 로드 실패', e);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadConversations);
 </script>
-</body>
+</th:block>
 </html>

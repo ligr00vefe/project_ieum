@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface PersonalityTagRepository extends JpaRepository<PersonalityTag, Long> {
     List<PersonalityTag> findAllByOrderByIdAsc();
+    List<PersonalityTag> findAllByIsCaregiversOnlyOrderByIdAsc(Boolean isCaregiversOnly);
 }

@@ -3,6 +3,7 @@ package com.project.ieum.config;
 import com.project.ieum.entity.*;
 import com.project.ieum.entity.caregiver.CaregiverPersonalityTag;
 import com.project.ieum.entity.caregiver.CaregiverProfile;
+import com.project.ieum.entity.request.ServiceCategory;
 import com.project.ieum.entity.user.*;
 import com.project.ieum.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class DataInitializer implements CommandLineRunner {
     private final CommunicationMethodRepository communicationMethodRepository;
     private final PersonalityTagRepository personalityTagRepository;
     private final RegionRepository regionRepository;
+    private final ServiceCategoryRepository serviceCategoryRepository;
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
     private final CaregiverProfileRepository caregiverProfileRepository;
@@ -46,6 +48,9 @@ public class DataInitializer implements CommandLineRunner {
         }
         if (regionRepository.count() == 0) {
             initRegions();
+        }
+        if (serviceCategoryRepository.count() == 0) {
+            initServiceCategories();
         }
         initAdminAccount();
         initTestAccounts();
@@ -72,17 +77,31 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void initPersonalityTags() {
-        personalityTagRepository.save(PersonalityTag.builder().name("차분함").build());
-        personalityTagRepository.save(PersonalityTag.builder().name("활발함").build());
-        personalityTagRepository.save(PersonalityTag.builder().name("친절함").build());
-        personalityTagRepository.save(PersonalityTag.builder().name("세심함").build());
-        personalityTagRepository.save(PersonalityTag.builder().name("유머러스함").build());
-        personalityTagRepository.save(PersonalityTag.builder().name("책임감").build());
-        personalityTagRepository.save(PersonalityTag.builder().name("인내심").build());
-        personalityTagRepository.save(PersonalityTag.builder().name("적극성").build());
-        personalityTagRepository.save(PersonalityTag.builder().name("예민함").build());
-        personalityTagRepository.save(PersonalityTag.builder().name("산만함").build());
+        // 활동지원사 전용 태그 (isCaregiversOnly = true)
+        personalityTagRepository.save(PersonalityTag.builder().name("차분함").isCaregiversOnly(true).build());
+        personalityTagRepository.save(PersonalityTag.builder().name("활발함").isCaregiversOnly(true).build());
+        personalityTagRepository.save(PersonalityTag.builder().name("친절함").isCaregiversOnly(true).build());
+        personalityTagRepository.save(PersonalityTag.builder().name("세심함").isCaregiversOnly(true).build());
+        personalityTagRepository.save(PersonalityTag.builder().name("유머러스함").isCaregiversOnly(true).build());
+        personalityTagRepository.save(PersonalityTag.builder().name("책임감").isCaregiversOnly(true).build());
+        personalityTagRepository.save(PersonalityTag.builder().name("인내심").isCaregiversOnly(true).build());
+        personalityTagRepository.save(PersonalityTag.builder().name("적극성").isCaregiversOnly(true).build());
+        // 공통/장애인 성향 태그 (isCaregiversOnly = false)
+        personalityTagRepository.save(PersonalityTag.builder().name("예민함").isCaregiversOnly(false).build());
+        personalityTagRepository.save(PersonalityTag.builder().name("산만함").isCaregiversOnly(false).build());
         log.info("성향 태그 초기화 완료");
+    }
+
+    private void initServiceCategories() {
+        serviceCategoryRepository.save(ServiceCategory.builder().code("SC001").name("이동 보조").description("이동 및 외출 시 동행·보조").build());
+        serviceCategoryRepository.save(ServiceCategory.builder().code("SC002").name("병원 동행").description("병원 방문 및 진료 동행").build());
+        serviceCategoryRepository.save(ServiceCategory.builder().code("SC003").name("약복용 보조").description("복약 확인 및 투약 보조").build());
+        serviceCategoryRepository.save(ServiceCategory.builder().code("SC004").name("대기 동행").description("대기 중 동행 및 보조").build());
+        serviceCategoryRepository.save(ServiceCategory.builder().code("SC005").name("가사 도움").description("청소·세탁·식사 준비 등 가사 보조").build());
+        serviceCategoryRepository.save(ServiceCategory.builder().code("SC006").name("외출 지원").description("쇼핑·나들이 등 외출 동행").build());
+        serviceCategoryRepository.save(ServiceCategory.builder().code("SC007").name("수어 통역").description("수어 통역 및 의사소통 보조").build());
+        serviceCategoryRepository.save(ServiceCategory.builder().code("SC008").name("기타").description("그 외 도움 요청").build());
+        log.info("서비스 카테고리 초기화 완료");
     }
 
     private void initRegions() {
