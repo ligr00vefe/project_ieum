@@ -119,4 +119,8 @@ public class HelpRequest extends BasicEntity {
       throw new IllegalStateException("종료 시간은 시작 시간 이후여야 합니다.");
     }
   }
+
+  // (이슈 #8 정본) 본문 수정 메서드(updateDetails)는 제거함.
+  // 근거: HelpRequest는 write-once — 도우미가 본 내용/시간/위치가 지원 후 바뀌면 신뢰성이 깨지므로,
+  //       생성 후에는 상태 전이(changeStatus)만 허용한다. 수정이 필요하면 마감(close) 후 재작성.
 }

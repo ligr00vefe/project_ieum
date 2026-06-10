@@ -12,10 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -27,24 +24,43 @@ public class UserController {
     private final UserService userService;
     private final MasterDataService masterDataService;
 
-    @GetMapping("/how-to-use")
-    public String howToUse(Model model) {
-        model.addAttribute("content", "guide/how-to-use");
-        model.addAttribute("title", "이용방법");
+    @GetMapping("/")
+    public String home(Model model) {
+        model.addAttribute("title", "메인");
+        model.addAttribute("content", "home/index");
         return "layout/layout";
     }
 
-    @GetMapping("/disabled/home")
-    public String disabledHome(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        model.addAttribute("email", userDetails.getUsername());
-        return "home/disabled-home";
+    @GetMapping("/healthz")
+    @ResponseBody
+    public String healthz() {
+        return "ok";
     }
 
-    @GetMapping("/caregiver/home")
-    public String caregiverHome(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        model.addAttribute("email", userDetails.getUsername());
-        return "home/caregiver-home";
+    @GetMapping("/readyz")
+    @ResponseBody
+    public String readyz() {
+        return "ok";
     }
+
+    @GetMapping("/safe-meeting")
+    public String safeMeeting(Model model) {
+        model.addAttribute("content", "guide/safe-meeting");
+        model.addAttribute("title", "첫만남 안심가이드");
+        return "layout/layout";
+    }
+
+//    @GetMapping("/disabled/home")
+//    public String disabledHome(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+//        model.addAttribute("email", userDetails.getUsername());
+//        return "home/disabled-home";
+//    }
+//
+//    @GetMapping("/caregiver/home")
+//    public String caregiverHome(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+//        model.addAttribute("email", userDetails.getUsername());
+//        return "home/caregiver-home";
+//    }
 
     @GetMapping("/mypage")
     public String mypage(@AuthenticationPrincipal UserDetails userDetails) {
@@ -59,6 +75,9 @@ public class UserController {
     public String disabledMypage(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
         model.addAttribute("userEmail", user.getEmail());
+        model.addAttribute("userName", userService.getDisplayName(user));
+        model.addAttribute("profileImageUrl", userService.getProfileImageUrl(user));
+        model.addAttribute("profileThumbUrl", userService.getProfileThumbUrl(user));
         model.addAttribute("content", "disabled/mypage");
         model.addAttribute("title", "마이페이지");
         return "layout/layout";
@@ -68,6 +87,9 @@ public class UserController {
     public String caregiverMypage(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
         model.addAttribute("userEmail", user.getEmail());
+        model.addAttribute("userName", userService.getDisplayName(user));
+        model.addAttribute("profileImageUrl", userService.getProfileImageUrl(user));
+        model.addAttribute("profileThumbUrl", userService.getProfileThumbUrl(user));
         model.addAttribute("content", "caregiver/mypage");
         model.addAttribute("title", "마이페이지");
         return "layout/layout";
@@ -106,9 +128,10 @@ public class UserController {
             @AuthenticationPrincipal UserDetails userDetails,
             @ModelAttribute("editDTO") DisabledEditDTO editDTO,
             @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestParam(value = "presetImage", required = false) String presetImage,
             RedirectAttributes redirectAttributes) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
-        userService.updateDisabledUser(user, editDTO, profileImage);
+        userService.updateDisabledUser(user, editDTO, profileImage, presetImage);
         redirectAttributes.addFlashAttribute("successMessage", "회원정보가 수정되었습니다.");
         return "redirect:/disabled/mypage";
     }
@@ -134,9 +157,10 @@ public class UserController {
             @AuthenticationPrincipal UserDetails userDetails,
             @ModelAttribute("editDTO") CaregiverEditDTO editDTO,
             @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestParam(value = "presetImage", required = false) String presetImage,
             RedirectAttributes redirectAttributes) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
-        userService.updateCaregiverUser(user, editDTO, profileImage);
+        userService.updateCaregiverUser(user, editDTO, profileImage, presetImage);
         redirectAttributes.addFlashAttribute("successMessage", "회원정보가 수정되었습니다.");
         return "redirect:/caregiver/mypage";
     }
