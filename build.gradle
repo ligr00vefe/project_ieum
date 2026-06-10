@@ -25,21 +25,23 @@ dependencies {
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.springframework.security:spring-security-messaging'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'
+	testRuntimeOnly 'com.h2database:h2'
 	annotationProcessor 'org.projectlombok:lombok'
 	// Spring Boot 4는 테스트 슬라이스를 모듈별 스타터로 분리한다(@DataJpaTest는 data-jpa-test에 포함).
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testImplementation 'org.springframework.security:spring-security-test'
 	// (#9 슬라이스 테스트) @DataJpaTest용 인메모리 DB. H2 사용 + 테스트 전용 H2 방언으로 enum→varchar.
 	//   H2 2.4.240은 @Enumerated(STRING)을 native ENUM 컬럼으로 만들고(Hibernate 7 H2Dialect),
 	//   그 ENUM 컬럼 + prepared statement가 같은 행의 다른 CHECK 평가를 오염시키는 마찰이 있다.
-	//   (HSQLDB는 enum은 없지만 엔티티의 columnDefinition="TEXT"(MySQL DDL 힌트)를 거부해 부적합.)
 	//   → H2VarcharEnumDialect가 enum 선언을 varchar로 바꿔 이 문제를 제거한다(엔티티 무수정).
-	testRuntimeOnly 'com.h2database:h2'
 	testCompileOnly 'org.projectlombok:lombok'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testAnnotationProcessor 'org.projectlombok:lombok'
@@ -97,3 +99,20 @@ tasks.register('buildTailwind', Exec) {
 }
 
 processResources.dependsOn buildTailwind
+
+// Querydsl QClass 생성 경로
+sourceSets {
+    main {
+        java {
+            srcDirs += layout.buildDirectory.dir("generated/querydsl")
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.generatedSourceOutputDirectory = layout.buildDirectory.dir("generated/querydsl").get().asFile
+}
+
+clean {
+    delete layout.buildDirectory.dir("generated/querydsl")
+}

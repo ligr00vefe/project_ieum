@@ -1,6 +1,7 @@
 package com.project.ieum.repository;
 
 import com.project.ieum.config.JpaAuditingConfig;
+import com.project.ieum.config.QuerydslConfig;
 import com.project.ieum.entity.User;
 import com.project.ieum.entity.UserRole;
 import com.project.ieum.entity.UserStatus;
@@ -36,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @DataJpaTest
 @ActiveProfiles("test")
-@Import(JpaAuditingConfig.class)
+@Import({JpaAuditingConfig.class, QuerydslConfig.class})
 class HelpRequestRepositoryTest {
 
     @Autowired
