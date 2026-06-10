@@ -91,35 +91,22 @@ public class HelpRequestController {
         return "request/my-detail";
     }
 
-    @GetMapping("/my/requests/{requestId}/edit")
-    public String editForm(@PathVariable Long requestId, Model model) {
-        var helpRequest = helpRequestService.get(requestId);
-        prepareForm(model, helpRequestService.toForm(helpRequest), "도움 요청 수정");
-        model.addAttribute("requestId", requestId);
-        return "request/form";
-    }
-
-    @PostMapping("/my/requests/{requestId}/edit")
-    public String update(
-            @PathVariable Long requestId,
-            @Valid @ModelAttribute("form") HelpRequestForm form,
-            BindingResult bindingResult,
-            Model model,
-            RedirectAttributes redirectAttributes) {
-        if (bindingResult.hasErrors()) {
-            prepareForm(model, form, "도움 요청 수정");
-            model.addAttribute("requestId", requestId);
-            return "request/form";
-        }
-        helpRequestService.update(requestId, form);
-        redirectAttributes.addFlashAttribute("message", "요청이 수정되었습니다.");
-        return "redirect:/my/requests/" + requestId;
-    }
+    // (이슈 #8 정본) 본문 수정(/edit GET·POST) 엔드포인트는 제거함.
+    // HelpRequest는 write-once — 도우미가 본 내용/시간/위치가 지원 후 바뀌면 신뢰성이 깨지므로
+    // 생성 후 본문 수정을 막는다. 변경이 필요하면 취소(cancel→CLOSED) 후 새로 작성한다.
 
     @PostMapping("/my/requests/{requestId}/cancel")
     public String cancel(@PathVariable Long requestId, RedirectAttributes redirectAttributes) {
         helpRequestService.cancel(requestId);
         redirectAttributes.addFlashAttribute("message", "요청이 취소되었습니다.");
+        return "redirect:/my/requests";
+    }
+
+    // 하드 삭제 — 2단계 삭제의 2단계. CLOSED 상태에서만 게시자가 명시적으로.
+    @PostMapping("/my/requests/{requestId}/delete")
+    public String delete(@PathVariable Long requestId, RedirectAttributes redirectAttributes) {
+        helpRequestService.delete(requestId);
+        redirectAttributes.addFlashAttribute("message", "요청이 삭제되었습니다.");
         return "redirect:/my/requests";
     }
 
