@@ -26,10 +26,10 @@ public class HelpRequestForm {
 
     @NotNull(message = "희망 시작 일시를 선택해주세요.")
     @FutureOrPresent(message = "희망 일시는 현재 이후여야 합니다.")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime desiredStartDatetime;
 
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime desiredEndDatetime;
 
     @NotBlank(message = "도로명주소를 입력해주세요.")
@@ -46,6 +46,9 @@ public class HelpRequestForm {
     private String bname;
     private String zonecode;
     private String bcode;
+
+    private String departureAddress;
+    private String destinationAddress;
 
     private String specialNotes;
     private List<Long> personalityTagIds = new ArrayList<>();

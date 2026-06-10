@@ -97,6 +97,14 @@ public class HelpRequest extends BasicEntity {
   @Column(name = "longitude", precision = 9, scale = 6)
   private BigDecimal longitude;
 
+  // 출발지 도로명주소
+  @Column(name = "departure_address", length = 255)
+  private String departureAddress;
+
+  // 도착지 도로명주소
+  @Column(name = "destination_address", length = 255)
+  private String destinationAddress;
+
   // 특이사항
   @Column(name = "special_notes", columnDefinition = "TEXT")
   private String specialNotes;

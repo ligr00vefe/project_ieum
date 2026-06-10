@@ -20,7 +20,7 @@
 
             <!-- 매칭률 뱃지 -->
             <div class="w-20 h-20 bg-indigo-600 rounded-full flex flex-col items-center justify-center mb-5 shadow-md shadow-indigo-100">
-                <span class="text-xl font-extrabold text-white leading-none">95%</span>
+                <span class="text-xl font-extrabold text-white leading-none" th:text="${matchPercent + '%'}">0%</span>
                 <span class="text-[10px] font-semibold text-indigo-200 mt-0.5 tracking-wider">MATCH</span>
             </div>
 
@@ -54,12 +54,11 @@
 
             <!-- 채팅 헤더 -->
             <div class="flex-shrink-0 flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-                <!-- 활동지원사 뷰: 뒤로가기 버튼 -->
-                <th:block th:if="${isCaregiver}">
-                    <a th:href="@{/board/1}" class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all flex-shrink-0">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                    </a>
-                </th:block>
+                <!-- 뒤로가기 버튼 (모든 역할) -->
+                <a th:href="${isCaregiver} ? @{/caregiver/board/{id}(id=${requestId})} : @{/disabled/board/{id}(id=${requestId})}"
+                   class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </a>
 
                 <div class="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 shadow-sm">
                     <img th:src="${partnerProfileImage ?: '/assets/profile_thumb_img/m01_thumb.png'}"
@@ -80,13 +79,11 @@
                     안심 통화
                 </button>
 
-                <!-- 활동지원사 뷰: 매칭률 뱃지 -->
-                <th:block th:if="${isCaregiver}">
-                    <div class="flex-shrink-0 flex flex-col items-center bg-indigo-600 text-white rounded-xl px-2.5 py-1.5">
-                        <span class="text-[9px] font-medium opacity-80 leading-none">매칭률</span>
-                        <span class="text-sm font-bold leading-none">95%</span>
-                    </div>
-                </th:block>
+                <!-- 매칭률 뱃지 (모든 역할) -->
+                <div class="flex-shrink-0 flex flex-col items-center bg-indigo-600 text-white rounded-xl px-2.5 py-1.5">
+                    <span class="text-[9px] font-medium opacity-80 leading-none">매칭률</span>
+                    <span class="text-sm font-bold leading-none" th:text="${matchPercent + '%'}">0%</span>
+                </div>
             </div>
 
             <!-- 안전 안내 배너 -->
@@ -96,77 +93,9 @@
 
             <!-- 채팅 메시지 영역 -->
             <div id="chatMessages" class="flex-1 overflow-y-auto space-y-4 px-5 py-4">
-
-                <!-- 날짜 구분선 -->
-                <div class="flex items-center gap-3 my-2">
-                    <div class="flex-1 h-px bg-gray-100"></div>
-                    <span class="text-xs text-gray-400 font-medium flex-shrink-0">오늘</span>
-                    <div class="flex-1 h-px bg-gray-100"></div>
+                <div id="loadingSpinner" class="flex justify-center py-8">
+                    <div class="w-6 h-6 border-2 border-indigo-300 border-t-indigo-600 rounded-full animate-spin"></div>
                 </div>
-
-                <!-- 상대방 메시지 -->
-                <div class="flex items-end gap-2.5">
-                    <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 mb-1 shadow-sm">
-                        <img th:src="${partnerProfileImage ?: '/assets/profile_thumb_img/m01_thumb.png'}"
-                             alt="프로필" class="w-full h-full object-cover object-top"
-                             style="transform:translateZ(0);">
-                    </div>
-                    <div class="max-w-[70%]">
-                        <div class="bg-gray-50 border border-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
-                            <p class="text-sm text-gray-800">안녕하세요 김지원님! 토요일 외래진료 동행 가능합니다.</p>
-                        </div>
-                        <p class="text-[11px] text-gray-400 mt-1 ml-1">14:02</p>
-                    </div>
-                </div>
-
-                <div class="flex items-end gap-2.5">
-                    <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 mb-1 shadow-sm">
-                        <img th:src="${partnerProfileImage ?: '/assets/profile_thumb_img/m01_thumb.png'}"
-                             alt="프로필" class="w-full h-full object-cover object-top"
-                             style="transform:translateZ(0);">
-                    </div>
-                    <div class="max-w-[70%]">
-                        <div class="bg-gray-50 border border-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
-                            <p class="text-sm text-gray-800">수어 통역 자격증도 있어서 진료 시 의사소통 도와드릴 수 있어요 😊</p>
-                        </div>
-                        <p class="text-[11px] text-gray-400 mt-1 ml-1">14:02</p>
-                    </div>
-                </div>
-
-                <!-- 내 메시지 -->
-                <div class="flex items-end gap-2.5 flex-row-reverse">
-                    <div class="max-w-[70%]">
-                        <div class="bg-indigo-600 rounded-2xl rounded-br-md px-4 py-3 shadow-sm shadow-indigo-100">
-                            <p class="text-sm text-white">안녕하세요! 수어 가능하시다니 든든해요. 진료 후 약국까지 동행 가능하실까요?</p>
-                        </div>
-                        <p class="text-[11px] text-gray-400 mt-1 mr-1 text-right">14:05</p>
-                    </div>
-                </div>
-
-                <div class="flex items-end gap-2.5">
-                    <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 mb-1 shadow-sm">
-                        <img th:src="${partnerProfileImage ?: '/assets/profile_thumb_img/m01_thumb.png'}"
-                             alt="프로필" class="w-full h-full object-cover object-top"
-                             style="transform:translateZ(0);">
-                    </div>
-                    <div class="max-w-[70%]">
-                        <div class="bg-gray-50 border border-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
-                            <p class="text-sm text-gray-800">물론입니다. 처방전 픽업까지 함께 가요. 진료 끝나고 잠깐 쉬실 카페도 근처에 있어요.</p>
-                        </div>
-                        <p class="text-[11px] text-gray-400 mt-1 ml-1">14:06</p>
-                    </div>
-                </div>
-
-                <!-- 활동지원사 뷰: 매칭 가능 시스템 메시지 -->
-                <th:block th:if="${isCaregiver}">
-                    <div class="flex justify-center">
-                        <div class="bg-teal-50 border border-teal-100 rounded-2xl px-4 py-3 max-w-xs text-center">
-                            <p class="text-xs font-semibold text-teal-700">🎯 매칭이 가능합니다!</p>
-                            <p class="text-xs text-teal-500 mt-0.5">최종 결정은 이용자에게 있습니다.<br>상세한 일정 안내 등 최선을 다해 알리세요.</p>
-                        </div>
-                    </div>
-                </th:block>
-
             </div>
 
             <!-- 메시지 입력창 -->
@@ -219,35 +148,186 @@
 }
 </style>
 
-<script>
-function handleKeydown(e) {
-    if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+<script th:inline="javascript">
+const CONVERSATION_ID = /*[[${conversationId}]]*/ 0;
+const PARTNER_IMAGE = /*[[${partnerProfileImage}]]*/ null;
+const DEFAULT_IMAGE = '/assets/profile_thumb_img/m01_thumb.png';
+
+let lastRenderedDate = null;
+let polling = null;
+
+function fmt(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'});
 }
-function sendMessage() {
+function fmtDate(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric'});
+}
+
+function buildMessage(msg) {
+    const time = fmt(msg.sentAt);
+    const escaped = msg.body.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    if (msg.mine) {
+        return `<div class="flex items-end gap-2.5 flex-row-reverse">
+            <div class="max-w-[70%]">
+                <div class="bg-indigo-600 rounded-2xl rounded-br-md px-4 py-3 shadow-sm shadow-indigo-100">
+                    <p class="text-sm text-white">${escaped}</p>
+                </div>
+                <p class="text-[11px] text-gray-400 mt-1 mr-1 text-right">${time}</p>
+            </div>
+        </div>`;
+    } else {
+        const img = PARTNER_IMAGE ? PARTNER_IMAGE : DEFAULT_IMAGE;
+        return `<div class="flex items-end gap-2.5">
+            <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 mb-1 shadow-sm">
+                <img src="${img}" alt="프로필" class="w-full h-full object-cover object-top">
+            </div>
+            <div class="max-w-[70%]">
+                <div class="bg-gray-50 border border-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
+                    <p class="text-sm text-gray-800">${escaped}</p>
+                </div>
+                <p class="text-[11px] text-gray-400 mt-1 ml-1">${time}</p>
+            </div>
+        </div>`;
+    }
+}
+
+function buildDateDivider(label) {
+    return `<div class="flex items-center gap-3 my-2">
+        <div class="flex-1 h-px bg-gray-100"></div>
+        <span class="text-xs text-gray-400 font-medium flex-shrink-0">${label}</span>
+        <div class="flex-1 h-px bg-gray-100"></div>
+    </div>`;
+}
+
+async function loadMessages() {
+    try {
+        const res = await fetch(`/api/chat/conversations/${CONVERSATION_ID}/messages?page=0&size=100&sort=sentAt,asc`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const messages = (data.content || []).reverse();
+
+        const box = document.getElementById('chatMessages');
+        lastRenderedDate = null;
+        let html = '';
+
+        const today = new Date().toDateString();
+        const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+        for (const msg of messages) {
+            const msgDate = new Date(msg.sentAt).toDateString();
+            if (msgDate !== lastRenderedDate) {
+                let label;
+                if (msgDate === today) label = '오늘';
+                else if (msgDate === yesterday) label = '어제';
+                else label = fmtDate(msg.sentAt);
+                html += buildDateDivider(label);
+                lastRenderedDate = msgDate;
+            }
+            html += buildMessage(msg);
+        }
+
+        if (messages.length === 0) {
+            html = `<div class="flex justify-center py-8">
+                <p class="text-sm text-gray-400">아직 메시지가 없습니다. 먼저 인사해보세요!</p>
+            </div>`;
+        }
+
+        box.innerHTML = html;
+        box.scrollTop = box.scrollHeight;
+    } catch (e) {
+        console.error('메시지 로드 실패', e);
+    }
+}
+
+async function markRead() {
+    try {
+        await fetch(`/api/chat/conversations/${CONVERSATION_ID}/read`, { method: 'POST',
+            headers: { 'X-XSRF-TOKEN': getCsrfToken() }
+        });
+    } catch (e) { /* 무시 */ }
+}
+
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="_csrf"]');
+    if (meta) return meta.getAttribute('content');
+    const cookie = document.cookie.split(';').find(c => c.trim().startsWith('XSRF-TOKEN='));
+    return cookie ? decodeURIComponent(cookie.split('=')[1]) : '';
+}
+
+async function sendMessage() {
     const input = document.getElementById('messageInput');
     const text = input.value.trim();
     if (!text) return;
-    const msgs = document.getElementById('chatMessages');
-    const now = new Date().toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'});
-    const div = document.createElement('div');
-    div.className = 'flex items-end gap-2.5 flex-row-reverse';
-    div.innerHTML = `
-        <div class="max-w-[70%]">
-            <div class="bg-indigo-600 rounded-2xl rounded-br-md px-4 py-3 shadow-sm shadow-indigo-100">
-                <p class="text-sm text-white">${text.replace(/</g,'&lt;')}</p>
-            </div>
-            <p class="text-[11px] text-gray-400 mt-1 mr-1 text-right">${now}</p>
-        </div>`;
-    msgs.appendChild(div);
-    msgs.scrollTop = msgs.scrollHeight;
+
     input.value = '';
+    input.disabled = true;
+
+    try {
+        const res = await fetch(`/api/chat/conversations/${CONVERSATION_ID}/messages`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': getCsrfToken()
+            },
+            body: JSON.stringify({ body: text })
+        });
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            alert(err.message || '전송에 실패했습니다.');
+            input.value = text;
+            return;
+        }
+        const msg = await res.json();
+        appendMessage(msg);
+    } catch (e) {
+        alert('전송에 실패했습니다.');
+        input.value = text;
+    } finally {
+        input.disabled = false;
+        input.focus();
+    }
 }
+
+function appendMessage(msg) {
+    const box = document.getElementById('chatMessages');
+    const msgDate = new Date(msg.sentAt).toDateString();
+    const today = new Date().toDateString();
+
+    let html = '';
+    if (msgDate !== lastRenderedDate) {
+        html += buildDateDivider(msgDate === today ? '오늘' : fmtDate(msg.sentAt));
+        lastRenderedDate = msgDate;
+    }
+    html += buildMessage(msg);
+
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    while (tmp.firstChild) box.appendChild(tmp.firstChild);
+    box.scrollTop = box.scrollHeight;
+}
+
+function handleKeydown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
 function showMatchConfirmModal() {
     document.getElementById('matchConfirmModal').classList.remove('hidden');
 }
 function hideMatchConfirmModal() {
     document.getElementById('matchConfirmModal').classList.add('hidden');
 }
+
+document.addEventListener('DOMContentLoaded', async () => {
+    document.getElementById('loadingSpinner')?.remove();
+    await loadMessages();
+    await markRead();
+    polling = setInterval(async () => {
+        await loadMessages();
+        await markRead();
+    }, 5000);
+});
 </script>
 </th:block>
 </html>
