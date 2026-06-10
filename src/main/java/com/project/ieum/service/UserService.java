@@ -14,11 +14,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.project.ieum.util.ImageThumbUtil;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -212,6 +217,7 @@ public class UserService {
                 .avoidSituations(profile.getAvoidSituations())
                 .communicationMethodIds(commIds)
                 .personalityTagIds(tagIds)
+                .profileImageUrl(profile.getProfileImageUrl())
                 .build();
     }
 
@@ -251,6 +257,7 @@ public class UserService {
                 .availableTimeSlots(timeSlots)
                 .regionIds(regionIds)
                 .personalityTagIds(tagIds)
+                .profileImageUrl(profile.getProfileImageUrl())
                 .build();
     }
 
@@ -258,7 +265,7 @@ public class UserService {
     // 장애인 회원정보 수정
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     @Transactional
-    public void updateDisabledUser(User user, DisabledEditDTO dto, MultipartFile profileImage) {
+    public void updateDisabledUser(User user, DisabledEditDTO dto, MultipartFile profileImage, String presetImage) {
         UserProfile profile = userProfileRepository.findById(user.getId()).orElseThrow();
 
         // 기본 정보 업데이트
@@ -271,6 +278,8 @@ public class UserService {
         if (profileImage != null && !profileImage.isEmpty()) {
             String imageUrl = saveProfileImage(user.getId(), profileImage);
             profile.updateProfileImage(imageUrl);
+        } else if (presetImage != null && !presetImage.isBlank()) {
+            profile.updateProfileImage(presetImage);
         }
 
         // 장애 유형 교체 (orphanRemoval flush 후 insert)
@@ -313,7 +322,7 @@ public class UserService {
     // 활동지원사 회원정보 수정
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     @Transactional
-    public void updateCaregiverUser(User user, CaregiverEditDTO dto, MultipartFile profileImage) {
+    public void updateCaregiverUser(User user, CaregiverEditDTO dto, MultipartFile profileImage, String presetImage) {
         CaregiverProfile profile = caregiverProfileRepository.findById(user.getId()).orElseThrow();
 
         // 기본 정보 업데이트
@@ -343,6 +352,8 @@ public class UserService {
         if (profileImage != null && !profileImage.isEmpty()) {
             String imageUrl = saveProfileImage(user.getId(), profileImage);
             profile.updateProfileImage(imageUrl);
+        } else if (presetImage != null && !presetImage.isBlank()) {
+            profile.updateProfileImage(presetImage);
         }
 
         // 활동 지역: CaregiverServiceRegion 제거(#11, 전역 매칭)로 더 이상 저장하지 않는다.
@@ -371,6 +382,33 @@ public class UserService {
     // 유틸리티
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     @Transactional(readOnly = true)
+    public String getProfileImageUrl(User user) {
+        if (user.getRole() == com.project.ieum.entity.UserRole.CAREGIVER) {
+            return caregiverProfileRepository.findById(user.getId())
+                    .map(p -> p.getProfileImageUrl()).orElse(null);
+        } else {
+            return userProfileRepository.findById(user.getId())
+                    .map(p -> p.getProfileImageUrl()).orElse(null);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public String getProfileThumbUrl(User user) {
+        return ImageThumbUtil.deriveThumbUrl(getProfileImageUrl(user));
+    }
+
+    @Transactional(readOnly = true)
+    public String getDisplayName(User user) {
+        if (user.getRole() == com.project.ieum.entity.UserRole.CAREGIVER) {
+            return caregiverProfileRepository.findById(user.getId())
+                    .map(p -> p.getFullName()).orElse(null);
+        } else {
+            return userProfileRepository.findById(user.getId())
+                    .map(p -> p.getFullName()).orElse(null);
+        }
+    }
+
+    @Transactional(readOnly = true)
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
     }
@@ -390,13 +428,124 @@ public class UserService {
                     ? originalFilename.substring(originalFilename.lastIndexOf("."))
                     : ".jpg";
             String filename = "user_" + userId + extension;
-            Path targetPath = uploadDir.resolve(filename);
-            Files.write(targetPath, file.getBytes());
+            byte[] bytes = file.getBytes();
+            Files.write(uploadDir.resolve(filename), bytes);
+
+            // 200×200 썸네일 생성
+            try {
+                String thumbFilename = "user_" + userId + "_thumb.png";
+                Path thumbPath = Paths.get("profile_thumbs").resolve(thumbFilename);
+                ImageThumbUtil.generateThumb(new ByteArrayInputStream(bytes), thumbPath);
+            } catch (Exception e) {
+                log.warn("썸네일 생성 실패 (원본은 저장됨) - userId={}", userId, e);
+            }
 
             return "/uploads/profiles/" + filename;
         } catch (IOException e) {
             log.error("프로필 이미지 저장 실패 - userId={}", userId, e);
             throw new RuntimeException("프로필 이미지 저장에 실패했습니다.", e);
         }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 프로필 이미지 즉시 변경 (API용)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    @Transactional
+    public void updateProfileImageDirect(User user, String imageUrl) {
+        if (user.getRole() == com.project.ieum.entity.UserRole.CAREGIVER) {
+            CaregiverProfile p = caregiverProfileRepository.findById(user.getId()).orElseThrow();
+            p.updateProfileImage(imageUrl);
+            caregiverProfileRepository.save(p);
+        } else {
+            UserProfile p = userProfileRepository.findById(user.getId()).orElseThrow();
+            p.updateProfileImage(imageUrl);
+            userProfileRepository.save(p);
+        }
+    }
+
+    // 커스텀 업로드 이미지 저장 경로 (파일시스템, 런타임 즉시 서빙)
+    private static final Path PROFILE_CUSTOM_DIR = Paths.get("uploads/profile_custom");
+    private static final Path PROFILE_THUMB_DIR  = Paths.get("uploads/profile_thumb");
+
+    public Map<String, String> saveCustomProfileImage(Long userId, MultipartFile file) {
+        try {
+            Files.createDirectories(PROFILE_CUSTOM_DIR);
+            Files.createDirectories(PROFILE_THUMB_DIR);
+
+            String originalFilename = file.getOriginalFilename();
+            String extension = (originalFilename != null && originalFilename.contains("."))
+                    ? originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase() : ".jpg";
+
+            int slot = -1;
+            String[] exts = {".jpg", ".jpeg", ".png", ".gif", ".webp"};
+            for (int i = 1; i <= 3; i++) {
+                boolean exists = false;
+                for (String ext : exts) {
+                    if (Files.exists(PROFILE_CUSTOM_DIR.resolve("user_" + userId + "_c" + i + ext))) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists) { slot = i; break; }
+            }
+            if (slot == -1) throw new RuntimeException("최대 3개까지 등록 가능합니다.");
+
+            String filename = "user_" + userId + "_c" + slot + extension;
+            byte[] bytes = file.getBytes();
+            Files.write(PROFILE_CUSTOM_DIR.resolve(filename), bytes);
+
+            String thumbFilename = "user_" + userId + "_c" + slot + "_thumb.png";
+            try {
+                ImageThumbUtil.generateThumb(new ByteArrayInputStream(bytes), PROFILE_THUMB_DIR.resolve(thumbFilename));
+            } catch (Exception e) {
+                log.warn("커스텀 이미지 썸네일 생성 실패 - userId={}", userId, e);
+            }
+
+            Map<String, String> result = new HashMap<>();
+            result.put("imageUrl", "/uploads/profile_custom/" + filename);
+            result.put("thumbUrl", "/uploads/profile_thumb/" + thumbFilename);
+            return result;
+        } catch (IOException e) {
+            log.error("커스텀 프로필 이미지 저장 실패 - userId={}", userId, e);
+            throw new RuntimeException("이미지 저장에 실패했습니다.", e);
+        }
+    }
+
+    public List<Map<String, String>> getCustomProfileImages(Long userId) {
+        List<Map<String, String>> result = new ArrayList<>();
+        if (!Files.exists(PROFILE_CUSTOM_DIR)) return result;
+        String[] exts = {".jpg", ".jpeg", ".png", ".gif", ".webp"};
+        for (int i = 1; i <= 3; i++) {
+            for (String ext : exts) {
+                Path f = PROFILE_CUSTOM_DIR.resolve("user_" + userId + "_c" + i + ext);
+                if (Files.exists(f)) {
+                    Map<String, String> entry = new HashMap<>();
+                    entry.put("url", "/uploads/profile_custom/user_" + userId + "_c" + i + ext);
+                    entry.put("thumbUrl", "/uploads/profile_thumb/user_" + userId + "_c" + i + "_thumb.png");
+                    result.add(entry);
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    public void deleteCustomProfileImage(Long userId, String url) {
+        String filename = url.substring(url.lastIndexOf('/') + 1);
+        if (!filename.startsWith("user_" + userId + "_c")) {
+            log.warn("본인 이미지가 아닌 삭제 시도 - userId={}, url={}", userId, url);
+            return;
+        }
+        try {
+            Files.deleteIfExists(PROFILE_CUSTOM_DIR.resolve(filename));
+            String baseName = filename.substring(0, filename.lastIndexOf('.'));
+            Files.deleteIfExists(PROFILE_THUMB_DIR.resolve(baseName + "_thumb.png"));
+        } catch (IOException e) {
+            log.warn("커스텀 이미지 삭제 실패 - url={}", url, e);
+        }
+    }
+
+    private String blankIfNull(String value) {
+        return value == null ? "" : value;
     }
 }

@@ -77,6 +77,14 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of("INVALID_ARGUMENT", e.getMessage()));
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException e) {
+        log.warn("Illegal state: message={}", e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.of("INVALID_STATE", e.getMessage()));
+    }
+
     // favicon.ico 등 정적 리소스 미존재 요청 — ERROR 로그 방지
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<Void> handleNoResourceFound(NoResourceFoundException e) {
