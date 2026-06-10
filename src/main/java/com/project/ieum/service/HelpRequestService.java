@@ -9,8 +9,13 @@ import com.project.ieum.entity.request.HelpRequestPersonalityTag;
 import com.project.ieum.entity.request.HelpRequestStatus;
 import com.project.ieum.entity.request.ServiceCategory;
 import com.project.ieum.entity.user.UserProfile;
+import com.project.ieum.exception.BadRequestException;
 import com.project.ieum.exception.ForbiddenException;
+import com.project.ieum.exception.HelpRequestNotFoundException;
+import com.project.ieum.exception.InvalidRequestStateException;
 import com.project.ieum.exception.NotFoundException;
+import com.project.ieum.exception.NotRequestOwnerException;
+import com.project.ieum.exception.RequestTimeConflictException;
 import com.project.ieum.repository.*;
 import com.project.ieum.service.common.CurrentUserService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +32,10 @@ import java.util.List;
 @Transactional
 public class HelpRequestService {
 
+    // 시간대 겹침 충돌 대상으로 보는 활성 상태(종료상태 COMPLETED/CLOSED 제외).
+    private static final List<HelpRequestStatus> ACTIVE_STATUSES =
+            List.of(HelpRequestStatus.OPEN, HelpRequestStatus.MATCHED, HelpRequestStatus.IN_PROGRESS);
+
     private final HelpRequestRepository helpRequestRepository;
     private final UserProfileRepository userProfileRepository;
     private final ServiceCategoryRepository serviceCategoryRepository;
@@ -39,18 +48,17 @@ public class HelpRequestService {
         UserProfile requester = userProfileRepository.findById(currentUser.getId())
                 .orElseThrow(() -> new NotFoundException("이용자 프로필을 찾을 수 없습니다."));
 
-        // 시간대 겹침 검사
         LocalDateTime start = form.getDesiredStartDatetime();
         LocalDateTime end = form.getDesiredEndDatetime() != null
                 ? form.getDesiredEndDatetime()
                 : start.plusHours(1);
 
-        if (helpRequestRepository.existsOverlapping(
-                requester, start, end,
-                List.of(HelpRequestStatus.OPEN, HelpRequestStatus.MATCHED, HelpRequestStatus.IN_PROGRESS))) {
-            throw new IllegalStateException("해당 시간대에 이미 다른 도움 요청이 있습니다.");
+        // (이슈 #8 정본) 시간대 겹침은 도메인 4xx 예외로 — IllegalStateException(→500 오매핑) 대신 400.
+        if (helpRequestRepository.existsOverlapping(requester, start, end, ACTIVE_STATUSES)) {
+            throw new RequestTimeConflictException();
         }
 
+        // status는 지정하지 않는다 — 엔티티 @Builder.Default = OPEN 이 생성 시 고정값을 보장(누락 방지).
         HelpRequest helpRequest = HelpRequest.builder()
                 .requester(requester)
                 .serviceCategory(getServiceCategory(form.getServiceCategoryId()))
@@ -66,7 +74,6 @@ public class HelpRequestService {
                 .zonecode(form.getZonecode())
                 .bcode(form.getBcode())
                 .specialNotes(form.getSpecialNotes())
-                .status(HelpRequestStatus.OPEN)
                 .build();
 
         HelpRequest saved = helpRequestRepository.save(helpRequest);
@@ -74,48 +81,51 @@ public class HelpRequestService {
         return saved;
     }
 
-    public HelpRequest update(Long requestId, HelpRequestForm form) {
-        User currentUser = requireRole(UserRole.USER);
-        HelpRequest helpRequest = getOwnedRequest(requestId, currentUser.getId());
-        if (helpRequest.getStatus() != HelpRequestStatus.OPEN) {
-            throw new IllegalStateException("열린 상태의 요청만 수정할 수 있습니다.");
-        }
+    // (이슈 #8 정본) update()/toForm() 제거: HelpRequest는 write-once.
+    // 도우미가 본 내용/시간/위치가 지원 후 바뀌면 신뢰성이 깨지므로 생성 후 본문 수정을 막는다.
+    // 변경이 필요하면 마감(cancel→CLOSED) 후 새로 작성한다.
 
-        helpRequest.updateDetails(
-                getServiceCategory(form.getServiceCategoryId()),
-                form.getTitle(),
-                form.getBody(),
-                form.getDesiredStartDatetime(),
-                form.getDesiredEndDatetime(),
-                form.getRoadAddress(),
-                form.getAddressDetail(),
-                form.getSido(),
-                form.getSigungu(),
-                form.getSpecialNotes());
-        replaceTags(helpRequest, form.getPersonalityTagIds());
-        return helpRequest;
-    }
-
+    // 마감(취소) — 매칭 전(OPEN)에만 게시자가 직접. 2단계 삭제의 1단계.
     public void cancel(Long requestId) {
         User currentUser = requireRole(UserRole.USER);
-        HelpRequest helpRequest = getOwnedRequest(requestId, currentUser.getId());
-        if (helpRequest.getStatus() == HelpRequestStatus.COMPLETED) {
-            throw new IllegalStateException("완료된 요청은 취소할 수 없습니다.");
+        HelpRequest helpRequest = get(requestId);
+        // (이슈 #8 정본) 권한 검사 순서 = 소유자(403) → 상태(400). 비소유자에게 상태를 노출하지 않는다.
+        if (!helpRequest.getRequester().getUserId().equals(currentUser.getId())) {
+            throw new NotRequestOwnerException();
         }
-        helpRequest.changeStatus(HelpRequestStatus.CANCELLED);
+        if (helpRequest.getStatus() != HelpRequestStatus.OPEN) {
+            throw InvalidRequestStateException.cannotClose();
+        }
+        helpRequest.changeStatus(HelpRequestStatus.CLOSED);
+        // TODO(#11): 지원/매칭 기능이 생기면 여기서 지원서를 일괄 취소한다(cascade 옵션 D, MatchingService에 위임).
+    }
+
+    // 하드 삭제 — 2단계 삭제의 2단계. CLOSED 상태에서만 게시자가 명시적으로.
+    public void delete(Long requestId) {
+        User currentUser = requireRole(UserRole.USER);
+        HelpRequest helpRequest = get(requestId);
+        if (!helpRequest.getRequester().getUserId().equals(currentUser.getId())) {
+            throw new NotRequestOwnerException();
+        }
+        if (helpRequest.getStatus() != HelpRequestStatus.CLOSED) {
+            throw InvalidRequestStateException.cannotDelete();
+        }
+        helpRequestPersonalityTagRepository.deleteAll(
+                helpRequestPersonalityTagRepository.findByHelpRequest_Id(requestId));
+        helpRequestRepository.delete(helpRequest);
     }
 
     @Transactional(readOnly = true)
     public HelpRequest get(Long requestId) {
         return helpRequestRepository.findById(requestId)
-                .orElseThrow(() -> new NotFoundException("도움 요청을 찾을 수 없습니다."));
+                .orElseThrow(() -> new HelpRequestNotFoundException(requestId));
     }
 
     @Transactional(readOnly = true)
     public HelpRequest getOwnedRequest(Long requestId, Long userId) {
         HelpRequest helpRequest = get(requestId);
         if (!helpRequest.getRequester().getUserId().equals(userId)) {
-            throw new ForbiddenException("본인의 요청만 접근할 수 있습니다.");
+            throw new NotRequestOwnerException();
         }
         return helpRequest;
     }
@@ -131,28 +141,6 @@ public class HelpRequestService {
     @Transactional(readOnly = true)
     public Page<HelpRequest> getOpenRequests(Pageable pageable) {
         return helpRequestRepository.findByStatusOrderByDesiredStartDatetimeAscIdDesc(HelpRequestStatus.OPEN, pageable);
-    }
-
-    public HelpRequestForm toForm(HelpRequest helpRequest) {
-        HelpRequestForm form = new HelpRequestForm();
-        form.setTitle(helpRequest.getTitle());
-        form.setBody(helpRequest.getBody());
-        form.setServiceCategoryId(helpRequest.getServiceCategory().getId());
-        form.setDesiredStartDatetime(helpRequest.getDesiredStartDatetime());
-        form.setDesiredEndDatetime(helpRequest.getDesiredEndDatetime());
-        form.setRoadAddress(helpRequest.getRoadAddress());
-        form.setAddressDetail(helpRequest.getAddressDetail());
-        form.setSido(helpRequest.getSido());
-        form.setSigungu(helpRequest.getSigungu());
-        form.setBname(helpRequest.getBname());
-        form.setZonecode(helpRequest.getZonecode());
-        form.setBcode(helpRequest.getBcode());
-        form.setSpecialNotes(helpRequest.getSpecialNotes());
-        form.setPersonalityTagIds(helpRequestPersonalityTagRepository.findByHelpRequest_Id(helpRequest.getId())
-                .stream()
-                .map(tag -> tag.getTag().getId())
-                .toList());
-        return form;
     }
 
     private void replaceTags(HelpRequest helpRequest, List<Long> tagIds) {
@@ -178,8 +166,9 @@ public class HelpRequestService {
         return currentUser;
     }
 
+    // (이슈 #8 정본) 등록되지 않은 분류 선택은 클라이언트 입력 오류 → 404(NotFound)가 아니라 400(BadRequest).
     private ServiceCategory getServiceCategory(Long id) {
         return serviceCategoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("서비스 종류를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BadRequestException("등록되지 않은 서비스 분류입니다."));
     }
 }
