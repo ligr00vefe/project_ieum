@@ -37,6 +37,16 @@ public class MasterDataService {
         return personalityTagRepository.findAllByOrderByIdAsc();
     }
 
+    // 활동지원사 전용 태그 (글 작성 폼 "원하는 활동지원사 성향", 활동지원사 회원가입/마이페이지)
+    public List<PersonalityTag> getCaregiverPersonalityTags() {
+        return personalityTagRepository.findAllByIsCaregiversOnlyOrderByIdAsc(true);
+    }
+
+    // 장애인/공통 태그 (장애인 회원가입/마이페이지 본인 성향)
+    public List<PersonalityTag> getUserPersonalityTags() {
+        return personalityTagRepository.findAllByIsCaregiversOnlyOrderByIdAsc(false);
+    }
+
     public List<Region> getAllRegions() {
         return regionRepository.findAllByOrderBySidoAscSigunguAscDongAsc();
     }

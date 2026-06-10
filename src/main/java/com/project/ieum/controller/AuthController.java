@@ -197,7 +197,9 @@ public class AuthController {
         RegistrationSessionDTO sessionData = getSessionOrRedirect(session);
         if (sessionData == null) return "redirect:/register/" + type + "/step1";
 
-        model.addAttribute("personalityTags", masterDataService.getAllPersonalityTags());
+        model.addAttribute("personalityTags", "caregiver".equals(type)
+                ? masterDataService.getCaregiverPersonalityTags()
+                : masterDataService.getAllPersonalityTags());
         model.addAttribute("personalityTagInfo",
                 sessionData.getPersonalityTags() != null ? sessionData.getPersonalityTags() : new PersonalityTagDTO());
         model.addAttribute("userType", type);

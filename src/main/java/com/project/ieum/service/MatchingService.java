@@ -17,6 +17,10 @@ import com.project.ieum.exception.NotFoundException;
 import com.project.ieum.repository.*;
 import com.project.ieum.service.common.CurrentUserService;
 import com.project.ieum.service.notification.NotificationService;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +40,8 @@ public class MatchingService {
     private final MessageRepository messageRepository;
     private final CurrentUserService currentUserService;
     private final NotificationService notificationService;
+    private final HelpRequestPersonalityTagRepository helpRequestPersonalityTagRepository;
+    private final CaregiverPersonalityTagRepository caregiverPersonalityTagRepository;
 
     public HelpRequestApplication apply(Long requestId, ApplyRequest applyRequest) {
         User currentUser = requireRole(UserRole.CAREGIVER);
@@ -88,6 +94,13 @@ public class MatchingService {
         return application;
     }
 
+    public Long acceptAndGetConversationId(Long applicationId) {
+        accept(applicationId);
+        return conversationRepository.findByApplication_Id(applicationId)
+                .map(c -> c.getId())
+                .orElseThrow(() -> new NotFoundException("채팅방을 찾을 수 없습니다."));
+    }
+
     public void accept(Long applicationId) {
         User currentUser = requireRole(UserRole.USER);
         HelpRequestApplication selected = getApplication(applicationId);
@@ -118,6 +131,17 @@ public class MatchingService {
                         .map(conversation -> "/chat/conversations/" + conversation.getId())
                         .orElse("/chat/conversations")
         );
+    }
+
+    public void cancelMatch(Long applicationId) {
+        User currentUser = requireRole(UserRole.USER);
+        HelpRequestApplication application = getApplication(applicationId);
+        ensureRequester(application.getHelpRequest(), currentUser.getId());
+        if (application.getStatus() != ApplicationStatus.ACCEPTED) {
+            throw new IllegalStateException("수락된 지원만 매칭 취소할 수 있습니다.");
+        }
+        application.pending();
+        application.getHelpRequest().changeStatus(HelpRequestStatus.OPEN);
     }
 
     public void reject(Long applicationId) {
@@ -167,6 +191,51 @@ public class MatchingService {
         HelpRequest helpRequest = getRequest(requestId);
         ensureRequester(helpRequest, currentUser.getId());
         return applicationRepository.findByHelpRequest_IdOrderByCreatedAtDesc(requestId);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean hasApplied(Long requestId, Long userId) {
+        return applicationRepository.existsByHelpRequest_IdAndCaregiver_UserId(requestId, userId);
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.Optional<Long> getMyConversationId(Long requestId, Long userId) {
+        return applicationRepository.findByHelpRequest_IdAndCaregiver_UserId(requestId, userId)
+                .flatMap(app -> conversationRepository.findByApplication_Id(app.getId()))
+                .map(c -> c.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, Long> getConversationIdMap(List<HelpRequestApplication> applications) {
+        List<Long> appIds = applications.stream().map(HelpRequestApplication::getId).toList();
+        Map<Long, Long> result = new HashMap<>();
+        conversationRepository.findByApplication_IdIn(appIds)
+                .forEach(c -> result.put(c.getApplication().getId(), c.getId()));
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, Integer> getMatchPercentMap(Long requestId, List<HelpRequestApplication> applications) {
+        Set<Long> requestTagIds = helpRequestPersonalityTagRepository.findByHelpRequest_Id(requestId)
+                .stream()
+                .map(t -> t.getTag().getId())
+                .collect(Collectors.toSet());
+
+        Map<Long, Integer> result = new HashMap<>();
+        for (HelpRequestApplication app : applications) {
+            if (requestTagIds.isEmpty()) {
+                result.put(app.getId(), 0);
+                continue;
+            }
+            Set<Long> caregiverTagIds = caregiverPersonalityTagRepository.findByCaregiver(app.getCaregiver())
+                    .stream()
+                    .map(t -> t.getTag().getId())
+                    .collect(Collectors.toSet());
+            long matched = requestTagIds.stream().filter(caregiverTagIds::contains).count();
+            int percent = (int) (matched * 100 / requestTagIds.size());
+            result.put(app.getId(), percent);
+        }
+        return result;
     }
 
     @Transactional(readOnly = true)
