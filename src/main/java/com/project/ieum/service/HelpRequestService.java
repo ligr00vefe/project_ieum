@@ -65,6 +65,8 @@ public class HelpRequestService {
                 .bname(form.getBname())
                 .zonecode(form.getZonecode())
                 .bcode(form.getBcode())
+                .departureAddress(form.getDepartureAddress())
+                .destinationAddress(form.getDestinationAddress())
                 .specialNotes(form.getSpecialNotes())
                 .status(HelpRequestStatus.OPEN)
                 .build();
@@ -126,6 +128,12 @@ public class HelpRequestService {
         UserProfile requester = userProfileRepository.findById(currentUser.getId())
                 .orElseThrow(() -> new NotFoundException("이용자 프로필을 찾을 수 없습니다."));
         return helpRequestRepository.findByRequesterOrderByCreatedAtDesc(requester);
+    }
+
+    @Transactional(readOnly = true)
+    public List<HelpRequest> getAllActiveRequests() {
+        return helpRequestRepository.findByStatusInOrderByCreatedAtDesc(
+                List.of(HelpRequestStatus.OPEN, HelpRequestStatus.MATCHED));
     }
 
     @Transactional(readOnly = true)
