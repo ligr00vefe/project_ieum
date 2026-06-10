@@ -1,5 +1,6 @@
 package com.project.ieum.dto.request;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -51,4 +52,15 @@ public class HelpRequestForm {
 
     private String specialNotes;
     private List<Long> personalityTagIds = new ArrayList<>();
+
+    // (이슈 #8 정본) 시간 순서 검증 — 종료가 시작 이후여야 한다.
+    // @AssertTrue 는 true=유효. 둘 중 하나라도 null이면 @NotNull 책임이라 여기선 통과(true)시킨다.
+    // 엔티티 verifyTimeRange()는 최종 방어선(→500)이라, 사용자 입력 오류는 폼에서 400으로 끝낸다.
+    @AssertTrue(message = "종료 시간은 시작 시간 이후여야 합니다.")
+    public boolean isEndAfterStart() {
+        if (desiredStartDatetime == null || desiredEndDatetime == null) {
+            return true;
+        }
+        return !desiredEndDatetime.isBefore(desiredStartDatetime);
+    }
 }
