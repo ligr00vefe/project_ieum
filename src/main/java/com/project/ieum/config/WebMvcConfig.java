@@ -13,12 +13,16 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/uploads/profiles/**")
-                .addResourceLocations("file:" + Paths.get("uploads/profiles").toAbsolutePath() + "/");
+                .addResourceLocations("file:" + toUrl("uploads/profiles"));
         registry.addResourceHandler("/uploads/profile_custom/**")
-                .addResourceLocations("file:" + Paths.get("uploads/profile_custom").toAbsolutePath() + "/");
+                .addResourceLocations("file:" + toUrl("uploads/profile_custom"));
         registry.addResourceHandler("/uploads/profile_thumb/**")
-                .addResourceLocations("file:" + Paths.get("uploads/profile_thumb").toAbsolutePath() + "/");
+                .addResourceLocations("file:" + toUrl("uploads/profile_thumb"));
         registry.addResourceHandler("/uploads/notices/**")
-                .addResourceLocations("file:" + Paths.get("uploads/notices").toAbsolutePath() + "/");
+                .addResourceLocations("file:" + toUrl("uploads/notices"));
+    }
+
+    private String toUrl(String relativePath) {
+        return Paths.get(relativePath).toAbsolutePath() + "/";
     }
 }
