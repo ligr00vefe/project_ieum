@@ -82,37 +82,6 @@ public class DisabledBoardController {
         return "layout/layout";
     }
 
-    @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model) {
-        model.addAttribute("title", "요청 글 수정");
-        model.addAttribute("form", helpRequestService.toForm(helpRequestService.get(id)));
-        model.addAttribute("requestId", id);
-        model.addAttribute("serviceCategories", masterDataService.getAllServiceCategories());
-        model.addAttribute("personalityTags", masterDataService.getCaregiverPersonalityTags());
-        model.addAttribute("content", "disabled/board/edit");
-        return "layout/layout";
-    }
-
-    @PostMapping("/{id}/edit")
-    public String editSubmit(
-            @PathVariable Long id,
-            @Valid @ModelAttribute("form") HelpRequestForm form,
-            BindingResult bindingResult,
-            Model model,
-            RedirectAttributes redirectAttributes) {
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("title", "요청 글 수정");
-            model.addAttribute("requestId", id);
-            model.addAttribute("serviceCategories", masterDataService.getAllServiceCategories());
-            model.addAttribute("personalityTags", masterDataService.getCaregiverPersonalityTags());
-            model.addAttribute("content", "disabled/board/edit");
-            return "layout/layout";
-        }
-        helpRequestService.update(id, form);
-        redirectAttributes.addFlashAttribute("message", "도움 요청이 수정되었습니다.");
-        return "redirect:/disabled/board/" + id;
-    }
-
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         helpRequestService.cancel(id);

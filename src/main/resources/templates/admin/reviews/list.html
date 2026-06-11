@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+<div th:attr="data-page-title='리뷰 관리'">
+
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h2 class="text-xl font-bold text-slate-900">리뷰 관리</h2>
+            <p class="text-sm text-slate-500 mt-0.5">부적절한 리뷰를 숨김 처리할 수 있습니다.</p>
+        </div>
+    </div>
+
+    <div th:if="${message}"
+         class="mb-4 px-4 py-3 rounded-xl bg-teal-50 border border-teal-200 text-sm text-teal-700"
+         th:text="${message}"></div>
+
+    <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="border-b border-slate-100 bg-slate-50">
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">내용</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">작성자</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">대상 지원사</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">평점</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">공개 여부</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">등록일</th>
+                    <th class="px-5 py-3"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+                <th:block th:each="review : ${reviews}">
+                <tr class="hover:bg-slate-50 transition-colors"
+                    th:classappend="${review.visibility.name() == 'PRIVATE'} ? 'opacity-50' : ''">
+                    <td class="px-5 py-3.5">
+                        <p class="text-slate-700 truncate max-w-xs"
+                           th:text="${review.body != null ? review.body : '(내용 없음)'}">내용</p>
+                    </td>
+                    <td class="px-5 py-3.5 text-slate-600 text-xs"
+                        th:text="${review.author?.fullName ?: '-'}">-</td>
+                    <td class="px-5 py-3.5 text-slate-600 text-xs"
+                        th:text="${review.target?.fullName ?: '-'}">-</td>
+                    <td class="px-5 py-3.5">
+                        <div class="flex items-center gap-0.5">
+                            <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            <span class="text-sm font-semibold text-slate-700" th:text="${review.rating}">5</span>
+                        </div>
+                    </td>
+                    <td class="px-5 py-3.5">
+                        <span th:text="${review.visibility.name() == 'PUBLIC' ? '공개' : '숨김'}"
+                              th:classappend="${review.visibility.name() == 'PUBLIC'} ? 'bg-teal-50 text-teal-600' : 'bg-slate-100 text-slate-400'"
+                              class="px-2 py-0.5 text-xs font-semibold rounded-full">공개</span>
+                    </td>
+                    <td class="px-5 py-3.5 text-slate-400 text-xs"
+                        th:text="${#temporals.format(review.createdAt, 'yyyy.MM.dd')}">-</td>
+                    <td class="px-5 py-3.5 text-right">
+                        <form th:action="@{/admin/reviews/{id}/visibility(id=${review.id})}" method="post" class="inline">
+                            <input type="hidden" name="visibility"
+                                   th:value="${review.visibility.name() == 'PUBLIC' ? 'PRIVATE' : 'PUBLIC'}">
+                            <button type="submit"
+                                    th:text="${review.visibility.name() == 'PUBLIC' ? '숨김' : '공개'}"
+                                    class="text-xs font-medium text-indigo-500 hover:text-indigo-700">숨김</button>
+                        </form>
+                    </td>
+                </tr>
+                </th:block>
+                <tr th:if="${#lists.isEmpty(reviews)}">
+                    <td colspan="7" class="px-5 py-10 text-center text-sm text-slate-400">리뷰가 없습니다.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</th:block>
+</html>
