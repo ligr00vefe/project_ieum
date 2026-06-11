@@ -18,5 +18,4 @@ public class IeumApplication {
 		String basePath = (contextPath == null || contextPath.isBlank() || "/".equals(contextPath)) ? "/" : contextPath;
 		log.info("IEUM application started: http://localhost:{}{}", port, basePath);
 	}
-
 }
