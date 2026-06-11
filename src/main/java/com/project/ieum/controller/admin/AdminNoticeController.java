@@ -32,6 +32,15 @@ public class AdminNoticeController {
         return "admin/notices/list";
     }
 
+    @GetMapping("/{id}")
+    public String detail(@PathVariable Long id, Model model) {
+        model.addAttribute("notice", noticeService.getById(id));
+        model.addAttribute("attachments", noticeService.getAttachments(id));
+        model.addAttribute("activeMenu", "notices");
+        model.addAttribute("title", "공지 상세");
+        return "admin/notices/detail";
+    }
+
     @GetMapping("/new")
     public String createForm(Model model) {
         model.addAttribute("form", new NoticeForm());
