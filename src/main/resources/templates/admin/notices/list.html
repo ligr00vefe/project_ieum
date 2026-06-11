@@ -44,7 +44,9 @@
                         </svg>
                     </td>
                     <td class="px-5 py-3.5">
-                        <p class="font-medium text-slate-800 truncate max-w-sm" th:text="${notice.title}">제목</p>
+                        <a th:href="@{/admin/notices/{id}(id=${notice.id})}"
+                           class="font-medium text-slate-800 hover:text-indigo-600 truncate max-w-sm block transition-colors"
+                           th:text="${notice.title}">제목</a>
                     </td>
                     <td class="px-5 py-3.5 text-slate-500 text-xs"
                         th:text="${notice.author?.email ?: '-'}">-</td>
