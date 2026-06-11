@@ -16,20 +16,22 @@ public class HtmlSanitizer {
 
     private static Safelist buildSafelist() {
         return Safelist.relaxed()
-                // Quill이 생성하는 추가 태그
-                .addTags("s", "del", "ins", "span", "pre")
-                // 인라인 스타일(색상·크기) — 위험 속성은 Jsoup이 자동 제거
+                // CKEditor 5가 이미지를 <figure class="image"> 로 감싸므로 허용
+                .addTags("s", "del", "ins", "span", "pre", "figure", "figcaption")
                 .addAttributes(":all", "class", "style")
-                // 이미지: 로컬 상대경로(/uploads/...) 허용
-                .addProtocols("img", "src", "http", "https", "/")
-                // 링크: http·https 만 허용 (javascript: 차단)
+                // img src: "#" = Jsoup 와일드카드(어떤 값이든 허용).
+                // 이미지 src로는 JavaScript 실행이 불가능하므로 XSS 위험 없음.
+                // "/uploads/..." 같은 상대경로도 통과시키기 위해 사용.
+                .addProtocols("img", "src", "#")
+                // a href: http/https 만 허용 → javascript: 차단
                 .removeProtocols("a", "href", "ftp")
-                .addProtocols("a", "href", "http", "https", "#");
+                .addProtocols("a", "href", "http", "https")
+                .preserveRelativeLinks(true);
     }
 
-    /** 신뢰할 수 없는 HTML을 허용 목록 기준으로 정제하여 반환합니다. */
     public String sanitize(String html) {
         if (html == null || html.isBlank()) return html;
-        return Jsoup.clean(html, SAFELIST);
+        // base URI를 주어야 href="#section" 같은 앵커 링크도 절대 URL로 검증됨
+        return Jsoup.clean(html, "http://localhost", SAFELIST);
     }
 }
