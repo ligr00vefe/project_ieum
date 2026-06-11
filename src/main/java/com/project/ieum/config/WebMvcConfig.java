@@ -18,5 +18,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addResourceLocations("file:" + Paths.get("uploads/profile_custom").toAbsolutePath() + "/");
         registry.addResourceHandler("/uploads/profile_thumb/**")
                 .addResourceLocations("file:" + Paths.get("uploads/profile_thumb").toAbsolutePath() + "/");
+        registry.addResourceHandler("/uploads/notices/**")
+                .addResourceLocations("file:" + Paths.get("uploads/notices").toAbsolutePath() + "/");
     }
 }
