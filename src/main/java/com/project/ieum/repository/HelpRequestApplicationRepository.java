@@ -18,4 +18,5 @@ public interface HelpRequestApplicationRepository extends JpaRepository<HelpRequ
     List<HelpRequestApplication> findByCaregiver_UserIdOrderByCreatedAtDesc(Long caregiverUserId);
 
     List<HelpRequestApplication> findByHelpRequest_IdAndStatus(Long helpRequestId, ApplicationStatus status);
+    long countByStatus(ApplicationStatus status);
 }

@@ -48,4 +48,8 @@ public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long>,
     // 도움 요청 상세 — id로 1건 조회하며 serviceCategory·requester를 함께 로딩(N+1 방지).
     @EntityGraph(attributePaths = {"serviceCategory", "requester"})
     Optional<HelpRequest> getHelpRequestById(Long id);
+
+    long countByStatus(HelpRequestStatus status);
+    List<HelpRequest> findAllByOrderByCreatedAtDesc();
+    List<HelpRequest> findTop5ByStatusOrderByUpdatedAtDesc(HelpRequestStatus status);
 }
