@@ -1,6 +1,7 @@
 package com.project.ieum.controller.admin;
 
 import com.project.ieum.dto.admin.InquiryForm;
+import com.project.ieum.entity.inquiry.InquiryCategory;
 import com.project.ieum.entity.inquiry.InquiryStatus;
 import com.project.ieum.service.admin.InquiryService;
 import com.project.ieum.service.common.CurrentUserService;
@@ -21,12 +22,30 @@ public class AdminInquiryController {
     private final CurrentUserService currentUserService;
 
     @GetMapping
-    public String list(@RequestParam(required = false) String status, Model model) {
-        var inquiries = (status != null && !status.isBlank())
-                ? inquiryService.getByStatus(InquiryStatus.valueOf(status))
-                : inquiryService.getAll();
-        model.addAttribute("inquiries", inquiries);
+    public String list(@RequestParam(required = false) String status,
+                       @RequestParam(required = false) String category,
+                       @RequestParam(defaultValue = "0") int page,
+                       Model model) {
+        InquiryStatus statusEnum = null;
+        InquiryCategory categoryEnum = null;
+        try {
+            if (status != null && !status.isBlank()) statusEnum = InquiryStatus.valueOf(status);
+            if (category != null && !category.isBlank()) categoryEnum = InquiryCategory.valueOf(category);
+        } catch (IllegalArgumentException ignored) {}
+
+        var inquiryPage = inquiryService.getFilteredPaged(categoryEnum, statusEnum, page);
+        int totalPages = inquiryPage.getTotalPages();
+        int startPage  = Math.max(0, page - 2);
+        int endPage    = Math.min(totalPages - 1, page + 2);
+
+        model.addAttribute("inquiries", inquiryPage.getContent());
+        model.addAttribute("inquiryPage", inquiryPage);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
         model.addAttribute("selectedStatus", status);
+        model.addAttribute("selectedCategory", category);
+        model.addAttribute("categories", InquiryCategory.values());
         model.addAttribute("activeMenu", "inquiries");
         model.addAttribute("title", "문의 관리");
         return "admin/inquiries/list";
@@ -53,6 +72,14 @@ public class AdminInquiryController {
         }
         inquiryService.reply(id, form, currentUserService.getCurrentUser());
         ra.addFlashAttribute("message", "답변이 등록되었습니다.");
+        return "redirect:/admin/inquiries/" + id;
+    }
+
+    /** 답변 상태 PENDING ↔ ANSWERED 토글 */
+    @PostMapping("/{id}/status")
+    public String toggleStatus(@PathVariable Long id, RedirectAttributes ra) {
+        inquiryService.toggleStatus(id);
+        ra.addFlashAttribute("message", "답변 상태가 변경되었습니다.");
         return "redirect:/admin/inquiries/" + id;
     }
 }
