@@ -44,5 +44,13 @@ public class Inquiry extends BasicEntity {
     @OneToOne(mappedBy = "inquiry", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private InquiryReply reply;
 
+    public void update(String title, String body, InquiryCategory category, Boolean isSecret) {
+        this.title    = title;
+        this.body     = body;
+        this.category = category;
+        this.isSecret = isSecret;
+    }
+
     public void markAnswered() { this.status = InquiryStatus.ANSWERED; }
+    public void markPending()  { this.status = InquiryStatus.PENDING; }
 }
