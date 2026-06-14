@@ -11,6 +11,8 @@ import com.project.ieum.repository.NoticeRepository;
 import com.project.ieum.util.HtmlSanitizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +42,16 @@ public class NoticeService {
     @Transactional(readOnly = true)
     public List<Notice> getAll() {
         return noticeRepository.findAllByOrderByIsPinnedDescCreatedAtDesc();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Notice> getAllPaged(int page) {
+        return noticeRepository.findAllByOrderByIsPinnedDescCreatedAtDesc(PageRequest.of(page, 10));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Notice> getPublicPaged(int page) {
+        return noticeRepository.findByIsPublicTrueOrderByIsPinnedDescCreatedAtDesc(PageRequest.of(page, 10));
     }
 
     @Transactional(readOnly = true)

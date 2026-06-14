@@ -45,18 +45,12 @@
                 <tr class="hover:bg-slate-50 transition-colors">
                     <td class="px-5 py-3.5 font-medium text-slate-800" th:text="${user.email}">이메일</td>
                     <td class="px-5 py-3.5">
-                        <span th:text="${user.role.name() == 'USER' ? '이용자' : user.role.name() == 'CAREGIVER' ? '활동지원사' : '관리자'}"
-                              th:classappend="${user.role.name() == 'USER'} ? 'bg-indigo-50 text-indigo-600' :
-                                              ${user.role.name() == 'CAREGIVER'} ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-600'"
-                              class="px-2 py-0.5 text-xs font-semibold rounded-full">역할</span>
+                        <span th:text="${user.roleLabel}"
+                              th:class="'px-2 py-0.5 text-xs font-semibold rounded-full ' + ${user.roleClass}">역할</span>
                     </td>
                     <td class="px-5 py-3.5">
-                        <span th:text="${user.status.name() == 'ACTIVE' ? '활성' :
-                                         user.status.name() == 'PAUSED' ? '일시중지' :
-                                         user.status.name() == 'BANNED' ? '정지' : '탈퇴'}"
-                              th:classappend="${user.status.name() == 'ACTIVE'} ? 'bg-teal-50 text-teal-600' :
-                                              ${user.status.name() == 'BANNED'} ? 'bg-red-50 text-red-500' : 'bg-slate-100 text-slate-500'"
-                              class="px-2 py-0.5 text-xs font-semibold rounded-full">상태</span>
+                        <span th:text="${user.statusLabel}"
+                              th:class="'px-2 py-0.5 text-xs font-semibold rounded-full ' + ${user.statusClass}">상태</span>
                     </td>
                     <td class="px-5 py-3.5 text-slate-500 text-xs"
                         th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'yyyy.MM.dd') : '-'}">-</td>
@@ -74,6 +68,9 @@
             </tbody>
         </table>
     </div>
+
+    <!-- 페이지네이션 -->
+    <div th:replace="~{fragments/pagination :: pager(${currentPage}, ${totalPages}, ${startPage}, ${endPage}, '/admin/users?' + (selectedRole != null ? 'role=' + selectedRole + '&' : ''))}"></div>
 
 </div>
 </th:block>
