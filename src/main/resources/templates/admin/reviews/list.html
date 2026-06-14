@@ -73,6 +73,9 @@
         </table>
     </div>
 
+    <!-- 페이지네이션 -->
+    <div th:replace="~{fragments/pagination :: pager(${currentPage}, ${totalPages}, ${startPage}, ${endPage}, '/admin/reviews?')}"></div>
+
 </div>
 </th:block>
 </html>
