@@ -10,4 +10,5 @@ import java.util.List;
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
     List<Notice> findAllByOrderByIsPinnedDescCreatedAtDesc();
     List<Notice> findTop5ByOrderByCreatedAtDesc();
+    List<Notice> findTop5ByIsPublicTrueOrderByIsPinnedDescCreatedAtDesc();
 }

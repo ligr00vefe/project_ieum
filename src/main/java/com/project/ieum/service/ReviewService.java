@@ -68,7 +68,12 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public List<Review> getPublicReviews(Long caregiverUserId) {
-        return reviewRepository.findByTarget_UserIdAndVisibilityOrderByCreatedAtDesc(caregiverUserId, ReviewVisibility.PUBLIC);
+        return reviewRepository.findByTargetWithFetch(caregiverUserId, ReviewVisibility.PUBLIC);
+    }
+
+    @Transactional(readOnly = true)
+    public long countWrittenByUserId(Long userId) {
+        return reviewRepository.countByAuthor_UserId(userId);
     }
 
     private void refreshRating(Long caregiverUserId) {

@@ -8,14 +8,19 @@ import com.project.ieum.entity.inquiry.Inquiry;
 import com.project.ieum.entity.inquiry.InquiryCategory;
 import org.springframework.data.domain.Page;
 import com.project.ieum.service.admin.InquiryService;
+import com.project.ieum.service.admin.NoticeService;
 import com.project.ieum.service.common.CurrentUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Map;
 
 @Controller
 @RequestMapping("/inquiries")
@@ -23,6 +28,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class InquiryController {
 
     private final InquiryService inquiryService;
+    private final NoticeService noticeService;
     private final CurrentUserService currentUserService;
 
     /**
@@ -180,6 +186,14 @@ public class InquiryController {
         inquiryService.update(id, form, currentUser);
         ra.addFlashAttribute("message", "문의가 수정되었습니다.");
         return "redirect:/inquiries/" + id;
+    }
+
+    /** CKEditor 인라인 이미지 업로드 */
+    @PostMapping("/editor-image")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> uploadEditorImage(@RequestParam("upload") MultipartFile image) {
+        String url = noticeService.uploadEditorImage(image);
+        return ResponseEntity.ok(Map.of("url", url));
     }
 
     /** 삭제 처리 */
