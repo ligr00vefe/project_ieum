@@ -117,7 +117,7 @@ public class MatchingService {
                 .findByHelpRequest_IdAndStatus(helpRequest.getId(), ApplicationStatus.PENDING);
         for (HelpRequestApplication application : pendingApplications) {
             if (!application.getId().equals(selected.getId())) {
-                application.reject();
+                application.cancel();
                 conversationRepository.findByApplication_Id(application.getId()).ifPresent(Conversation::close);
             }
         }
@@ -140,8 +140,9 @@ public class MatchingService {
         if (application.getStatus() != ApplicationStatus.ACCEPTED) {
             throw new IllegalStateException("수락된 지원만 매칭 취소할 수 있습니다.");
         }
-        application.pending();
-        application.getHelpRequest().changeStatus(HelpRequestStatus.OPEN);
+        application.cancel();
+        application.getHelpRequest().changeStatus(HelpRequestStatus.CLOSED);
+        conversationRepository.findByApplication_Id(applicationId).ifPresent(Conversation::close);
     }
 
     public void reject(Long applicationId) {
