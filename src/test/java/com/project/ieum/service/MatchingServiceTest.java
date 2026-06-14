@@ -29,6 +29,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 /**
@@ -330,6 +332,86 @@ class MatchingServiceTest {
 
             assertThatThrownBy(() -> matchingService.apply(10L, null))
                     .isInstanceOf(IllegalStateException.class);
+        }
+    }
+
+    // ── 스케줄러 시간 기반 자동전이(runLifecycleTransitions) ──────────
+
+    @Nested
+    @DisplayName("시간 기반 자동전이(scheduler)")
+    class Scheduler {
+
+        @Test
+        @DisplayName("OPEN 만료: CLOSED + 대기 지원 일괄 CANCELLED + 대화방 CLOSED")
+        void expireOpenRequests_closesAndCancelsPending() {
+            HelpRequest open = helpRequest(10L, userProfile(1L), HelpRequestStatus.OPEN);
+            HelpRequestApplication pending = application(1L, open, caregiver(2L), ApplicationStatus.PENDING);
+            Conversation conv = conversation(20L);
+
+            when(helpRequestRepository.findByStatusAndDesiredStartDatetimeBefore(eq(HelpRequestStatus.OPEN), any()))
+                    .thenReturn(List.of(open));
+            when(helpRequestRepository.findByStatusAndDesiredStartDatetimeBefore(eq(HelpRequestStatus.MATCHED), any()))
+                    .thenReturn(List.of()); // 같은 파인더의 MATCHED 호출(노쇼 잡) — 이 테스트에선 대상 없음
+            when(applicationRepository.findByHelpRequest_IdAndStatus(10L, ApplicationStatus.PENDING))
+                    .thenReturn(List.of(pending));
+            when(conversationRepository.findByApplication_Id(1L)).thenReturn(Optional.of(conv));
+
+            matchingService.runLifecycleTransitions(LocalDateTime.now());
+
+            assertThat(open.getStatus()).isEqualTo(HelpRequestStatus.CLOSED);
+            assertThat(pending.getStatus()).isEqualTo(ApplicationStatus.CANCELLED);
+            assertThat(conv.getStatus()).isEqualTo(ConversationStatus.CLOSED);
+        }
+
+        @Test
+        @DisplayName("MATCHED 노쇼: CLOSED + 선정 지원 CANCELLED + 대화방 CLOSED")
+        void closeNoShowMatches_closesAndCancelsAccepted() {
+            HelpRequest matched = helpRequest(10L, userProfile(1L), HelpRequestStatus.MATCHED);
+            HelpRequestApplication accepted = application(5L, matched, caregiver(2L), ApplicationStatus.ACCEPTED);
+            Conversation conv = conversation(30L);
+
+            when(helpRequestRepository.findByStatusAndDesiredStartDatetimeBefore(eq(HelpRequestStatus.OPEN), any()))
+                    .thenReturn(List.of()); // 같은 파인더의 OPEN 호출(만료 잡) — 이 테스트에선 대상 없음
+            when(helpRequestRepository.findByStatusAndDesiredStartDatetimeBefore(eq(HelpRequestStatus.MATCHED), any()))
+                    .thenReturn(List.of(matched));
+            when(applicationRepository.findByHelpRequest_IdAndStatus(10L, ApplicationStatus.ACCEPTED))
+                    .thenReturn(List.of(accepted));
+            when(conversationRepository.findByApplication_Id(5L)).thenReturn(Optional.of(conv));
+
+            matchingService.runLifecycleTransitions(LocalDateTime.now());
+
+            assertThat(matched.getStatus()).isEqualTo(HelpRequestStatus.CLOSED);
+            assertThat(accepted.getStatus()).isEqualTo(ApplicationStatus.CANCELLED);
+            assertThat(conv.getStatus()).isEqualTo(ConversationStatus.CLOSED);
+        }
+
+        @Test
+        @DisplayName("IN_PROGRESS 종료누락: 요청·지원 모두 COMPLETED")
+        void autoCompleteOverdue_completesRequestAndApplication() {
+            HelpRequest inProgress = helpRequest(10L, userProfile(1L), HelpRequestStatus.IN_PROGRESS);
+            HelpRequestApplication accepted = application(5L, inProgress, caregiver(2L), ApplicationStatus.ACCEPTED);
+
+            when(helpRequestRepository.findByStatusAndDesiredEndDatetimeBefore(eq(HelpRequestStatus.IN_PROGRESS), any()))
+                    .thenReturn(List.of(inProgress));
+            when(applicationRepository.findByHelpRequest_IdAndStatus(10L, ApplicationStatus.ACCEPTED))
+                    .thenReturn(List.of(accepted));
+
+            matchingService.runLifecycleTransitions(LocalDateTime.now());
+
+            assertThat(inProgress.getStatus()).isEqualTo(HelpRequestStatus.COMPLETED);
+            assertThat(accepted.getStatus()).isEqualTo(ApplicationStatus.COMPLETED);
+        }
+
+        @Test
+        @DisplayName("COMPLETED 매칭의 열린 대화방은 희망종료+1h 경과 시 CLOSED")
+        void closeCompletedConversations_closesActiveOnes() {
+            Conversation conv = conversation(40L);
+            when(conversationRepository.findActiveConversationsForCompletedRequestsEndedBefore(any()))
+                    .thenReturn(List.of(conv));
+
+            matchingService.runLifecycleTransitions(LocalDateTime.now());
+
+            assertThat(conv.getStatus()).isEqualTo(ConversationStatus.CLOSED);
         }
     }
 
