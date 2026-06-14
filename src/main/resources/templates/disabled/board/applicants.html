@@ -31,13 +31,13 @@
              class="bg-white rounded-2xl border border-gray-100 p-5">
             <div class="flex items-start gap-4">
                 <div class="relative flex-shrink-0">
-                    <div th:if="${application.caregiver.profileImageUrl != null}"
-                         class="w-14 h-14 rounded-2xl overflow-hidden">
-                        <img th:src="${application.caregiver.profileImageUrl}" class="w-full h-full object-cover">
+                    <div class="relative w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 font-bold text-lg"
+                         th:text="${#strings.substring(application.caregiver.fullName, 0, 1)}">박
+                        <img th:if="${application.caregiver.profileImageUrl != null}"
+                             th:src="${application.caregiver.profileImageUrl}"
+                             alt="" class="absolute inset-0 w-full h-full object-cover rounded-2xl"
+                             onerror="this.remove()">
                     </div>
-                    <div th:if="${application.caregiver.profileImageUrl == null}"
-                         class="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 font-bold text-lg"
-                         th:text="${#strings.substring(application.caregiver.fullName, 0, 1)}">박</div>
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between mb-1.5">

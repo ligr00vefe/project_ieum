@@ -43,6 +43,11 @@ public class NoticeService {
     }
 
     @Transactional(readOnly = true)
+    public List<Notice> getRecentPublicNotices() {
+        return noticeRepository.findTop5ByIsPublicTrueOrderByIsPinnedDescCreatedAtDesc();
+    }
+
+    @Transactional(readOnly = true)
     public Notice getById(Long id) {
         return noticeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("공지사항을 찾을 수 없습니다."));
