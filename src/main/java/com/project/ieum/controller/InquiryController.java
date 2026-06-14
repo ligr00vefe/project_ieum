@@ -54,6 +54,7 @@ public class InquiryController {
         model.addAttribute("inquiries", inquiryPage.getContent());
         model.addAttribute("inquiryPage", inquiryPage);
         model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
         model.addAttribute("selectedCategory", category);
