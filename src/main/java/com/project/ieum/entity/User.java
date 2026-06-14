@@ -61,6 +61,7 @@ public class User extends BasicEntity {
 
   public void changeEmail(String email) { this.email = email; }
   public void changePhone(String phone) { this.phone = phone; }
+  public void changePassword(String encodedPassword) { this.passwordHash = encodedPassword; }
   public void changeStatus(UserStatus status) { this.status = status; }
   public void markDeleted() { this.deletedAt = LocalDateTime.now(); }
 }

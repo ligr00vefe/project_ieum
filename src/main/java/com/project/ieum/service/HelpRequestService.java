@@ -1,12 +1,16 @@
 package com.project.ieum.service;
 
+import com.project.ieum.dto.mypage.CompletedMatchingView;
 import com.project.ieum.dto.request.HelpRequestForm;
+import com.project.ieum.entity.ApplicationStatus;
 import com.project.ieum.entity.PersonalityTag;
 import com.project.ieum.entity.User;
 import com.project.ieum.entity.UserRole;
 import com.project.ieum.entity.request.HelpRequest;
+import com.project.ieum.entity.request.HelpRequestApplication;
 import com.project.ieum.entity.request.HelpRequestPersonalityTag;
 import com.project.ieum.entity.request.HelpRequestStatus;
+import com.project.ieum.entity.request.Review;
 import com.project.ieum.entity.request.ServiceCategory;
 import com.project.ieum.entity.user.UserProfile;
 import com.project.ieum.exception.BadRequestException;
@@ -41,6 +45,8 @@ public class HelpRequestService {
     private final ServiceCategoryRepository serviceCategoryRepository;
     private final PersonalityTagRepository personalityTagRepository;
     private final HelpRequestPersonalityTagRepository helpRequestPersonalityTagRepository;
+    private final HelpRequestApplicationRepository helpRequestApplicationRepository;
+    private final ReviewRepository reviewRepository;
     private final CurrentUserService currentUserService;
 
     public HelpRequest create(HelpRequestForm form) {
@@ -138,6 +144,36 @@ public class HelpRequestService {
         UserProfile requester = userProfileRepository.findById(currentUser.getId())
                 .orElseThrow(() -> new NotFoundException("이용자 프로필을 찾을 수 없습니다."));
         return helpRequestRepository.findByRequesterOrderByCreatedAtDesc(requester);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CompletedMatchingView> getMyMatchingViews() {
+        User currentUser = requireRole(UserRole.USER);
+        UserProfile requester = userProfileRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new NotFoundException("이용자 프로필을 찾을 수 없습니다."));
+        List<HelpRequest> requests = helpRequestRepository.findByRequesterOrderByCreatedAtDesc(requester);
+
+        return requests.stream()
+                .filter(r -> r.getStatus() != HelpRequestStatus.OPEN && r.getStatus() != HelpRequestStatus.CLOSED)
+                .map(r -> {
+                    boolean completed = r.getStatus() == HelpRequestStatus.COMPLETED;
+                    ApplicationStatus targetStatus = completed ? ApplicationStatus.COMPLETED : ApplicationStatus.ACCEPTED;
+                    HelpRequestApplication app = helpRequestApplicationRepository
+                            .findByHelpRequest_IdAndStatus(r.getId(), targetStatus)
+                            .stream().findFirst().orElse(null);
+                    Review review = completed ? reviewRepository.findByHelpRequest_Id(r.getId()).orElse(null) : null;
+                    return CompletedMatchingView.builder()
+                            .requestId(r.getId())
+                            .serviceCategory(r.getServiceCategory() != null ? r.getServiceCategory().getName() : null)
+                            .location(r.getSido() + " " + r.getSigungu())
+                            .startDatetime(r.getDesiredStartDatetime())
+                            .endDatetime(r.getDesiredEndDatetime())
+                            .caregiverName(app != null ? app.getCaregiver().getFullName() : null)
+                            .completed(completed)
+                            .review(review)
+                            .build();
+                })
+                .toList();
     }
 
     @Transactional(readOnly = true)
