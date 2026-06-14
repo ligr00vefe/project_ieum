@@ -1,5 +1,6 @@
 package com.project.ieum.service;
 
+import com.project.ieum.dto.recommend.MatchTagInfo;
 import com.project.ieum.dto.request.ApplyRequest;
 import com.project.ieum.entity.ApplicationStatus;
 import com.project.ieum.entity.User;
@@ -11,6 +12,7 @@ import com.project.ieum.entity.conversation.Message;
 import com.project.ieum.entity.notification.NotificationType;
 import com.project.ieum.entity.request.HelpRequest;
 import com.project.ieum.entity.request.HelpRequestApplication;
+import com.project.ieum.entity.request.HelpRequestPersonalityTag;
 import com.project.ieum.entity.request.HelpRequestStatus;
 import com.project.ieum.exception.ForbiddenException;
 import com.project.ieum.exception.NotFoundException;
@@ -113,15 +115,6 @@ public class MatchingService {
         selected.accept();
         helpRequest.changeStatus(HelpRequestStatus.MATCHED);
 
-        List<HelpRequestApplication> pendingApplications = applicationRepository
-                .findByHelpRequest_IdAndStatus(helpRequest.getId(), ApplicationStatus.PENDING);
-        for (HelpRequestApplication application : pendingApplications) {
-            if (!application.getId().equals(selected.getId())) {
-                application.reject();
-                conversationRepository.findByApplication_Id(application.getId()).ifPresent(Conversation::close);
-            }
-        }
-
         notificationService.create(
                 selected.getCaregiver().getUser(),
                 NotificationType.MATCHING,
@@ -141,7 +134,16 @@ public class MatchingService {
             throw new IllegalStateException("수락된 지원만 매칭 취소할 수 있습니다.");
         }
         application.pending();
-        application.getHelpRequest().changeStatus(HelpRequestStatus.OPEN);
+        HelpRequest helpRequest = application.getHelpRequest();
+        helpRequest.changeStatus(HelpRequestStatus.OPEN);
+
+        // 매칭 수락 시 자동으로 거절된 다른 신청들을 다시 대기 중으로 복구
+        applicationRepository.findByHelpRequest_IdOrderByCreatedAtDesc(helpRequest.getId()).stream()
+                .filter(a -> !a.getId().equals(applicationId) && a.getStatus() == ApplicationStatus.REJECTED)
+                .forEach(a -> {
+                    a.pending();
+                    conversationRepository.findByApplication_Id(a.getId()).ifPresent(Conversation::open);
+                });
     }
 
     public void reject(Long applicationId) {
@@ -194,6 +196,11 @@ public class MatchingService {
     }
 
     @Transactional(readOnly = true)
+    public int countApplicationsForRequest(Long requestId) {
+        return applicationRepository.findByHelpRequest_IdOrderByCreatedAtDesc(requestId).size();
+    }
+
+    @Transactional(readOnly = true)
     public boolean hasApplied(Long requestId, Long userId) {
         return applicationRepository.existsByHelpRequest_IdAndCaregiver_UserId(requestId, userId);
     }
@@ -217,10 +224,7 @@ public class MatchingService {
     @Transactional(readOnly = true)
     public Map<Long, Integer> getMatchPercentMap(Long requestId, List<HelpRequestApplication> applications) {
         Set<Long> requestTagIds = helpRequestPersonalityTagRepository.findByHelpRequest_Id(requestId)
-                .stream()
-                .map(t -> t.getTag().getId())
-                .collect(Collectors.toSet());
-
+                .stream().map(t -> t.getTag().getId()).collect(Collectors.toSet());
         Map<Long, Integer> result = new HashMap<>();
         for (HelpRequestApplication app : applications) {
             if (requestTagIds.isEmpty()) {
@@ -228,12 +232,28 @@ public class MatchingService {
                 continue;
             }
             Set<Long> caregiverTagIds = caregiverPersonalityTagRepository.findByCaregiver(app.getCaregiver())
+                    .stream().map(t -> t.getTag().getId()).collect(Collectors.toSet());
+            long matched = requestTagIds.stream().filter(caregiverTagIds::contains).count();
+            result.put(app.getId(), (int) (matched * 100 / requestTagIds.size()));
+        }
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, List<MatchTagInfo>> getMatchTagDetailMap(Long requestId, List<HelpRequestApplication> applications) {
+        List<HelpRequestPersonalityTag> requestTags =
+                helpRequestPersonalityTagRepository.findByHelpRequest_Id(requestId);
+        Map<Long, List<MatchTagInfo>> result = new HashMap<>();
+        for (HelpRequestApplication app : applications) {
+            Set<Long> caregiverTagIds = caregiverPersonalityTagRepository.findByCaregiver(app.getCaregiver())
                     .stream()
                     .map(t -> t.getTag().getId())
                     .collect(Collectors.toSet());
-            long matched = requestTagIds.stream().filter(caregiverTagIds::contains).count();
-            int percent = (int) (matched * 100 / requestTagIds.size());
-            result.put(app.getId(), percent);
+            List<MatchTagInfo> tagInfos = requestTags.stream()
+                    .map(rt -> new MatchTagInfo(rt.getTag().getName(),
+                            caregiverTagIds.contains(rt.getTag().getId())))
+                    .toList();
+            result.put(app.getId(), tagInfos);
         }
         return result;
     }
@@ -246,7 +266,8 @@ public class MatchingService {
 
     @Transactional(readOnly = true)
     public HelpRequestApplication findAcceptedApplication(Long requestId) {
-        return applicationRepository.findByHelpRequest_IdAndStatus(requestId, ApplicationStatus.ACCEPTED)
+        return applicationRepository.findByHelpRequest_IdAndStatusIn(
+                        requestId, List.of(ApplicationStatus.ACCEPTED, ApplicationStatus.COMPLETED))
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("확정된 매칭을 찾을 수 없습니다."));
