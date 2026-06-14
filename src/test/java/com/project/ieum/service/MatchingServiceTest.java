@@ -6,6 +6,7 @@ import com.project.ieum.entity.UserRole;
 import com.project.ieum.entity.caregiver.CaregiverProfile;
 import com.project.ieum.entity.conversation.Conversation;
 import com.project.ieum.entity.conversation.ConversationStatus;
+import com.project.ieum.entity.request.ConfirmParty;
 import com.project.ieum.entity.request.HelpRequest;
 import com.project.ieum.entity.request.HelpRequestApplication;
 import com.project.ieum.entity.request.HelpRequestStatus;
@@ -194,6 +195,108 @@ class MatchingServiceTest {
             when(applicationRepository.findById(5L)).thenReturn(Optional.of(app));
 
             assertThatThrownBy(() -> matchingService.cancelMatch(5L))
+                    .isInstanceOf(IllegalStateException.class);
+        }
+    }
+
+    // ── confirmStart() / confirmEnd() 핸드셰이크 ─────────────────────
+
+    @Nested
+    @DisplayName("활동 시작/종료 양측 확인(handshake)")
+    class Handshake {
+
+        @Test
+        @DisplayName("한쪽만 시작 확인하면 전이 없이 확인 플래그만 선다 (MATCHED 유지)")
+        void confirmStart_oneParty_noTransition() {
+            loginAsUser(1L); // 이용자(요청자)
+            HelpRequest helpRequest = helpRequest(10L, userProfile(1L), HelpRequestStatus.MATCHED);
+            HelpRequestApplication matched = application(5L, helpRequest, caregiver(2L), ApplicationStatus.ACCEPTED);
+
+            when(helpRequestRepository.findById(10L)).thenReturn(Optional.of(helpRequest));
+            when(applicationRepository.findByHelpRequest_IdAndStatus(10L, ApplicationStatus.ACCEPTED))
+                    .thenReturn(List.of(matched));
+
+            matchingService.confirmStart(10L);
+
+            assertThat(matched.startConfirmedBy(ConfirmParty.REQUESTER)).isTrue();
+            assertThat(matched.bothStartConfirmed()).isFalse();
+            assertThat(helpRequest.getStatus()).isEqualTo(HelpRequestStatus.MATCHED);
+        }
+
+        @Test
+        @DisplayName("양측이 시작 확인하면 IN_PROGRESS로 전이된다")
+        void confirmStart_bothParties_transitionsToInProgress() {
+            loginAsCaregiver(2L); // 도우미가 두 번째로 확인
+            HelpRequest helpRequest = helpRequest(10L, userProfile(1L), HelpRequestStatus.MATCHED);
+            HelpRequestApplication matched = application(5L, helpRequest, caregiver(2L), ApplicationStatus.ACCEPTED)
+                    .toBuilder().requesterStartConfirmed(true).build();
+
+            when(helpRequestRepository.findById(10L)).thenReturn(Optional.of(helpRequest));
+            when(applicationRepository.findByHelpRequest_IdAndStatus(10L, ApplicationStatus.ACCEPTED))
+                    .thenReturn(List.of(matched));
+            when(conversationRepository.findByApplication_Id(5L)).thenReturn(Optional.empty());
+
+            matchingService.confirmStart(10L);
+
+            assertThat(matched.bothStartConfirmed()).isTrue();
+            assertThat(helpRequest.getStatus()).isEqualTo(HelpRequestStatus.IN_PROGRESS);
+        }
+
+        @Test
+        @DisplayName("매칭 참여자가 아니면 ForbiddenException")
+        void confirmStart_notParticipant_throws() {
+            loginAsUser(99L);
+            HelpRequest helpRequest = helpRequest(10L, userProfile(1L), HelpRequestStatus.MATCHED);
+            HelpRequestApplication matched = application(5L, helpRequest, caregiver(2L), ApplicationStatus.ACCEPTED);
+
+            when(helpRequestRepository.findById(10L)).thenReturn(Optional.of(helpRequest));
+            when(applicationRepository.findByHelpRequest_IdAndStatus(10L, ApplicationStatus.ACCEPTED))
+                    .thenReturn(List.of(matched));
+
+            assertThatThrownBy(() -> matchingService.confirmStart(10L))
+                    .isInstanceOf(ForbiddenException.class);
+        }
+
+        @Test
+        @DisplayName("MATCHED가 아니면 시작 확인은 IllegalStateException")
+        void confirmStart_notMatched_throws() {
+            loginAsUser(1L);
+            HelpRequest helpRequest = helpRequest(10L, userProfile(1L), HelpRequestStatus.OPEN);
+
+            when(helpRequestRepository.findById(10L)).thenReturn(Optional.of(helpRequest));
+
+            assertThatThrownBy(() -> matchingService.confirmStart(10L))
+                    .isInstanceOf(IllegalStateException.class);
+        }
+
+        @Test
+        @DisplayName("양측이 종료 확인하면 COMPLETED로 전이되고 지원도 COMPLETED가 된다")
+        void confirmEnd_bothParties_completes() {
+            loginAsCaregiver(2L);
+            HelpRequest helpRequest = helpRequest(10L, userProfile(1L), HelpRequestStatus.IN_PROGRESS);
+            HelpRequestApplication matched = application(5L, helpRequest, caregiver(2L), ApplicationStatus.ACCEPTED)
+                    .toBuilder().requesterEndConfirmed(true).build();
+
+            when(helpRequestRepository.findById(10L)).thenReturn(Optional.of(helpRequest));
+            when(applicationRepository.findByHelpRequest_IdAndStatus(10L, ApplicationStatus.ACCEPTED))
+                    .thenReturn(List.of(matched));
+            when(conversationRepository.findByApplication_Id(5L)).thenReturn(Optional.empty());
+
+            matchingService.confirmEnd(10L);
+
+            assertThat(helpRequest.getStatus()).isEqualTo(HelpRequestStatus.COMPLETED);
+            assertThat(matched.getStatus()).isEqualTo(ApplicationStatus.COMPLETED);
+        }
+
+        @Test
+        @DisplayName("IN_PROGRESS가 아니면 종료 확인은 IllegalStateException")
+        void confirmEnd_notInProgress_throws() {
+            loginAsUser(1L);
+            HelpRequest helpRequest = helpRequest(10L, userProfile(1L), HelpRequestStatus.MATCHED);
+
+            when(helpRequestRepository.findById(10L)).thenReturn(Optional.of(helpRequest));
+
+            assertThatThrownBy(() -> matchingService.confirmEnd(10L))
                     .isInstanceOf(IllegalStateException.class);
         }
     }
