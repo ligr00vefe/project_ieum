@@ -28,7 +28,7 @@ public class Conversation {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  // 지원 신청 (수락 시 1:1 자동 생성)
+  // 지원 신청 (지원 시점에 1:1 자동 생성)
   @OneToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "application_id", nullable = false)
   @ToString.Exclude
