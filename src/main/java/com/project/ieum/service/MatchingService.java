@@ -316,6 +316,54 @@ public class MatchingService {
                                 .orElse(null)));
     }
 
+    // ── 시간 기반 자동전이 (스케줄러가 호출) ──
+    // 상태 가드로 멱등: 전이 후 상태가 바뀌어 다음 주기엔 같은 행이 재선택되지 않는다.
+    @Transactional
+    public void runLifecycleTransitions(LocalDateTime now) {
+        expireOpenRequests(now);          // OPEN  : now > 희망시작 − 1h → CLOSED + 지원 일괄 CANCELLED
+        closeNoShowMatches(now);          // MATCHED: now > 희망시작 + 30m → CLOSED + 선정 지원 CANCELLED
+        autoCompleteOverdueActivities(now); // IN_PROGRESS: now > 희망종료 + 30m → COMPLETED
+        closeCompletedConversations(now); // COMPLETED 대화방: 희망종료 + 1h 경과 → CLOSED
+    }
+
+    private void expireOpenRequests(LocalDateTime now) {
+        for (HelpRequest helpRequest : helpRequestRepository
+                .findByStatusAndDesiredStartDatetimeBefore(HelpRequestStatus.OPEN, now.plusHours(1))) {
+            helpRequest.close();
+            cancelApplicationsAndCloseConversations(helpRequest.getId(), ApplicationStatus.PENDING);
+        }
+    }
+
+    private void closeNoShowMatches(LocalDateTime now) {
+        for (HelpRequest helpRequest : helpRequestRepository
+                .findByStatusAndDesiredStartDatetimeBefore(HelpRequestStatus.MATCHED, now.minusMinutes(30))) {
+            helpRequest.close();
+            cancelApplicationsAndCloseConversations(helpRequest.getId(), ApplicationStatus.ACCEPTED);
+        }
+    }
+
+    private void autoCompleteOverdueActivities(LocalDateTime now) {
+        for (HelpRequest helpRequest : helpRequestRepository
+                .findByStatusAndDesiredEndDatetimeBefore(HelpRequestStatus.IN_PROGRESS, now.minusMinutes(30))) {
+            helpRequest.complete();
+            applicationRepository.findByHelpRequest_IdAndStatus(helpRequest.getId(), ApplicationStatus.ACCEPTED)
+                    .stream().findFirst().ifPresent(HelpRequestApplication::complete);
+        }
+    }
+
+    private void closeCompletedConversations(LocalDateTime now) {
+        conversationRepository.findActiveConversationsForCompletedRequestsEndedBefore(now.minusHours(1))
+                .forEach(Conversation::close);
+    }
+
+    private void cancelApplicationsAndCloseConversations(Long requestId, ApplicationStatus targetStatus) {
+        applicationRepository.findByHelpRequest_IdAndStatus(requestId, targetStatus)
+                .forEach(application -> {
+                    application.cancel();
+                    conversationRepository.findByApplication_Id(application.getId()).ifPresent(Conversation::close);
+                });
+    }
+
     // 현재 사용자를 매칭의 확인 주체(이용자/도우미)로 해석. 둘 다 아니면 거부.
     private ConfirmParty resolveParty(HelpRequest helpRequest, HelpRequestApplication matched, Long userId) {
         if (helpRequest.getRequester().getUserId().equals(userId)) {

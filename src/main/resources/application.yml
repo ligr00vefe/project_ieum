@@ -15,3 +15,8 @@ server:
 ieum:
   upload:
     certification-path: ${IEUM_CERTIFICATION_UPLOAD_PATH:${user.home}/ieum/uploads/certifications}
+matching:
+  scheduler:
+    # 시간 기반 자동전이(만료/노쇼/자동완료/대화방 종료) 스케줄러. 기본 off — 데모/운영 시 true로 켠다.
+    enabled: false
+    fixed-delay-ms: 60000
