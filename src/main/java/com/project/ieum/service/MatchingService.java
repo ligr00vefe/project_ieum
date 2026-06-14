@@ -1,5 +1,6 @@
 package com.project.ieum.service;
 
+import com.project.ieum.dto.recommend.MatchTagInfo;
 import com.project.ieum.dto.request.ActivityHandshakeView;
 import com.project.ieum.dto.request.ApplyRequest;
 import com.project.ieum.dto.request.MatchedPartyView;
@@ -14,6 +15,7 @@ import com.project.ieum.entity.notification.NotificationType;
 import com.project.ieum.entity.request.ConfirmParty;
 import com.project.ieum.entity.request.HelpRequest;
 import com.project.ieum.entity.request.HelpRequestApplication;
+import com.project.ieum.entity.request.HelpRequestPersonalityTag;
 import com.project.ieum.entity.request.HelpRequestStatus;
 import com.project.ieum.exception.ForbiddenException;
 import com.project.ieum.exception.NotFoundException;
@@ -212,6 +214,11 @@ public class MatchingService {
     }
 
     @Transactional(readOnly = true)
+    public int countApplicationsForRequest(Long requestId) {
+        return applicationRepository.findByHelpRequest_IdOrderByCreatedAtDesc(requestId).size();
+    }
+
+    @Transactional(readOnly = true)
     public boolean hasApplied(Long requestId, Long userId) {
         return applicationRepository.existsByHelpRequest_IdAndCaregiver_UserId(requestId, userId);
     }
@@ -235,10 +242,7 @@ public class MatchingService {
     @Transactional(readOnly = true)
     public Map<Long, Integer> getMatchPercentMap(Long requestId, List<HelpRequestApplication> applications) {
         Set<Long> requestTagIds = helpRequestPersonalityTagRepository.findByHelpRequest_Id(requestId)
-                .stream()
-                .map(t -> t.getTag().getId())
-                .collect(Collectors.toSet());
-
+                .stream().map(t -> t.getTag().getId()).collect(Collectors.toSet());
         Map<Long, Integer> result = new HashMap<>();
         for (HelpRequestApplication app : applications) {
             if (requestTagIds.isEmpty()) {
@@ -246,12 +250,28 @@ public class MatchingService {
                 continue;
             }
             Set<Long> caregiverTagIds = caregiverPersonalityTagRepository.findByCaregiver(app.getCaregiver())
+                    .stream().map(t -> t.getTag().getId()).collect(Collectors.toSet());
+            long matched = requestTagIds.stream().filter(caregiverTagIds::contains).count();
+            result.put(app.getId(), (int) (matched * 100 / requestTagIds.size()));
+        }
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, List<MatchTagInfo>> getMatchTagDetailMap(Long requestId, List<HelpRequestApplication> applications) {
+        List<HelpRequestPersonalityTag> requestTags =
+                helpRequestPersonalityTagRepository.findByHelpRequest_Id(requestId);
+        Map<Long, List<MatchTagInfo>> result = new HashMap<>();
+        for (HelpRequestApplication app : applications) {
+            Set<Long> caregiverTagIds = caregiverPersonalityTagRepository.findByCaregiver(app.getCaregiver())
                     .stream()
                     .map(t -> t.getTag().getId())
                     .collect(Collectors.toSet());
-            long matched = requestTagIds.stream().filter(caregiverTagIds::contains).count();
-            int percent = (int) (matched * 100 / requestTagIds.size());
-            result.put(app.getId(), percent);
+            List<MatchTagInfo> tagInfos = requestTags.stream()
+                    .map(rt -> new MatchTagInfo(rt.getTag().getName(),
+                            caregiverTagIds.contains(rt.getTag().getId())))
+                    .toList();
+            result.put(app.getId(), tagInfos);
         }
         return result;
     }
@@ -264,7 +284,8 @@ public class MatchingService {
 
     @Transactional(readOnly = true)
     public HelpRequestApplication findAcceptedApplication(Long requestId) {
-        return applicationRepository.findByHelpRequest_IdAndStatus(requestId, ApplicationStatus.ACCEPTED)
+        return applicationRepository.findByHelpRequest_IdAndStatusIn(
+                        requestId, List.of(ApplicationStatus.ACCEPTED, ApplicationStatus.COMPLETED))
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("확정된 매칭을 찾을 수 없습니다."));

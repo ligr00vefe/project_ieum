@@ -32,13 +32,13 @@
              class="bg-white rounded-2xl border border-gray-100 p-5">
             <div class="flex items-start gap-4">
                 <div class="relative flex-shrink-0">
-                    <div th:if="${appl.caregiver.profileImageUrl != null}"
-                         class="w-16 h-16 rounded-2xl overflow-hidden shadow-sm">
-                        <img th:src="${appl.caregiver.profileImageUrl}" class="w-full h-full object-cover object-top">
+                    <div class="relative w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 font-bold text-lg shadow-sm"
+                         th:text="${#strings.substring(appl.caregiver.fullName, 0, 1)}">박
+                        <img th:if="${appl.caregiver.profileImageUrl != null}"
+                             th:src="${appl.caregiver.profileImageUrl}"
+                             alt="" class="absolute inset-0 w-full h-full object-cover object-top rounded-2xl"
+                             onerror="this.remove()">
                     </div>
-                    <div th:if="${appl.caregiver.profileImageUrl == null}"
-                         class="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 font-bold text-lg shadow-sm"
-                         th:text="${#strings.substring(appl.caregiver.fullName, 0, 1)}">박</div>
                     <div th:if="${stat.index < 3 and appl.status.name() == 'PENDING'}"
                          th:text="${stat.index + 1}"
                          th:classappend="${stat.index == 0 ? ' bg-indigo-600' : (stat.index == 1 ? ' bg-gray-400' : ' bg-gray-300')}"
@@ -54,12 +54,28 @@
                             <span th:if="${appl.status.name() == 'REJECTED' or appl.status.name() == 'CANCELLED'}"
                                   class="px-2 py-0.5 bg-gray-100 text-gray-400 text-xs font-medium rounded-full">거절됨</span>
                         </div>
-                        <!-- Match% 배지 -->
-                        <div th:with="pct=${matchPercentMap[appl.id] ?: 0}"
-                             th:classappend="${pct >= 80 ? ' bg-indigo-600' : (pct >= 60 ? ' bg-indigo-400' : (pct >= 40 ? ' bg-slate-400' : ' bg-gray-300'))}"
-                             class="flex flex-col items-center text-white rounded-xl px-2.5 py-1.5 flex-shrink-0">
-                            <span class="text-[9px] font-medium opacity-80 leading-none">Match</span>
-                            <span class="text-base font-bold leading-none" th:text="${matchPercentMap[appl.id] ?: 0} + '%'">0%</span>
+                        <!-- Match% 배지 + 호버 툴팁 -->
+                        <div class="relative flex-shrink-0 match-badge-wrap"
+                             th:attr="data-appid=${appl.id}">
+                            <div th:with="pct=${matchPercentMap[appl.id] ?: 0}"
+                                 th:classappend="${pct >= 80 ? ' bg-indigo-600' : (pct >= 60 ? ' bg-indigo-400' : (pct >= 40 ? ' bg-slate-400' : ' bg-gray-300'))}"
+                                 class="flex flex-col items-center text-white rounded-xl px-2.5 py-1.5 cursor-default">
+                                <span class="text-[9px] font-medium opacity-80 leading-none">Match</span>
+                                <span class="text-base font-bold leading-none" th:text="${matchPercentMap[appl.id] ?: 0} + '%'">0%</span>
+                            </div>
+                            <!-- 호버 툴팁 -->
+                            <div class="match-tooltip hidden absolute right-0 top-full mt-2 z-50 w-56 bg-white border border-gray-100 rounded-2xl shadow-xl p-4">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">케어메이트 선호 성향</p>
+                                <div th:if="${matchTagDetailMap != null and matchTagDetailMap[appl.id] != null and !#lists.isEmpty(matchTagDetailMap[appl.id])}"
+                                     class="flex flex-wrap gap-1.5">
+                                    <span th:each="tag : ${matchTagDetailMap[appl.id]}"
+                                          th:text="${tag.name}"
+                                          th:classappend="${tag.matched} ? ' bg-indigo-100 text-indigo-700 ring-1 ring-indigo-300' : ' bg-gray-100 text-gray-400'"
+                                          class="px-2 py-1 text-xs font-semibold rounded-lg transition-colors">태그</span>
+                                </div>
+                                <p th:if="${matchTagDetailMap == null or matchTagDetailMap[appl.id] == null or #lists.isEmpty(matchTagDetailMap[appl.id])}"
+                                   class="text-xs text-gray-400">선호 성향 태그 없음</p>
+                            </div>
                         </div>
                     </div>
                     <p th:if="${appl.caregiver.introShort}"
@@ -108,5 +124,16 @@
     </div>
 
 </section>
+
+<script>
+(function () {
+    document.querySelectorAll('.match-badge-wrap').forEach(function (wrap) {
+        var tooltip = wrap.querySelector('.match-tooltip');
+        if (!tooltip) return;
+        wrap.addEventListener('mouseover', function () { tooltip.classList.remove('hidden'); });
+        wrap.addEventListener('mouseout',  function () { tooltip.classList.add('hidden'); });
+    });
+})();
+</script>
 </th:block>
 </html>
