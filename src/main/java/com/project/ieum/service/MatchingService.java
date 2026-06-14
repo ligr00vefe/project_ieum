@@ -1,5 +1,6 @@
 package com.project.ieum.service;
 
+import com.project.ieum.dto.request.ActivityHandshakeView;
 import com.project.ieum.dto.request.ApplyRequest;
 import com.project.ieum.entity.ApplicationStatus;
 import com.project.ieum.entity.User;
@@ -266,6 +267,39 @@ public class MatchingService {
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("확정된 매칭을 찾을 수 없습니다."));
+    }
+
+    // 상세 페이지 핸드셰이크 패널용 파생 뷰. 현재 사용자가 매칭 참여자가 아니면 hidden.
+    @Transactional(readOnly = true)
+    public ActivityHandshakeView getHandshakeView(Long requestId, Long userId) {
+        HelpRequest helpRequest = getRequest(requestId);
+        HelpRequestStatus status = helpRequest.getStatus();
+        if (status != HelpRequestStatus.MATCHED && status != HelpRequestStatus.IN_PROGRESS) {
+            return ActivityHandshakeView.hidden();
+        }
+        HelpRequestApplication matched = applicationRepository
+                .findByHelpRequest_IdAndStatus(requestId, ApplicationStatus.ACCEPTED)
+                .stream().findFirst().orElse(null);
+        if (matched == null) {
+            return ActivityHandshakeView.hidden();
+        }
+
+        final ConfirmParty party;
+        if (helpRequest.getRequester().getUserId().equals(userId)) {
+            party = ConfirmParty.REQUESTER;
+        } else if (matched.getCaregiver().getUserId().equals(userId)) {
+            party = ConfirmParty.CAREGIVER;
+        } else {
+            return ActivityHandshakeView.hidden();
+        }
+        ConfirmParty other = (party == ConfirmParty.REQUESTER) ? ConfirmParty.CAREGIVER : ConfirmParty.REQUESTER;
+
+        if (status == HelpRequestStatus.MATCHED) {
+            return new ActivityHandshakeView(true, "START",
+                    matched.startConfirmedBy(party), matched.startConfirmedBy(other), matched.bothStartConfirmed());
+        }
+        return new ActivityHandshakeView(true, "END",
+                matched.endConfirmedBy(party), matched.endConfirmedBy(other), matched.bothEndConfirmed());
     }
 
     // 현재 사용자를 매칭의 확인 주체(이용자/도우미)로 해석. 둘 다 아니면 거부.
