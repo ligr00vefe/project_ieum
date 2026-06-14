@@ -62,10 +62,12 @@ public class DisabledBoardController {
 
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
+        Long currentUserId = currentUserService.getCurrentUser().getId();
         model.addAttribute("title", "게시물 상세");
         model.addAttribute("request", helpRequestService.get(id));
         model.addAttribute("applicationCount", matchingService.getApplicationsForRequest(id).size());
-        model.addAttribute("currentUserId", currentUserService.getCurrentUser().getId());
+        model.addAttribute("currentUserId", currentUserId);
+        model.addAttribute("handshake", matchingService.getHandshakeView(id, currentUserId));
         model.addAttribute("content", "disabled/board/detail");
         return "layout/layout";
     }
@@ -121,5 +123,20 @@ public class DisabledBoardController {
         matchingService.reject(applicationId);
         redirectAttributes.addFlashAttribute("message", "지원자를 거절했습니다.");
         return "redirect:/disabled/board/" + requestId + "/applicants";
+    }
+
+    // 활동 시작/종료 양측 확인 — 이용자(요청자) 측. 양측이 모두 확인하면 서비스가 상태를 전이한다.
+    @PostMapping("/{id}/confirm-start")
+    public String confirmStart(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        matchingService.confirmStart(id);
+        redirectAttributes.addFlashAttribute("message", "활동 시작을 확인했습니다.");
+        return "redirect:/disabled/board/" + id;
+    }
+
+    @PostMapping("/{id}/confirm-end")
+    public String confirmEnd(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        matchingService.confirmEnd(id);
+        redirectAttributes.addFlashAttribute("message", "활동 종료를 확인했습니다.");
+        return "redirect:/disabled/board/" + id;
     }
 }
