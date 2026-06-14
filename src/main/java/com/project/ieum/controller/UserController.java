@@ -2,11 +2,24 @@ package com.project.ieum.controller;
 
 import com.project.ieum.dto.CaregiverEditDTO;
 import com.project.ieum.dto.DisabledEditDTO;
+import com.project.ieum.entity.ApplicationStatus;
 import com.project.ieum.entity.User;
 import com.project.ieum.entity.UserRole;
+import com.project.ieum.entity.caregiver.CaregiverProfile;
+import com.project.ieum.entity.request.HelpRequest;
+import com.project.ieum.entity.request.HelpRequestApplication;
+import com.project.ieum.entity.request.HelpRequestStatus;
+import com.project.ieum.entity.user.UserProfile;
+import com.project.ieum.repository.CaregiverProfileRepository;
+import com.project.ieum.repository.HelpRequestApplicationRepository;
+import com.project.ieum.repository.UserProfileRepository;
 import com.project.ieum.repository.UserRepository;
+import com.project.ieum.service.HelpRequestService;
 import com.project.ieum.service.MasterDataService;
+import com.project.ieum.service.MatchingService;
+import com.project.ieum.service.ReviewService;
 import com.project.ieum.service.UserService;
+import com.project.ieum.service.admin.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +29,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Controller
 @RequiredArgsConstructor
 public class UserController {
@@ -23,9 +41,17 @@ public class UserController {
     private final UserRepository userRepository;
     private final UserService userService;
     private final MasterDataService masterDataService;
+    private final HelpRequestService helpRequestService;
+    private final MatchingService matchingService;
+    private final ReviewService reviewService;
+    private final UserProfileRepository userProfileRepository;
+    private final CaregiverProfileRepository caregiverProfileRepository;
+    private final HelpRequestApplicationRepository applicationRepository;
+    private final NoticeService noticeService;
 
     @GetMapping("/")
     public String home(Model model) {
+        model.addAttribute("recentNotices", noticeService.getRecentPublicNotices());
         model.addAttribute("title", "메인");
         model.addAttribute("content", "home/index");
         return "layout/layout";
@@ -50,18 +76,6 @@ public class UserController {
         return "layout/layout";
     }
 
-//    @GetMapping("/disabled/home")
-//    public String disabledHome(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-//        model.addAttribute("email", userDetails.getUsername());
-//        return "home/disabled-home";
-//    }
-//
-//    @GetMapping("/caregiver/home")
-//    public String caregiverHome(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-//        model.addAttribute("email", userDetails.getUsername());
-//        return "home/caregiver-home";
-//    }
-
     @GetMapping("/mypage")
     public String mypage(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
@@ -74,10 +88,59 @@ public class UserController {
     @GetMapping("/disabled/mypage")
     public String disabledMypage(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        UserProfile profile = userProfileRepository.findById(user.getId()).orElse(null);
+
         model.addAttribute("userEmail", user.getEmail());
         model.addAttribute("userName", userService.getDisplayName(user));
         model.addAttribute("profileImageUrl", userService.getProfileImageUrl(user));
         model.addAttribute("profileThumbUrl", userService.getProfileThumbUrl(user));
+        model.addAttribute("phone", user.getPhone());
+
+        if (profile != null) {
+            if (profile.getRegion() != null) {
+                model.addAttribute("region", profile.getRegion().getSido() + " " + profile.getRegion().getSigungu());
+            }
+            List<String> disabilityTypeNames = profile.getDisabilityTypes().stream()
+                    .map(dt -> dt.getDisabilityType().getName())
+                    .collect(Collectors.toList());
+            model.addAttribute("disabilityTypes", disabilityTypeNames);
+
+            List<String> commMethodNames = profile.getCommunicationMethods().stream()
+                    .map(cm -> cm.getCommunicationMethod().getName())
+                    .collect(Collectors.toList());
+            model.addAttribute("communicationMethods", commMethodNames);
+        }
+
+        List<HelpRequest> myRequests = helpRequestService.getMyRequests();
+        long totalRequests = myRequests.size();
+        long completedMatches = myRequests.stream()
+                .filter(r -> r.getStatus() == HelpRequestStatus.COMPLETED).count();
+        long writtenReviews = reviewService.countWrittenByUserId(user.getId());
+
+        LocalDateTime now = LocalDateTime.now();
+        List<HelpRequest> waitingRequests = myRequests.stream()
+                .filter(r -> r.getStatus() == HelpRequestStatus.OPEN && !r.getDesiredStartDatetime().isBefore(now))
+                .collect(Collectors.toList());
+        List<HelpRequest> matchedRequests = myRequests.stream()
+                .filter(r -> r.getStatus() == HelpRequestStatus.MATCHED || r.getStatus() == HelpRequestStatus.IN_PROGRESS)
+                .collect(Collectors.toList());
+        List<HelpRequest> completedRequestsList = myRequests.stream()
+                .filter(r -> r.getStatus() == HelpRequestStatus.COMPLETED)
+                .collect(Collectors.toList());
+        List<HelpRequest> expiredRequests = myRequests.stream()
+                .filter(r -> r.getStatus() == HelpRequestStatus.CLOSED ||
+                             (r.getStatus() == HelpRequestStatus.OPEN && r.getDesiredStartDatetime().isBefore(now)))
+                .collect(Collectors.toList());
+
+        model.addAttribute("totalRequests", totalRequests);
+        model.addAttribute("completedMatches", completedMatches);
+        model.addAttribute("writtenReviews", writtenReviews);
+        model.addAttribute("waitingRequests", waitingRequests);
+        model.addAttribute("matchedRequests", matchedRequests);
+        model.addAttribute("completedRequestsList", completedRequestsList);
+        model.addAttribute("expiredRequests", expiredRequests);
+        model.addAttribute("matchingViews", helpRequestService.getMyMatchingViews());
+
         model.addAttribute("content", "disabled/mypage");
         model.addAttribute("title", "마이페이지");
         return "layout/layout";
@@ -86,10 +149,46 @@ public class UserController {
     @GetMapping("/caregiver/mypage")
     public String caregiverMypage(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        CaregiverProfile profile = caregiverProfileRepository.findById(user.getId()).orElse(null);
+
         model.addAttribute("userEmail", user.getEmail());
         model.addAttribute("userName", userService.getDisplayName(user));
         model.addAttribute("profileImageUrl", userService.getProfileImageUrl(user));
         model.addAttribute("profileThumbUrl", userService.getProfileThumbUrl(user));
+        model.addAttribute("phone", user.getPhone());
+
+        if (profile != null) {
+            model.addAttribute("avgRating", profile.getAvgRating());
+            model.addAttribute("totalReviews", profile.getTotalReviews());
+            model.addAttribute("hasCertification", profile.getHasCertification());
+            model.addAttribute("certificationType", profile.getCertificationType());
+            model.addAttribute("availabilityStatus", profile.getAvailabilityStatus());
+
+            if (profile.getServiceCategories() != null && !profile.getServiceCategories().isBlank()) {
+                List<String> categories = Arrays.stream(profile.getServiceCategories().split(","))
+                        .map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toList());
+                model.addAttribute("serviceCategories", categories);
+            }
+        }
+
+        List<HelpRequestApplication> allApplications = matchingService.getMyApplications();
+        List<HelpRequestApplication> pendingApplications = allApplications.stream()
+                .filter(a -> a.getStatus() == ApplicationStatus.PENDING).collect(Collectors.toList());
+        List<HelpRequestApplication> acceptedApplications = allApplications.stream()
+                .filter(a -> a.getStatus() == ApplicationStatus.ACCEPTED).collect(Collectors.toList());
+        List<HelpRequestApplication> completedApplications = allApplications.stream()
+                .filter(a -> a.getStatus() == ApplicationStatus.COMPLETED).collect(Collectors.toList());
+        List<HelpRequestApplication> rejectedApplications = allApplications.stream()
+                .filter(a -> a.getStatus() == ApplicationStatus.REJECTED
+                        || a.getStatus() == ApplicationStatus.CANCELLED).collect(Collectors.toList());
+
+        model.addAttribute("completedMatches", completedApplications.size());
+        model.addAttribute("pendingApplications", pendingApplications);
+        model.addAttribute("acceptedApplications", acceptedApplications);
+        model.addAttribute("completedApplications", completedApplications);
+        model.addAttribute("rejectedApplications", rejectedApplications);
+        model.addAttribute("receivedReviews", reviewService.getPublicReviews(user.getId()));
+
         model.addAttribute("content", "caregiver/mypage");
         model.addAttribute("title", "마이페이지");
         return "layout/layout";
@@ -163,5 +262,40 @@ public class UserController {
         userService.updateCaregiverUser(user, editDTO, profileImage, presetImage);
         redirectAttributes.addFlashAttribute("successMessage", "회원정보가 수정되었습니다.");
         return "redirect:/caregiver/mypage";
+    }
+
+    // ─── 비밀번호 변경 ────────────────────────────────────────────
+
+    @GetMapping("/mypage/password")
+    public String passwordChangePage(Model model) {
+        model.addAttribute("content", "mypage/password");
+        model.addAttribute("title", "비밀번호 변경");
+        return "layout/layout";
+    }
+
+    @PostMapping("/mypage/password")
+    public String passwordChangeSubmit(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam("currentPassword") String currentPassword,
+            @RequestParam("newPassword") String newPassword,
+            @RequestParam("confirmPassword") String confirmPassword,
+            RedirectAttributes redirectAttributes) {
+        if (!newPassword.equals(confirmPassword)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "새 비밀번호가 일치하지 않습니다.");
+            return "redirect:/mypage/password";
+        }
+        if (newPassword.length() < 8) {
+            redirectAttributes.addFlashAttribute("errorMessage", "비밀번호는 8자 이상이어야 합니다.");
+            return "redirect:/mypage/password";
+        }
+        try {
+            User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+            userService.changePassword(user, currentPassword, newPassword);
+            redirectAttributes.addFlashAttribute("successMessage", "비밀번호가 변경되었습니다.");
+            return "redirect:/mypage";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/mypage/password";
+        }
     }
 }
