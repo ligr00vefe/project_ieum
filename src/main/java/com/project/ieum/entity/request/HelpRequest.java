@@ -115,7 +115,29 @@ public class HelpRequest extends BasicEntity {
   @Builder.Default
   private HelpRequestStatus status = HelpRequestStatus.OPEN;
 
-  public void changeStatus(HelpRequestStatus next) { this.status = next; }
+  // ── 상태 전이 (가드 포함 단일 출처) ──
+  // 정상 수명주기 전이는 아래 의도 메서드만 사용한다. 수동(MatchingService)·자동(스케줄러)이 동일 진입점을 호출하므로
+  // 전이 규칙이 한 곳에만 존재한다. 전제 상태가 아니면 IllegalStateException(→400)으로 거부한다.
+  public void match()         { requireStatus(HelpRequestStatus.OPEN,        "매칭은 모집 중(OPEN) 요청에만 가능합니다."); this.status = HelpRequestStatus.MATCHED; }
+  public void startProgress() { requireStatus(HelpRequestStatus.MATCHED,     "활동 시작은 매칭 확정(MATCHED) 상태에서만 가능합니다."); this.status = HelpRequestStatus.IN_PROGRESS; }
+  public void complete()      { requireStatus(HelpRequestStatus.IN_PROGRESS, "활동 완료는 진행 중(IN_PROGRESS) 상태에서만 가능합니다."); this.status = HelpRequestStatus.COMPLETED; }
+
+  // 마감: 모집 중 취소·매칭 후 합의취소/노쇼·OPEN 만료가 모두 여기로 수렴. 진행/완료 이후엔 닫지 않는다.
+  public void close() {
+    if (status != HelpRequestStatus.OPEN && status != HelpRequestStatus.MATCHED) {
+      throw new IllegalStateException("마감은 모집 중(OPEN) 또는 매칭(MATCHED) 상태에서만 가능합니다.");
+    }
+    this.status = HelpRequestStatus.CLOSED;
+  }
+
+  // 관리자 강제 종료 전용 — 수명주기 가드를 우회하는 모더레이션 경로(일반 흐름에서 쓰지 말 것).
+  public void forceCloseByAdmin() { this.status = HelpRequestStatus.CLOSED; }
+
+  private void requireStatus(HelpRequestStatus expected, String message) {
+    if (this.status != expected) {
+      throw new IllegalStateException(message);
+    }
+  }
 
   // 시간 구간 불변식: 종료가 있으면 시작 이후여야 한다.
   // existsOverlapping(반열림 겹침)이 "start <= end"를 전제하므로, end < start인 행은
@@ -130,5 +152,5 @@ public class HelpRequest extends BasicEntity {
 
   // (이슈 #8 정본) 본문 수정 메서드(updateDetails)는 제거함.
   // 근거: HelpRequest는 write-once — 도우미가 본 내용/시간/위치가 지원 후 바뀌면 신뢰성이 깨지므로,
-  //       생성 후에는 상태 전이(changeStatus)만 허용한다. 수정이 필요하면 마감(close) 후 재작성.
+  //       생성 후에는 상태 전이(match/startProgress/complete/close)만 허용한다. 수정이 필요하면 마감(close) 후 재작성.
 }

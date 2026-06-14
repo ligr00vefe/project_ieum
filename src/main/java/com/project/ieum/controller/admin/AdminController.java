@@ -109,7 +109,7 @@ public class AdminController {
     public String forceClose(@PathVariable Long id, RedirectAttributes ra) {
         var request = helpRequestRepository.findById(id)
                 .orElseThrow(() -> new com.project.ieum.exception.NotFoundException("요청을 찾을 수 없습니다."));
-        request.changeStatus(HelpRequestStatus.CLOSED);
+        request.forceCloseByAdmin();
         helpRequestRepository.save(request);
         ra.addFlashAttribute("message", "강제 종료되었습니다.");
         return "redirect:/admin/matching/" + id;
