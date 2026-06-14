@@ -50,6 +50,7 @@ public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long>,
     Optional<HelpRequest> getHelpRequestById(Long id);
 
     long countByStatus(HelpRequestStatus status);
+    @Query("SELECT r FROM HelpRequest r LEFT JOIN FETCH r.requester LEFT JOIN FETCH r.serviceCategory ORDER BY r.createdAt DESC")
     List<HelpRequest> findAllByOrderByCreatedAtDesc();
     List<HelpRequest> findTop5ByStatusOrderByUpdatedAtDesc(HelpRequestStatus status);
 

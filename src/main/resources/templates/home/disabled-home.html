@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>이음인 홈 - 이음 Care Match</title>
+    <title>홈 - 이음 Care Match</title>
     <link th:href="@{/css/output.css}" rel="stylesheet">
 </head>
 <body class="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-6">
@@ -15,7 +15,7 @@
             </svg>
         </div>
         <h1 class="text-2xl font-extrabold text-gray-900 mb-2">환영합니다 🎉</h1>
-        <p class="text-sm text-gray-500 mb-1">이음인(장애인) 홈 페이지입니다.</p>
+        <p class="text-sm text-gray-500 mb-1">케어메이트 홈 페이지입니다.</p>
         <p class="text-xs text-indigo-600 font-medium mb-6" th:text="${email}">user@email.com</p>
         <p class="text-xs text-gray-400 mb-8">이 페이지는 임시 홈 화면입니다. 추후 실제 서비스 화면으로 교체됩니다.</p>
         <form th:action="@{/logout}" method="post">

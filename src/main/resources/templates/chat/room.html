@@ -5,34 +5,60 @@
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
     <div class="flex gap-5" style="height: calc(100vh - 160px); min-height: 600px;">
 
-        <!-- 왼쪽: 프로필 카드 (장애인 뷰, 모바일에서 숨김) -->
+        <!-- 왼쪽: 프로필 카드 (케어메이트 뷰) -->
         <th:block th:if="${isUser}">
         <div class="chat-profile-sidebar w-72 flex-shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col items-center text-center">
             <!-- 아바타 -->
-            <div class="w-28 h-28 rounded-2xl overflow-hidden mb-3 flex-shrink-0 shadow-sm">
-                <img th:src="${partnerProfileImage ?: '/assets/profile_thumb_img/m01_thumb.png'}"
-                     alt="프로필" class="w-full h-full object-cover object-top"
+            <div class="relative w-28 h-28 rounded-2xl mb-3 flex-shrink-0 shadow-sm bg-teal-500 flex items-center justify-center text-white text-4xl font-black"
+                 th:text="${partnerName != null ? partnerName.substring(0,1) : '?'}">박
+                <img th:if="${partnerProfileImage != null}"
+                     th:src="${partnerProfileImage}"
+                     alt="" class="absolute inset-0 w-full h-full object-cover object-top rounded-2xl"
+                     onerror="this.remove()"
                      style="transform:translateZ(0);">
             </div>
+
             <!-- 이름 / 직함 -->
-            <p class="text-lg font-bold text-gray-900" th:text="${partnerName ?: '박서연'}">박서연</p>
-            <p class="text-sm text-gray-400 mt-0.5 mb-4" th:text="${partnerSubtitle ?: '활동지원사'}">사회복지사 2급 · 경력 5년</p>
+            <p class="text-lg font-bold text-gray-900" th:text="${partnerName}">박서연 활동지원사</p>
+            <p class="text-sm text-gray-400 mt-0.5 mb-4" th:text="${partnerSubtitle}">활동지원사</p>
 
             <!-- 매칭률 뱃지 -->
-            <div class="w-20 h-20 bg-indigo-600 rounded-full flex flex-col items-center justify-center mb-5 shadow-md shadow-indigo-100">
+            <div th:with="pct=${matchPercent}"
+                 th:classappend="${pct >= 80 ? ' bg-indigo-600 shadow-indigo-100' : (pct >= 60 ? ' bg-indigo-400 shadow-indigo-100' : (pct >= 40 ? ' bg-slate-400' : ' bg-gray-300'))}"
+                 class="w-20 h-20 rounded-full flex flex-col items-center justify-center mb-5 shadow-md">
                 <span class="text-xl font-extrabold text-white leading-none" th:text="${matchPercent + '%'}">0%</span>
-                <span class="text-[10px] font-semibold text-indigo-200 mt-0.5 tracking-wider">MATCH</span>
+                <span class="text-[10px] font-semibold text-white/70 mt-0.5 tracking-wider">MATCH</span>
             </div>
 
-            <!-- 자격·검증 -->
+            <!-- 자격·검증 (실제 데이터) -->
             <div class="w-full text-left mb-5">
                 <p class="text-xs font-semibold text-gray-400 mb-2">자격 · 검증</p>
                 <ul class="space-y-1.5">
-                    <li class="text-sm text-gray-700">🔒 신원 확인 완료</li>
-                    <li class="text-sm text-gray-700">📋 사회복지사 2급 검증</li>
-                    <li class="text-sm text-gray-700">🤟 수어 통역 자격</li>
-                    <li class="text-sm text-gray-700">⭐ 후기 4.9 (32건)</li>
+                    <li th:if="${caregiverHasCert}" class="text-sm text-gray-700">
+                        📋 <span th:text="${caregiverCertType ?: '자격증 보유'}">자격증</span>
+                    </li>
+                    <li th:unless="${caregiverHasCert}" class="text-sm text-gray-400">
+                        🚫 자격증 없음
+                    </li>
+                    <li th:if="${caregiverExperience}" class="text-sm text-gray-700">
+                        💼 <span th:text="'경력 ' + ${caregiverExperience}">경력</span>
+                    </li>
+                    <li class="text-sm text-gray-700">
+                        ⭐ 후기
+                        <span th:text="${#numbers.formatDecimal(caregiverAvgRating, 1, 1) + ' (' + caregiverTotalReviews + '건)'}">0.0 (0건)</span>
+                    </li>
                 </ul>
+            </div>
+
+            <!-- 성향 태그 -->
+            <div th:if="${caregiverTags != null and !#lists.isEmpty(caregiverTags)}"
+                 class="w-full text-left mb-5">
+                <p class="text-xs font-semibold text-gray-400 mb-2">성향 태그</p>
+                <div class="flex flex-wrap gap-1.5">
+                    <span th:each="tag : ${caregiverTags}"
+                          th:text="${tag.name}"
+                          class="px-2 py-1 bg-teal-50 text-teal-700 text-xs font-medium rounded-lg">태그</span>
+                </div>
             </div>
 
             <!-- 액션 버튼 -->
@@ -41,10 +67,10 @@
                         class="w-full py-3 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100">
                     ✓ 매칭 확정하기
                 </button>
-                <a th:href="@{/caregiver/profile}"
-                   class="block w-full py-3 text-sm font-semibold text-indigo-600 border border-indigo-200 rounded-xl hover:bg-indigo-50 transition-all text-center">
+                <button onclick="showProfileModal()"
+                        class="w-full py-3 text-sm font-semibold text-indigo-600 border border-indigo-200 rounded-xl hover:bg-indigo-50 transition-all">
                     프로필 자세히 보기
-                </a>
+                </button>
             </div>
         </div>
         </th:block>
@@ -54,19 +80,22 @@
 
             <!-- 채팅 헤더 -->
             <div class="flex-shrink-0 flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-                <!-- 뒤로가기 버튼 (모든 역할) -->
                 <a th:href="${isCaregiver} ? @{/caregiver/board/{id}(id=${requestId})} : @{/disabled/board/{id}(id=${requestId})}"
                    class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all flex-shrink-0">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 </a>
 
-                <div class="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 shadow-sm">
-                    <img th:src="${partnerProfileImage ?: '/assets/profile_thumb_img/m01_thumb.png'}"
-                         alt="프로필" class="w-full h-full object-cover object-top"
+                <div class="relative w-11 h-11 rounded-full flex-shrink-0 shadow-sm flex items-center justify-center text-white font-bold text-base"
+                     th:classappend="${isUser} ? 'bg-teal-500' : 'bg-indigo-500'"
+                     th:text="${partnerName != null ? partnerName.substring(0,1) : '?'}">박
+                    <img th:if="${partnerProfileImage != null}"
+                         th:src="${partnerProfileImage}"
+                         alt="" class="absolute inset-0 w-full h-full object-cover object-top rounded-full"
+                         onerror="this.remove()"
                          style="transform:translateZ(0);">
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-bold text-gray-900" th:text="${partnerName ?: '박서연 활동지원사'}">박서연 활동지원사</p>
+                    <p class="text-sm font-bold text-gray-900" th:text="${partnerName}">박서연 활동지원사</p>
                     <div class="flex items-center gap-1.5 mt-0.5">
                         <span class="w-2 h-2 bg-teal-400 rounded-full flex-shrink-0"></span>
                         <span class="text-xs text-teal-500 font-medium">지금 접속 중</span>
@@ -78,12 +107,6 @@
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                     안심 통화
                 </button>
-
-                <!-- 매칭률 뱃지 (모든 역할) -->
-                <div class="flex-shrink-0 flex flex-col items-center bg-indigo-600 text-white rounded-xl px-2.5 py-1.5">
-                    <span class="text-[9px] font-medium opacity-80 leading-none">매칭률</span>
-                    <span class="text-sm font-bold leading-none" th:text="${matchPercent + '%'}">0%</span>
-                </div>
             </div>
 
             <!-- 안전 안내 배너 -->
@@ -115,7 +138,7 @@
     </div>
 </div>
 
-<!-- 매칭 확정 모달 (장애인 뷰) -->
+<!-- 매칭 확정 모달 (케어메이트 뷰) -->
 <div id="matchConfirmModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="hideMatchConfirmModal()"></div>
     <div class="relative bg-white rounded-3xl shadow-2xl p-7 w-full max-w-sm text-center z-10">
@@ -142,6 +165,131 @@
     </div>
 </div>
 
+<!-- 프로필 상세 모달 (케어메이트 뷰) -->
+<div th:if="${isUser}" id="profileModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="hideProfileModal()"></div>
+    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg z-10 flex flex-col" style="max-height:85vh;">
+
+        <!-- 모달 헤더 -->
+        <div class="flex-shrink-0 flex items-center justify-between px-7 pt-7 pb-5 border-b border-gray-100">
+            <h2 class="text-lg font-bold text-gray-900">활동지원사 프로필</h2>
+            <button onclick="hideProfileModal()" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <!-- 모달 본문 (스크롤) -->
+        <div class="flex-1 overflow-y-auto px-7 py-6 space-y-6">
+
+            <!-- 기본 정보 -->
+            <div class="flex items-start gap-4">
+                <div class="relative w-20 h-20 rounded-2xl flex-shrink-0 shadow-sm bg-teal-500 flex items-center justify-center text-white text-3xl font-black"
+                     th:text="${partnerName != null ? partnerName.substring(0,1) : '?'}">박
+                    <img th:if="${partnerProfileImage != null}"
+                         th:src="${partnerProfileImage}"
+                         alt="" class="absolute inset-0 w-full h-full object-cover object-top rounded-2xl"
+                         onerror="this.remove()">
+                </div>
+                <div>
+                    <p class="text-lg font-bold text-gray-900" th:text="${partnerName}">박서연 활동지원사</p>
+                    <p class="text-sm text-gray-500 mt-0.5" th:text="${partnerSubtitle}">활동지원사</p>
+                    <!-- 별점 -->
+                    <div class="flex items-center gap-1.5 mt-2">
+                        <div class="flex">
+                            <th:block th:each="i : ${#numbers.sequence(1,5)}">
+                                <svg th:classappend="${caregiverAvgRating != null and caregiverAvgRating.doubleValue() >= i} ? 'text-amber-400 fill-amber-400' : 'text-gray-200 fill-gray-200'"
+                                     class="w-4 h-4" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                            </th:block>
+                        </div>
+                        <span class="text-sm font-bold text-gray-800"
+                              th:text="${caregiverAvgRating != null ? #numbers.formatDecimal(caregiverAvgRating, 1, 1) : '0.0'}">0.0</span>
+                        <span class="text-xs text-gray-400"
+                              th:text="'(' + ${caregiverTotalReviews ?: 0} + '건)'">0건</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 한 줄 소개 -->
+            <div th:if="${caregiverIntroShort}">
+                <p class="text-xs font-semibold text-gray-400 mb-1.5">한 줄 소개</p>
+                <p class="text-sm text-gray-700" th:text="${caregiverIntroShort}">소개</p>
+            </div>
+
+            <!-- 상세 소개 -->
+            <div th:if="${caregiverIntroLong}">
+                <p class="text-xs font-semibold text-gray-400 mb-1.5">상세 소개</p>
+                <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-line" th:text="${caregiverIntroLong}">상세 소개</p>
+            </div>
+
+            <!-- 자격·경력 -->
+            <div class="bg-gray-50 rounded-2xl p-4 space-y-2">
+                <p class="text-xs font-semibold text-gray-400 mb-2">자격 · 경력</p>
+                <div th:if="${caregiverHasCert}" class="flex items-center gap-2 text-sm text-gray-700">
+                    <span class="text-base">📋</span>
+                    <span th:text="${caregiverCertType ?: '자격증 보유'}">자격증</span>
+                </div>
+                <div th:if="${caregiverExperience}" class="flex items-start gap-2 text-sm text-gray-700">
+                    <span class="text-base flex-shrink-0">💼</span>
+                    <span th:text="'경력 ' + ${caregiverExperience}">경력</span>
+                </div>
+                <div th:if="${caregiverServiceCategories}" class="flex items-start gap-2 text-sm text-gray-700">
+                    <span class="text-base flex-shrink-0">🛠</span>
+                    <span th:text="${caregiverServiceCategories}">서비스</span>
+                </div>
+            </div>
+
+            <!-- 성향 태그 -->
+            <div th:if="${caregiverTags != null and !#lists.isEmpty(caregiverTags)}">
+                <p class="text-xs font-semibold text-gray-400 mb-2">성향 태그</p>
+                <div class="flex flex-wrap gap-2">
+                    <span th:each="tag : ${caregiverTags}"
+                          th:text="${tag.name}"
+                          class="px-3 py-1.5 bg-teal-50 text-teal-700 text-sm font-medium rounded-xl">태그</span>
+                </div>
+            </div>
+
+            <!-- 후기 리스트 -->
+            <div>
+                <p class="text-xs font-semibold text-gray-400 mb-3">
+                    후기
+                    <span class="text-gray-600 font-bold ml-1"
+                          th:text="${caregiverTotalReviews ?: 0}">0</span>건
+                </p>
+
+                <div th:if="${caregiverReviews != null and !#lists.isEmpty(caregiverReviews)}"
+                     class="space-y-3">
+                    <div th:each="rv : ${caregiverReviews}"
+                         class="bg-gray-50 rounded-2xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <!-- 별점 -->
+                            <div class="flex">
+                                <th:block th:each="i : ${#numbers.sequence(1,5)}">
+                                    <svg th:classappend="${rv.rating != null and rv.rating >= i} ? 'text-amber-400 fill-amber-400' : 'text-gray-200 fill-gray-200'"
+                                         class="w-3.5 h-3.5" viewBox="0 0 24 24">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                    </svg>
+                                </th:block>
+                            </div>
+                            <span class="text-xs text-gray-400"
+                                  th:text="${#temporals.format(rv.createdAt, 'yyyy.MM.dd')}">날짜</span>
+                        </div>
+                        <p class="text-sm text-gray-700 leading-relaxed" th:text="${rv.body}">후기 내용</p>
+                        <p class="text-xs text-gray-400 mt-1.5"
+                           th:text="${rv.author.fullName != null ? rv.author.fullName.substring(0,1) + '○○ 님' : '익명'}">홍○○ 님</p>
+                    </div>
+                </div>
+
+                <div th:if="${caregiverReviews == null or #lists.isEmpty(caregiverReviews)}"
+                     class="text-center py-6 text-sm text-gray-400">
+                    아직 등록된 후기가 없습니다.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 @media (max-width: 767px) {
     .chat-profile-sidebar { display: none !important; }
@@ -151,7 +299,8 @@
 <script th:inline="javascript">
 const CONVERSATION_ID = /*[[${conversationId}]]*/ 0;
 const PARTNER_IMAGE = /*[[${partnerProfileImage}]]*/ null;
-const DEFAULT_IMAGE = '/assets/profile_thumb_img/m01_thumb.png';
+const PARTNER_FIRST = /*[[${partnerName != null ? partnerName.substring(0,1) : '?'}]]*/ '?';
+const PARTNER_COLOR = /*[[${isUser ? 'bg-teal-500' : 'bg-indigo-500'}]]*/ 'bg-indigo-500';
 
 let lastRenderedDate = null;
 let polling = null;
@@ -178,11 +327,11 @@ function buildMessage(msg) {
             </div>
         </div>`;
     } else {
-        const img = PARTNER_IMAGE ? PARTNER_IMAGE : DEFAULT_IMAGE;
+        const avatarHtml = PARTNER_IMAGE
+            ? `<div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 mb-1 shadow-sm"><img src="${PARTNER_IMAGE}" alt="프로필" class="w-full h-full object-cover object-top"></div>`
+            : `<div class="w-9 h-9 rounded-full flex-shrink-0 mb-1 shadow-sm ${PARTNER_COLOR} text-white flex items-center justify-center font-bold text-sm">${PARTNER_FIRST}</div>`;
         return `<div class="flex items-end gap-2.5">
-            <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 mb-1 shadow-sm">
-                <img src="${img}" alt="프로필" class="w-full h-full object-cover object-top">
-            </div>
+            ${avatarHtml}
             <div class="max-w-[70%]">
                 <div class="bg-gray-50 border border-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
                     <p class="text-sm text-gray-800">${escaped}</p>
@@ -317,6 +466,12 @@ function showMatchConfirmModal() {
 }
 function hideMatchConfirmModal() {
     document.getElementById('matchConfirmModal').classList.add('hidden');
+}
+function showProfileModal() {
+    document.getElementById('profileModal')?.classList.remove('hidden');
+}
+function hideProfileModal() {
+    document.getElementById('profileModal')?.classList.add('hidden');
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

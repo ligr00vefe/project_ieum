@@ -41,6 +41,6 @@ public class ReviewController {
         }
         reviewService.create(requestId, form);
         redirectAttributes.addFlashAttribute("message", "후기가 등록되었습니다.");
-        return "redirect:/my/requests/" + requestId;
+        return "redirect:/disabled/mypage";
     }
 }

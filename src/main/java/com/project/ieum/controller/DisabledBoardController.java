@@ -65,7 +65,7 @@ public class DisabledBoardController {
         Long currentUserId = currentUserService.getCurrentUser().getId();
         model.addAttribute("title", "게시물 상세");
         model.addAttribute("request", helpRequestService.get(id));
-        model.addAttribute("applicationCount", matchingService.getApplicationsForRequest(id).size());
+        model.addAttribute("applicationCount", matchingService.countApplicationsForRequest(id));
         model.addAttribute("currentUserId", currentUserId);
         model.addAttribute("handshake", matchingService.getHandshakeView(id, currentUserId));
         matchingService.getMatchedParty(id)
@@ -77,11 +77,18 @@ public class DisabledBoardController {
     @GetMapping("/{id}/applicants")
     public String applicants(@PathVariable Long id, Model model) {
         var applications = matchingService.getApplicationsForRequest(id);
+        var matchPercentMap = matchingService.getMatchPercentMap(id, applications);
+        var sorted = applications.stream()
+                .sorted(java.util.Comparator.comparingInt(
+                        (com.project.ieum.entity.request.HelpRequestApplication a) ->
+                                matchPercentMap.getOrDefault(a.getId(), 0)).reversed())
+                .toList();
         model.addAttribute("title", "지원자 리스트");
         model.addAttribute("request", helpRequestService.get(id));
-        model.addAttribute("applications", applications);
-        model.addAttribute("matchPercentMap", matchingService.getMatchPercentMap(id, applications));
-        model.addAttribute("conversationIdMap", matchingService.getConversationIdMap(applications));
+        model.addAttribute("applications", sorted);
+        model.addAttribute("matchPercentMap", matchPercentMap);
+        model.addAttribute("matchTagDetailMap", matchingService.getMatchTagDetailMap(id, sorted));
+        model.addAttribute("conversationIdMap", matchingService.getConversationIdMap(sorted));
         model.addAttribute("content", "board/applicants");
         return "layout/layout";
     }
