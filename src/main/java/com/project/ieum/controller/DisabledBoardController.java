@@ -68,6 +68,8 @@ public class DisabledBoardController {
         model.addAttribute("applicationCount", matchingService.getApplicationsForRequest(id).size());
         model.addAttribute("currentUserId", currentUserId);
         model.addAttribute("handshake", matchingService.getHandshakeView(id, currentUserId));
+        matchingService.getMatchedParty(id)
+                .ifPresent(party -> model.addAttribute("matchedParty", party));
         model.addAttribute("content", "disabled/board/detail");
         return "layout/layout";
     }
@@ -113,7 +115,7 @@ public class DisabledBoardController {
                          RedirectAttributes redirectAttributes) {
         matchingService.accept(applicationId);
         redirectAttributes.addFlashAttribute("message", "매칭이 확정되었습니다.");
-        return "redirect:/disabled/board/" + requestId + "/applicants";
+        return "redirect:/disabled/board/" + requestId;
     }
 
     @PostMapping("/applications/{applicationId}/reject")

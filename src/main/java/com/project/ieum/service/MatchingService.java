@@ -2,6 +2,7 @@ package com.project.ieum.service;
 
 import com.project.ieum.dto.request.ActivityHandshakeView;
 import com.project.ieum.dto.request.ApplyRequest;
+import com.project.ieum.dto.request.MatchedPartyView;
 import com.project.ieum.entity.ApplicationStatus;
 import com.project.ieum.entity.User;
 import com.project.ieum.entity.UserRole;
@@ -300,6 +301,19 @@ public class MatchingService {
         }
         return new ActivityHandshakeView(true, "END",
                 matched.endConfirmedBy(party), matched.endConfirmedBy(other), matched.bothEndConfirmed());
+    }
+
+    // 상세 페이지(이용자 측)에서 선정된 도우미·대화방을 보여주기 위한 파생 뷰.
+    // ACCEPTED 지원이 없으면(아직 미선정·이미 종료) Optional.empty.
+    @Transactional(readOnly = true)
+    public java.util.Optional<MatchedPartyView> getMatchedParty(Long requestId) {
+        return applicationRepository.findByHelpRequest_IdAndStatus(requestId, ApplicationStatus.ACCEPTED)
+                .stream().findFirst()
+                .map(app -> new MatchedPartyView(
+                        app.getCaregiver().getFullName(),
+                        conversationRepository.findByApplication_Id(app.getId())
+                                .map(Conversation::getId)
+                                .orElse(null)));
     }
 
     // 현재 사용자를 매칭의 확인 주체(이용자/도우미)로 해석. 둘 다 아니면 거부.
