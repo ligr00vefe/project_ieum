@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+<div th:attr="data-page-title='대시보드'">
+
+    <div class="mb-6">
+        <h2 class="text-xl font-bold text-slate-900">대시보드</h2>
+        <p class="text-sm text-slate-500 mt-0.5">서비스 현황을 한눈에 확인하세요.</p>
+    </div>
+
+    <!-- 핵심 지표 카드 -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+
+        <div class="bg-white rounded-2xl border border-slate-100 p-5">
+            <p class="text-xs font-medium text-slate-400 mb-1">이용자 수</p>
+            <p class="text-3xl font-bold text-slate-900" th:text="${stats.totalUsers}">0</p>
+            <p class="text-xs text-slate-400 mt-1">USER 역할</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-100 p-5">
+            <p class="text-xs font-medium text-slate-400 mb-1">활동지원사 수</p>
+            <p class="text-3xl font-bold text-slate-900" th:text="${stats.totalCaregivers}">0</p>
+            <p class="text-xs text-slate-400 mt-1">CAREGIVER 역할</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-100 p-5">
+            <p class="text-xs font-medium text-slate-400 mb-1">신규 가입</p>
+            <p class="text-3xl font-bold text-indigo-600" th:text="${stats.newMembersThisWeek}">0</p>
+            <p class="text-xs text-slate-400 mt-1">최근 7일</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-100 p-5">
+            <p class="text-xs font-medium text-slate-400 mb-1">미답변 문의</p>
+            <p class="text-3xl font-bold"
+               th:classappend="${stats.unansweredInquiries > 0} ? 'text-red-500' : 'text-slate-900'"
+               th:text="${stats.unansweredInquiries}">0</p>
+            <p class="text-xs text-slate-400 mt-1">답변 대기 중</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-100 p-5">
+            <p class="text-xs font-medium text-slate-400 mb-1">진행 중 매칭</p>
+            <p class="text-3xl font-bold text-teal-600" th:text="${stats.activeMatchings}">0</p>
+            <p class="text-xs text-slate-400 mt-1">IN_PROGRESS</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-100 p-5">
+            <p class="text-xs font-medium text-slate-400 mb-1">미처리 지원</p>
+            <p class="text-3xl font-bold text-slate-900" th:text="${stats.pendingApplications}">0</p>
+            <p class="text-xs text-slate-400 mt-1">PENDING 상태</p>
+        </div>
+
+    </div>
+
+    <!-- 상태 분포 + 현황 요약 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+
+        <!-- HelpRequest 상태 분포 -->
+        <div class="bg-white rounded-2xl border border-slate-100 p-5">
+            <h3 class="text-sm font-semibold text-slate-700 mb-4">매칭 요청 상태 분포</h3>
+            <div class="space-y-2.5">
+                <th:block th:each="entry : ${stats.helpRequestByStatus}">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-medium text-slate-500"
+                              th:text="${entry.key == 'OPEN' ? '모집중' :
+                                        entry.key == 'MATCHED' ? '매칭완료' :
+                                        entry.key == 'IN_PROGRESS' ? '진행중' :
+                                        entry.key == 'COMPLETED' ? '완료' : '종료'}">상태</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-28 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full bg-indigo-400"
+                                     th:style="'width: ' + ${entry.value * 100 / stats.helpRequestTotal} + '%'"></div>
+                            </div>
+                            <span class="text-sm font-semibold text-slate-800 w-6 text-right" th:text="${entry.value}">0</span>
+                        </div>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+
+        <!-- 회원 상태 분포 -->
+        <div class="bg-white rounded-2xl border border-slate-100 p-5">
+            <h3 class="text-sm font-semibold text-slate-700 mb-4">회원 상태 분포</h3>
+            <div class="space-y-2.5">
+                <th:block th:each="entry : ${stats.userByStatus}">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-medium text-slate-500"
+                              th:text="${entry.key == 'ACTIVE' ? '활성' :
+                                        entry.key == 'PAUSED' ? '일시중지' :
+                                        entry.key == 'BANNED' ? '정지' : '탈퇴'}">상태</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-28 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full bg-teal-400"
+                                     th:style="'width: ' + ${entry.value * 100 / stats.userTotal} + '%'"></div>
+                            </div>
+                            <span class="text-sm font-semibold text-slate-800 w-6 text-right" th:text="${entry.value}">0</span>
+                        </div>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 현황 요약 테이블 -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        <!-- 최근 문의 -->
+        <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-50">
+                <h3 class="text-sm font-semibold text-slate-700">최근 문의</h3>
+                <a th:href="@{/admin/inquiries}" class="text-xs text-indigo-500 hover:text-indigo-700 font-medium">전체 보기</a>
+            </div>
+            <div class="divide-y divide-slate-50">
+                <th:block th:each="inquiry : ${stats.recentInquiries}">
+                    <a th:href="@{/admin/inquiries/{id}(id=${inquiry.id})}"
+                       class="flex items-center justify-between px-5 py-3 hover:bg-slate-50 transition-colors">
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm text-slate-700 truncate" th:text="${inquiry.title}">제목</p>
+                            <p class="text-xs text-slate-400 mt-0.5"
+                               th:text="${#temporals.format(inquiry.createdAt, 'MM/dd HH:mm')}">날짜</p>
+                        </div>
+                        <span th:text="${inquiry.status.name() == 'PENDING' ? '미답변' : '답변완료'}"
+                              th:classappend="${inquiry.status.name() == 'PENDING'} ? 'bg-red-50 text-red-500' : 'bg-teal-50 text-teal-600'"
+                              class="ml-2 flex-shrink-0 px-2 py-0.5 text-xs font-medium rounded-full">미답변</span>
+                    </a>
+                </th:block>
+                <div th:if="${#lists.isEmpty(stats.recentInquiries)}"
+                     class="px-5 py-6 text-center text-sm text-slate-400">문의가 없습니다.</div>
+            </div>
+        </div>
+
+        <!-- 최근 가입 회원 -->
+        <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-50">
+                <h3 class="text-sm font-semibold text-slate-700">최근 가입</h3>
+                <a th:href="@{/admin/users}" class="text-xs text-indigo-500 hover:text-indigo-700 font-medium">전체 보기</a>
+            </div>
+            <div class="divide-y divide-slate-50">
+                <th:block th:each="user : ${stats.recentUsers}">
+                    <a th:href="@{/admin/users/{id}(id=${user.id})}"
+                       class="flex items-center justify-between px-5 py-3 hover:bg-slate-50 transition-colors">
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm text-slate-700 truncate" th:text="${user.email}">이메일</p>
+                            <p class="text-xs text-slate-400 mt-0.5"
+                               th:text="${#temporals.format(user.createdAt, 'MM/dd HH:mm')}">날짜</p>
+                        </div>
+                        <span th:text="${user.role.name() == 'USER' ? '이용자' : user.role.name() == 'CAREGIVER' ? '지원사' : '관리자'}"
+                              th:classappend="${user.role.name() == 'USER'} ? 'bg-indigo-50 text-indigo-600' : 'bg-amber-50 text-amber-600'"
+                              class="ml-2 flex-shrink-0 px-2 py-0.5 text-xs font-medium rounded-full">역할</span>
+                    </a>
+                </th:block>
+                <div th:if="${#lists.isEmpty(stats.recentUsers)}"
+                     class="px-5 py-6 text-center text-sm text-slate-400">회원이 없습니다.</div>
+            </div>
+        </div>
+
+        <!-- 최근 완료 매칭 -->
+        <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-50">
+                <h3 class="text-sm font-semibold text-slate-700">최근 완료 매칭</h3>
+                <a th:href="@{/admin/matching}" class="text-xs text-indigo-500 hover:text-indigo-700 font-medium">전체 보기</a>
+            </div>
+            <div class="divide-y divide-slate-50">
+                <th:block th:each="req : ${stats.recentCompletedMatchings}">
+                    <a th:href="@{/admin/matching/{id}(id=${req.id})}"
+                       class="flex items-center justify-between px-5 py-3 hover:bg-slate-50 transition-colors">
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm text-slate-700 truncate" th:text="${req.title}">제목</p>
+                            <p class="text-xs text-slate-400 mt-0.5"
+                               th:text="${#temporals.format(req.updatedAt, 'MM/dd HH:mm')}">날짜</p>
+                        </div>
+                        <span class="ml-2 flex-shrink-0 px-2 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-slate-500">완료</span>
+                    </a>
+                </th:block>
+                <div th:if="${#lists.isEmpty(stats.recentCompletedMatchings)}"
+                     class="px-5 py-6 text-center text-sm text-slate-400">완료된 매칭이 없습니다.</div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+</th:block>
+</html>

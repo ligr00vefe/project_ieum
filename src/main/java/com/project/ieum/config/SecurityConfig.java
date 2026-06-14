@@ -73,7 +73,8 @@ public class SecurityConfig {
                 .clearAuthentication(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
-            );
+            )
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
 
         return http.build();
     }
@@ -98,9 +99,9 @@ public class SecurityConfig {
         boolean caregiver = authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_" + UserRole.CAREGIVER.name()));
         if (caregiver) {
-            return "/requests";
+            return "/caregiver/board";
         }
 
-        return "/me";
+        return "/disabled/board";
     }
 }

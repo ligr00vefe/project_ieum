@@ -1,6 +1,7 @@
 package com.project.ieum.repository;
 
 import com.project.ieum.config.JpaAuditingConfig;
+import com.project.ieum.config.QuerydslConfig;
 import com.project.ieum.entity.User;
 import com.project.ieum.entity.UserRole;
 import com.project.ieum.entity.UserStatus;
@@ -36,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @DataJpaTest
 @ActiveProfiles("test")
-@Import(JpaAuditingConfig.class)
+@Import({JpaAuditingConfig.class, QuerydslConfig.class})
 class HelpRequestRepositoryTest {
 
     @Autowired
@@ -111,9 +112,9 @@ class HelpRequestRepositoryTest {
     }
 
     @Test
-    @DisplayName("비활성 상태(CANCELLED) 요청은 충돌 대상에서 제외")
+    @DisplayName("비활성 상태(CLOSED) 요청은 충돌 대상에서 제외")
     void inactiveStatus_excluded() {
-        persistRequest(requester, at(10), at(12), HelpRequestStatus.CANCELLED);
+        persistRequest(requester, at(10), at(12), HelpRequestStatus.CLOSED);
 
         boolean result = helpRequestRepository.existsOverlapping(requester, at(11), at(13), ACTIVE);
 

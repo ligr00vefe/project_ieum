@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+
+<!-- 뒤로가기 -->
+<div class="flex items-center gap-3 mb-5">
+    <a th:href="@{/admin/notices}"
+       class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        공지사항 목록
+    </a>
+    <span class="text-slate-300">/</span>
+    <span class="text-sm font-medium text-slate-700"
+          th:text="${noticeId != null ? '수정' : '새 공지 작성'}">작성</span>
+</div>
+
+<!-- CKEditor 5 v41 classic build (라이선스 키 불필요) -->
+<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.css">
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+
+<style>
+    .ck-editor__editable { min-height: 480px; }
+    .ck-content img { max-width: 100%; height: auto; }
+</style>
+
+<form id="noticeForm"
+      th:action="${noticeId != null ? '/admin/notices/' + noticeId + '/edit' : '/admin/notices/new'}"
+      th:object="${form}"
+      method="post"
+      enctype="multipart/form-data"
+      class="flex flex-col gap-4">
+
+    <!-- ① 상단고정 / 공개 체크박스 -->
+    <div class="bg-white rounded-2xl border border-slate-100 px-5 py-4">
+        <div class="flex items-center gap-6">
+            <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" th:field="*{pinned}"
+                       class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-400 cursor-pointer">
+                <span class="text-sm font-medium text-slate-600">상단 고정</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" th:field="*{published}"
+                       class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-400 cursor-pointer">
+                <span class="text-sm font-medium text-slate-600">공개</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- ② 공지 제목 -->
+    <div class="bg-white rounded-2xl border border-slate-100 px-5 py-4">
+        <input type="text" th:field="*{title}"
+               placeholder="공지 제목을 입력하세요"
+               class="w-full text-sm font-medium text-slate-900 placeholder-slate-300 bg-transparent focus:outline-none border-none">
+        <p th:if="${#fields.hasErrors('title')}" th:errors="*{title}"
+           class="mt-1.5 text-xs text-red-500"></p>
+    </div>
+
+    <!-- ③ 파일 첨부 -->
+    <div class="bg-white rounded-2xl border border-slate-100 p-5">
+        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">첨부파일</h3>
+
+        <!-- 기존 첨부파일 (수정 시) -->
+        <div th:if="${attachments != null and !#lists.isEmpty(attachments)}" class="space-y-1.5 mb-3">
+            <div th:each="att : ${attachments}"
+                 class="flex items-center justify-between px-3 py-2 bg-slate-50 rounded-xl border border-slate-100">
+                <div class="flex items-center gap-2 min-w-0">
+                    <svg class="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                    </svg>
+                    <div class="min-w-0">
+                        <p class="text-xs font-medium text-slate-700 truncate" th:text="${att.originalName}">파일명</p>
+                        <p class="text-[10px] text-slate-400"
+                           th:text="${att.fileSize != null ? (att.fileSize / 1024) + ' KB' : ''}"></p>
+                    </div>
+                </div>
+                <form th:action="@{/admin/notices/{nid}/files/{fid}/delete(nid=${noticeId},fid=${att.id})}"
+                      method="post" class="ml-2 flex-shrink-0">
+                    <button type="submit" onclick="return confirm('첨부파일을 삭제하시겠습니까?')"
+                            class="text-slate-300 hover:text-red-500 transition-colors">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 새 파일 미리보기 -->
+        <div id="attachPreviewContainer" class="space-y-1.5 mb-3 hidden"></div>
+
+        <!-- 업로드 존 -->
+        <label for="attachFiles"
+               class="flex items-center justify-center gap-3 w-full h-12 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-indigo-300 hover:bg-indigo-50/30 transition-all group">
+            <svg class="w-4 h-4 text-slate-300 group-hover:text-indigo-400 flex-shrink-0 transition-colors"
+                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                      d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+            </svg>
+            <span class="text-xs text-slate-400 group-hover:text-indigo-500 transition-colors">
+                클릭하여 파일 첨부
+                <span class="text-slate-300">· PDF, DOC, XLS, ZIP 등 · 최대 10MB</span>
+            </span>
+            <input id="attachFiles" name="attachFiles" type="file"
+                   multiple class="hidden" onchange="previewAttachments(this)">
+        </label>
+    </div>
+
+    <!-- ④ 내용 (CKEditor 5 v41) -->
+    <div class="bg-white rounded-2xl border border-slate-100 p-5">
+        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">내용</h3>
+        <div id="ckEditorTarget"></div>
+        <textarea id="bodyTextarea" th:field="*{body}" class="hidden"></textarea>
+        <p th:if="${#fields.hasErrors('body')}" th:errors="*{body}"
+           class="mt-1.5 text-xs text-red-500"></p>
+    </div>
+
+    <!-- ⑤ 하단 버튼 -->
+    <div class="bg-white rounded-2xl border border-slate-100 px-5 py-4 flex items-center justify-end gap-2">
+        <a th:href="@{/admin/notices}"
+           class="px-4 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+            취소
+        </a>
+        <button type="submit"
+                class="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-100"
+                th:text="${noticeId != null ? '수정 완료' : '등록'}">등록</button>
+    </div>
+
+</form>
+
+<script th:inline="javascript">
+(function () {
+    const csrfToken  = document.querySelector('meta[name="_csrf"]')?.getAttribute('content') || '';
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
+    const initialData = document.getElementById('bodyTextarea').value || '';
+
+    // 커스텀 이미지 업로드 어댑터
+    function UploadAdapterPlugin(editor) {
+        editor.plugins.get('FileRepository').createUploadAdapter = (loader) => ({
+            upload() {
+                return loader.file.then(file => new Promise((resolve, reject) => {
+                    const fd = new FormData();
+                    fd.append('upload', file);
+                    fetch('/admin/notices/editor-image', {
+                        method: 'POST',
+                        headers: { [csrfHeader]: csrfToken },
+                        body: fd
+                    })
+                    .then(r => r.ok ? r.json() : Promise.reject('업로드 실패'))
+                    .then(data => resolve({ default: data.url }))
+                    .catch(reject);
+                }));
+            },
+            abort() {}
+        });
+    }
+
+    // v41 classic 빌드: ClassicEditor가 전역에 바로 노출됨
+    ClassicEditor.create(document.getElementById('ckEditorTarget'), {
+        extraPlugins: [UploadAdapterPlugin],
+        toolbar: {
+            items: [
+                'heading', '|',
+                'bold', 'italic', '|',
+                'bulletedList', 'numberedList', '|',
+                'outdent', 'indent', '|',
+                'blockQuote', 'link', '|',
+                'uploadImage', 'insertTable', '|',
+                'undo', 'redo'
+            ]
+        },
+        image: {
+            toolbar: [
+                'imageStyle:alignLeft', 'imageStyle:alignCenter', 'imageStyle:alignRight',
+                '|',
+                'imageStyle:block', 'imageStyle:side',
+                '|',
+                'resizeImage'
+            ]
+        },
+        table: {
+            contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells']
+        },
+        initialData
+    }).then(editor => {
+        document.getElementById('noticeForm').addEventListener('submit', () => {
+            document.getElementById('bodyTextarea').value = editor.getData();
+        });
+    }).catch(err => {
+        console.error('CKEditor 초기화 오류:', err);
+        document.getElementById('ckEditorTarget').textContent = '에디터 로드 실패: ' + err.message;
+    });
+
+    // ── 첨부파일 미리보기 + 개별 취소 ──────────────────────
+    let selectedFiles = [];
+
+    window.previewAttachments = function (input) {
+        selectedFiles = Array.from(input.files);
+        renderPreviews();
+    };
+
+    function renderPreviews() {
+        const container = document.getElementById('attachPreviewContainer');
+        container.innerHTML = '';
+        if (!selectedFiles.length) { container.classList.add('hidden'); syncInput(); return; }
+        container.classList.remove('hidden');
+        selectedFiles.forEach((file, idx) => {
+            const kb = Math.round(file.size / 1024);
+            const div = document.createElement('div');
+            div.className = 'flex items-center justify-between px-3 py-2 bg-indigo-50 rounded-xl border border-indigo-100';
+            div.innerHTML = `
+                <div class="flex items-center gap-2 min-w-0">
+                    <svg class="w-4 h-4 text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                    </svg>
+                    <div class="min-w-0">
+                        <p class="text-xs font-medium text-slate-700 truncate">${esc(file.name)}</p>
+                        <p class="text-[10px] text-slate-400">${kb} KB</p>
+                    </div>
+                </div>
+                <button type="button" data-idx="${idx}"
+                        class="ml-2 flex-shrink-0 text-slate-300 hover:text-red-500 transition-colors remove-btn">
+                    <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>`;
+            container.appendChild(div);
+        });
+        container.querySelectorAll('.remove-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                selectedFiles.splice(+this.dataset.idx, 1);
+                renderPreviews();
+            });
+        });
+        syncInput();
+    }
+
+    function syncInput() {
+        try {
+            const dt = new DataTransfer();
+            selectedFiles.forEach(f => dt.items.add(f));
+            document.getElementById('attachFiles').files = dt.files;
+        } catch (_) {}
+    }
+
+    function esc(s) {
+        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+})();
+</script>
+
+</th:block>
+</html>

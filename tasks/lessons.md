@@ -1,5 +1,11 @@
 # IEUM 구현 기록
 
+## 2026-06-14 실시간 채팅 보강
+- STOMP `convertAndSend`로 같은 DTO를 모든 구독자에게 broadcast하면 서버에서 계산한 `mine` 값이 받는 사람 기준과 다를 수 있으므로, 화면에서는 `senderId`와 현재 사용자 id를 비교해 메시지 방향을 보정해야 한다.
+- WebSocket 전환 시에도 기존 REST 조회/전송과 5초 polling을 fallback으로 남기면 CDN 로드 실패, WebSocket 연결 실패, 일시적 연결 종료 상황에서 최소 채팅 기능을 유지할 수 있다.
+- REST fallback 전송으로 저장된 메시지도 topic으로 publish해야, 상대방이 WebSocket 연결 성공으로 polling을 중단한 상태에서도 즉시 수신할 수 있다.
+- WebSocket 수신과 polling 재조회가 겹칠 수 있으므로 메시지 `id` 기준 렌더링 Set을 유지해 중복 append를 막는 편이 안전하다.
+
 ## 2026-05-19
 - `application.properties`가 `templates` 아래에 있어 Spring Boot가 기본 설정으로 읽지 못했다.
 - 테스트는 별도 `test` 프로필과 내장 데이터베이스가 없으면 컨텍스트 로딩부터 실패한다.
@@ -17,3 +23,7 @@
 - 앱의 실제 context-path는 `/`인데 시작 클래스에서 `http://localhost:8080/ieum`을 직접 출력하고 있었다.
 - Controller 매핑과 DB 흐름은 정상이라 원본 구조는 유지하고, 시작 로그만 실제 `server.port`와 `server.servlet.context-path` 기준으로 출력하도록 바꿨다.
 - 실행 확인은 `./gradlew.bat test`와 임시 포트 `18082`의 `/`, `/login`, `/healthz`, `/readyz` 응답으로 검증했다.
+## 2026-06-08 main 병합 검증
+- 같은 URL을 여러 Controller가 처리하면 Spring MVC가 `Ambiguous mapping`으로 시작하지 못한다.
+- `@DataJpaTest`는 필요한 설정만 얇게 올리므로 Querydsl custom repository 테스트에서는 `QuerydslConfig`를 명시적으로 import해야 한다.
+- 회원가입 완료처럼 DB 상태를 바꾸는 흐름은 GET 완료 페이지가 아니라 마지막 POST 요청에서 처리하는 편이 테스트와 보안 관점에서 안전하다.

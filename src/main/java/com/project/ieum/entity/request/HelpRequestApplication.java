@@ -44,6 +44,7 @@ public class HelpRequestApplication extends BasicEntity {
   private ApplicationStatus status;
 
   public void accept()    { this.status = ApplicationStatus.ACCEPTED; }
+  public void pending()   { this.status = ApplicationStatus.PENDING; }
   public void reject()    { this.status = ApplicationStatus.REJECTED; }
   public void complete()  { this.status = ApplicationStatus.COMPLETED; }
   // 취소: 요청자 마감(타 지원 선택)·요청 취소·지원자 본인 취소 모두 CANCELLED로 통합(구 withdraw 제거)

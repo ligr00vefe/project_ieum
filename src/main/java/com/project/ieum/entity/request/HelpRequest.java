@@ -97,37 +97,38 @@ public class HelpRequest extends BasicEntity {
   @Column(name = "longitude", precision = 9, scale = 6)
   private BigDecimal longitude;
 
+  // 출발지 도로명주소
+  @Column(name = "departure_address", length = 255)
+  private String departureAddress;
+
+  // 도착지 도로명주소
+  @Column(name = "destination_address", length = 255)
+  private String destinationAddress;
+
   // 특이사항
   @Column(name = "special_notes", columnDefinition = "TEXT")
   private String specialNotes;
 
-  // 상태 (open/matched/in_progress/completed/cancelled/closed)
+  // 상태 (open/matched/in_progress/completed/closed)
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 24)
-  private HelpRequestStatus status;
+  @Builder.Default
+  private HelpRequestStatus status = HelpRequestStatus.OPEN;
 
   public void changeStatus(HelpRequestStatus next) { this.status = next; }
 
-  public void updateDetails(
-      ServiceCategory serviceCategory,
-      String title,
-      String body,
-      LocalDateTime desiredStartDatetime,
-      LocalDateTime desiredEndDatetime,
-      String roadAddress,
-      String addressDetail,
-      String sido,
-      String sigungu,
-      String specialNotes) {
-    this.serviceCategory = serviceCategory;
-    this.title = title;
-    this.body = body;
-    this.desiredStartDatetime = desiredStartDatetime;
-    this.desiredEndDatetime = desiredEndDatetime;
-    this.roadAddress = roadAddress;
-    this.addressDetail = addressDetail;
-    this.sido = sido;
-    this.sigungu = sigungu;
-    this.specialNotes = specialNotes;
+  // 시간 구간 불변식: 종료가 있으면 시작 이후여야 한다.
+  // existsOverlapping(반열림 겹침)이 "start <= end"를 전제하므로, end < start인 행은
+  // 겹침을 조용히 누락시킨다. 이 콜백이 우회 불가 최종 방어선이다.
+  @PrePersist
+  @PreUpdate
+  protected void verifyTimeRange() {
+    if (desiredEndDatetime != null && desiredEndDatetime.isBefore(desiredStartDatetime)) {
+      throw new IllegalStateException("종료 시간은 시작 시간 이후여야 합니다.");
+    }
   }
+
+  // (이슈 #8 정본) 본문 수정 메서드(updateDetails)는 제거함.
+  // 근거: HelpRequest는 write-once — 도우미가 본 내용/시간/위치가 지원 후 바뀌면 신뢰성이 깨지므로,
+  //       생성 후에는 상태 전이(changeStatus)만 허용한다. 수정이 필요하면 마감(close) 후 재작성.
 }

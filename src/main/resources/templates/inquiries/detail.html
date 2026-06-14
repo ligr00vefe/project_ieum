@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="content">
+<section class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- 브레드크럼 + 수정/삭제 버튼 -->
+    <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-3">
+            <a th:href="@{/inquiries}"
+               class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                문의 게시판
+            </a>
+            <span class="text-slate-300">/</span>
+            <span class="text-sm font-medium text-slate-700">상세</span>
+        </div>
+
+        <!-- 본인 글: 수정/삭제 버튼 -->
+        <div th:if="${isOwner}" class="flex items-center gap-2">
+            <a th:href="@{/inquiries/{id}/edit(id=${inquiry.id})}"
+               class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                수정
+            </a>
+            <form th:action="@{/inquiries/{id}/delete(id=${inquiry.id})}" method="post" class="inline">
+                <button type="submit"
+                        onclick="return confirm('문의를 삭제하시겠습니까?')"
+                        class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-red-500 border border-red-200 rounded-xl hover:bg-red-50 transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    삭제
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 플래시 메시지 -->
+    <div th:if="${message}"
+         class="mb-4 px-4 py-3 rounded-xl bg-teal-50 border border-teal-200 text-sm text-teal-700"
+         th:text="${message}"></div>
+
+    <!-- 메타 정보 -->
+    <div class="bg-white rounded-2xl border border-slate-100 px-5 py-4 flex items-center gap-4 flex-wrap mb-4">
+        <span th:text="${inquiry.category.label()}"
+              class="px-2.5 py-1 text-xs font-medium rounded-md bg-slate-100 text-slate-500">분류</span>
+        <span th:if="${inquiry.isSecret}"
+              class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-slate-100 text-slate-500">
+            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            비밀글
+        </span>
+        <span th:text="${inquiry.status.name() == 'PENDING' ? '답변 대기' : '답변 완료'}"
+              th:classappend="${inquiry.status.name() == 'PENDING'} ? 'bg-amber-50 text-amber-600' : 'bg-teal-50 text-teal-600'"
+              class="px-2.5 py-1 text-xs font-semibold rounded-full">상태</span>
+        <span class="text-xs text-slate-400"
+              th:text="'작성자: ' + ${inquiry.author?.email ?: '-'}"></span>
+        <span class="text-xs text-slate-400"
+              th:text="'등록일: ' + ${#temporals.format(inquiry.createdAt, 'yyyy.MM.dd HH:mm')}"></span>
+    </div>
+
+    <!-- 제목 -->
+    <div class="bg-white rounded-2xl border border-slate-100 px-5 py-4 mb-4">
+        <h1 class="text-base font-semibold text-slate-900" th:text="${inquiry.title}">제목</h1>
+    </div>
+
+    <!-- 본문 -->
+    <div class="bg-white rounded-2xl border border-slate-100 p-6 mb-4">
+        <p class="text-sm text-slate-700 whitespace-pre-line leading-relaxed"
+           th:text="${inquiry.body}">내용</p>
+    </div>
+
+    <!-- 관리자 답변 표시 -->
+    <div th:if="${inquiry.reply != null}"
+         class="bg-indigo-50 rounded-2xl border border-indigo-100 p-6 mb-4">
+        <div class="flex items-center gap-2 mb-3">
+            <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+            </svg>
+            <span class="text-sm font-semibold text-indigo-700">관리자 답변</span>
+            <span class="text-xs text-indigo-400 ml-auto"
+                  th:text="${#temporals.format(inquiry.reply.createdAt, 'yyyy.MM.dd HH:mm')}">-</span>
+        </div>
+        <p class="text-sm text-indigo-800 whitespace-pre-line leading-relaxed"
+           th:text="${inquiry.reply.body}">답변 내용</p>
+    </div>
+
+    <!-- 답변 대기 안내 (답변 없고 관리자가 아닐 때) -->
+    <div th:if="${inquiry.reply == null and !isAdmin}"
+         class="bg-slate-50 rounded-2xl border border-dashed border-slate-200 p-6 text-center mb-4">
+        <svg class="w-8 h-8 text-slate-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+        </svg>
+        <p class="text-sm text-slate-400">답변을 준비 중입니다. 영업일 기준 1~3일 내에 답변 드리겠습니다.</p>
+    </div>
+
+    <!-- ───────────────────────────────────────────
+         관리자 전용 영역
+    ─────────────────────────────────────────── -->
+    <div th:if="${isAdmin}" class="bg-white rounded-2xl border border-slate-100 p-6 space-y-4">
+
+        <!-- 상태 토글 -->
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <span class="text-sm font-semibold text-slate-700">답변 상태 관리</span>
+            <form th:action="@{/admin/inquiries/{id}/status(id=${inquiry.id})}" method="post">
+                <button type="submit"
+                        th:text="${inquiry.status.name() == 'PENDING' ? '답변완료로 변경' : '미답변으로 변경'}"
+                        th:classappend="${inquiry.status.name() == 'PENDING'} ? 'bg-teal-50 text-teal-600 border-teal-200 hover:bg-teal-100' : 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100'"
+                        class="px-3.5 py-1.5 text-xs font-semibold rounded-full border transition-colors">
+                    상태 변경
+                </button>
+            </form>
+        </div>
+
+        <!-- 답변 등록/수정 폼 -->
+        <div>
+            <h4 class="text-sm font-semibold text-slate-700 mb-3"
+                th:text="${inquiry.reply != null ? '답변 수정' : '답변 등록'}">답변 등록</h4>
+            <form th:action="@{/inquiries/{id}/reply(id=${inquiry.id})}"
+                  th:object="${replyForm}" method="post" class="space-y-3">
+                <div>
+                    <textarea th:field="*{body}" rows="5"
+                              th:text="${inquiry.reply != null ? inquiry.reply.body : ''}"
+                              placeholder="답변 내용을 입력하세요"
+                              class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition resize-none"></textarea>
+                    <p th:if="${#fields.hasErrors('body')}" th:errors="*{body}"
+                       class="mt-1 text-xs text-red-500"></p>
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit"
+                            th:text="${inquiry.reply != null ? '답변 수정' : '답변 등록'}"
+                            class="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-100">
+                        답변 등록
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+</section>
+</th:block>
+</html>
