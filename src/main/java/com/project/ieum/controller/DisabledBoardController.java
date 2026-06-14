@@ -26,7 +26,7 @@ public class DisabledBoardController {
     @GetMapping({"", "/"})
     public String list(Model model) {
         model.addAttribute("title", "매칭 게시판");
-        model.addAttribute("requests", helpRequestService.getAllActiveRequests());
+        model.addAttribute("requests", helpRequestService.getMyRequests());
         model.addAttribute("currentUserId", currentUserService.getCurrentUser().getId());
         model.addAttribute("content", "disabled/board/list");
         return "layout/layout";
