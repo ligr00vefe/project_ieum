@@ -111,7 +111,7 @@ public class MatchingService {
         }
 
         selected.accept();
-        helpRequest.changeStatus(HelpRequestStatus.MATCHED);
+        helpRequest.match();
 
         List<HelpRequestApplication> pendingApplications = applicationRepository
                 .findByHelpRequest_IdAndStatus(helpRequest.getId(), ApplicationStatus.PENDING);
@@ -141,7 +141,7 @@ public class MatchingService {
             throw new IllegalStateException("수락된 지원만 매칭 취소할 수 있습니다.");
         }
         application.cancel();
-        application.getHelpRequest().changeStatus(HelpRequestStatus.CLOSED);
+        application.getHelpRequest().close();
         conversationRepository.findByApplication_Id(applicationId).ifPresent(Conversation::close);
     }
 
@@ -172,7 +172,7 @@ public class MatchingService {
         if (helpRequest.getStatus() != HelpRequestStatus.MATCHED) {
             throw new IllegalStateException("매칭 확정 상태에서만 활동을 시작할 수 있습니다.");
         }
-        helpRequest.changeStatus(HelpRequestStatus.IN_PROGRESS);
+        helpRequest.startProgress();
     }
 
     public void completeActivity(Long requestId) {
@@ -182,7 +182,7 @@ public class MatchingService {
         if (helpRequest.getStatus() != HelpRequestStatus.IN_PROGRESS) {
             throw new IllegalStateException("진행 중인 활동만 완료할 수 있습니다.");
         }
-        helpRequest.changeStatus(HelpRequestStatus.COMPLETED);
+        helpRequest.complete();
         findAcceptedApplication(helpRequest.getId()).complete();
     }
 

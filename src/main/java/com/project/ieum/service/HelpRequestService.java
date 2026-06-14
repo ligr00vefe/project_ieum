@@ -103,7 +103,7 @@ public class HelpRequestService {
         if (helpRequest.getStatus() != HelpRequestStatus.OPEN) {
             throw InvalidRequestStateException.cannotClose();
         }
-        helpRequest.changeStatus(HelpRequestStatus.CLOSED);
+        helpRequest.close();
         applicationRepository.findByHelpRequest_IdAndStatus(helpRequest.getId(), ApplicationStatus.PENDING)
                 .forEach(app -> {
                     app.cancel();
