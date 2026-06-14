@@ -87,6 +87,46 @@ public class HelpRequestService {
     // 도우미가 본 내용/시간/위치가 지원 후 바뀌면 신뢰성이 깨지므로 생성 후 본문 수정을 막는다.
     // 변경이 필요하면 마감(cancel→CLOSED) 후 새로 작성한다.
 
+    // 재게시 — 마감(CLOSED)된 본인 요청의 내용을 작성 폼에 프리필한다.
+    // 원본은 보존하고, 제출 시 create()로 새 OPEN 요청이 생긴다(기존 작성 흐름과 동일).
+    // 날짜는 이미 지났으면(@FutureOrPresent 위반) 비워 사용자가 다시 고르게 한다.
+    @Transactional(readOnly = true)
+    public HelpRequestForm buildRepostForm(Long requestId) {
+        User currentUser = requireRole(UserRole.USER);
+        HelpRequest source = getOwnedRequest(requestId, currentUser.getId());
+        if (source.getStatus() != HelpRequestStatus.CLOSED) {
+            throw InvalidRequestStateException.cannotRepost();
+        }
+
+        HelpRequestForm form = new HelpRequestForm();
+        form.setTitle(source.getTitle());
+        form.setBody(source.getBody());
+        form.setServiceCategoryId(source.getServiceCategory().getId());
+        form.setRoadAddress(source.getRoadAddress());
+        form.setAddressDetail(source.getAddressDetail());
+        form.setSido(source.getSido());
+        form.setSigungu(source.getSigungu());
+        form.setBname(source.getBname());
+        form.setZonecode(source.getZonecode());
+        form.setBcode(source.getBcode());
+        form.setDepartureAddress(source.getDepartureAddress());
+        form.setDestinationAddress(source.getDestinationAddress());
+        form.setSpecialNotes(source.getSpecialNotes());
+        form.setPersonalityTagIds(
+                helpRequestPersonalityTagRepository.findByHelpRequest_Id(requestId).stream()
+                        .map(tag -> tag.getTag().getId())
+                        .toList());
+
+        LocalDateTime now = LocalDateTime.now();
+        if (source.getDesiredStartDatetime() != null && !source.getDesiredStartDatetime().isBefore(now)) {
+            form.setDesiredStartDatetime(source.getDesiredStartDatetime());
+        }
+        if (source.getDesiredEndDatetime() != null && !source.getDesiredEndDatetime().isBefore(now)) {
+            form.setDesiredEndDatetime(source.getDesiredEndDatetime());
+        }
+        return form;
+    }
+
     // 마감(취소) — 매칭 전(OPEN)에만 게시자가 직접. 2단계 삭제의 1단계.
     public void cancel(Long requestId) {
         User currentUser = requireRole(UserRole.USER);
