@@ -12,7 +12,7 @@
     <div class="bg-white border-b border-gray-100 px-4 py-3.5">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <a th:href="@{/}" class="flex items-center gap-2.5 group">
-                <div class="w-8 h-8 bg-teal-500 rounded-xl flex items-center justify-center group-hover:bg-teal-600 transition-colors">
+                <div class="w-8 h-8 bg-teal-500 rounded-xl flex items-center justify-center group-hover:bg-teal-500 transition-colors">
                     <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/>
                     </svg>
@@ -42,7 +42,7 @@
             <!-- Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
-                <!-- 이음인 Card -->
+                <!-- 케어메이트 Card -->
                 <form th:action="@{/register/type}" method="post">
                     <button type="submit" name="type" value="disabled"
                             class="group w-full text-left bg-white rounded-3xl border-2 border-gray-100 shadow-sm hover:border-indigo-400 hover:shadow-lg hover:shadow-indigo-50 active:scale-[0.98] transition-all duration-200 p-8 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
@@ -56,7 +56,7 @@
 
                         <!-- Content -->
                         <div class="mb-6">
-                            <h2 class="text-xl font-bold text-gray-900 mb-1.5">장애인 / 보호자</h2>
+                            <h2 class="text-xl font-bold text-gray-900 mb-1.5">케어메이트</h2>
                             <p class="text-sm text-gray-500 leading-relaxed">
                                 케어 도움이 필요한 분 또는<br>
                                 보호자로 이음 서비스를 이용하세요.
@@ -72,7 +72,7 @@
 
                         <!-- CTA -->
                         <div class="flex items-center justify-between">
-                            <span class="text-sm font-semibold text-indigo-600">이음인으로 가입하기</span>
+                            <span class="text-sm font-semibold text-indigo-600">케어메이트로 가입하기</span>
                             <div class="w-8 h-8 bg-indigo-600 group-hover:bg-indigo-700 rounded-lg flex items-center justify-center transition-colors">
                                 <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
@@ -113,7 +113,7 @@
                         <!-- CTA -->
                         <div class="flex items-center justify-between">
                             <span class="text-sm font-semibold text-teal-600">활동지원사로 가입하기</span>
-                            <div class="w-8 h-8 bg-teal-500 group-hover:bg-teal-600 rounded-lg flex items-center justify-center transition-colors">
+                            <div class="w-8 h-8 bg-teal-500 group-hover:bg-teal-500 rounded-lg flex items-center justify-center transition-colors">
                                 <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
                                 </svg>

@@ -383,13 +383,18 @@ public class UserService {
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     @Transactional(readOnly = true)
     public String getProfileImageUrl(User user) {
+        String url;
         if (user.getRole() == com.project.ieum.entity.UserRole.CAREGIVER) {
-            return caregiverProfileRepository.findById(user.getId())
+            url = caregiverProfileRepository.findById(user.getId())
                     .map(p -> p.getProfileImageUrl()).orElse(null);
         } else {
-            return userProfileRepository.findById(user.getId())
+            url = userProfileRepository.findById(user.getId())
                     .map(p -> p.getProfileImageUrl()).orElse(null);
         }
+        if (url != null && (url.startsWith("/assets/profile_img/") || url.startsWith("/assets/profile_thumb_img/"))) {
+            return null;
+        }
+        return url;
     }
 
     @Transactional(readOnly = true)
@@ -543,6 +548,16 @@ public class UserService {
         } catch (IOException e) {
             log.warn("커스텀 이미지 삭제 실패 - url={}", url, e);
         }
+    }
+
+    @Transactional
+    public void changePassword(User user, String currentPassword, String newPassword) {
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new IllegalArgumentException("현재 비밀번호가 올바르지 않습니다.");
+        }
+        user.changePassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        log.info("비밀번호 변경 완료 - userId={}", user.getId());
     }
 
     private String blankIfNull(String value) {

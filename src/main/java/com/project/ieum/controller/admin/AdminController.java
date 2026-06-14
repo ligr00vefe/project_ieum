@@ -118,7 +118,7 @@ public class AdminController {
     // ── 리뷰 관리 ─────────────────────────────────────────────────
     @GetMapping("/reviews")
     public String reviewList(Model model) {
-        model.addAttribute("reviews", reviewRepository.findAll());
+        model.addAttribute("reviews", reviewRepository.findAllWithFetch());
         model.addAttribute("activeMenu", "reviews");
         model.addAttribute("title", "리뷰 관리");
         return "admin/reviews/list";
