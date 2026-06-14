@@ -9,6 +9,7 @@ import com.project.ieum.entity.conversation.Conversation;
 import com.project.ieum.entity.conversation.ConversationStatus;
 import com.project.ieum.entity.conversation.Message;
 import com.project.ieum.entity.notification.NotificationType;
+import com.project.ieum.entity.request.ConfirmParty;
 import com.project.ieum.entity.request.HelpRequest;
 import com.project.ieum.entity.request.HelpRequestApplication;
 import com.project.ieum.entity.request.HelpRequestStatus;
@@ -163,27 +164,41 @@ public class MatchingService {
         conversationRepository.findByApplication_Id(applicationId).ifPresent(Conversation::close);
     }
 
-    public void startActivity(Long requestId) {
+    // 활동 시작 확인(핸드셰이크): 이용자·도우미가 각자 호출. 양측이 모두 확인하면 MATCHED→IN_PROGRESS.
+    public void confirmStart(Long requestId) {
         User currentUser = currentUserService.getCurrentUser();
         HelpRequest helpRequest = getRequest(requestId);
-        if (!canManageMatchedRequest(helpRequest, currentUser.getId())) {
-            throw new ForbiddenException("매칭 참여자만 활동을 시작할 수 있습니다.");
-        }
         if (helpRequest.getStatus() != HelpRequestStatus.MATCHED) {
-            throw new IllegalStateException("매칭 확정 상태에서만 활동을 시작할 수 있습니다.");
+            throw new IllegalStateException("매칭 확정 상태에서만 활동 시작을 확인할 수 있습니다.");
         }
-        helpRequest.startProgress();
+        HelpRequestApplication matched = findAcceptedApplication(requestId);
+        ConfirmParty party = resolveParty(helpRequest, matched, currentUser.getId());
+
+        matched.confirmStartBy(party);
+        if (matched.bothStartConfirmed()) {
+            helpRequest.startProgress();
+            notifyBothParties(helpRequest, matched, "활동이 시작되었어요",
+                    helpRequest.getTitle() + " 활동이 시작되었습니다.");
+        }
     }
 
-    public void completeActivity(Long requestId) {
-        User currentUser = requireRole(UserRole.USER);
+    // 활동 종료 확인(핸드셰이크): 양측이 모두 확인하면 IN_PROGRESS→COMPLETED + 지원 COMPLETED.
+    public void confirmEnd(Long requestId) {
+        User currentUser = currentUserService.getCurrentUser();
         HelpRequest helpRequest = getRequest(requestId);
-        ensureRequester(helpRequest, currentUser.getId());
         if (helpRequest.getStatus() != HelpRequestStatus.IN_PROGRESS) {
-            throw new IllegalStateException("진행 중인 활동만 완료할 수 있습니다.");
+            throw new IllegalStateException("진행 중 상태에서만 활동 종료를 확인할 수 있습니다.");
         }
-        helpRequest.complete();
-        findAcceptedApplication(helpRequest.getId()).complete();
+        HelpRequestApplication matched = findAcceptedApplication(requestId);
+        ConfirmParty party = resolveParty(helpRequest, matched, currentUser.getId());
+
+        matched.confirmEndBy(party);
+        if (matched.bothEndConfirmed()) {
+            helpRequest.complete();
+            matched.complete();
+            notifyBothParties(helpRequest, matched, "활동이 완료되었어요",
+                    helpRequest.getTitle() + " 활동이 완료되었습니다. 후기를 남겨보세요.");
+        }
     }
 
     @Transactional(readOnly = true)
@@ -253,13 +268,25 @@ public class MatchingService {
                 .orElseThrow(() -> new NotFoundException("확정된 매칭을 찾을 수 없습니다."));
     }
 
-    private boolean canManageMatchedRequest(HelpRequest helpRequest, Long userId) {
+    // 현재 사용자를 매칭의 확인 주체(이용자/도우미)로 해석. 둘 다 아니면 거부.
+    private ConfirmParty resolveParty(HelpRequest helpRequest, HelpRequestApplication matched, Long userId) {
         if (helpRequest.getRequester().getUserId().equals(userId)) {
-            return true;
+            return ConfirmParty.REQUESTER;
         }
-        return applicationRepository.findByHelpRequest_IdAndStatus(helpRequest.getId(), ApplicationStatus.ACCEPTED)
-                .stream()
-                .anyMatch(application -> application.getCaregiver().getUserId().equals(userId));
+        if (matched.getCaregiver().getUserId().equals(userId)) {
+            return ConfirmParty.CAREGIVER;
+        }
+        throw new ForbiddenException("매칭 참여자만 활동 상태를 변경할 수 있습니다.");
+    }
+
+    // 핸드셰이크 전이 성사 시 양측에게 동일 알림(대화방 링크).
+    private void notifyBothParties(HelpRequest helpRequest, HelpRequestApplication matched,
+                                   String title, String body) {
+        String link = conversationRepository.findByApplication_Id(matched.getId())
+                .map(conversation -> "/chat/conversations/" + conversation.getId())
+                .orElse("/chat/conversations");
+        notificationService.create(helpRequest.getRequester().getUser(), NotificationType.MATCHING, title, body, link);
+        notificationService.create(matched.getCaregiver().getUser(), NotificationType.MATCHING, title, body, link);
     }
 
     private void ensureRequester(HelpRequest helpRequest, Long userId) {
