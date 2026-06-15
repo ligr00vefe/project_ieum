@@ -215,7 +215,7 @@ class MatchingServiceTest {
             HelpRequestApplication matched = application(5L, helpRequest, caregiver(2L), ApplicationStatus.ACCEPTED);
 
             when(helpRequestRepository.findById(10L)).thenReturn(Optional.of(helpRequest));
-            when(applicationRepository.findByHelpRequest_IdAndStatus(10L, ApplicationStatus.ACCEPTED))
+            when(applicationRepository.findByHelpRequest_IdAndStatusIn(10L, List.of(ApplicationStatus.ACCEPTED, ApplicationStatus.COMPLETED)))
                     .thenReturn(List.of(matched));
 
             matchingService.confirmStart(10L);
@@ -234,7 +234,7 @@ class MatchingServiceTest {
                     .toBuilder().requesterStartConfirmed(true).build();
 
             when(helpRequestRepository.findById(10L)).thenReturn(Optional.of(helpRequest));
-            when(applicationRepository.findByHelpRequest_IdAndStatus(10L, ApplicationStatus.ACCEPTED))
+            when(applicationRepository.findByHelpRequest_IdAndStatusIn(10L, List.of(ApplicationStatus.ACCEPTED, ApplicationStatus.COMPLETED)))
                     .thenReturn(List.of(matched));
             when(conversationRepository.findByApplication_Id(5L)).thenReturn(Optional.empty());
 
@@ -252,7 +252,7 @@ class MatchingServiceTest {
             HelpRequestApplication matched = application(5L, helpRequest, caregiver(2L), ApplicationStatus.ACCEPTED);
 
             when(helpRequestRepository.findById(10L)).thenReturn(Optional.of(helpRequest));
-            when(applicationRepository.findByHelpRequest_IdAndStatus(10L, ApplicationStatus.ACCEPTED))
+            when(applicationRepository.findByHelpRequest_IdAndStatusIn(10L, List.of(ApplicationStatus.ACCEPTED, ApplicationStatus.COMPLETED)))
                     .thenReturn(List.of(matched));
 
             assertThatThrownBy(() -> matchingService.confirmStart(10L))
@@ -280,7 +280,7 @@ class MatchingServiceTest {
                     .toBuilder().requesterEndConfirmed(true).build();
 
             when(helpRequestRepository.findById(10L)).thenReturn(Optional.of(helpRequest));
-            when(applicationRepository.findByHelpRequest_IdAndStatus(10L, ApplicationStatus.ACCEPTED))
+            when(applicationRepository.findByHelpRequest_IdAndStatusIn(10L, List.of(ApplicationStatus.ACCEPTED, ApplicationStatus.COMPLETED)))
                     .thenReturn(List.of(matched));
             when(conversationRepository.findByApplication_Id(5L)).thenReturn(Optional.empty());
 
