@@ -4,11 +4,15 @@ import com.project.ieum.dto.search.HelpRequestSearchCondition;
 import com.project.ieum.entity.request.HelpRequest;
 import com.project.ieum.entity.request.QHelpRequest;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -19,6 +23,12 @@ public class HelpRequestSearchRepositoryImpl implements HelpRequestSearchReposit
 
     @Override
     public Page<HelpRequest> searchHelpRequests(HelpRequestSearchCondition condition, Pageable pageable) {
+        return searchHelpRequests(condition, pageable, null, null);
+    }
+
+    @Override
+    public Page<HelpRequest> searchHelpRequests(HelpRequestSearchCondition condition, Pageable pageable,
+                                                Double lat, Double lng) {
         QHelpRequest request = QHelpRequest.helpRequest;
         BooleanBuilder where = new BooleanBuilder();
 
@@ -35,13 +45,43 @@ public class HelpRequestSearchRepositoryImpl implements HelpRequestSearchReposit
         if (condition.getStatus() != null) {
             where.and(request.status.eq(condition.getStatus()));
         }
+        // 키워드 — 제목/본문 부분일치(대소문자 무시).
+        if (StringUtils.hasText(condition.getKeyword())) {
+            String kw = condition.getKeyword().trim();
+            where.and(request.title.containsIgnoreCase(kw).or(request.body.containsIgnoreCase(kw)));
+        }
+        // 지역 — 위치 스냅샷(sido/sigungu) 정확일치.
+        if (StringUtils.hasText(condition.getSido())) {
+            where.and(request.sido.eq(condition.getSido().trim()));
+        }
+        if (StringUtils.hasText(condition.getSigungu())) {
+            where.and(request.sigungu.eq(condition.getSigungu().trim()));
+        }
 
-        List<HelpRequest> content = queryFactory
+        JPAQuery<HelpRequest> query = queryFactory
                 .selectFrom(request)
                 .leftJoin(request.requester).fetchJoin()
                 .leftJoin(request.serviceCategory).fetchJoin()
-                .where(where)
-                .orderBy(request.desiredStartDatetime.asc(), request.id.desc())
+                .where(where);
+
+        if (lat != null && lng != null) {
+            // #66 거리정렬과 동일 — acos 없이 "코사인 유사도(구면 내적) 내림차순 = 거리 오름차순".
+            //   · sin/cos만 사용(HQL 표준), 도→라디안은 리터럴 상수(π/180)를 곱해 dialect 함수 의존 제거.
+            //   · 좌표 없는(null) 요청은 항상 뒤로(CASE), 동률은 시작시각 오름차순 폴백.
+            NumberExpression<Integer> nullCoordLast = Expressions.numberTemplate(Integer.class,
+                    "case when {0} is null or {1} is null then 1 else 0 end",
+                    request.latitude, request.longitude);
+            NumberExpression<Double> cosineSimilarity = Expressions.numberTemplate(Double.class,
+                    "( sin({0} * 0.017453292519943295) * sin({1} * 0.017453292519943295) "
+                  + "+ cos({0} * 0.017453292519943295) * cos({1} * 0.017453292519943295) "
+                  + "* cos({2} * 0.017453292519943295 - {3} * 0.017453292519943295) )",
+                    lat, request.latitude, request.longitude, lng);
+            query.orderBy(nullCoordLast.asc(), cosineSimilarity.desc(), request.desiredStartDatetime.asc());
+        } else {
+            query.orderBy(request.desiredStartDatetime.asc(), request.id.desc());
+        }
+
+        List<HelpRequest> content = query
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
