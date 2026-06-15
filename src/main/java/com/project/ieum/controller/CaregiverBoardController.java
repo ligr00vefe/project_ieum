@@ -29,8 +29,7 @@ public class CaregiverBoardController {
         var requestPage = helpRequestService.getOpenRequests(PageRequest.of(page, 10));
         int totalPages = requestPage.getTotalPages();
         model.addAttribute("title", "매칭 게시판");
-        model.addAttribute("requests", requestPage.getContent());
-        model.addAttribute("requestPage", requestPage);
+        model.addAttribute("requests", requestPage);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("startPage", Math.max(0, page - 2));
