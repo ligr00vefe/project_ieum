@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.List;
 
@@ -47,4 +48,17 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
     Optional<Conversation> findByApplication_Id(Long applicationId);
 
     List<Conversation> findByApplication_IdIn(List<Long> applicationIds);
+
+    // 스케줄러 — 완료(COMPLETED)된 매칭의 아직 열린(ACTIVE) 대화방 중 희망종료+1h가 지난 것.
+    // 닫으면 status가 CLOSED로 바뀌어 다음 주기에 재선택되지 않으므로 멱등하다.
+    @Query("""
+        select c from Conversation c
+        join c.application a
+        join a.helpRequest hr
+        where c.status = com.project.ieum.entity.conversation.ConversationStatus.ACTIVE
+          and hr.status = com.project.ieum.entity.request.HelpRequestStatus.COMPLETED
+          and hr.desiredEndDatetime is not null
+          and hr.desiredEndDatetime < :threshold
+    """)
+    List<Conversation> findActiveConversationsForCompletedRequestsEndedBefore(@Param("threshold") LocalDateTime threshold);
 }

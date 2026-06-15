@@ -140,17 +140,17 @@ public class HelpRequestController {
     }
 
     @PostMapping("/requests/{requestId}/start")
-    public String startActivity(@PathVariable Long requestId, RedirectAttributes redirectAttributes) {
-        matchingService.startActivity(requestId);
-        redirectAttributes.addFlashAttribute("message", "활동이 시작되었습니다.");
-        return "redirect:/disabled/board/" + requestId;
+    public String confirmStart(@PathVariable Long requestId, RedirectAttributes redirectAttributes) {
+        matchingService.confirmStart(requestId);
+        redirectAttributes.addFlashAttribute("message", "활동 시작을 확인했습니다. 양측이 모두 확인하면 진행 중으로 전환됩니다.");
+        return "redirect:/my/requests/" + requestId;
     }
 
     @PostMapping("/requests/{requestId}/complete")
-    public String completeActivity(@PathVariable Long requestId, RedirectAttributes redirectAttributes) {
-        matchingService.completeActivity(requestId);
-        redirectAttributes.addFlashAttribute("message", "활동이 완료되었습니다. 마이페이지에서 후기를 남겨보세요.");
-        return "redirect:/disabled/board/" + requestId;
+    public String confirmEnd(@PathVariable Long requestId, RedirectAttributes redirectAttributes) {
+        matchingService.confirmEnd(requestId);
+        redirectAttributes.addFlashAttribute("message", "활동 종료를 확인했습니다. 양측이 모두 확인하면 완료 처리됩니다.");
+        return "redirect:/my/requests/" + requestId;
     }
 
     private void prepareForm(Model model, HelpRequestForm form, String title) {
