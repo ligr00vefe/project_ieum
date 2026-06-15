@@ -5,12 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
 public class HelpRequestSearchCondition {
     private Long regionId;
-    private Long serviceCategoryId;
+    private Long serviceCategoryId; // 단일 — 기존 /api/search 호환용
     private LocalDate fromDate;
     private LocalDate toDate;
     private HelpRequestStatus status;
@@ -19,4 +20,7 @@ public class HelpRequestSearchCondition {
     private String keyword;
     private String sido;
     private String sigungu;
+
+    // 게시판 다중 선택 — 서비스 카테고리 여러 개(IN). 비어 있으면 단일 serviceCategoryId로 폴백.
+    private List<Long> serviceCategoryIds;
 }
