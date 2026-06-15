@@ -8,10 +8,31 @@
     <meta name="description" th:content="${description != null ? description : '케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼'}">
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
-    <!-- TMap JS SDK — SDK가 내부에서 document.write로 2차 스크립트를 로드하므로
-         파싱 초기(head)에 동기 로드해야 차단 위험이 낮다. tmapAppKey를 model에 담은 페이지에서만 로드. -->
-    <script th:if="${tmapAppKey != null and !tmapAppKey.isEmpty()}"
-            th:src="'https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=' + ${tmapAppKey}"></script>
+    <!-- TMap JS SDK 로더. jsv2 래퍼는 실제 SDK(tmapjs2.min.js)를 document.write로 cross-site
+         로드하는데, 최신 Chrome이 이를 차단해 Tmapv2가 정의되지 않는다(지도 미표시).
+         → document.write를 가로채 <script>를 동적 DOM 삽입으로 바꿔 차단을 회피한다.
+         tmapAppKey를 model에 담은 페이지에서만 동작. -->
+    <script th:if="${tmapAppKey != null and !tmapAppKey.isEmpty()}" th:inline="javascript">
+    (function () {
+        var appKey = /*[[${tmapAppKey}]]*/ '';
+        var origWrite = document.write;
+        document.write = function (html) {
+            var m = /<script[^>]+src=["']([^"']+)["']/i.exec(html);
+            if (m && m[1]) {
+                var s = document.createElement('script');
+                s.src = m[1];
+                s.async = false; // 실행 순서 보존 — Tmapv2 정의 보장
+                document.head.appendChild(s);
+            } else {
+                origWrite.call(document, html);
+            }
+        };
+        var jsv2 = document.createElement('script');
+        jsv2.src = 'https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=' + appKey;
+        jsv2.async = false;
+        document.head.appendChild(jsv2);
+    })();
+    </script>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col">
 
