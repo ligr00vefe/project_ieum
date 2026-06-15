@@ -1,5 +1,7 @@
 package com.project.ieum.controller.admin;
 
+import com.project.ieum.dto.admin.AdminMatchingRow;
+import com.project.ieum.dto.admin.AdminUserRow;
 import com.project.ieum.entity.User;
 import com.project.ieum.entity.UserRole;
 import com.project.ieum.entity.UserStatus;
@@ -11,6 +13,7 @@ import com.project.ieum.repository.UserRepository;
 import com.project.ieum.service.admin.AdminDashboardService;
 import com.project.ieum.service.common.CurrentUserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -44,16 +47,18 @@ public class AdminController {
     // ── 회원 관리 ─────────────────────────────────────────────────
     @GetMapping("/users")
     public String userList(@RequestParam(required = false) String role,
-                           @RequestParam(required = false) String status,
+                           @RequestParam(defaultValue = "0") int page,
                            Model model) {
-        var users = (role != null && !role.isBlank())
-                ? userRepository.findByRoleOrderByCreatedAtDesc(UserRole.valueOf(role))
-                : userRepository.findAllByOrderByCreatedAtDesc();
+        var pageable = PageRequest.of(page, 10);
+        var userPage = (role != null && !role.isBlank())
+                ? userRepository.findByRolePagedAdmin(UserRole.valueOf(role), pageable)
+                : userRepository.findAllPagedAdmin(pageable);
+        var users = userPage.getContent().stream().map(AdminUserRow::from).toList();
         model.addAttribute("users", users);
         model.addAttribute("selectedRole", role);
-        model.addAttribute("selectedStatus", status);
         model.addAttribute("activeMenu", "users");
         model.addAttribute("title", "회원 관리");
+        addPageAttrs(model, userPage, page);
         return "admin/users/list";
     }
 
@@ -84,15 +89,29 @@ public class AdminController {
 
     // ── 매칭 관리 ─────────────────────────────────────────────────
     @GetMapping("/matching")
-    public String matchingList(@RequestParam(required = false) String status, Model model) {
-        var requests = (status != null && !status.isBlank())
-                ? helpRequestRepository.findAllByOrderByCreatedAtDesc()
-                        .stream().filter(r -> r.getStatus().name().equals(status)).toList()
-                : helpRequestRepository.findAllByOrderByCreatedAtDesc();
+    public String matchingList(@RequestParam(required = false) String status,
+                               @RequestParam(defaultValue = "0") int page,
+                               Model model) {
+        var pageable = PageRequest.of(page, 10);
+        String resolvedStatus = status;
+        org.springframework.data.domain.Page<com.project.ieum.entity.request.HelpRequest> requestPage;
+        if (status != null && !status.isBlank()) {
+            try {
+                var statusEnum = HelpRequestStatus.valueOf(status);
+                requestPage = helpRequestRepository.findByStatusPagedAdminWithRequester(statusEnum, pageable);
+            } catch (IllegalArgumentException e) {
+                requestPage = helpRequestRepository.findAllPagedAdminWithRequester(pageable);
+                resolvedStatus = null;
+            }
+        } else {
+            requestPage = helpRequestRepository.findAllPagedAdminWithRequester(pageable);
+        }
+        var requests = requestPage.getContent().stream().map(AdminMatchingRow::from).toList();
         model.addAttribute("requests", requests);
-        model.addAttribute("selectedStatus", status);
+        model.addAttribute("selectedStatus", resolvedStatus);
         model.addAttribute("activeMenu", "matching");
         model.addAttribute("title", "매칭 관리");
+        addPageAttrs(model, requestPage, page);
         return "admin/matching/list";
     }
 
@@ -117,11 +136,21 @@ public class AdminController {
 
     // ── 리뷰 관리 ─────────────────────────────────────────────────
     @GetMapping("/reviews")
-    public String reviewList(Model model) {
-        model.addAttribute("reviews", reviewRepository.findAll());
+    public String reviewList(@RequestParam(defaultValue = "0") int page, Model model) {
+        var pageable = PageRequest.of(page, 10);
+        var reviewPage = reviewRepository.findAllPagedAdmin(pageable);
+        addPageAttrs(model, reviewPage, page);
+        model.addAttribute("reviews", reviewPage.getContent());
         model.addAttribute("activeMenu", "reviews");
         model.addAttribute("title", "리뷰 관리");
         return "admin/reviews/list";
+    }
+
+    private void addPageAttrs(Model model, org.springframework.data.domain.Page<?> p, int page) {
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", p.getTotalPages());
+        model.addAttribute("startPage", Math.max(0, page - 2));
+        model.addAttribute("endPage", Math.min(p.getTotalPages() - 1, page + 2));
     }
 
     @PostMapping("/reviews/{id}/visibility")
