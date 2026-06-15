@@ -143,15 +143,15 @@
          class="bg-white rounded-2xl border border-indigo-100 p-5 mb-4 flex items-center justify-between">
         <div>
             <p class="text-sm font-semibold text-gray-900">지원자 리스트 보기 · <span class="text-indigo-600" th:text="${applicationCount + '명 지원'}">0명 지원</span></p>
-            <p class="text-xs text-gray-400 mt-0.5" th:text="${request.requester.userId == currentUserId} ? '지원자를 확인하고 매칭을 진행하세요.' : '작성자만 지원자 리스트를 확인할 수 있어요.'">안내</p>
+            <p class="text-xs text-gray-400 mt-0.5" th:text="${request.requester.userId == currentUserId or isAdmin} ? '지원자를 확인하고 매칭을 진행하세요.' : '작성자만 지원자 리스트를 확인할 수 있어요.'">안내</p>
         </div>
-        <a th:if="${request.requester.userId == currentUserId}"
+        <a th:if="${request.requester.userId == currentUserId or isAdmin}"
            th:href="@{/disabled/board/{id}/applicants(id=${request.id})}"
            class="flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100">
             리스트 보기
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
-        <span th:if="${request.requester.userId != currentUserId}"
+        <span th:if="${request.requester.userId != currentUserId and !isAdmin}"
               class="flex items-center gap-1.5 px-4 py-2.5 bg-gray-100 text-gray-400 text-sm font-semibold rounded-xl cursor-not-allowed">
             리스트 보기
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>

@@ -25,6 +25,7 @@ import com.project.ieum.repository.*;
 import com.project.ieum.service.common.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -187,6 +188,13 @@ public class HelpRequestService {
     public List<HelpRequest> getAllActiveRequests() {
         return helpRequestRepository.findByStatusInOrderByCreatedAtDesc(
                 List.of(HelpRequestStatus.OPEN, HelpRequestStatus.MATCHED));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<HelpRequest> getAllActiveRequestsPaged(int page) {
+        return helpRequestRepository.findByStatusInOrderByCreatedAtDesc(
+                List.of(HelpRequestStatus.OPEN, HelpRequestStatus.MATCHED),
+                PageRequest.of(page, 10));
     }
 
     @Transactional(readOnly = true)

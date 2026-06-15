@@ -44,6 +44,7 @@ public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long>,
 
     // 전체 활성 요청 목록 — 매칭 게시판 전체 조회용 (OPEN/MATCHED 상태).
     List<HelpRequest> findByStatusInOrderByCreatedAtDesc(List<HelpRequestStatus> statuses);
+    Page<HelpRequest> findByStatusInOrderByCreatedAtDesc(List<HelpRequestStatus> statuses, Pageable pageable);
 
     // 도움 요청 상세 — id로 1건 조회하며 serviceCategory·requester를 함께 로딩(N+1 방지).
     @EntityGraph(attributePaths = {"serviceCategory", "requester"})
@@ -52,6 +53,16 @@ public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long>,
     long countByStatus(HelpRequestStatus status);
     @Query("SELECT r FROM HelpRequest r LEFT JOIN FETCH r.requester LEFT JOIN FETCH r.serviceCategory ORDER BY r.createdAt DESC")
     List<HelpRequest> findAllByOrderByCreatedAtDesc();
+
+    @Query(value = "SELECT r FROM HelpRequest r LEFT JOIN FETCH r.requester LEFT JOIN FETCH r.serviceCategory ORDER BY r.createdAt DESC",
+           countQuery = "SELECT count(r) FROM HelpRequest r")
+    Page<HelpRequest> findAllPagedWithFetch(Pageable pageable);
+
+    @Query(value = "SELECT r FROM HelpRequest r ORDER BY r.createdAt DESC",
+           countQuery = "SELECT count(r) FROM HelpRequest r")
+    Page<HelpRequest> findAllPagedAdmin(Pageable pageable);
+
+    Page<HelpRequest> findByStatusOrderByCreatedAtDesc(HelpRequestStatus status, Pageable pageable);
     List<HelpRequest> findTop5ByStatusOrderByUpdatedAtDesc(HelpRequestStatus status);
 
     // 스케줄러 시간 기반 자동전이용 — 상태 + 임계 일시 조회.
@@ -59,4 +70,12 @@ public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long>,
     //   IN_PROGRESS 자동완료(희망종료 < now-30m) → desiredEndDatetimeBefore (null end는 자연히 제외)
     List<HelpRequest> findByStatusAndDesiredStartDatetimeBefore(HelpRequestStatus status, LocalDateTime threshold);
     List<HelpRequest> findByStatusAndDesiredEndDatetimeBefore(HelpRequestStatus status, LocalDateTime threshold);
+
+    @Query(value = "SELECT r FROM HelpRequest r LEFT JOIN FETCH r.requester ORDER BY r.createdAt DESC",
+           countQuery = "SELECT count(r) FROM HelpRequest r")
+    Page<HelpRequest> findAllPagedAdminWithRequester(Pageable pageable);
+
+    @Query(value = "SELECT r FROM HelpRequest r LEFT JOIN FETCH r.requester WHERE r.status = :status ORDER BY r.createdAt DESC",
+           countQuery = "SELECT count(r) FROM HelpRequest r WHERE r.status = :status")
+    Page<HelpRequest> findByStatusPagedAdminWithRequester(@Param("status") HelpRequestStatus status, Pageable pageable);
 }
