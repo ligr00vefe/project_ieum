@@ -58,6 +58,10 @@
         </div>
 
     </div>
+
+    <!-- 페이지네이션 -->
+    <div th:replace="~{fragments/pagination :: pager(${currentPage}, ${totalPages}, ${startPage}, ${endPage}, '/caregiver/board?')}"></div>
+
 </section>
 </th:block>
 </html>

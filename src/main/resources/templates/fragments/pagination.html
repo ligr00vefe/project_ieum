@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+  공통 페이지네이션 fragment
+  파라미터:
+    currentPage  - 현재 페이지 (0-based)
+    totalPages   - 전체 페이지 수
+    startPage    - 표시 시작 페이지 번호 (0-based)
+    endPage      - 표시 끝 페이지 번호 (0-based)
+    urlPrefix    - 기본 URL + 기존 파라미터, '?' 또는 '&' 로 끝나야 함
+                   예) '/notices?'  '/admin/users?role=USER&'
+-->
+<div th:fragment="pager(currentPage, totalPages, startPage, endPage, urlPrefix)"
+     th:if="${totalPages >= 1}"
+     class="flex items-center justify-center gap-0.5 mt-6 select-none">
+
+    <!-- « 첫 페이지 -->
+    <a th:if="${currentPage > 0}"
+       th:href="${urlPrefix + 'page=0'}"
+       title="첫 페이지"
+       class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7M18 19l-7-7 7-7"/>
+        </svg>
+    </a>
+    <span th:unless="${currentPage > 0}"
+          class="w-9 h-9 flex items-center justify-center text-gray-200 rounded-xl cursor-default">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7M18 19l-7-7 7-7"/>
+        </svg>
+    </span>
+
+    <!-- ‹ 이전 페이지 -->
+    <a th:if="${currentPage > 0}"
+       th:href="${urlPrefix + 'page=' + (currentPage - 1)}"
+       title="이전 페이지"
+       class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+    </a>
+    <span th:unless="${currentPage > 0}"
+          class="w-9 h-9 flex items-center justify-center text-gray-200 rounded-xl cursor-default">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+    </span>
+
+    <!-- 페이지 번호 -->
+    <th:block th:each="i : ${#numbers.sequence(startPage, endPage)}">
+        <a th:if="${i != currentPage}"
+           th:href="${urlPrefix + 'page=' + i}"
+           th:text="${i + 1}"
+           class="w-9 h-9 flex items-center justify-center text-sm text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors">1</a>
+        <span th:if="${i == currentPage}"
+              th:text="${i + 1}"
+              class="w-9 h-9 flex items-center justify-center text-sm font-bold text-white bg-indigo-600 rounded-xl shadow-sm shadow-indigo-200">1</span>
+    </th:block>
+
+    <!-- › 다음 페이지 -->
+    <a th:if="${currentPage < totalPages - 1}"
+       th:href="${urlPrefix + 'page=' + (currentPage + 1)}"
+       title="다음 페이지"
+       class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+    </a>
+    <span th:unless="${currentPage < totalPages - 1}"
+          class="w-9 h-9 flex items-center justify-center text-gray-200 rounded-xl cursor-default">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+    </span>
+
+    <!-- » 마지막 페이지 -->
+    <a th:if="${currentPage < totalPages - 1}"
+       th:href="${urlPrefix + 'page=' + (totalPages - 1)}"
+       title="마지막 페이지"
+       class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M6 5l7 7-7 7"/>
+        </svg>
+    </a>
+    <span th:unless="${currentPage < totalPages - 1}"
+          class="w-9 h-9 flex items-center justify-center text-gray-200 rounded-xl cursor-default">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M6 5l7 7-7 7"/>
+        </svg>
+    </span>
+
+</div>
+</body>
+</html>

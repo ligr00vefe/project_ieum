@@ -97,8 +97,8 @@
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-bold text-gray-900" th:text="${partnerName}">박서연 활동지원사</p>
                     <div class="flex items-center gap-1.5 mt-0.5">
-                        <span class="w-2 h-2 bg-teal-400 rounded-full flex-shrink-0"></span>
-                        <span class="text-xs text-teal-500 font-medium">지금 접속 중</span>
+                        <span id="presenceDot" class="w-2 h-2 bg-gray-300 rounded-full flex-shrink-0"></span>
+                        <span id="presenceText" class="text-xs text-gray-400 font-medium">오프라인</span>
                     </div>
                 </div>
 
@@ -296,14 +296,54 @@
 }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 <script th:inline="javascript">
 const CONVERSATION_ID = /*[[${conversationId}]]*/ 0;
+const PARTNER_ID = /*[[${partnerId}]]*/ 0;
 const PARTNER_IMAGE = /*[[${partnerProfileImage}]]*/ null;
 const PARTNER_FIRST = /*[[${partnerName != null ? partnerName.substring(0,1) : '?'}]]*/ '?';
 const PARTNER_COLOR = /*[[${isUser ? 'bg-teal-500' : 'bg-indigo-500'}]]*/ 'bg-indigo-500';
 
 let lastRenderedDate = null;
 let polling = null;
+let stompClient = null;
+
+function updatePresenceUI(onlineUserIds) {
+    const isOnline = onlineUserIds.includes(PARTNER_ID);
+    const dot = document.getElementById('presenceDot');
+    const text = document.getElementById('presenceText');
+    if (!dot || !text) return;
+    if (isOnline) {
+        dot.className = 'w-2 h-2 bg-teal-400 rounded-full flex-shrink-0';
+        text.textContent = '지금 접속 중';
+        text.className = 'text-xs text-teal-500 font-medium';
+    } else {
+        dot.className = 'w-2 h-2 bg-gray-300 rounded-full flex-shrink-0';
+        text.textContent = '오프라인';
+        text.className = 'text-xs text-gray-400 font-medium';
+    }
+}
+
+function connectPresence() {
+    const socket = new SockJS('/ws');
+    stompClient = Stomp.over(socket);
+    stompClient.debug = null;
+    stompClient.connect({}, () => {
+        stompClient.subscribe('/topic/presence/' + CONVERSATION_ID, msg => {
+            updatePresenceUI(JSON.parse(msg.body));
+        });
+        stompClient.send('/app/presence/' + CONVERSATION_ID + '/enter', {}, '{}');
+    }, () => {
+        setTimeout(connectPresence, 3000);
+    });
+}
+
+window.addEventListener('beforeunload', () => {
+    if (stompClient && stompClient.connected) {
+        stompClient.send('/app/presence/' + CONVERSATION_ID + '/leave', {}, '{}');
+    }
+});
 
 function fmt(dateStr) {
     const d = new Date(dateStr);
@@ -478,6 +518,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('loadingSpinner')?.remove();
     await loadMessages();
     await markRead();
+    connectPresence();
     polling = setInterval(async () => {
         await loadMessages();
         await markRead();
