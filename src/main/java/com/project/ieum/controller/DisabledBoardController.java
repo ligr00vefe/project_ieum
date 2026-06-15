@@ -29,16 +29,11 @@ public class DisabledBoardController {
     private final HelpRequestApplicationRepository applicationRepository;
 
     @GetMapping({"", "/"})
-    public String list(@RequestParam(defaultValue = "0") int page, Model model) {
-        var requestPage = helpRequestService.getAllActiveRequestsPaged(page);
-        int totalPages = requestPage.getTotalPages();
+    public String list(Model model) {
+        // 매칭 종축 ADR(이슈11 골조버그 ④): /disabled/board 는 이용자 본인 요청만 노출.
+        // main 이 추가한 전체활성 페이지네이션은 이 정책과 상충하므로 채택하지 않음.
         model.addAttribute("title", "매칭 게시판");
-        model.addAttribute("requests", requestPage.getContent());
-        model.addAttribute("requestPage", requestPage);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("startPage", Math.max(0, page - 2));
-        model.addAttribute("endPage", Math.min(totalPages - 1, page + 2));
+        model.addAttribute("requests", helpRequestService.getMyRequests());
         model.addAttribute("currentUserId", currentUserService.getCurrentUser().getId());
         model.addAttribute("content", "disabled/board/list");
         return "layout/layout";
@@ -75,11 +70,15 @@ public class DisabledBoardController {
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
         var currentUser = currentUserService.getCurrentUser();
+        Long currentUserId = currentUser.getId();
         model.addAttribute("title", "게시물 상세");
         model.addAttribute("request", helpRequestService.get(id));
         model.addAttribute("applicationCount", matchingService.countApplicationsForRequest(id));
-        model.addAttribute("currentUserId", currentUser.getId());
+        model.addAttribute("currentUserId", currentUserId);
         model.addAttribute("isAdmin", currentUser.getRole() == UserRole.ADMIN);
+        model.addAttribute("handshake", matchingService.getHandshakeView(id, currentUserId));
+        matchingService.getMatchedParty(id)
+                .ifPresent(party -> model.addAttribute("matchedParty", party));
         model.addAttribute("content", "disabled/board/detail");
         return "layout/layout";
     }
@@ -148,7 +147,7 @@ public class DisabledBoardController {
                          RedirectAttributes redirectAttributes) {
         matchingService.accept(applicationId);
         redirectAttributes.addFlashAttribute("message", "매칭이 확정되었습니다.");
-        return "redirect:/disabled/board/" + requestId + "/applicants";
+        return "redirect:/disabled/board/" + requestId;
     }
 
     @PostMapping("/applications/{applicationId}/reject")
@@ -158,5 +157,20 @@ public class DisabledBoardController {
         matchingService.reject(applicationId);
         redirectAttributes.addFlashAttribute("message", "지원자를 거절했습니다.");
         return "redirect:/disabled/board/" + requestId + "/applicants";
+    }
+
+    // 활동 시작/종료 양측 확인 — 이용자(요청자) 측. 양측이 모두 확인하면 서비스가 상태를 전이한다.
+    @PostMapping("/{id}/confirm-start")
+    public String confirmStart(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        matchingService.confirmStart(id);
+        redirectAttributes.addFlashAttribute("message", "활동 시작을 확인했습니다.");
+        return "redirect:/disabled/board/" + id;
+    }
+
+    @PostMapping("/{id}/confirm-end")
+    public String confirmEnd(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        matchingService.confirmEnd(id);
+        redirectAttributes.addFlashAttribute("message", "활동 종료를 확인했습니다.");
+        return "redirect:/disabled/board/" + id;
     }
 }

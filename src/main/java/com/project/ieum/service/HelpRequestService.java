@@ -6,6 +6,7 @@ import com.project.ieum.entity.ApplicationStatus;
 import com.project.ieum.entity.PersonalityTag;
 import com.project.ieum.entity.User;
 import com.project.ieum.entity.UserRole;
+import com.project.ieum.entity.conversation.Conversation;
 import com.project.ieum.entity.request.HelpRequest;
 import com.project.ieum.entity.request.HelpRequestApplication;
 import com.project.ieum.entity.request.HelpRequestPersonalityTag;
@@ -42,6 +43,8 @@ public class HelpRequestService {
             List.of(HelpRequestStatus.OPEN, HelpRequestStatus.MATCHED, HelpRequestStatus.IN_PROGRESS);
 
     private final HelpRequestRepository helpRequestRepository;
+    private final HelpRequestApplicationRepository applicationRepository;
+    private final ConversationRepository conversationRepository;
     private final UserProfileRepository userProfileRepository;
     private final ServiceCategoryRepository serviceCategoryRepository;
     private final PersonalityTagRepository personalityTagRepository;
@@ -105,8 +108,12 @@ public class HelpRequestService {
         if (helpRequest.getStatus() != HelpRequestStatus.OPEN) {
             throw InvalidRequestStateException.cannotClose();
         }
-        helpRequest.changeStatus(HelpRequestStatus.CLOSED);
-        // TODO(#11): 지원/매칭 기능이 생기면 여기서 지원서를 일괄 취소한다(cascade 옵션 D, MatchingService에 위임).
+        helpRequest.close();
+        applicationRepository.findByHelpRequest_IdAndStatus(helpRequest.getId(), ApplicationStatus.PENDING)
+                .forEach(app -> {
+                    app.cancel();
+                    conversationRepository.findByApplication_Id(app.getId()).ifPresent(Conversation::close);
+                });
     }
 
     // 하드 삭제 — 2단계 삭제의 2단계. CLOSED 상태에서만 게시자가 명시적으로.
