@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -70,17 +72,23 @@ public class CaregiverBoardController {
                        @RequestParam(required = false) String keyword,
                        @RequestParam(required = false) String sido,
                        @RequestParam(required = false) String sigungu,
-                       @RequestParam(required = false) Long serviceCategoryId,
+                       @RequestParam(required = false) List<Long> serviceCategoryId,
                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
                        Model model) {
+        // 위치 기반(내 주변/지도) ↔ 지역 필터(시/도·시군구)는 상호 배타.
+        // 지역 필터가 있으면 위치 정렬을 해제(좌표 무시) → 시작시각 순 + 거리 배지 미표시.
+        if (hasText(sido)) {
+            lat = null;
+            lng = null;
+        }
         boolean locationSorted = lat != null && lng != null;
 
         HelpRequestSearchCondition condition = new HelpRequestSearchCondition();
         condition.setKeyword(keyword);
         condition.setSido(sido);
         condition.setSigungu(sigungu);
-        condition.setServiceCategoryId(serviceCategoryId);
+        condition.setServiceCategoryIds(serviceCategoryId);
         condition.setFromDate(fromDate);
         condition.setToDate(toDate);
 
@@ -105,11 +113,11 @@ public class CaregiverBoardController {
         model.addAttribute("fKeyword", keyword);
         model.addAttribute("fSido", sido);
         model.addAttribute("fSigungu", sigungu);
-        model.addAttribute("fServiceCategoryId", serviceCategoryId);
+        model.addAttribute("fServiceCategoryIds", serviceCategoryId);
         model.addAttribute("fFromDate", fromDate);
         model.addAttribute("fToDate", toDate);
         boolean hasFilter = hasText(keyword) || hasText(sido) || hasText(sigungu)
-                || serviceCategoryId != null || fromDate != null || toDate != null;
+                || !CollectionUtils.isEmpty(serviceCategoryId) || fromDate != null || toDate != null;
         model.addAttribute("hasFilter", hasFilter);
         // 페이지네이션이 현재 정렬·필터를 유지하도록 base URL을 만들어 넘긴다('&' 또는 '?'로 끝남).
         model.addAttribute("pageBaseUrl",
@@ -120,14 +128,18 @@ public class CaregiverBoardController {
 
     // 페이지네이션 base URL — page 외 모든 정렬·필터 파라미터를 보존(빈 값은 생략, 값은 URL 인코딩).
     private String buildBaseQuery(Double lat, Double lng, String keyword, String sido, String sigungu,
-                                  Long serviceCategoryId, LocalDate fromDate, LocalDate toDate) {
+                                  List<Long> serviceCategoryIds, LocalDate fromDate, LocalDate toDate) {
         StringBuilder sb = new StringBuilder("/caregiver/board?");
         appendParam(sb, "lat", lat);
         appendParam(sb, "lng", lng);
         appendParam(sb, "keyword", keyword);
         appendParam(sb, "sido", sido);
         appendParam(sb, "sigungu", sigungu);
-        appendParam(sb, "serviceCategoryId", serviceCategoryId);
+        if (serviceCategoryIds != null) {
+            for (Long id : serviceCategoryIds) {
+                appendParam(sb, "serviceCategoryId", id);
+            }
+        }
         appendParam(sb, "fromDate", fromDate);
         appendParam(sb, "toDate", toDate);
         return sb.toString();

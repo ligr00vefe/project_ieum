@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -33,7 +34,10 @@ public class HelpRequestSearchRepositoryImpl implements HelpRequestSearchReposit
         BooleanBuilder where = new BooleanBuilder();
 
         // regionId 필터 제거 — 서비스권역 정규화(#11)로 region FK 삭제됨
-        if (condition.getServiceCategoryId() != null) {
+        // 서비스 카테고리 — 다중 선택(IN) 우선, 없으면 단일 serviceCategoryId(/api/search 호환) 폴백.
+        if (!CollectionUtils.isEmpty(condition.getServiceCategoryIds())) {
+            where.and(request.serviceCategory.id.in(condition.getServiceCategoryIds()));
+        } else if (condition.getServiceCategoryId() != null) {
             where.and(request.serviceCategory.id.eq(condition.getServiceCategoryId()));
         }
         if (condition.getFromDate() != null) {

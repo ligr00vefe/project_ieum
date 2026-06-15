@@ -90,6 +90,37 @@ class HelpRequestSearchRepositoryTest {
     }
 
     @Test
+    @DisplayName("서비스 카테고리 다중 — 선택한 카테고리(IN)에 속한 요청만 반환")
+    void serviceCategories_inFilter() {
+        HelpRequest moveReq = persist(b -> b.serviceCategory(move));
+        HelpRequest companionReq = persist(b -> b.serviceCategory(companion));
+        ServiceCategory other = persistCategory("CLEAN", "가사 지원");
+        persist(b -> b.serviceCategory(other));
+
+        HelpRequestSearchCondition cond = new HelpRequestSearchCondition();
+        cond.setServiceCategoryIds(List.of(move.getId(), companion.getId()));
+
+        var page = helpRequestRepository.searchHelpRequests(cond, PageRequest.of(0, 10));
+
+        assertThat(page.getContent()).extracting(HelpRequest::getId)
+                .containsExactlyInAnyOrder(moveReq.getId(), companionReq.getId());
+    }
+
+    @Test
+    @DisplayName("서비스 카테고리 — ids 비었을 때 단일 serviceCategoryId로 폴백(/api/search 호환)")
+    void serviceCategory_singleFallback() {
+        HelpRequest moveReq = persist(b -> b.serviceCategory(move));
+        persist(b -> b.serviceCategory(companion));
+
+        HelpRequestSearchCondition cond = new HelpRequestSearchCondition();
+        cond.setServiceCategoryId(move.getId());
+
+        var page = helpRequestRepository.searchHelpRequests(cond, PageRequest.of(0, 10));
+
+        assertThat(page.getContent()).extracting(HelpRequest::getId).containsExactly(moveReq.getId());
+    }
+
+    @Test
     @DisplayName("거리순 정렬 — 좌표를 주면 가까운 순, 좌표 없는 요청은 뒤로")
     void distanceOrder_whenCoordsProvided() {
         // 기준점: 서울시청(37.5665, 126.9780)
