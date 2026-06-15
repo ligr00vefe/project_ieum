@@ -197,12 +197,24 @@
     if (!modal || !openBtn) return;
 
     var DEFAULT = { lat: 37.5665, lng: 126.9780 }; // 서울시청
+    var THRESHOLD_M = 1000; // 이 값(m)을 넘는 측위 정확도는 신뢰하지 않고 수동 지정을 안내
     var map = null, marker = null, picked = null;
 
+    // 세션에 기억된 사용자 지정 위치(지도 확정·내 주변 보기에서 저장). 네이버식 위치 사전 지정.
+    function rememberedCoord() {
+        try {
+            var p = JSON.parse(sessionStorage.getItem('caregiverBoardGeo'));
+            if (p && !isNaN(p.lat) && !isNaN(p.lng)) return { lat: p.lat, lng: p.lng };
+        } catch (e) { /* 캐시 손상 무시 */ }
+        return null;
+    }
+
     function startCoord() {
+        // 현재 정렬 좌표(URL) → 세션에 기억된 위치 → 기본값(서울시청) 순으로 지도 초기 중심을 정한다.
         var la = parseFloat(modal.getAttribute('data-lat'));
         var ln = parseFloat(modal.getAttribute('data-lng'));
-        return (!isNaN(la) && !isNaN(ln)) ? { lat: la, lng: ln } : DEFAULT;
+        if (!isNaN(la) && !isNaN(ln)) return { lat: la, lng: ln };
+        return rememberedCoord() || DEFAULT;
     }
 
     function initMap() {
@@ -296,16 +308,17 @@
         setMsg('현재 위치 확인 중...');
         navigator.geolocation.getCurrentPosition(
             function (pos) {
-                moveTo(pos.coords.latitude, pos.coords.longitude);
                 var acc = Math.round(pos.coords.accuracy);
-                // 정확도(m)를 함께 보여 고정밀 측위 적용 여부를 사용자가 확인하게 한다.
-                if (acc > 1000) {
-                    setMsg('현재 위치로 이동했습니다. (정확도 약 ' + acc + 'm — 오차가 크면 지도를 직접 클릭해 보정하세요)');
-                } else {
-                    setMsg('현재 위치로 이동했습니다. (정확도 약 ' + acc + 'm)');
+                // PC는 GPS가 없어 WiFi/IP 측위 오차가 km 단위로 큰 경우가 많다(네이버 지도도 PC에선
+                // 수동 지정으로 우회). 정확도가 나쁘면 잘못된 곳으로 옮겨 오도하지 않고 수동 지정을 안내한다.
+                if (acc > THRESHOLD_M) {
+                    setMsg('현재 위치 정확도가 낮습니다(약 ' + acc + 'm). 지도를 클릭하거나 장소를 검색해 직접 지정해 주세요.');
+                    return;
                 }
+                moveTo(pos.coords.latitude, pos.coords.longitude);
+                setMsg('현재 위치로 이동했습니다. (정확도 약 ' + acc + 'm)');
             },
-            function () { setMsg('현재 위치를 가져오지 못했습니다.'); },
+            function () { setMsg('현재 위치를 가져오지 못했습니다. 지도를 클릭하거나 장소를 검색해 직접 지정해 주세요.'); },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
     }
@@ -324,6 +337,8 @@
     document.getElementById('myLocBtn').addEventListener('click', myLocation);
     document.getElementById('mapConfirm').addEventListener('click', function () {
         if (!picked) return;
+        // 사용자가 직접 지정한 위치를 세션에 기억 — 다음 지도 열기·내 주변 보기에서 재사용(사전 지정).
+        sessionStorage.setItem('caregiverBoardGeo', JSON.stringify({ lat: picked.lat, lng: picked.lng }));
         window.location.assign('/caregiver/board?lat=' + encodeURIComponent(picked.lat)
             + '&lng=' + encodeURIComponent(picked.lng) + '&page=0');
     });
