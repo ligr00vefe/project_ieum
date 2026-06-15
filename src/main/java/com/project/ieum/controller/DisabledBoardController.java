@@ -67,6 +67,16 @@ public class DisabledBoardController {
         return "redirect:/disabled/board/" + helpRequest.getId();
     }
 
+    @GetMapping("/{id}/repost")
+    public String repostForm(@PathVariable Long id, Model model) {
+        model.addAttribute("title", "요청 글 작성");
+        model.addAttribute("form", helpRequestService.buildRepostForm(id));
+        model.addAttribute("serviceCategories", masterDataService.getAllServiceCategories());
+        model.addAttribute("personalityTags", masterDataService.getCaregiverPersonalityTags());
+        model.addAttribute("content", "disabled/board/create");
+        return "layout/layout";
+    }
+
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
         var currentUser = currentUserService.getCurrentUser();
