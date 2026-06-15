@@ -51,21 +51,14 @@
                     <td class="px-5 py-3.5">
                         <p class="font-medium text-slate-800 truncate max-w-xs" th:text="${req.title}">제목</p>
                     </td>
-                    <td class="px-5 py-3.5 text-slate-600 text-xs"
-                        th:text="${req.requester?.fullName ?: '-'}">-</td>
+                    <td class="px-5 py-3.5 text-slate-600 text-xs" th:text="${req.requesterName}">-</td>
                     <td class="px-5 py-3.5 text-slate-500 text-xs"
                         th:text="${req.sido + ' ' + req.sigungu}">-</td>
                     <td class="px-5 py-3.5 text-slate-500 text-xs"
                         th:text="${#temporals.format(req.desiredStartDatetime, 'MM/dd HH:mm')}">-</td>
                     <td class="px-5 py-3.5">
-                        <span th:text="${req.status.name() == 'OPEN' ? '모집중' :
-                                         req.status.name() == 'MATCHED' ? '매칭완료' :
-                                         req.status.name() == 'IN_PROGRESS' ? '진행중' :
-                                         req.status.name() == 'COMPLETED' ? '완료' : '종료'}"
-                              th:classappend="${req.status.name() == 'OPEN'} ? 'bg-indigo-50 text-indigo-600' :
-                                              ${req.status.name() == 'IN_PROGRESS'} ? 'bg-teal-50 text-teal-600' :
-                                              ${req.status.name() == 'COMPLETED'} ? 'bg-slate-100 text-slate-500' : 'bg-slate-100 text-slate-400'"
-                              class="px-2 py-0.5 text-xs font-semibold rounded-full">상태</span>
+                        <span th:text="${req.statusLabel}"
+                              th:class="'px-2 py-0.5 text-xs font-semibold rounded-full ' + ${req.statusClass}">상태</span>
                     </td>
                     <td class="px-5 py-3.5 text-right">
                         <a th:href="@{/admin/matching/{id}(id=${req.id})}"
@@ -79,6 +72,9 @@
             </tbody>
         </table>
     </div>
+
+    <!-- 페이지네이션 -->
+    <div th:replace="~{fragments/pagination :: pager(${currentPage}, ${totalPages}, ${startPage}, ${endPage}, '/admin/matching?' + (selectedStatus != null ? 'status=' + selectedStatus + '&' : ''))}"></div>
 
 </div>
 </th:block>

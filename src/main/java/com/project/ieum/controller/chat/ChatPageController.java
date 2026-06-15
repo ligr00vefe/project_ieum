@@ -51,12 +51,14 @@ public class ChatPageController {
         Long requestId = conversation.getApplication().getHelpRequest().getId();
         int matchPercent = 0;
 
+        Long partnerId;
         if (isUser) {
             var caregiver = conversation.getCaregiver();
             partnerName = caregiver.getFullName() + " 활동지원사";
             partnerProfileImage = caregiver.getProfileImageUrl();
             partnerSubtitle = (caregiver.getCertificationType() != null ? caregiver.getCertificationType() : "활동지원사")
                     + (caregiver.getExperience() != null ? " · 경력 " + caregiver.getExperience() : "");
+            partnerId = caregiver.getUserId();
 
             var applications = java.util.List.of(conversation.getApplication());
             var pctMap = matchingService.getMatchPercentMap(requestId, applications);
@@ -82,10 +84,12 @@ public class ChatPageController {
             partnerName = requester.getFullName() + " 이용자";
             partnerProfileImage = requester.getProfileImageUrl();
             partnerSubtitle = "이용자";
+            partnerId = requester.getUserId();
         }
 
         model.addAttribute("title", "채팅");
         model.addAttribute("conversationId", conversationId);
+        model.addAttribute("partnerId", partnerId);
         model.addAttribute("isUser", isUser);
         model.addAttribute("isCaregiver", isCaregiver);
         model.addAttribute("partnerName", partnerName);

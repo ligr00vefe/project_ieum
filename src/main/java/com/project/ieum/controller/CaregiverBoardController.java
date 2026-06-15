@@ -7,8 +7,7 @@ import com.project.ieum.service.common.CurrentUserService;
 import com.project.ieum.service.recommend.RecommendationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -26,9 +25,16 @@ public class CaregiverBoardController {
     private final CurrentUserService currentUserService;
 
     @GetMapping({"", "/"})
-    public String list(@PageableDefault(size = 20) Pageable pageable, Model model) {
+    public String list(@RequestParam(defaultValue = "0") int page, Model model) {
+        var requestPage = helpRequestService.getOpenRequests(PageRequest.of(page, 10));
+        int totalPages = requestPage.getTotalPages();
         model.addAttribute("title", "매칭 게시판");
-        model.addAttribute("requests", helpRequestService.getOpenRequests(pageable));
+        model.addAttribute("requests", requestPage.getContent());
+        model.addAttribute("requestPage", requestPage);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("startPage", Math.max(0, page - 2));
+        model.addAttribute("endPage", Math.min(totalPages - 1, page + 2));
         model.addAttribute("content", "caregiver/board/list");
         return "layout/layout";
     }
