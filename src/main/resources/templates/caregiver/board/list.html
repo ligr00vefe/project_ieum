@@ -183,7 +183,7 @@
                 btn.textContent = '내 주변 순으로 보기';
                 showMsg('위치를 허용하면 가까운 순으로 볼 수 있어요. 지금은 시작시각 순으로 표시합니다.');
             },
-            { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
     });
 })();
@@ -295,9 +295,18 @@
         if (!navigator.geolocation) { setMsg('이 브라우저는 위치 기능을 지원하지 않습니다.'); return; }
         setMsg('현재 위치 확인 중...');
         navigator.geolocation.getCurrentPosition(
-            function (pos) { moveTo(pos.coords.latitude, pos.coords.longitude); setMsg('현재 위치로 이동했습니다.'); },
+            function (pos) {
+                moveTo(pos.coords.latitude, pos.coords.longitude);
+                var acc = Math.round(pos.coords.accuracy);
+                // 정확도(m)를 함께 보여 고정밀 측위 적용 여부를 사용자가 확인하게 한다.
+                if (acc > 1000) {
+                    setMsg('현재 위치로 이동했습니다. (정확도 약 ' + acc + 'm — 오차가 크면 지도를 직접 클릭해 보정하세요)');
+                } else {
+                    setMsg('현재 위치로 이동했습니다. (정확도 약 ' + acc + 'm)');
+                }
+            },
             function () { setMsg('현재 위치를 가져오지 못했습니다.'); },
-            { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
     }
 
