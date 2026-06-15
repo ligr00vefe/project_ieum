@@ -21,6 +21,14 @@
                 </svg>
                 내 주변 순으로 보기
             </button>
+            <button type="button" id="mapPickBtn"
+                    th:if="${tmapAppKey != null and !tmapAppKey.isEmpty()}"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:text-indigo-600 transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                </svg>
+                지도에서 선택
+            </button>
             <span th:if="${locationSorted}"
                   class="inline-flex items-center px-2.5 py-1 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 rounded-full">
                 내 위치 기준 가까운 순
@@ -64,6 +72,12 @@
                             <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             <span th:text="${#temporals.format(request.desiredStartDatetime, 'MM/dd (E) HH:mm')}">일시</span>
                         </span>
+                        <span th:if="${distanceMap != null and distanceMap.containsKey(request.id)}"
+                              class="inline-flex items-center gap-1 px-2 py-0.5 text-indigo-600 bg-indigo-50 rounded-full font-medium"
+                              th:title="'대략적인 직선 거리입니다'">
+                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                            <span th:text="${distanceMap.get(request.id)}">약 2.5km</span>
+                        </span>
                     </div>
                     <div class="flex items-center gap-1.5 mt-3">
                         <span th:text="${request.serviceCategory.name}"
@@ -85,6 +99,33 @@
          ${locationSorted} ? '/caregiver/board?lat=' + ${lat} + '&lng=' + ${lng} + '&' : '/caregiver/board?')}"></div>
 
 </section>
+
+<!-- 지도 위치 선택 모달 (TMap appKey 있을 때만) -->
+<div th:if="${tmapAppKey != null and !tmapAppKey.isEmpty()}"
+     id="mapModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+     th:attr="data-lat=${lat},data-lng=${lng}"
+     role="dialog" aria-modal="true" aria-labelledby="mapModalTitle">
+    <div id="mapBackdrop" class="absolute inset-0 bg-black/40"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <h2 id="mapModalTitle" class="text-base font-semibold text-gray-900">지도에서 위치 선택</h2>
+            <button type="button" id="mapClose" aria-label="닫기"
+                    class="text-gray-400 hover:text-gray-700 transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div id="mapCanvas" class="w-full h-80 bg-gray-100"></div>
+        <div class="px-5 py-4">
+            <p class="text-sm text-gray-500">지도를 눌러 기준 위치를 정하세요.</p>
+            <div class="flex gap-2 mt-4">
+                <button type="button" id="mapCancel"
+                        class="flex-1 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">취소</button>
+                <button type="button" id="mapConfirm"
+                        class="flex-1 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors">이 위치로 찾기</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
 (function () {
@@ -131,6 +172,69 @@
             },
             { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
         );
+    });
+})();
+</script>
+
+<!-- TMap JS SDK — document.write 기반이라 파싱 시점에 정적 로드해야 한다(비동기 주입 시 깨짐). -->
+<script th:if="${tmapAppKey != null and !tmapAppKey.isEmpty()}"
+        th:src="'https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=' + ${tmapAppKey}"></script>
+<script th:if="${tmapAppKey != null and !tmapAppKey.isEmpty()}">
+(function () {
+    var modal = document.getElementById('mapModal');
+    var openBtn = document.getElementById('mapPickBtn');
+    if (!modal || !openBtn) return;
+
+    var DEFAULT = { lat: 37.5665, lng: 126.9780 }; // 서울시청
+    var map = null, marker = null, picked = null;
+
+    function startCoord() {
+        var la = parseFloat(modal.getAttribute('data-lat'));
+        var ln = parseFloat(modal.getAttribute('data-lng'));
+        return (!isNaN(la) && !isNaN(ln)) ? { lat: la, lng: ln } : DEFAULT;
+    }
+
+    function initMap() {
+        var c = startCoord();
+        picked = c;
+        map = new Tmapv2.Map('mapCanvas', {
+            center: new Tmapv2.LatLng(c.lat, c.lng),
+            width: '100%', height: '100%', zoom: 14
+        });
+        marker = new Tmapv2.Marker({
+            position: new Tmapv2.LatLng(c.lat, c.lng), map: map, draggable: true
+        });
+        map.addListener('click', function (e) {
+            var ll = e.latLng;
+            marker.setPosition(ll);
+            picked = { lat: ll.lat(), lng: ll.lng() };
+        });
+        marker.addListener('dragend', function () {
+            var ll = marker.getPosition();
+            picked = { lat: ll.lat(), lng: ll.lng() };
+        });
+    }
+
+    function openModal() {
+        modal.classList.remove('hidden');
+        // 지도는 보인 뒤 초기화해야 컨테이너 크기를 잡는다(숨김 상태 init 시 0px).
+        if (!map && window.Tmapv2) {
+            initMap();
+        }
+    }
+    function closeModal() { modal.classList.add('hidden'); }
+
+    openBtn.addEventListener('click', openModal);
+    document.getElementById('mapClose').addEventListener('click', closeModal);
+    document.getElementById('mapCancel').addEventListener('click', closeModal);
+    document.getElementById('mapBackdrop').addEventListener('click', closeModal);
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+    });
+    document.getElementById('mapConfirm').addEventListener('click', function () {
+        if (!picked) return;
+        window.location.assign('/caregiver/board?lat=' + encodeURIComponent(picked.lat)
+            + '&lng=' + encodeURIComponent(picked.lng) + '&page=0');
     });
 })();
 </script>
