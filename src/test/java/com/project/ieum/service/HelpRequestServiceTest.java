@@ -235,6 +235,59 @@ class HelpRequestServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("재게시(buildRepostForm)")
+    class Repost {
+        @Test
+        @DisplayName("게시자가 아니면 NotRequestOwnerException")
+        void repost_notOwner_throws() {
+            // given — 로그인=2번, 요청 소유자=1번
+            loginAsUser(2L);
+            when(helpRequestRepository.findById(any()))
+                .thenReturn(Optional.of(closedRequest(1L)));
+
+            // when / then
+            assertThatThrownBy(() -> helpRequestService.buildRepostForm(50L))
+                .isInstanceOf(NotRequestOwnerException.class);
+        }
+
+        @Test
+        @DisplayName("CLOSED가 아니면 InvalidRequestStateException")
+        void repost_notClosed_throws() {
+            // given
+            loginAsUser(1L);
+            when(helpRequestRepository.findById(any()))
+                .thenReturn(Optional.of(helpRequest(1L, HelpRequestStatus.OPEN)));
+
+            // when / then
+            assertThatThrownBy(() -> helpRequestService.buildRepostForm(1L))
+                .isInstanceOf(InvalidRequestStateException.class);
+        }
+
+        @Test
+        @DisplayName("CLOSED 본인 요청이면 내용은 프리필하되 지난 일시는 비운다")
+        void repost_ownerAndClosed_prefillsContentAndClearsPastDates() {
+            // given — 희망일시(2026-06-10)는 현재 기준 과거 → @FutureOrPresent 위반이라 비워야 한다.
+            loginAsUser(1L);
+            when(helpRequestRepository.findById(1L)).thenReturn(Optional.of(closedRequest(1L)));
+            when(helpRequestPersonalityTagRepository.findByHelpRequest_Id(1L))
+                .thenReturn(java.util.List.of());
+
+            // when
+            HelpRequestForm form = helpRequestService.buildRepostForm(1L);
+
+            // then — 내용은 복사
+            assertThat(form.getTitle()).isEqualTo("병원 동행");
+            assertThat(form.getBody()).isEqualTo("외래진료 동행");
+            assertThat(form.getServiceCategoryId()).isEqualTo(7L);
+            assertThat(form.getSido()).isEqualTo("서울특별시");
+            assertThat(form.getSigungu()).isEqualTo("강남구");
+            // 일시는 과거라 비움
+            assertThat(form.getDesiredStartDatetime()).isNull();
+            assertThat(form.getDesiredEndDatetime()).isNull();
+        }
+    }
+
     // ── 픽스처 헬퍼 ────────────────────────────────────────────────
 
     // 로그인 사용자(USER 역할) 모킹. requireRole(USER) 통과 + getId() 소유자 비교에 사용.
@@ -256,6 +309,24 @@ class HelpRequestServiceTest {
             .status(status)
             .title("도움 요청")
             .desiredStartDatetime(LocalDateTime.of(2026, 6, 10, 10, 0))
+            .build();
+    }
+
+    // 재게시 원본 — CLOSED·serviceCategory·내용·과거 일시를 갖춘 본인 요청. buildRepostForm 검증용.
+    private HelpRequest closedRequest(Long ownerId) {
+        return HelpRequest.builder()
+            .id(1L)
+            .requester(owner(ownerId))
+            .status(HelpRequestStatus.CLOSED)
+            .serviceCategory(ServiceCategory.builder().id(7L).code("MOVE").name("이동 보조").build())
+            .title("병원 동행")
+            .body("외래진료 동행")
+            .desiredStartDatetime(LocalDateTime.of(2026, 6, 10, 14, 0))
+            .desiredEndDatetime(LocalDateTime.of(2026, 6, 10, 16, 0))
+            .roadAddress("서울특별시 강남구 테헤란로 152")
+            .sido("서울특별시")
+            .sigungu("강남구")
+            .specialNotes("주의사항")
             .build();
     }
 
