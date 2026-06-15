@@ -8,6 +8,10 @@
     <meta name="description" th:content="${description != null ? description : '케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼'}">
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <!-- TMap JS SDK — SDK가 내부에서 document.write로 2차 스크립트를 로드하므로
+         파싱 초기(head)에 동기 로드해야 차단 위험이 낮다. tmapAppKey를 model에 담은 페이지에서만 로드. -->
+    <script th:if="${tmapAppKey != null and !tmapAppKey.isEmpty()}"
+            th:src="'https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=' + ${tmapAppKey}"></script>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col">
 
