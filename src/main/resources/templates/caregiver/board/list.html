@@ -176,9 +176,7 @@
 })();
 </script>
 
-<!-- TMap JS SDK — document.write 기반이라 파싱 시점에 정적 로드해야 한다(비동기 주입 시 깨짐). -->
-<script th:if="${tmapAppKey != null and !tmapAppKey.isEmpty()}"
-        th:src="'https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=' + ${tmapAppKey}"></script>
+<!-- 지도 제어 — TMap SDK는 layout head에서 파싱 초기에 로드된다. -->
 <script th:if="${tmapAppKey != null and !tmapAppKey.isEmpty()}">
 (function () {
     var modal = document.getElementById('mapModal');
@@ -216,9 +214,18 @@
     }
 
     function openModal() {
+        // SDK가 로드되지 않았으면(차단·네트워크 실패) 지도 대신 현재 위치 정렬을 안내.
+        if (!window.Tmapv2) {
+            var m = document.getElementById('geoMsg');
+            if (m) {
+                m.textContent = '지도를 불러오지 못했습니다. "내 주변 순으로 보기"를 이용해 주세요.';
+                m.classList.remove('hidden');
+            }
+            return;
+        }
         modal.classList.remove('hidden');
         // 지도는 보인 뒤 초기화해야 컨테이너 크기를 잡는다(숨김 상태 init 시 0px).
-        if (!map && window.Tmapv2) {
+        if (!map) {
             initMap();
         }
     }
