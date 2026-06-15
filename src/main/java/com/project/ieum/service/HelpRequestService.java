@@ -23,6 +23,8 @@ import com.project.ieum.exception.NotRequestOwnerException;
 import com.project.ieum.exception.RequestTimeConflictException;
 import com.project.ieum.repository.*;
 import com.project.ieum.service.common.CurrentUserService;
+import com.project.ieum.service.geocoding.GeoPoint;
+import com.project.ieum.service.geocoding.GeocodingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -52,6 +54,7 @@ public class HelpRequestService {
     private final HelpRequestApplicationRepository helpRequestApplicationRepository;
     private final ReviewRepository reviewRepository;
     private final CurrentUserService currentUserService;
+    private final GeocodingService geocodingService;
 
     public HelpRequest create(HelpRequestForm form) {
         User currentUser = requireRole(UserRole.USER);
@@ -68,6 +71,10 @@ public class HelpRequestService {
             throw new RequestTimeConflictException();
         }
 
+        // 위치 스냅샷 좌표는 생성 시점에 1회만 채운다(write-once). 주소검색 위젯은 좌표를 주지 않으므로
+        // 도로명주소를 지오코딩해 보강한다. 좌표는 발견/정렬용이라 미확보(null)여도 생성은 막지 않는다.
+        GeoPoint geoPoint = geocodingService.geocode(form.getRoadAddress()).orElse(null);
+
         // status는 지정하지 않는다 — 엔티티 @Builder.Default = OPEN 이 생성 시 고정값을 보장(누락 방지).
         HelpRequest helpRequest = HelpRequest.builder()
                 .requester(requester)
@@ -83,6 +90,8 @@ public class HelpRequestService {
                 .bname(form.getBname())
                 .zonecode(form.getZonecode())
                 .bcode(form.getBcode())
+                .latitude(geoPoint != null ? geoPoint.latitude() : null)
+                .longitude(geoPoint != null ? geoPoint.longitude() : null)
                 .departureAddress(form.getDepartureAddress())
                 .destinationAddress(form.getDestinationAddress())
                 .specialNotes(form.getSpecialNotes())
@@ -240,6 +249,15 @@ public class HelpRequestService {
     @Transactional(readOnly = true)
     public Page<HelpRequest> getOpenRequests(Pageable pageable) {
         return helpRequestRepository.findByStatusOrderByDesiredStartDatetimeAscIdDesc(HelpRequestStatus.OPEN, pageable);
+    }
+
+    // 접속 위치 기반 정렬 — 좌표(lat,lng)가 모두 있으면 가까운 순, 아니면 기존 시작시각 정렬로 위임(회귀 보존).
+    @Transactional(readOnly = true)
+    public Page<HelpRequest> getOpenRequests(Pageable pageable, Double lat, Double lng) {
+        if (lat == null || lng == null) {
+            return getOpenRequests(pageable);
+        }
+        return helpRequestRepository.findByStatusOrderByDistance(HelpRequestStatus.OPEN, lat, lng, pageable);
     }
 
     private void replaceTags(HelpRequest helpRequest, List<Long> tagIds) {

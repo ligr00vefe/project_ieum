@@ -9,8 +9,27 @@
         <p class="text-sm text-gray-500 mt-1">나의 조건과 맞는 도움 요청을 찾아보세요.</p>
     </div>
 
-    <!-- 검색 -->
-    <div class="flex justify-end mb-5">
+    <!-- 위치 정렬 + 검색 -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
+        <!-- 위치 기반 정렬 컨트롤 -->
+        <div class="flex flex-wrap items-center gap-2">
+            <button type="button" id="nearbyBtn"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                내 주변 순으로 보기
+            </button>
+            <span th:if="${locationSorted}"
+                  class="inline-flex items-center px-2.5 py-1 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 rounded-full">
+                내 위치 기준 가까운 순
+            </span>
+            <a th:if="${locationSorted}" th:href="@{/caregiver/board}"
+               class="text-xs text-gray-400 hover:text-indigo-600 underline underline-offset-2">전체 보기</a>
+        </div>
+
+        <!-- 검색 -->
         <div class="relative sm:w-52">
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -19,6 +38,8 @@
                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 bg-white">
         </div>
     </div>
+    <!-- 위치 안내 메시지(거부/미지원 시 노출) -->
+    <p id="geoMsg" class="hidden mb-3 text-xs text-gray-500" role="status" aria-live="polite"></p>
 
     <!-- 게시글 목록 -->
     <div class="space-y-3">
@@ -59,9 +80,59 @@
 
     </div>
 
-    <!-- 페이지네이션 -->
-    <div th:replace="~{fragments/pagination :: pager(${currentPage}, ${totalPages}, ${startPage}, ${endPage}, '/caregiver/board?')}"></div>
+    <!-- 페이지네이션 (위치 정렬 시 lat/lng 유지) -->
+    <div th:replace="~{fragments/pagination :: pager(${currentPage}, ${totalPages}, ${startPage}, ${endPage},
+         ${locationSorted} ? '/caregiver/board?lat=' + ${lat} + '&lng=' + ${lng} + '&' : '/caregiver/board?')}"></div>
 
 </section>
+
+<script>
+(function () {
+    var btn = document.getElementById('nearbyBtn');
+    var msg = document.getElementById('geoMsg');
+    if (!btn) return;
+
+    function goTo(lat, lng) {
+        window.location.assign('/caregiver/board?lat=' + encodeURIComponent(lat)
+            + '&lng=' + encodeURIComponent(lng) + '&page=0');
+    }
+    function showMsg(text) {
+        if (!msg) return;
+        msg.textContent = text;
+        msg.classList.remove('hidden');
+    }
+
+    btn.addEventListener('click', function () {
+        // 같은 세션에서 이미 받은 위치는 재사용해 권한 재요청을 피한다.
+        var cached = sessionStorage.getItem('caregiverBoardGeo');
+        if (cached) {
+            try {
+                var p = JSON.parse(cached);
+                goTo(p.lat, p.lng);
+                return;
+            } catch (e) { /* 캐시 손상 시 새로 요청 */ }
+        }
+        if (!navigator.geolocation) {
+            showMsg('이 브라우저는 위치 기능을 지원하지 않습니다. 시작시각 순으로 표시합니다.');
+            return;
+        }
+        btn.disabled = true;
+        btn.textContent = '위치 확인 중...';
+        navigator.geolocation.getCurrentPosition(
+            function (pos) {
+                var lat = pos.coords.latitude, lng = pos.coords.longitude;
+                sessionStorage.setItem('caregiverBoardGeo', JSON.stringify({ lat: lat, lng: lng }));
+                goTo(lat, lng);
+            },
+            function () {
+                btn.disabled = false;
+                btn.textContent = '내 주변 순으로 보기';
+                showMsg('위치를 허용하면 가까운 순으로 볼 수 있어요. 지금은 시작시각 순으로 표시합니다.');
+            },
+            { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+        );
+    });
+})();
+</script>
 </th:block>
 </html>

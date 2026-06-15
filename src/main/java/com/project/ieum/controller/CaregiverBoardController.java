@@ -25,8 +25,12 @@ public class CaregiverBoardController {
     private final CurrentUserService currentUserService;
 
     @GetMapping({"", "/"})
-    public String list(@RequestParam(defaultValue = "0") int page, Model model) {
-        var requestPage = helpRequestService.getOpenRequests(PageRequest.of(page, 10));
+    public String list(@RequestParam(defaultValue = "0") int page,
+                       @RequestParam(required = false) Double lat,
+                       @RequestParam(required = false) Double lng,
+                       Model model) {
+        boolean locationSorted = lat != null && lng != null;
+        var requestPage = helpRequestService.getOpenRequests(PageRequest.of(page, 10), lat, lng);
         int totalPages = requestPage.getTotalPages();
         model.addAttribute("title", "매칭 게시판");
         model.addAttribute("requests", requestPage);
@@ -34,6 +38,9 @@ public class CaregiverBoardController {
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("startPage", Math.max(0, page - 2));
         model.addAttribute("endPage", Math.min(totalPages - 1, page + 2));
+        model.addAttribute("locationSorted", locationSorted);
+        model.addAttribute("lat", lat);
+        model.addAttribute("lng", lng);
         model.addAttribute("content", "caregiver/board/list");
         return "layout/layout";
     }

@@ -20,6 +20,7 @@ import com.project.ieum.repository.PersonalityTagRepository;
 import com.project.ieum.repository.ServiceCategoryRepository;
 import com.project.ieum.repository.UserProfileRepository;
 import com.project.ieum.service.common.CurrentUserService;
+import com.project.ieum.service.geocoding.GeocodingService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -68,6 +69,8 @@ class HelpRequestServiceTest {
     private HelpRequestPersonalityTagRepository helpRequestPersonalityTagRepository;
     @Mock
     private CurrentUserService currentUserService;
+    @Mock
+    private GeocodingService geocodingService;
 
     @InjectMocks
     private HelpRequestService helpRequestService;
@@ -114,6 +117,7 @@ class HelpRequestServiceTest {
             when(helpRequestRepository.existsOverlapping(any(), any(), any(), any()))
                 .thenReturn(false);
             when(serviceCategoryRepository.findById(any())).thenReturn(Optional.of(category()));
+            when(geocodingService.geocode(any())).thenReturn(Optional.empty());
             when(helpRequestRepository.save(any()))
                 .thenReturn(HelpRequest.builder().id(100L).build());
 
