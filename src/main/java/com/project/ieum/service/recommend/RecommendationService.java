@@ -62,6 +62,20 @@ public class RecommendationService {
                 .toList();
     }
 
+    public int scorePercent(Long requestId, CaregiverProfile caregiver) {
+        HelpRequest request = helpRequestRepository.findById(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("도움 요청을 찾을 수 없습니다."));
+        Set<Long> requestTagIds = helpRequestPersonalityTagRepository.findByHelpRequest_Id(requestId)
+                .stream()
+                .map(t -> t.getTag().getId())
+                .collect(Collectors.toSet());
+        int total = calculateTimeScore(request, caregiver)
+                + calculatePersonalityScore(requestTagIds, caregiver)
+                + calculateRatingScore(caregiver.getAvgRating())
+                + (Boolean.TRUE.equals(caregiver.getHasCertification()) ? 5 : 0);
+        return Math.min(100, total * 100 / 70);
+    }
+
     private CaregiverRecommendationResponse score(HelpRequest request, Set<Long> requestTagIds, CaregiverProfile caregiver) {
         int regionScore = calculateRegionScore(request, caregiver);
         int timeScore = calculateTimeScore(request, caregiver);

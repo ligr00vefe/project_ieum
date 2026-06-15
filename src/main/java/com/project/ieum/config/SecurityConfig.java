@@ -50,6 +50,8 @@ public class SecurityConfig {
                         "/assets/**",
                         "/healthz",
                         "/readyz",
+                        "/notices",
+                        "/notices/**",
                         "/error").permitAll()
                 .requestMatchers("/admin/**").hasRole(UserRole.ADMIN.name())
                 .requestMatchers("/disabled/**").hasAnyRole("USER", "ADMIN")
