@@ -75,16 +75,19 @@
                 </select>
             </div>
 
-            <!-- 서비스 카테고리 -->
-            <div>
-                <label for="serviceCategoryId" class="block text-xs font-semibold text-gray-500 mb-1">서비스</label>
-                <select id="serviceCategoryId" name="serviceCategoryId"
-                        class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300">
-                    <option value="">전체</option>
-                    <option th:each="cat : ${serviceCategories}" th:value="${cat.id}" th:text="${cat.name}"
-                            th:selected="${cat.id == fServiceCategoryId}">서비스</option>
-                </select>
-            </div>
+            <!-- 서비스 카테고리 (다중 선택 — 같은 name 체크박스 → 반복 파라미터로 제출) -->
+            <fieldset class="sm:col-span-2 lg:col-span-3">
+                <legend class="block text-xs font-semibold text-gray-500 mb-1.5">서비스 (복수 선택 가능)</legend>
+                <div class="flex flex-wrap gap-2">
+                    <label th:each="cat : ${serviceCategories}"
+                           class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border border-gray-200 rounded-full cursor-pointer hover:border-indigo-300 transition-colors has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-300 has-[:checked]:text-indigo-700">
+                        <input type="checkbox" name="serviceCategoryId" th:value="${cat.id}"
+                               th:checked="${fServiceCategoryIds != null and #lists.contains(fServiceCategoryIds, cat.id)}"
+                               class="accent-indigo-600">
+                        <span th:text="${cat.name}">서비스</span>
+                    </label>
+                </div>
+            </fieldset>
 
             <!-- 희망 시작일 범위 -->
             <div>
@@ -209,8 +212,10 @@
     if (!btn) return;
 
     function goTo(lat, lng) {
-        // 현재 검색 필터(URL 쿼리)를 보존하고 좌표·page만 갱신해 "내 주변 + 검색"을 함께 유지한다.
+        // 위치 기반 사용 시 지역 필터(시/도·시군구)는 자동 해제(상호 배타). 키워드·서비스·날짜는 유지.
         var params = new URLSearchParams(window.location.search);
+        params.delete('sido');
+        params.delete('sigungu');
         params.set('lat', lat);
         params.set('lng', lng);
         params.set('page', '0');
@@ -436,8 +441,10 @@
         if (!picked) return;
         // 사용자가 직접 지정한 위치를 세션에 기억 — 다음 지도 열기·내 주변 보기에서 재사용(사전 지정).
         sessionStorage.setItem('caregiverBoardGeo', JSON.stringify({ lat: picked.lat, lng: picked.lng }));
-        // 현재 검색 필터(URL 쿼리)를 보존하고 좌표·page만 갱신.
+        // 위치 기반 사용 시 지역 필터(시/도·시군구)는 자동 해제(상호 배타). 키워드·서비스·날짜는 유지.
         var params = new URLSearchParams(window.location.search);
+        params.delete('sido');
+        params.delete('sigungu');
         params.set('lat', picked.lat);
         params.set('lng', picked.lng);
         params.set('page', '0');
