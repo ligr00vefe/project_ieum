@@ -1,6 +1,10 @@
 package com.project.ieum.controller;
 
 import com.project.ieum.dto.request.HelpRequestForm;
+import java.util.List;
+import com.project.ieum.entity.UserRole;
+import com.project.ieum.entity.request.HelpRequestApplication;
+import com.project.ieum.repository.HelpRequestApplicationRepository;
 import com.project.ieum.service.HelpRequestService;
 import com.project.ieum.service.MasterDataService;
 import com.project.ieum.service.MatchingService;
@@ -22,11 +26,19 @@ public class DisabledBoardController {
     private final MatchingService matchingService;
     private final MasterDataService masterDataService;
     private final CurrentUserService currentUserService;
+    private final HelpRequestApplicationRepository applicationRepository;
 
     @GetMapping({"", "/"})
-    public String list(Model model) {
+    public String list(@RequestParam(defaultValue = "0") int page, Model model) {
+        var requestPage = helpRequestService.getAllActiveRequestsPaged(page);
+        int totalPages = requestPage.getTotalPages();
         model.addAttribute("title", "매칭 게시판");
-        model.addAttribute("requests", helpRequestService.getAllActiveRequests());
+        model.addAttribute("requests", requestPage.getContent());
+        model.addAttribute("requestPage", requestPage);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("startPage", Math.max(0, page - 2));
+        model.addAttribute("endPage", Math.min(totalPages - 1, page + 2));
         model.addAttribute("currentUserId", currentUserService.getCurrentUser().getId());
         model.addAttribute("content", "disabled/board/list");
         return "layout/layout";
@@ -72,22 +84,47 @@ public class DisabledBoardController {
 
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
+        var currentUser = currentUserService.getCurrentUser();
         model.addAttribute("title", "게시물 상세");
         model.addAttribute("request", helpRequestService.get(id));
-        model.addAttribute("applicationCount", matchingService.getApplicationsForRequest(id).size());
-        model.addAttribute("currentUserId", currentUserService.getCurrentUser().getId());
+        model.addAttribute("applicationCount", matchingService.countApplicationsForRequest(id));
+        model.addAttribute("currentUserId", currentUser.getId());
+        model.addAttribute("isAdmin", currentUser.getRole() == UserRole.ADMIN);
         model.addAttribute("content", "disabled/board/detail");
         return "layout/layout";
     }
 
     @GetMapping("/{id}/applicants")
-    public String applicants(@PathVariable Long id, Model model) {
-        var applications = matchingService.getApplicationsForRequest(id);
+    public String applicants(@PathVariable Long id,
+                             @RequestParam(defaultValue = "0") int page,
+                             Model model) {
+        var currentUser = currentUserService.getCurrentUser();
+        List<HelpRequestApplication> applications = (currentUser.getRole() == UserRole.ADMIN)
+                ? applicationRepository.findByHelpRequest_IdOrderByCreatedAtDesc(id)
+                : matchingService.getApplicationsForRequest(id);
+        var matchPercentMap = matchingService.getMatchPercentMap(id, applications);
+        var sorted = applications.stream()
+                .sorted(java.util.Comparator.comparingInt(
+                        (com.project.ieum.entity.request.HelpRequestApplication a) ->
+                                matchPercentMap.getOrDefault(a.getId(), 0)).reversed())
+                .toList();
+        int pageSize = 10;
+        int totalItems = sorted.size();
+        int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+        int from = Math.min(page * pageSize, totalItems);
+        int to = Math.min(from + pageSize, totalItems);
+        var pagedList = sorted.subList(from, to);
+
         model.addAttribute("title", "지원자 리스트");
         model.addAttribute("request", helpRequestService.get(id));
-        model.addAttribute("applications", applications);
-        model.addAttribute("matchPercentMap", matchingService.getMatchPercentMap(id, applications));
-        model.addAttribute("conversationIdMap", matchingService.getConversationIdMap(applications));
+        model.addAttribute("applications", pagedList);
+        model.addAttribute("matchPercentMap", matchPercentMap);
+        model.addAttribute("matchTagDetailMap", matchingService.getMatchTagDetailMap(id, sorted));
+        model.addAttribute("conversationIdMap", matchingService.getConversationIdMap(sorted));
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("startPage", Math.max(0, page - 2));
+        model.addAttribute("endPage", Math.min(totalPages - 1, page + 2));
         model.addAttribute("content", "board/applicants");
         return "layout/layout";
     }

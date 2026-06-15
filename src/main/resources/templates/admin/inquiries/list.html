@@ -88,48 +88,7 @@
     </div>
 
     <!-- 페이지네이션 -->
-    <div th:if="${inquiryPage.totalPages > 1}" class="flex items-center justify-center gap-1 mt-6">
-
-        <!-- 이전 -->
-        <a th:if="${!inquiryPage.first}"
-           th:href="@{/admin/inquiries(status=${selectedStatus}, category=${selectedCategory}, page=${currentPage - 1})}"
-           class="px-3 py-2 text-sm text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-        </a>
-        <span th:if="${inquiryPage.first}" class="px-3 py-2 text-slate-300">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-        </span>
-
-        <!-- 페이지 번호 -->
-        <th:block th:each="i : ${#numbers.sequence(startPage, endPage)}">
-            <a th:if="${i != currentPage}"
-               th:href="@{/admin/inquiries(status=${selectedStatus}, category=${selectedCategory}, page=${i})}"
-               th:text="${i + 1}"
-               class="px-3.5 py-2 text-sm text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">1</a>
-            <span th:if="${i == currentPage}"
-                  th:text="${i + 1}"
-                  class="px-3.5 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg">1</span>
-        </th:block>
-
-        <!-- 다음 -->
-        <a th:if="${!inquiryPage.last}"
-           th:href="@{/admin/inquiries(status=${selectedStatus}, category=${selectedCategory}, page=${currentPage + 1})}"
-           class="px-3 py-2 text-sm text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-        </a>
-        <span th:if="${inquiryPage.last}" class="px-3 py-2 text-slate-300">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-        </span>
-
-    </div>
+    <div th:replace="~{fragments/pagination :: pager(${currentPage}, ${totalPages}, ${startPage}, ${endPage}, '/admin/inquiries?' + (selectedStatus != null ? 'status=' + selectedStatus + '&' : '') + (selectedCategory != null ? 'category=' + selectedCategory + '&' : ''))}"></div>
 
 </div>
 </th:block>

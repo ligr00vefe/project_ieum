@@ -3,7 +3,11 @@ package com.project.ieum.repository;
 import com.project.ieum.entity.User;
 import com.project.ieum.entity.UserRole;
 import com.project.ieum.entity.UserStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -19,7 +23,19 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countByRole(UserRole role);
     long countByStatus(UserStatus status);
     long countByCreatedAtAfter(LocalDateTime dateTime);
+
     List<User> findAllByOrderByCreatedAtDesc();
     List<User> findByRoleOrderByCreatedAtDesc(UserRole role);
+
+    Page<User> findByRoleOrderByCreatedAtDesc(UserRole role, Pageable pageable);
+
     List<User> findTop5ByOrderByCreatedAtDesc();
+
+    @Query(value = "SELECT u FROM User u ORDER BY u.createdAt DESC",
+           countQuery = "SELECT count(u) FROM User u")
+    Page<User> findAllPagedAdmin(Pageable pageable);
+
+    @Query(value = "SELECT u FROM User u WHERE u.role = :role ORDER BY u.createdAt DESC",
+           countQuery = "SELECT count(u) FROM User u WHERE u.role = :role")
+    Page<User> findByRolePagedAdmin(@Param("role") UserRole role, Pageable pageable);
 }
