@@ -64,6 +64,16 @@ public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long>,
     @EntityGraph(attributePaths = {"serviceCategory"})
     List<HelpRequest> findByRequesterOrderByCreatedAtDesc(UserProfile requester);
 
+    // 게시판 지역 필터 옵션 — 특정 상태 요청에 실제 존재하는 (시/도, 시군구) distinct 쌍.
+    // 빈 결과만 내는 필터를 막기 위해 정적 지역표가 아닌 실데이터에서 뽑는다.
+    @Query("""
+        select distinct new com.project.ieum.dto.search.RegionOption(hr.sido, hr.sigungu)
+        from HelpRequest hr
+        where hr.status = :status and hr.sido is not null and hr.sigungu is not null
+        order by hr.sido asc, hr.sigungu asc
+        """)
+    List<com.project.ieum.dto.search.RegionOption> findDistinctRegionsByStatus(@Param("status") HelpRequestStatus status);
+
     // 전체 활성 요청 목록 — 매칭 게시판 전체 조회용 (OPEN/MATCHED 상태).
     List<HelpRequest> findByStatusInOrderByCreatedAtDesc(List<HelpRequestStatus> statuses);
     Page<HelpRequest> findByStatusInOrderByCreatedAtDesc(List<HelpRequestStatus> statuses, Pageable pageable);
