@@ -6,6 +6,8 @@ import com.project.ieum.service.HelpRequestService;
 import com.project.ieum.service.MatchingService;
 import com.project.ieum.service.common.CurrentUserService;
 import com.project.ieum.service.geocoding.GeoDistance;
+import com.project.ieum.service.geocoding.PlaceResult;
+import com.project.ieum.service.geocoding.TmapPlaceSearchService;
 import com.project.ieum.service.recommend.RecommendationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +29,7 @@ public class CaregiverBoardController {
     private final MatchingService matchingService;
     private final RecommendationService recommendationService;
     private final CurrentUserService currentUserService;
+    private final TmapPlaceSearchService placeSearchService;
     // 지도 위치 선택용 TMap JS SDK appKey(클라이언트 노출). 비어 있으면 지도 버튼을 숨긴다.
     private final String tmapAppKey;
 
@@ -34,12 +37,21 @@ public class CaregiverBoardController {
                                     MatchingService matchingService,
                                     RecommendationService recommendationService,
                                     CurrentUserService currentUserService,
+                                    TmapPlaceSearchService placeSearchService,
                                     @Value("${tmap.app-key:}") String tmapAppKey) {
         this.helpRequestService = helpRequestService;
         this.matchingService = matchingService;
         this.recommendationService = recommendationService;
         this.currentUserService = currentUserService;
+        this.placeSearchService = placeSearchService;
         this.tmapAppKey = tmapAppKey;
+    }
+
+    // 지도 모달의 장소 검색 — 검색어를 좌표로(서버 프록시, CORS 회피). 결과 목록(JSON)을 반환.
+    @GetMapping("/poi-search")
+    @ResponseBody
+    public java.util.List<PlaceResult> poiSearch(@RequestParam String keyword) {
+        return placeSearchService.search(keyword);
     }
 
     @GetMapping({"", "/"})
