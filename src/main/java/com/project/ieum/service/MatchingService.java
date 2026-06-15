@@ -1,7 +1,9 @@
 package com.project.ieum.service;
 
 import com.project.ieum.dto.recommend.MatchTagInfo;
+import com.project.ieum.dto.request.ActivityHandshakeView;
 import com.project.ieum.dto.request.ApplyRequest;
+import com.project.ieum.dto.request.MatchedPartyView;
 import com.project.ieum.entity.ApplicationStatus;
 import com.project.ieum.entity.User;
 import com.project.ieum.entity.UserRole;
@@ -10,6 +12,7 @@ import com.project.ieum.entity.conversation.Conversation;
 import com.project.ieum.entity.conversation.ConversationStatus;
 import com.project.ieum.entity.conversation.Message;
 import com.project.ieum.entity.notification.NotificationType;
+import com.project.ieum.entity.request.ConfirmParty;
 import com.project.ieum.entity.request.HelpRequest;
 import com.project.ieum.entity.request.HelpRequestApplication;
 import com.project.ieum.entity.request.HelpRequestPersonalityTag;
@@ -113,7 +116,16 @@ public class MatchingService {
         }
 
         selected.accept();
-        helpRequest.changeStatus(HelpRequestStatus.MATCHED);
+        helpRequest.match();
+
+        List<HelpRequestApplication> pendingApplications = applicationRepository
+                .findByHelpRequest_IdAndStatus(helpRequest.getId(), ApplicationStatus.PENDING);
+        for (HelpRequestApplication application : pendingApplications) {
+            if (!application.getId().equals(selected.getId())) {
+                application.cancel();
+                conversationRepository.findByApplication_Id(application.getId()).ifPresent(Conversation::close);
+            }
+        }
 
         notificationService.create(
                 selected.getCaregiver().getUser(),
@@ -133,17 +145,9 @@ public class MatchingService {
         if (application.getStatus() != ApplicationStatus.ACCEPTED) {
             throw new IllegalStateException("수락된 지원만 매칭 취소할 수 있습니다.");
         }
-        application.pending();
-        HelpRequest helpRequest = application.getHelpRequest();
-        helpRequest.changeStatus(HelpRequestStatus.OPEN);
-
-        // 매칭 수락 시 자동으로 거절된 다른 신청들을 다시 대기 중으로 복구
-        applicationRepository.findByHelpRequest_IdOrderByCreatedAtDesc(helpRequest.getId()).stream()
-                .filter(a -> !a.getId().equals(applicationId) && a.getStatus() == ApplicationStatus.REJECTED)
-                .forEach(a -> {
-                    a.pending();
-                    conversationRepository.findByApplication_Id(a.getId()).ifPresent(Conversation::open);
-                });
+        application.cancel();
+        application.getHelpRequest().close();
+        conversationRepository.findByApplication_Id(applicationId).ifPresent(Conversation::close);
     }
 
     public void reject(Long applicationId) {
@@ -164,27 +168,41 @@ public class MatchingService {
         conversationRepository.findByApplication_Id(applicationId).ifPresent(Conversation::close);
     }
 
-    public void startActivity(Long requestId) {
+    // 활동 시작 확인(핸드셰이크): 이용자·도우미가 각자 호출. 양측이 모두 확인하면 MATCHED→IN_PROGRESS.
+    public void confirmStart(Long requestId) {
         User currentUser = currentUserService.getCurrentUser();
         HelpRequest helpRequest = getRequest(requestId);
-        if (!canManageMatchedRequest(helpRequest, currentUser.getId())) {
-            throw new ForbiddenException("매칭 참여자만 활동을 시작할 수 있습니다.");
-        }
         if (helpRequest.getStatus() != HelpRequestStatus.MATCHED) {
-            throw new IllegalStateException("매칭 확정 상태에서만 활동을 시작할 수 있습니다.");
+            throw new IllegalStateException("매칭 확정 상태에서만 활동 시작을 확인할 수 있습니다.");
         }
-        helpRequest.changeStatus(HelpRequestStatus.IN_PROGRESS);
+        HelpRequestApplication matched = findAcceptedApplication(requestId);
+        ConfirmParty party = resolveParty(helpRequest, matched, currentUser.getId());
+
+        matched.confirmStartBy(party);
+        if (matched.bothStartConfirmed()) {
+            helpRequest.startProgress();
+            notifyBothParties(helpRequest, matched, "활동이 시작되었어요",
+                    helpRequest.getTitle() + " 활동이 시작되었습니다.");
+        }
     }
 
-    public void completeActivity(Long requestId) {
-        User currentUser = requireRole(UserRole.USER);
+    // 활동 종료 확인(핸드셰이크): 양측이 모두 확인하면 IN_PROGRESS→COMPLETED + 지원 COMPLETED.
+    public void confirmEnd(Long requestId) {
+        User currentUser = currentUserService.getCurrentUser();
         HelpRequest helpRequest = getRequest(requestId);
-        ensureRequester(helpRequest, currentUser.getId());
         if (helpRequest.getStatus() != HelpRequestStatus.IN_PROGRESS) {
-            throw new IllegalStateException("진행 중인 활동만 완료할 수 있습니다.");
+            throw new IllegalStateException("진행 중 상태에서만 활동 종료를 확인할 수 있습니다.");
         }
-        helpRequest.changeStatus(HelpRequestStatus.COMPLETED);
-        findAcceptedApplication(helpRequest.getId()).complete();
+        HelpRequestApplication matched = findAcceptedApplication(requestId);
+        ConfirmParty party = resolveParty(helpRequest, matched, currentUser.getId());
+
+        matched.confirmEndBy(party);
+        if (matched.bothEndConfirmed()) {
+            helpRequest.complete();
+            matched.complete();
+            notifyBothParties(helpRequest, matched, "활동이 완료되었어요",
+                    helpRequest.getTitle() + " 활동이 완료되었습니다. 후기를 남겨보세요.");
+        }
     }
 
     @Transactional(readOnly = true)
@@ -273,13 +291,119 @@ public class MatchingService {
                 .orElseThrow(() -> new NotFoundException("확정된 매칭을 찾을 수 없습니다."));
     }
 
-    private boolean canManageMatchedRequest(HelpRequest helpRequest, Long userId) {
-        if (helpRequest.getRequester().getUserId().equals(userId)) {
-            return true;
+    // 상세 페이지 핸드셰이크 패널용 파생 뷰. 현재 사용자가 매칭 참여자가 아니면 hidden.
+    @Transactional(readOnly = true)
+    public ActivityHandshakeView getHandshakeView(Long requestId, Long userId) {
+        HelpRequest helpRequest = getRequest(requestId);
+        HelpRequestStatus status = helpRequest.getStatus();
+        if (status != HelpRequestStatus.MATCHED && status != HelpRequestStatus.IN_PROGRESS) {
+            return ActivityHandshakeView.hidden();
         }
-        return applicationRepository.findByHelpRequest_IdAndStatus(helpRequest.getId(), ApplicationStatus.ACCEPTED)
-                .stream()
-                .anyMatch(application -> application.getCaregiver().getUserId().equals(userId));
+        HelpRequestApplication matched = applicationRepository
+                .findByHelpRequest_IdAndStatus(requestId, ApplicationStatus.ACCEPTED)
+                .stream().findFirst().orElse(null);
+        if (matched == null) {
+            return ActivityHandshakeView.hidden();
+        }
+
+        final ConfirmParty party;
+        if (helpRequest.getRequester().getUserId().equals(userId)) {
+            party = ConfirmParty.REQUESTER;
+        } else if (matched.getCaregiver().getUserId().equals(userId)) {
+            party = ConfirmParty.CAREGIVER;
+        } else {
+            return ActivityHandshakeView.hidden();
+        }
+        ConfirmParty other = (party == ConfirmParty.REQUESTER) ? ConfirmParty.CAREGIVER : ConfirmParty.REQUESTER;
+
+        if (status == HelpRequestStatus.MATCHED) {
+            return new ActivityHandshakeView(true, "START",
+                    matched.startConfirmedBy(party), matched.startConfirmedBy(other), matched.bothStartConfirmed());
+        }
+        return new ActivityHandshakeView(true, "END",
+                matched.endConfirmedBy(party), matched.endConfirmedBy(other), matched.bothEndConfirmed());
+    }
+
+    // 상세 페이지(이용자 측)에서 선정된 도우미·대화방을 보여주기 위한 파생 뷰.
+    // ACCEPTED 지원이 없으면(아직 미선정·이미 종료) Optional.empty.
+    @Transactional(readOnly = true)
+    public java.util.Optional<MatchedPartyView> getMatchedParty(Long requestId) {
+        return applicationRepository.findByHelpRequest_IdAndStatus(requestId, ApplicationStatus.ACCEPTED)
+                .stream().findFirst()
+                .map(app -> new MatchedPartyView(
+                        app.getCaregiver().getFullName(),
+                        conversationRepository.findByApplication_Id(app.getId())
+                                .map(Conversation::getId)
+                                .orElse(null)));
+    }
+
+    // ── 시간 기반 자동전이 (스케줄러가 호출) ──
+    // 상태 가드로 멱등: 전이 후 상태가 바뀌어 다음 주기엔 같은 행이 재선택되지 않는다.
+    @Transactional
+    public void runLifecycleTransitions(LocalDateTime now) {
+        expireOpenRequests(now);          // OPEN  : now > 희망시작 − 1h → CLOSED + 지원 일괄 CANCELLED
+        closeNoShowMatches(now);          // MATCHED: now > 희망시작 + 30m → CLOSED + 선정 지원 CANCELLED
+        autoCompleteOverdueActivities(now); // IN_PROGRESS: now > 희망종료 + 30m → COMPLETED
+        closeCompletedConversations(now); // COMPLETED 대화방: 희망종료 + 1h 경과 → CLOSED
+    }
+
+    private void expireOpenRequests(LocalDateTime now) {
+        for (HelpRequest helpRequest : helpRequestRepository
+                .findByStatusAndDesiredStartDatetimeBefore(HelpRequestStatus.OPEN, now.plusHours(1))) {
+            helpRequest.close();
+            cancelApplicationsAndCloseConversations(helpRequest.getId(), ApplicationStatus.PENDING);
+        }
+    }
+
+    private void closeNoShowMatches(LocalDateTime now) {
+        for (HelpRequest helpRequest : helpRequestRepository
+                .findByStatusAndDesiredStartDatetimeBefore(HelpRequestStatus.MATCHED, now.minusMinutes(30))) {
+            helpRequest.close();
+            cancelApplicationsAndCloseConversations(helpRequest.getId(), ApplicationStatus.ACCEPTED);
+        }
+    }
+
+    private void autoCompleteOverdueActivities(LocalDateTime now) {
+        for (HelpRequest helpRequest : helpRequestRepository
+                .findByStatusAndDesiredEndDatetimeBefore(HelpRequestStatus.IN_PROGRESS, now.minusMinutes(30))) {
+            helpRequest.complete();
+            applicationRepository.findByHelpRequest_IdAndStatus(helpRequest.getId(), ApplicationStatus.ACCEPTED)
+                    .stream().findFirst().ifPresent(HelpRequestApplication::complete);
+        }
+    }
+
+    private void closeCompletedConversations(LocalDateTime now) {
+        conversationRepository.findActiveConversationsForCompletedRequestsEndedBefore(now.minusHours(1))
+                .forEach(Conversation::close);
+    }
+
+    private void cancelApplicationsAndCloseConversations(Long requestId, ApplicationStatus targetStatus) {
+        applicationRepository.findByHelpRequest_IdAndStatus(requestId, targetStatus)
+                .forEach(application -> {
+                    application.cancel();
+                    conversationRepository.findByApplication_Id(application.getId()).ifPresent(Conversation::close);
+                });
+    }
+
+    // 현재 사용자를 매칭의 확인 주체(이용자/도우미)로 해석. 둘 다 아니면 거부.
+    private ConfirmParty resolveParty(HelpRequest helpRequest, HelpRequestApplication matched, Long userId) {
+        if (helpRequest.getRequester().getUserId().equals(userId)) {
+            return ConfirmParty.REQUESTER;
+        }
+        if (matched.getCaregiver().getUserId().equals(userId)) {
+            return ConfirmParty.CAREGIVER;
+        }
+        throw new ForbiddenException("매칭 참여자만 활동 상태를 변경할 수 있습니다.");
+    }
+
+    // 핸드셰이크 전이 성사 시 양측에게 동일 알림(대화방 링크).
+    private void notifyBothParties(HelpRequest helpRequest, HelpRequestApplication matched,
+                                   String title, String body) {
+        String link = conversationRepository.findByApplication_Id(matched.getId())
+                .map(conversation -> "/chat/conversations/" + conversation.getId())
+                .orElse("/chat/conversations");
+        notificationService.create(helpRequest.getRequester().getUser(), NotificationType.MATCHING, title, body, link);
+        notificationService.create(matched.getCaregiver().getUser(), NotificationType.MATCHING, title, body, link);
     }
 
     private void ensureRequester(HelpRequest helpRequest, Long userId) {

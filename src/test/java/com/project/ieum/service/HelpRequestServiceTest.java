@@ -12,6 +12,8 @@ import com.project.ieum.exception.HelpRequestNotFoundException;
 import com.project.ieum.exception.InvalidRequestStateException;
 import com.project.ieum.exception.NotRequestOwnerException;
 import com.project.ieum.exception.RequestTimeConflictException;
+import com.project.ieum.repository.ConversationRepository;
+import com.project.ieum.repository.HelpRequestApplicationRepository;
 import com.project.ieum.repository.HelpRequestPersonalityTagRepository;
 import com.project.ieum.repository.HelpRequestRepository;
 import com.project.ieum.repository.PersonalityTagRepository;
@@ -52,6 +54,10 @@ class HelpRequestServiceTest {
 
     @Mock
     private HelpRequestRepository helpRequestRepository;
+    @Mock
+    private HelpRequestApplicationRepository helpRequestApplicationRepository;
+    @Mock
+    private ConversationRepository conversationRepository;
     @Mock
     private UserProfileRepository userProfileRepository;
     @Mock

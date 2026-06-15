@@ -57,7 +57,7 @@ class LoginFlowTest {
                         .param("email", "login-user@ieum.test")
                         .param("password", "password123!"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/me"));
+                .andExpect(redirectedUrl("/disabled/board"));
     }
 
     @Test
@@ -123,7 +123,7 @@ class LoginFlowTest {
                         .param("email", "new-caregiver@ieum.test")
                         .param("password", "password123!"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/requests"));
+                .andExpect(redirectedUrl("/caregiver/board"));
     }
 
     @Test

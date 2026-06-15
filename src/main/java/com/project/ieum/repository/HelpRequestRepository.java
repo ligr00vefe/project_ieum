@@ -65,6 +65,12 @@ public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long>,
     Page<HelpRequest> findByStatusOrderByCreatedAtDesc(HelpRequestStatus status, Pageable pageable);
     List<HelpRequest> findTop5ByStatusOrderByUpdatedAtDesc(HelpRequestStatus status);
 
+    // 스케줄러 시간 기반 자동전이용 — 상태 + 임계 일시 조회.
+    //   OPEN 만료(희망시작 < now+1h) / MATCHED 노쇼(희망시작 < now-30m) → desiredStartDatetimeBefore
+    //   IN_PROGRESS 자동완료(희망종료 < now-30m) → desiredEndDatetimeBefore (null end는 자연히 제외)
+    List<HelpRequest> findByStatusAndDesiredStartDatetimeBefore(HelpRequestStatus status, LocalDateTime threshold);
+    List<HelpRequest> findByStatusAndDesiredEndDatetimeBefore(HelpRequestStatus status, LocalDateTime threshold);
+
     @Query(value = "SELECT r FROM HelpRequest r LEFT JOIN FETCH r.requester ORDER BY r.createdAt DESC",
            countQuery = "SELECT count(r) FROM HelpRequest r")
     Page<HelpRequest> findAllPagedAdminWithRequester(Pageable pageable);

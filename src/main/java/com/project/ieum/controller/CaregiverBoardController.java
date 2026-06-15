@@ -51,6 +51,7 @@ public class CaregiverBoardController {
             matchingService.getMyConversationId(id, currentUserId).ifPresent(cid ->
                 model.addAttribute("myConversationId", cid));
         }
+        model.addAttribute("handshake", matchingService.getHandshakeView(id, currentUserId));
         model.addAttribute("recommendations", recommendationService.recommendCaregivers(id, 5));
         model.addAttribute("content", "caregiver/board/detail");
         return "layout/layout";
@@ -68,6 +69,21 @@ public class CaregiverBoardController {
         }
         matchingService.apply(id, applyRequest);
         redirectAttributes.addFlashAttribute("applied", true);
+        return "redirect:/caregiver/board/" + id;
+    }
+
+    // 활동 시작/종료 양측 확인 — 도우미(선정된 활동지원사) 측.
+    @PostMapping("/{id}/confirm-start")
+    public String confirmStart(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        matchingService.confirmStart(id);
+        redirectAttributes.addFlashAttribute("message", "활동 시작을 확인했습니다.");
+        return "redirect:/caregiver/board/" + id;
+    }
+
+    @PostMapping("/{id}/confirm-end")
+    public String confirmEnd(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        matchingService.confirmEnd(id);
+        redirectAttributes.addFlashAttribute("message", "활동 종료를 확인했습니다.");
         return "redirect:/caregiver/board/" + id;
     }
 }
