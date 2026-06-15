@@ -106,7 +106,7 @@
      th:attr="data-lat=${lat},data-lng=${lng}"
      role="dialog" aria-modal="true" aria-labelledby="mapModalTitle">
     <div id="mapBackdrop" class="absolute inset-0 bg-black/40"></div>
-    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden">
         <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <h2 id="mapModalTitle" class="text-base font-semibold text-gray-900">지도에서 위치 선택</h2>
             <button type="button" id="mapClose" aria-label="닫기"
@@ -114,9 +114,22 @@
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
-        <div id="mapCanvas" class="w-full h-80 bg-gray-100"></div>
+        <div class="px-5 py-3 border-b border-gray-100 flex flex-wrap gap-2">
+            <div class="relative flex-1 min-w-[12rem]">
+                <input type="text" id="poiSearch" placeholder="장소·주소 검색 (예: 강남역)"
+                       class="w-full pl-3 pr-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300">
+            </div>
+            <button type="button" id="poiSearchBtn"
+                    class="px-3.5 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors whitespace-nowrap">검색</button>
+            <button type="button" id="myLocBtn"
+                    class="inline-flex items-center gap-1 px-3.5 py-2 text-sm font-semibold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors whitespace-nowrap">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                현재 위치
+            </button>
+        </div>
+        <div id="mapCanvas" class="w-full h-[28rem] bg-gray-100"></div>
         <div class="px-5 py-4">
-            <p class="text-sm text-gray-500">지도를 눌러 기준 위치를 정하세요.</p>
+            <p id="mapMsg" class="text-sm text-gray-500">지도를 누르거나 검색해 기준 위치를 정하세요.</p>
             <div class="flex gap-2 mt-4">
                 <button type="button" id="mapCancel"
                         class="flex-1 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">취소</button>
@@ -245,6 +258,49 @@
     }
     function closeModal() { modal.classList.add('hidden'); }
 
+    function setMsg(text) {
+        var m = document.getElementById('mapMsg');
+        if (m) m.textContent = text;
+    }
+
+    // 지도 중심·마커·선택 좌표를 한 번에 이동(검색·현재위치 공용).
+    function moveTo(lat, lng) {
+        if (!map || !marker) return;
+        var ll = new Tmapv2.LatLng(lat, lng);
+        map.setCenter(ll);
+        marker.setPosition(ll);
+        picked = { lat: lat, lng: lng };
+    }
+
+    // 장소 검색 — 서버 프록시(/poi-search)로 좌표를 받아 첫 결과로 이동.
+    function searchPoi() {
+        var input = document.getElementById('poiSearch');
+        var kw = input.value.trim();
+        if (!kw) return;
+        if (!map) { setMsg('지도가 아직 준비되지 않았습니다.'); return; }
+        setMsg('검색 중...');
+        fetch('/caregiver/board/poi-search?keyword=' + encodeURIComponent(kw))
+            .then(function (r) { return r.json(); })
+            .then(function (list) {
+                if (!list || !list.length) { setMsg('검색 결과가 없습니다.'); return; }
+                var p = list[0];
+                moveTo(p.lat, p.lng);
+                setMsg('"' + p.name + '" 위치로 이동했습니다.');
+            })
+            .catch(function () { setMsg('검색에 실패했습니다.'); });
+    }
+
+    // 현재 위치로 지도 이동.
+    function myLocation() {
+        if (!navigator.geolocation) { setMsg('이 브라우저는 위치 기능을 지원하지 않습니다.'); return; }
+        setMsg('현재 위치 확인 중...');
+        navigator.geolocation.getCurrentPosition(
+            function (pos) { moveTo(pos.coords.latitude, pos.coords.longitude); setMsg('현재 위치로 이동했습니다.'); },
+            function () { setMsg('현재 위치를 가져오지 못했습니다.'); },
+            { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+        );
+    }
+
     openBtn.addEventListener('click', openModal);
     document.getElementById('mapClose').addEventListener('click', closeModal);
     document.getElementById('mapCancel').addEventListener('click', closeModal);
@@ -252,6 +308,11 @@
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
     });
+    document.getElementById('poiSearchBtn').addEventListener('click', searchPoi);
+    document.getElementById('poiSearch').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); searchPoi(); }
+    });
+    document.getElementById('myLocBtn').addEventListener('click', myLocation);
     document.getElementById('mapConfirm').addEventListener('click', function () {
         if (!picked) return;
         window.location.assign('/caregiver/board?lat=' + encodeURIComponent(picked.lat)
