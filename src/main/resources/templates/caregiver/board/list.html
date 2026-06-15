@@ -9,43 +9,106 @@
         <p class="text-sm text-gray-500 mt-1">나의 조건과 맞는 도움 요청을 찾아보세요.</p>
     </div>
 
-    <!-- 위치 정렬 + 검색 -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
-        <!-- 위치 기반 정렬 컨트롤 -->
-        <div class="flex flex-wrap items-center gap-2">
-            <button type="button" id="nearbyBtn"
-                    class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-colors">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                내 주변 순으로 보기
-            </button>
-            <button type="button" id="mapPickBtn"
-                    th:if="${tmapAppKey != null and !tmapAppKey.isEmpty()}"
-                    class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:text-indigo-600 transition-colors">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-                </svg>
-                지도에서 선택
-            </button>
-            <span th:if="${locationSorted}"
-                  class="inline-flex items-center px-2.5 py-1 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 rounded-full">
-                내 위치 기준 가까운 순
-            </span>
-            <a th:if="${locationSorted}" th:href="@{/caregiver/board}"
-               class="text-xs text-gray-400 hover:text-indigo-600 underline underline-offset-2">전체 보기</a>
+    <!-- 위치 기반 정렬 컨트롤 -->
+    <div class="flex flex-wrap items-center gap-2 mb-3">
+        <button type="button" id="nearbyBtn"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            내 주변 순으로 보기
+        </button>
+        <button type="button" id="mapPickBtn"
+                th:if="${tmapAppKey != null and !tmapAppKey.isEmpty()}"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:text-indigo-600 transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+            </svg>
+            지도에서 선택
+        </button>
+        <span th:if="${locationSorted}"
+              class="inline-flex items-center px-2.5 py-1 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 rounded-full">
+            내 위치 기준 가까운 순
+        </span>
+        <a th:if="${locationSorted}" th:href="@{/caregiver/board}"
+           class="text-xs text-gray-400 hover:text-indigo-600 underline underline-offset-2">전체 보기</a>
+    </div>
+
+    <!-- 동적 검색 필터 — GET 폼 제출(서버 필터링). lat/lng는 hidden으로 보존해 위치정렬과 함께 검색. -->
+    <form method="get" th:action="@{/caregiver/board}" id="searchForm"
+          class="bg-white border border-gray-100 rounded-2xl p-4 mb-4">
+        <input type="hidden" name="lat" th:if="${lat != null}" th:value="${lat}">
+        <input type="hidden" name="lng" th:if="${lng != null}" th:value="${lng}">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <!-- 키워드 (제목·본문) -->
+            <div class="lg:col-span-3">
+                <label for="keyword" class="block text-xs font-semibold text-gray-500 mb-1">키워드</label>
+                <div class="relative">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input type="text" id="keyword" name="keyword" th:value="${fKeyword}"
+                           placeholder="제목·내용으로 검색"
+                           class="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300">
+                </div>
+            </div>
+
+            <!-- 시/도 -->
+            <div>
+                <label for="sido" class="block text-xs font-semibold text-gray-500 mb-1">시/도</label>
+                <select id="sido" name="sido"
+                        class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300">
+                    <option value="">전체</option>
+                    <option th:each="entry : ${regionMap}" th:value="${entry.key}" th:text="${entry.key}"
+                            th:selected="${entry.key == fSido}">서울</option>
+                </select>
+            </div>
+
+            <!-- 시/군/구 (시/도 선택에 따라 JS로 채움) -->
+            <div>
+                <label for="sigungu" class="block text-xs font-semibold text-gray-500 mb-1">시/군/구</label>
+                <select id="sigungu" name="sigungu"
+                        class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300">
+                    <option value="">전체</option>
+                </select>
+            </div>
+
+            <!-- 서비스 카테고리 -->
+            <div>
+                <label for="serviceCategoryId" class="block text-xs font-semibold text-gray-500 mb-1">서비스</label>
+                <select id="serviceCategoryId" name="serviceCategoryId"
+                        class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300">
+                    <option value="">전체</option>
+                    <option th:each="cat : ${serviceCategories}" th:value="${cat.id}" th:text="${cat.name}"
+                            th:selected="${cat.id == fServiceCategoryId}">서비스</option>
+                </select>
+            </div>
+
+            <!-- 희망 시작일 범위 -->
+            <div>
+                <label for="fromDate" class="block text-xs font-semibold text-gray-500 mb-1">희망일(부터)</label>
+                <input type="date" id="fromDate" name="fromDate" th:value="${fFromDate}"
+                       class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300">
+            </div>
+            <div>
+                <label for="toDate" class="block text-xs font-semibold text-gray-500 mb-1">희망일(까지)</label>
+                <input type="date" id="toDate" name="toDate" th:value="${fToDate}"
+                       class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300">
+            </div>
         </div>
 
-        <!-- 검색 -->
-        <div class="relative sm:w-52">
-            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-            <input type="text" placeholder="지역, 날짜, 키워드로 검색"
-                   class="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 bg-white">
+        <div class="flex items-center gap-2 mt-4">
+            <button type="submit"
+                    class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                검색
+            </button>
+            <a th:if="${hasFilter}" th:href="@{/caregiver/board(lat=${lat},lng=${lng})}"
+               class="px-4 py-2 text-sm font-semibold text-gray-500 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">필터 초기화</a>
         </div>
-    </div>
+    </form>
     <!-- 위치 안내 메시지(거부/미지원 시 노출) -->
     <p id="geoMsg" class="hidden mb-3 text-xs text-gray-500" role="status" aria-live="polite"></p>
 
@@ -94,9 +157,8 @@
 
     </div>
 
-    <!-- 페이지네이션 (위치 정렬 시 lat/lng 유지) -->
-    <div th:replace="~{fragments/pagination :: pager(${currentPage}, ${totalPages}, ${startPage}, ${endPage},
-         ${locationSorted} ? '/caregiver/board?lat=' + ${lat} + '&lng=' + ${lng} + '&' : '/caregiver/board?')}"></div>
+    <!-- 페이지네이션 (정렬·검색 필터 파라미터를 pageBaseUrl로 모두 유지) -->
+    <div th:replace="~{fragments/pagination :: pager(${currentPage}, ${totalPages}, ${startPage}, ${endPage}, ${pageBaseUrl})}"></div>
 
 </section>
 
@@ -147,8 +209,12 @@
     if (!btn) return;
 
     function goTo(lat, lng) {
-        window.location.assign('/caregiver/board?lat=' + encodeURIComponent(lat)
-            + '&lng=' + encodeURIComponent(lng) + '&page=0');
+        // 현재 검색 필터(URL 쿼리)를 보존하고 좌표·page만 갱신해 "내 주변 + 검색"을 함께 유지한다.
+        var params = new URLSearchParams(window.location.search);
+        params.set('lat', lat);
+        params.set('lng', lng);
+        params.set('page', '0');
+        window.location.assign('/caregiver/board?' + params.toString());
     }
     function showMsg(text) {
         if (!msg) return;
@@ -185,6 +251,37 @@
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
+    });
+})();
+</script>
+
+<!-- 시/도 → 시/군/구 cascade — 서버가 내려준 지역 맵으로 선택 시 시군구 옵션을 갱신(점진적 향상). -->
+<script th:inline="javascript">
+(function () {
+    var REGION_MAP = /*[[${regionMap}]]*/ {};
+    var SELECTED_SIGUNGU = /*[[${fSigungu}]]*/ '';
+    var sidoSel = document.getElementById('sido');
+    var sigunguSel = document.getElementById('sigungu');
+    if (!sidoSel || !sigunguSel) return;
+
+    function fillSigungu(sido, selected) {
+        // '전체' 옵션 1개만 남기고 재구성.
+        sigunguSel.innerHTML = '<option value="">전체</option>';
+        var list = REGION_MAP[sido] || [];
+        list.forEach(function (sg) {
+            var opt = document.createElement('option');
+            opt.value = sg;
+            opt.textContent = sg;
+            if (sg === selected) opt.selected = true;
+            sigunguSel.appendChild(opt);
+        });
+    }
+
+    // 초기 렌더 — 현재 선택된 시/도의 시군구 목록 + 기존 선택값 복원.
+    fillSigungu(sidoSel.value, SELECTED_SIGUNGU);
+    // 시/도 변경 시 시군구 목록 교체(선택 초기화).
+    sidoSel.addEventListener('change', function () {
+        fillSigungu(sidoSel.value, '');
     });
 })();
 </script>
@@ -339,8 +436,12 @@
         if (!picked) return;
         // 사용자가 직접 지정한 위치를 세션에 기억 — 다음 지도 열기·내 주변 보기에서 재사용(사전 지정).
         sessionStorage.setItem('caregiverBoardGeo', JSON.stringify({ lat: picked.lat, lng: picked.lng }));
-        window.location.assign('/caregiver/board?lat=' + encodeURIComponent(picked.lat)
-            + '&lng=' + encodeURIComponent(picked.lng) + '&page=0');
+        // 현재 검색 필터(URL 쿼리)를 보존하고 좌표·page만 갱신.
+        var params = new URLSearchParams(window.location.search);
+        params.set('lat', picked.lat);
+        params.set('lng', picked.lng);
+        params.set('page', '0');
+        window.location.assign('/caregiver/board?' + params.toString());
     });
 })();
 </script>
