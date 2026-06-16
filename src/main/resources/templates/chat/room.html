@@ -308,6 +308,7 @@ const PARTNER_COLOR = /*[[${isUser ? 'bg-teal-500' : 'bg-indigo-500'}]]*/ 'bg-in
 let lastRenderedDate = null;
 let polling = null;
 let stompClient = null;
+const renderedMessageIds = new Set();
 
 function updatePresenceUI(onlineUserIds) {
     const isOnline = onlineUserIds.includes(PARTNER_ID);
@@ -334,6 +335,14 @@ function connectPresence() {
             updatePresenceUI(JSON.parse(msg.body));
         });
         stompClient.send('/app/presence/' + CONVERSATION_ID + '/enter', {}, '{}');
+
+        // 새 메시지 실시간 수신 — presence 구독과 동일한 stompClient를 재사용한다.
+        stompClient.subscribe('/topic/conversations/' + CONVERSATION_ID, msg => {
+            const received = JSON.parse(msg.body);
+            received.mine = String(received.senderId) !== String(PARTNER_ID);
+            appendMessage(received);
+            markRead();
+        });
     }, () => {
         setTimeout(connectPresence, 3000);
     });
@@ -399,6 +408,7 @@ async function loadMessages() {
 
         const box = document.getElementById('chatMessages');
         lastRenderedDate = null;
+        renderedMessageIds.clear();
         let html = '';
 
         const today = new Date().toDateString();
@@ -415,6 +425,7 @@ async function loadMessages() {
                 lastRenderedDate = msgDate;
             }
             html += buildMessage(msg);
+            if (msg.id !== undefined && msg.id !== null) renderedMessageIds.add(msg.id);
         }
 
         if (messages.length === 0) {
@@ -480,6 +491,11 @@ async function sendMessage() {
 }
 
 function appendMessage(msg) {
+    if (msg.id !== undefined && msg.id !== null) {
+        if (renderedMessageIds.has(msg.id)) return;
+        renderedMessageIds.add(msg.id);
+    }
+
     const box = document.getElementById('chatMessages');
     const msgDate = new Date(msg.sentAt).toDateString();
     const today = new Date().toDateString();
