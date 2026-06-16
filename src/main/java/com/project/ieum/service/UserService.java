@@ -560,6 +560,16 @@ public class UserService {
         log.info("비밀번호 변경 완료 - userId={}", user.getId());
     }
 
+    @Transactional
+    public void withdraw(User user, String currentPassword) {
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new IllegalArgumentException("비밀번호가 올바르지 않습니다.");
+        }
+        user.changeStatus(com.project.ieum.entity.UserStatus.DELETED);
+        userRepository.save(user);
+        log.info("회원 탈퇴 완료 - userId={}", user.getId());
+    }
+
     private String blankIfNull(String value) {
         return value == null ? "" : value;
     }
