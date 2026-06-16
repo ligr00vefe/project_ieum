@@ -1,5 +1,11 @@
 # IEUM 구현 기록
 
+## 2026-06-14 실시간 채팅 보강
+- STOMP `convertAndSend`로 같은 DTO를 모든 구독자에게 broadcast하면 서버에서 계산한 `mine` 값이 받는 사람 기준과 다를 수 있으므로, 화면에서는 `senderId`와 현재 사용자 id를 비교해 메시지 방향을 보정해야 한다.
+- WebSocket 전환 시에도 기존 REST 조회/전송과 5초 polling을 fallback으로 남기면 CDN 로드 실패, WebSocket 연결 실패, 일시적 연결 종료 상황에서 최소 채팅 기능을 유지할 수 있다.
+- REST fallback 전송으로 저장된 메시지도 topic으로 publish해야, 상대방이 WebSocket 연결 성공으로 polling을 중단한 상태에서도 즉시 수신할 수 있다.
+- WebSocket 수신과 polling 재조회가 겹칠 수 있으므로 메시지 `id` 기준 렌더링 Set을 유지해 중복 append를 막는 편이 안전하다.
+
 ## 2026-05-19
 - `application.properties`가 `templates` 아래에 있어 Spring Boot가 기본 설정으로 읽지 못했다.
 - 테스트는 별도 `test` 프로필과 내장 데이터베이스가 없으면 컨텍스트 로딩부터 실패한다.
