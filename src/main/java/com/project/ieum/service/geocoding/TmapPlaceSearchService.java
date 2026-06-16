@@ -3,19 +3,21 @@ package com.project.ieum.service.geocoding;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
 
 /**
  * TMap 통합검색(POI, {@code /tmap/pois}) 기반 장소 검색. 지도 모달의 "위치/주소 검색"에서
  * 검색어를 좌표로 바꿔 지도를 이동시키는 데 쓴다(서버 프록시 — 브라우저 CORS 회피).
  *
- * <p>appKey는 지도 SDK와 동일하게 쿼리 파라미터로 전달한다(이미 검증된 인증 경로).
+ * <p>appKey는 {@link TmapGeocodingService}와 동일하게 {@code appKey} 헤더로 전달한다(인코딩 모호성 제거).
  * 키가 비었거나 호출이 실패하면 빈 목록을 반환해 검색 UI가 "결과 없음"으로 안전하게 처리한다.
  */
 @Slf4j
@@ -31,7 +33,11 @@ public class TmapPlaceSearchService {
             @Value("${tmap.poi-url:https://apis.openapi.sk.com/tmap/pois}") String poiUrl) {
         this.appKey = appKey;
         this.poiUrl = poiUrl;
-        this.restClient = RestClient.builder().build();
+        // 외부 호출이 응답하지 않을 때 요청 스레드가 무한 대기하지 않도록 연결·읽기 타임아웃을 둔다.
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(Duration.ofSeconds(3));
+        factory.setReadTimeout(Duration.ofSeconds(5));
+        this.restClient = RestClient.builder().requestFactory(factory).build();
     }
 
     public List<PlaceResult> search(String keyword) {
@@ -39,14 +45,19 @@ public class TmapPlaceSearchService {
             return List.of();
         }
         try {
-            // appKey는 이미 인코딩된 값일 수 있어 그대로 두고(지도 SDK와 동일 경로), 검색어만 인코딩.
-            String url = poiUrl
-                    + "?version=1&format=json&count=5&searchKeyword="
-                    + URLEncoder.encode(keyword, StandardCharsets.UTF_8)
-                    + "&appKey=" + appKey;
+            // 검색어는 UriComponentsBuilder가 인코딩하고, appKey는 헤더로 전달(쿼리 인코딩 모호성 제거).
+            URI uri = UriComponentsBuilder.fromUriString(poiUrl)
+                    .queryParam("version", 1)
+                    .queryParam("format", "json")
+                    .queryParam("count", 5)
+                    .queryParam("searchKeyword", keyword)
+                    .encode(StandardCharsets.UTF_8)
+                    .build()
+                    .toUri();
 
             PoiResponse response = restClient.get()
-                    .uri(URI.create(url))
+                    .uri(uri)
+                    .header("appKey", appKey)
                     .header("Accept", "application/json")
                     .retrieve()
                     .body(PoiResponse.class);
