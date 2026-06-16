@@ -58,14 +58,10 @@
                         </a>
                     </th:block>
                     <th:block th:if="${isUser}">
-                        <a th:href="@{/requests/create}"
+                        <a th:href="@{/disabled/board/create}"
                            class="inline-flex items-center justify-center gap-2 px-7 py-4 bg-indigo-500 text-white font-bold text-[15px] rounded-2xl hover:bg-indigo-400 active:scale-95 transition-all shadow-2xl shadow-indigo-500/30">
                             활동 요청 작성하기
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                        </a>
-                        <a th:href="@{/matching}"
-                           class="inline-flex items-center justify-center px-7 py-4 border border-white/15 text-white/70 font-semibold text-[15px] rounded-2xl hover:bg-white/8 hover:border-white/30 active:scale-95 transition-all">
-                            활동지원사 찾기
                         </a>
                     </th:block>
                     <th:block th:if="${isCaregiver}">
@@ -83,11 +79,11 @@
 
                 <!-- Stats -->
                 <div class="flex items-center gap-8 pt-8 border-t border-white/8">
-                    <div><div class="text-3xl font-black text-white">2,500<span class="text-indigo-400">+</span></div><div class="text-xs text-gray-500 mt-0.5 font-medium">등록 케어메이트</div></div>
+                    <div><div class="text-3xl font-black text-white"><span class="stat-counter" data-target="2500">0</span><span class="text-indigo-400">+</span></div><div class="text-xs text-gray-500 mt-0.5 font-medium">등록 케어메이트</div></div>
                     <div class="w-px h-10 bg-white/10"></div>
-                    <div><div class="text-3xl font-black text-white">1,200<span class="text-indigo-400">+</span></div><div class="text-xs text-gray-500 mt-0.5 font-medium">활동지원사</div></div>
+                    <div><div class="text-3xl font-black text-white"><span class="stat-counter" data-target="1200">0</span><span class="text-indigo-400">+</span></div><div class="text-xs text-gray-500 mt-0.5 font-medium">활동지원사</div></div>
                     <div class="w-px h-10 bg-white/10"></div>
-                    <div><div class="text-3xl font-black text-white">98<span class="text-indigo-400">%</span></div><div class="text-xs text-gray-500 mt-0.5 font-medium">매칭 만족도</div></div>
+                    <div><div class="text-3xl font-black text-white"><span class="stat-counter" data-target="98">0</span><span class="text-indigo-400">%</span></div><div class="text-xs text-gray-500 mt-0.5 font-medium">매칭 만족도</div></div>
                 </div>
             </div>
 
@@ -457,8 +453,7 @@
         </th:block>
         <th:block th:if="${isUser}">
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a th:href="@{/requests/create}" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-indigo-600 text-white font-semibold rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95">활동 요청 작성하기<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg></a>
-                <a th:href="@{/matching}" class="inline-flex items-center justify-center px-8 py-4 border-2 border-indigo-200 text-indigo-700 font-semibold rounded-2xl hover:bg-indigo-50 transition-all active:scale-95">활동지원사 찾아보기</a>
+                <a th:href="@{/disabled/board/create}" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-indigo-600 text-white font-semibold rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95">활동 요청 작성하기<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg></a>
             </div>
         </th:block>
         <th:block th:if="${isCaregiver}">
@@ -554,6 +549,44 @@
 
     window.addEventListener('resize', buildPath, { passive: true });
     window.addEventListener('scroll', onScroll,  { passive: true });
+})();
+</script>
+
+<script>
+(function () {
+    var counters = Array.from(document.querySelectorAll('.stat-counter'));
+    if (!counters.length) return;
+
+    function animateCounter(el) {
+        var target = parseInt(el.dataset.target, 10) || 0;
+        var duration = 1200;
+        var startTime = null;
+
+        function step(timestamp) {
+            if (startTime === null) startTime = timestamp;
+            var progress = Math.min((timestamp - startTime) / duration, 1);
+            var eased = 1 - Math.pow(1 - progress, 3);
+            var current = Math.round(target * eased);
+            el.textContent = current.toLocaleString('en-US');
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                el.textContent = target.toLocaleString('en-US');
+            }
+        }
+        requestAnimationFrame(step);
+    }
+
+    var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                animateCounter(entry.target);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.4 });
+
+    counters.forEach(function (el) { observer.observe(el); });
 })();
 </script>
 

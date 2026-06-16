@@ -298,4 +298,26 @@ public class UserController {
             return "redirect:/mypage/password";
         }
     }
+
+    // ─── 회원 탈퇴 ────────────────────────────────────────────
+
+    @PostMapping("/mypage/withdraw")
+    public String withdraw(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam("password") String password,
+            jakarta.servlet.http.HttpServletRequest request,
+            jakarta.servlet.http.HttpServletResponse response,
+            RedirectAttributes redirectAttributes) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        try {
+            userService.withdraw(user, password);
+            new org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler()
+                    .logout(request, response, null);
+            redirectAttributes.addFlashAttribute("successMessage", "탈퇴가 완료되었습니다.");
+            return "redirect:/login";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return user.getRole() == UserRole.CAREGIVER ? "redirect:/caregiver/mypage" : "redirect:/disabled/mypage";
+        }
+    }
 }
