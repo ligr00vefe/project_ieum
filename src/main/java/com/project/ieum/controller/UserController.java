@@ -178,15 +178,16 @@ public class UserController {
                 .filter(a -> a.getStatus() == ApplicationStatus.ACCEPTED).collect(Collectors.toList());
         List<HelpRequestApplication> completedApplications = allApplications.stream()
                 .filter(a -> a.getStatus() == ApplicationStatus.COMPLETED).collect(Collectors.toList());
-        List<HelpRequestApplication> rejectedApplications = allApplications.stream()
-                .filter(a -> a.getStatus() == ApplicationStatus.REJECTED
-                        || a.getStatus() == ApplicationStatus.CANCELLED).collect(Collectors.toList());
+        // 취소/마감된 지원(거절 기능 폐지 후 무산 지원은 모두 CANCELLED). 과거 REJECTED 데이터도 함께 표시.
+        List<HelpRequestApplication> cancelledApplications = allApplications.stream()
+                .filter(a -> a.getStatus() == ApplicationStatus.CANCELLED
+                        || a.getStatus() == ApplicationStatus.REJECTED).collect(Collectors.toList());
 
         model.addAttribute("completedMatches", completedApplications.size());
         model.addAttribute("pendingApplications", pendingApplications);
         model.addAttribute("acceptedApplications", acceptedApplications);
         model.addAttribute("completedApplications", completedApplications);
-        model.addAttribute("rejectedApplications", rejectedApplications);
+        model.addAttribute("cancelledApplications", cancelledApplications);
         model.addAttribute("receivedReviews", reviewService.getPublicReviews(user.getId()));
 
         model.addAttribute("content", "caregiver/mypage");
