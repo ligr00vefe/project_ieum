@@ -52,7 +52,8 @@ public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long>,
           ( sin(:lat * 0.017453292519943295) * sin(hr.latitude * 0.017453292519943295)
           + cos(:lat * 0.017453292519943295) * cos(hr.latitude * 0.017453292519943295)
             * cos(hr.longitude * 0.017453292519943295 - :lng * 0.017453292519943295) ) desc,
-          hr.desiredStartDatetime asc
+          hr.desiredStartDatetime asc,
+          hr.id desc
         """,
         countQuery = "select count(hr) from HelpRequest hr where hr.status = :status")
     Page<HelpRequest> findByStatusOrderByDistance(@Param("status") HelpRequestStatus status,
