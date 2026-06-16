@@ -233,9 +233,14 @@
         if (cached) {
             try {
                 var p = JSON.parse(cached);
-                goTo(p.lat, p.lng);
-                return;
-            } catch (e) { /* 캐시 손상 시 새로 요청 */ }
+                if (p && !isNaN(p.lat) && !isNaN(p.lng)) {
+                    goTo(p.lat, p.lng);
+                    return;
+                }
+                sessionStorage.removeItem('caregiverBoardGeo'); // 손상·구버전 캐시 폐기 후 새로 요청
+            } catch (e) {
+                sessionStorage.removeItem('caregiverBoardGeo'); // 캐시 손상 시 폐기 후 새로 요청
+            }
         }
         if (!navigator.geolocation) {
             showMsg('이 브라우저는 위치 기능을 지원하지 않습니다. 시작시각 순으로 표시합니다.');

@@ -77,8 +77,9 @@ public class CaregiverBoardController {
                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
                        Model model) {
         // 위치 기반(내 주변/지도) ↔ 지역 필터(시/도·시군구)는 상호 배타.
-        // 지역 필터가 있으면 위치 정렬을 해제(좌표 무시) → 시작시각 순 + 거리 배지 미표시.
-        if (hasText(sido)) {
+        // 지역 필터(시/도 또는 시군구)가 있으면 위치 정렬을 해제(좌표 무시) → 시작시각 순 + 거리 배지 미표시.
+        // 시군구만 단독으로 와도(직접 URL 등) 지역 필터로 간주해 클라이언트 JS(goTo/mapConfirm)와 동일하게 처리.
+        if (hasText(sido) || hasText(sigungu)) {
             lat = null;
             lng = null;
         }
