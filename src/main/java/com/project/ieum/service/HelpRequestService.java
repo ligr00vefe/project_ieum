@@ -111,14 +111,15 @@ public class HelpRequestService {
     // 도우미가 본 내용/시간/위치가 지원 후 바뀌면 신뢰성이 깨지므로 생성 후 본문 수정을 막는다.
     // 변경이 필요하면 마감(cancel→CLOSED) 후 새로 작성한다.
 
-    // 재게시 — 마감(CLOSED)된 본인 요청의 내용을 작성 폼에 프리필한다.
+    // 재게시 — 마감(CLOSED)·완료(COMPLETED)된 본인 요청의 내용을 작성 폼에 프리필한다.
     // 원본은 보존하고, 제출 시 create()로 새 OPEN 요청이 생긴다(기존 작성 흐름과 동일).
     // 날짜는 이미 지났으면(@FutureOrPresent 위반) 비워 사용자가 다시 고르게 한다.
     @Transactional(readOnly = true)
     public HelpRequestForm buildRepostForm(Long requestId) {
         User currentUser = requireRole(UserRole.USER);
         HelpRequest source = getOwnedRequest(requestId, currentUser.getId());
-        if (source.getStatus() != HelpRequestStatus.CLOSED) {
+        if (source.getStatus() != HelpRequestStatus.CLOSED
+                && source.getStatus() != HelpRequestStatus.COMPLETED) {
             throw InvalidRequestStateException.cannotRepost();
         }
 
