@@ -274,15 +274,6 @@ public class HelpRequestService {
         return map;
     }
 
-    // 접속 위치 기반 정렬 — 좌표(lat,lng)가 모두 있으면 가까운 순, 아니면 기존 시작시각 정렬로 위임(회귀 보존).
-    @Transactional(readOnly = true)
-    public Page<HelpRequest> getOpenRequests(Pageable pageable, Double lat, Double lng) {
-        if (lat == null || lng == null) {
-            return getOpenRequests(pageable);
-        }
-        return helpRequestRepository.findByStatusOrderByDistance(HelpRequestStatus.OPEN, lat, lng, pageable);
-    }
-
     private void replaceTags(HelpRequest helpRequest, List<Long> tagIds) {
         List<HelpRequestPersonalityTag> existing = helpRequestPersonalityTagRepository.findByHelpRequest_Id(helpRequest.getId());
         helpRequestPersonalityTagRepository.deleteAll(existing);
