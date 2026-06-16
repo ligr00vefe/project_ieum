@@ -2,6 +2,8 @@ package com.project.ieum.service;
 
 import com.project.ieum.dto.mypage.CompletedMatchingView;
 import com.project.ieum.dto.request.HelpRequestForm;
+import com.project.ieum.dto.search.HelpRequestSearchCondition;
+import com.project.ieum.dto.search.RegionOption;
 import com.project.ieum.entity.ApplicationStatus;
 import com.project.ieum.entity.PersonalityTag;
 import com.project.ieum.entity.User;
@@ -33,7 +35,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -249,6 +254,24 @@ public class HelpRequestService {
     @Transactional(readOnly = true)
     public Page<HelpRequest> getOpenRequests(Pageable pageable) {
         return helpRequestRepository.findByStatusOrderByDesiredStartDatetimeAscIdDesc(HelpRequestStatus.OPEN, pageable);
+    }
+
+    // 게시판 동적 검색 — 모집중(OPEN)만 대상으로 조건 필터링. 좌표가 있으면 가까운 순 정렬(#66 보존).
+    @Transactional(readOnly = true)
+    public Page<HelpRequest> searchOpenRequests(HelpRequestSearchCondition condition, Pageable pageable,
+                                                Double lat, Double lng) {
+        condition.setStatus(HelpRequestStatus.OPEN);
+        return helpRequestRepository.searchHelpRequests(condition, pageable, lat, lng);
+    }
+
+    // 게시판 지역 필터 옵션 — 모집중 요청에 존재하는 시/도 → [시군구...] 맵(드롭다운 cascade용, 입력 순서 보존).
+    @Transactional(readOnly = true)
+    public Map<String, List<String>> getOpenRegionOptions() {
+        Map<String, List<String>> map = new LinkedHashMap<>();
+        for (RegionOption opt : helpRequestRepository.findDistinctRegionsByStatus(HelpRequestStatus.OPEN)) {
+            map.computeIfAbsent(opt.sido(), key -> new ArrayList<>()).add(opt.sigungu());
+        }
+        return map;
     }
 
     // 접속 위치 기반 정렬 — 좌표(lat,lng)가 모두 있으면 가까운 순, 아니면 기존 시작시각 정렬로 위임(회귀 보존).
