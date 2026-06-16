@@ -158,22 +158,6 @@
         </span>
     </div>
 
-    <!-- IN_PROGRESS: 활동 완료 버튼 -->
-    <div th:if="${request.status.name() == 'IN_PROGRESS' and request.requester.userId == currentUserId}"
-         class="bg-white rounded-2xl border border-green-100 p-5 mb-4 flex items-center justify-between">
-        <div>
-            <p class="text-sm font-semibold text-gray-900">활동이 진행 중입니다</p>
-            <p class="text-xs text-gray-400 mt-0.5">활동이 끝나면 완료 처리 후 후기를 남겨주세요.</p>
-        </div>
-        <form th:action="@{/requests/{id}/complete(id=${request.id})}" method="post">
-            <button type="submit"
-                    class="flex items-center gap-1.5 px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-all shadow-sm shadow-green-100">
-                활동 완료
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </button>
-        </form>
-    </div>
-
     <!-- COMPLETED: 마이페이지에서 후기 작성 안내 -->
     <div th:if="${request.status.name() == 'COMPLETED'}"
          class="bg-indigo-50 rounded-2xl border border-indigo-100 p-5 mb-4 flex items-center justify-between">
@@ -188,12 +172,12 @@
         </a>
     </div>
 
-    <!-- 재게시 (마감된 본인 요청을 같은 내용으로 다시 작성) -->
-    <div th:if="${request.status.name() == 'CLOSED' and request.requester.userId == currentUserId}"
+    <!-- 재게시 (마감·완료된 본인 요청을 같은 내용으로 다시 작성) -->
+    <div th:if="${(request.status.name() == 'CLOSED' or request.status.name() == 'COMPLETED') and request.requester.userId == currentUserId}"
          class="bg-white rounded-2xl border border-indigo-100 p-5 mb-4 flex items-center justify-between">
         <div>
             <p class="text-sm font-semibold text-gray-900">이 요청을 다시 게시</p>
-            <p class="text-xs text-gray-400 mt-0.5">마감된 요청입니다. 같은 내용으로 새 요청을 작성할 수 있어요. (일시는 다시 선택)</p>
+            <p class="text-xs text-gray-400 mt-0.5">같은 내용으로 새 요청을 작성할 수 있어요. (일시는 다시 선택)</p>
         </div>
         <a th:href="@{/disabled/board/{id}/repost(id=${request.id})}"
            class="flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100">
