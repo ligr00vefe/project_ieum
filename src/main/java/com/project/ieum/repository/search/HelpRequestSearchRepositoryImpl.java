@@ -80,7 +80,9 @@ public class HelpRequestSearchRepositoryImpl implements HelpRequestSearchReposit
                   + "+ cos({0} * 0.017453292519943295) * cos({1} * 0.017453292519943295) "
                   + "* cos({2} * 0.017453292519943295 - {3} * 0.017453292519943295) )",
                     lat, request.latitude, request.longitude, lng);
-            query.orderBy(nullCoordLast.asc(), cosineSimilarity.desc(), request.desiredStartDatetime.asc());
+            // id.desc() — 좌표·시작시각이 모두 동률일 때 결정적 순서를 보장(페이지 경계 중복/누락 방지).
+            query.orderBy(nullCoordLast.asc(), cosineSimilarity.desc(),
+                    request.desiredStartDatetime.asc(), request.id.desc());
         } else {
             query.orderBy(request.desiredStartDatetime.asc(), request.id.desc());
         }

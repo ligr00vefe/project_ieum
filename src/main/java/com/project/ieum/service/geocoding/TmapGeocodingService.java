@@ -3,6 +3,7 @@ package com.project.ieum.service.geocoding;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -10,6 +11,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,7 +38,11 @@ public class TmapGeocodingService implements GeocodingService {
             @Value("${tmap.geocode-url:https://apis.openapi.sk.com/tmap/geo/fullAddrGeo}") String geocodeUrl) {
         this.appKey = appKey;
         this.geocodeUrl = geocodeUrl;
-        this.restClient = RestClient.builder().build();
+        // 외부 호출이 응답하지 않을 때 요청 스레드(및 생성 트랜잭션)가 무한 대기하지 않도록 타임아웃을 둔다.
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(Duration.ofSeconds(3));
+        factory.setReadTimeout(Duration.ofSeconds(5));
+        this.restClient = RestClient.builder().requestFactory(factory).build();
     }
 
     @Override
