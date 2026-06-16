@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class ChatRestController {
 
     private final ChatService chatService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @GetMapping("/conversations")
     public Page<ConversationSummaryResponse> conversations(Pageable pageable) {
@@ -39,7 +41,9 @@ public class ChatRestController {
             throw new SecurityException("로그인이 필요합니다.");
         }
 
-        return chatService.sendMessage(conversationId, authentication.getName(), request);
+        MessageResponse response = chatService.sendMessage(conversationId, authentication.getName(), request);
+        messagingTemplate.convertAndSend("/topic/conversations/" + conversationId, response);
+        return response;
     }
 
     @PostMapping("/conversations/{conversationId}/read")
