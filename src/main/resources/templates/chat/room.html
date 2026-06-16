@@ -377,7 +377,7 @@ function buildMessage(msg) {
         </div>`;
     } else {
         const avatarHtml = PARTNER_IMAGE
-            ? `<div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 mb-1 shadow-sm"><img src="${PARTNER_IMAGE}" alt="프로필" class="w-full h-full object-cover object-top"></div>`
+            ? `<div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 mb-1 shadow-sm"><img src="${PARTNER_IMAGE}" alt="프로필" class="w-full h-full object-cover object-top" onerror="this.parentElement.outerHTML='<div class=\\'w-9 h-9 rounded-full flex-shrink-0 mb-1 shadow-sm ${PARTNER_COLOR} text-white flex items-center justify-center font-bold text-sm\\'>${PARTNER_FIRST}</div>'"></div>`
             : `<div class="w-9 h-9 rounded-full flex-shrink-0 mb-1 shadow-sm ${PARTNER_COLOR} text-white flex items-center justify-center font-bold text-sm">${PARTNER_FIRST}</div>`;
         return `<div class="flex items-end gap-2.5">
             ${avatarHtml}
