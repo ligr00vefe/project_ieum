@@ -38,6 +38,28 @@ public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long>,
     @EntityGraph(attributePaths = {"serviceCategory"})
     Page<HelpRequest> findByStatusOrderByDesiredStartDatetimeAscIdDesc(HelpRequestStatus status, Pageable pageable);
 
+    // 도움 요청 리스트 — 특정 상태를 기준 좌표(:lat,:lng)에서 가까운 순으로(페이지네이션).
+    // 거리 정렬은 acos 없이 "코사인 유사도(구면 내적) 내림차순 = 거리 오름차순"으로 표현한다.
+    //   · 함수는 sin/cos만 사용(HQL 표준). 도→라디안은 radians() 대신 리터럴 상수(π/180)를 곱해 dialect 함수 의존을 제거.
+    //   · 좌표가 없는(null) 요청은 항상 뒤로(CASE), 동률·좌표없음은 시작시각 오름차순으로 폴백.
+    // serviceCategory 동시 로딩(N+1 방지).
+    @EntityGraph(attributePaths = {"serviceCategory"})
+    @Query(value = """
+        select hr from HelpRequest hr
+        where hr.status = :status
+        order by
+          case when hr.latitude is null or hr.longitude is null then 1 else 0 end asc,
+          ( sin(:lat * 0.017453292519943295) * sin(hr.latitude * 0.017453292519943295)
+          + cos(:lat * 0.017453292519943295) * cos(hr.latitude * 0.017453292519943295)
+            * cos(hr.longitude * 0.017453292519943295 - :lng * 0.017453292519943295) ) desc,
+          hr.desiredStartDatetime asc
+        """,
+        countQuery = "select count(hr) from HelpRequest hr where hr.status = :status")
+    Page<HelpRequest> findByStatusOrderByDistance(@Param("status") HelpRequestStatus status,
+                                                  @Param("lat") double lat,
+                                                  @Param("lng") double lng,
+                                                  Pageable pageable);
+
     // 내 도움 요청 관리 — 요청자의 요청을 최근 작성 순으로. serviceCategory 동시 로딩(N+1 방지).
     @EntityGraph(attributePaths = {"serviceCategory"})
     List<HelpRequest> findByRequesterOrderByCreatedAtDesc(UserProfile requester);
