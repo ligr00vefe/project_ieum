@@ -12,7 +12,7 @@
          SDK 내부의 document.write가 정상 동작한다(동적 삽입 시 차단·미정의 위험).
          tmapAppKey를 model에 담은 페이지에서만 로드. -->
     <script th:if="${tmapAppKey != null and !tmapAppKey.isEmpty()}"
-            th:src="'https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=' + ${tmapAppKey}"></script>
+            th:src="@{https://apis.openapi.sk.com/tmap/jsv2(version=1,appKey=${tmapAppKey})}"></script>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col">
 

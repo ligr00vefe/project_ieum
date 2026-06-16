@@ -123,16 +123,17 @@ class HelpRequestSearchRepositoryTest {
     @Test
     @DisplayName("거리순 정렬 — 좌표를 주면 가까운 순, 좌표 없는 요청은 뒤로")
     void distanceOrder_whenCoordsProvided() {
-        // 기준점: 서울시청(37.5665, 126.9780)
-        HelpRequest near = persist(b -> b.latitude(new BigDecimal("37.5759")).longitude(new BigDecimal("126.9769"))); // 광화문
-        HelpRequest far = persist(b -> b.latitude(new BigDecimal("35.1796")).longitude(new BigDecimal("129.0756")));  // 부산
+        // 기준점: 서울시청(37.5665, 126.9780). near < mid < far 순서로 3단계 거리 검증.
+        HelpRequest near = persist(b -> b.latitude(new BigDecimal("37.5759")).longitude(new BigDecimal("126.9769"))); // 광화문 ~1km
+        HelpRequest mid = persist(b -> b.latitude(new BigDecimal("37.4979")).longitude(new BigDecimal("127.0276")));  // 강남 ~11km
+        HelpRequest far = persist(b -> b.latitude(new BigDecimal("35.1796")).longitude(new BigDecimal("129.0756")));  // 부산 ~325km
         HelpRequest noCoord = persist(b -> b.latitude(null).longitude(null));
 
         var page = helpRequestRepository.searchHelpRequests(
                 new HelpRequestSearchCondition(), PageRequest.of(0, 10), 37.5665, 126.9780);
 
         assertThat(page.getContent()).extracting(HelpRequest::getId)
-                .containsExactly(near.getId(), far.getId(), noCoord.getId());
+                .containsExactly(near.getId(), mid.getId(), far.getId(), noCoord.getId());
     }
 
     @Test
