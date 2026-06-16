@@ -28,6 +28,7 @@ public record AdminMatchingRow(
         };
         String statusClass = switch (statusName) {
             case "OPEN" -> "bg-indigo-50 text-indigo-600";
+            case "MATCHED" -> "bg-teal-50 text-teal-600";
             case "IN_PROGRESS" -> "bg-teal-50 text-teal-600";
             case "COMPLETED" -> "bg-slate-100 text-slate-500";
             default -> "bg-slate-100 text-slate-400";
