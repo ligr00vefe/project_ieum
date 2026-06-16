@@ -1,5 +1,10 @@
 # IEUM 구현 TODO
 
+## 2026-06-14 실시간 채팅 보강
+- [x] 기존 ChatService/Repository/Entity/REST API는 유지하고 room.html 중심으로 STOMP 연결 및 REST fallback broadcast 추가
+- [x] WebSocket 연결 성공 시 polling 중단, 실패 시 기존 REST 전송과 polling fallback 유지
+- [x] 메시지 id 기반 중복 렌더링 방지와 읽음 처리 흐름 확인
+
 ## 기준
 - HTML 24개 이슈 전체를 구현 범위로 본다.
 - PDF 철학인 성향 기반 매칭, 첫 만남 안전, 당사자 중심 케어를 화면과 도메인 흐름에 반영한다.

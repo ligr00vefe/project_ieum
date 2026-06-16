@@ -148,13 +148,21 @@
 }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
 <script th:inline="javascript">
 const CONVERSATION_ID = /*[[${conversationId}]]*/ 0;
+const CURRENT_USER_ID = /*[[${currentUser != null ? currentUser.id : null}]]*/ null;
+const CURRENT_USER_EMAIL = /*[[${currentUser != null ? currentUser.email : ''}]]*/ '';
 const PARTNER_IMAGE = /*[[${partnerProfileImage}]]*/ null;
 const DEFAULT_IMAGE = '/assets/profile_thumb_img/m01_thumb.png';
 
 let lastRenderedDate = null;
 let polling = null;
+let stompClient = null;
+let chatSubscription = null;
+let webSocketConnected = false;
+const renderedMessageIds = new Set();
 
 function fmt(dateStr) {
     const d = new Date(dateStr);
@@ -165,9 +173,52 @@ function fmtDate(dateStr) {
     return d.toLocaleDateString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric'});
 }
 
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function normalizeMessage(msg) {
+    const normalized = { ...msg };
+    if (CURRENT_USER_ID !== null && normalized.senderId !== null && normalized.senderId !== undefined) {
+        normalized.mine = String(normalized.senderId) === String(CURRENT_USER_ID);
+    } else if (CURRENT_USER_EMAIL && normalized.senderName) {
+        normalized.mine = normalized.senderName === CURRENT_USER_EMAIL;
+    } else {
+        normalized.mine = Boolean(normalized.mine);
+    }
+    return normalized;
+}
+
+function messageKey(msg) {
+    if (msg.id !== null && msg.id !== undefined) {
+        return `message:${msg.id}`;
+    }
+    if (msg.senderId !== undefined && msg.sentAt && msg.body !== undefined) {
+        return `message:${msg.senderId}:${msg.sentAt}:${msg.body}`;
+    }
+    return null;
+}
+
+function rememberRenderedMessage(msg) {
+    const key = messageKey(msg);
+    if (key) {
+        renderedMessageIds.add(key);
+    }
+}
+
+function hasRenderedMessage(msg) {
+    const key = messageKey(msg);
+    return key ? renderedMessageIds.has(key) : false;
+}
+
 function buildMessage(msg) {
     const time = fmt(msg.sentAt);
-    const escaped = msg.body.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const escaped = escapeHtml(msg.body);
     if (msg.mine) {
         return `<div class="flex items-end gap-2.5 flex-row-reverse">
             <div class="max-w-[70%]">
@@ -206,10 +257,11 @@ async function loadMessages() {
         const res = await fetch(`/api/chat/conversations/${CONVERSATION_ID}/messages?page=0&size=100&sort=sentAt,asc`);
         if (!res.ok) return;
         const data = await res.json();
-        const messages = (data.content || []).reverse();
+        const messages = (data.content || []).reverse().map(normalizeMessage);
 
         const box = document.getElementById('chatMessages');
         lastRenderedDate = null;
+        renderedMessageIds.clear();
         let html = '';
 
         const today = new Date().toDateString();
@@ -226,10 +278,11 @@ async function loadMessages() {
                 lastRenderedDate = msgDate;
             }
             html += buildMessage(msg);
+            rememberRenderedMessage(msg);
         }
 
         if (messages.length === 0) {
-            html = `<div class="flex justify-center py-8">
+            html = `<div data-empty-chat="true" class="flex justify-center py-8">
                 <p class="text-sm text-gray-400">아직 메시지가 없습니다. 먼저 인사해보세요!</p>
             </div>`;
         }
@@ -265,6 +318,11 @@ async function sendMessage() {
     input.disabled = true;
 
     try {
+        if (canSendByWebSocket()) {
+            sendMessageByWebSocket(text);
+            return;
+        }
+
         const res = await fetch(`/api/chat/conversations/${CONVERSATION_ID}/messages`, {
             method: 'POST',
             headers: {
@@ -282,6 +340,17 @@ async function sendMessage() {
         const msg = await res.json();
         appendMessage(msg);
     } catch (e) {
+        if (webSocketConnected) {
+            webSocketConnected = false;
+            startPolling();
+            try {
+                const msg = await sendMessageByRest(text);
+                appendMessage(msg);
+                return;
+            } catch (restError) {
+                console.error('REST fallback send failed', restError);
+            }
+        }
         alert('전송에 실패했습니다.');
         input.value = text;
     } finally {
@@ -290,8 +359,45 @@ async function sendMessage() {
     }
 }
 
+function canSendByWebSocket() {
+    return webSocketConnected && stompClient && stompClient.connected;
+}
+
+function sendMessageByWebSocket(text) {
+    stompClient.publish({
+        destination: `/app/chat/${CONVERSATION_ID}/send`,
+        headers: {
+            'content-type': 'application/json',
+            'X-XSRF-TOKEN': getCsrfToken()
+        },
+        body: JSON.stringify({ body: text })
+    });
+}
+
+async function sendMessageByRest(text) {
+    const res = await fetch(`/api/chat/conversations/${CONVERSATION_ID}/messages`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': getCsrfToken()
+        },
+        body: JSON.stringify({ body: text })
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Message send failed');
+    }
+    return res.json();
+}
+
 function appendMessage(msg) {
+    msg = normalizeMessage(msg);
+    if (hasRenderedMessage(msg)) {
+        return false;
+    }
+
     const box = document.getElementById('chatMessages');
+    box.querySelector('[data-empty-chat="true"]')?.remove();
     const msgDate = new Date(msg.sentAt).toDateString();
     const today = new Date().toDateString();
 
@@ -305,7 +411,9 @@ function appendMessage(msg) {
     const tmp = document.createElement('div');
     tmp.innerHTML = html;
     while (tmp.firstChild) box.appendChild(tmp.firstChild);
+    rememberRenderedMessage(msg);
     box.scrollTop = box.scrollHeight;
+    return true;
 }
 
 function handleKeydown(e) {
@@ -319,14 +427,82 @@ function hideMatchConfirmModal() {
     document.getElementById('matchConfirmModal').classList.add('hidden');
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-    document.getElementById('loadingSpinner')?.remove();
-    await loadMessages();
-    await markRead();
+function startPolling() {
+    if (polling) {
+        return;
+    }
     polling = setInterval(async () => {
         await loadMessages();
         await markRead();
     }, 5000);
+}
+
+function stopPolling() {
+    if (!polling) {
+        return;
+    }
+    clearInterval(polling);
+    polling = null;
+}
+
+function connectWebSocket() {
+    if (!window.SockJS || !window.StompJs) {
+        startPolling();
+        return;
+    }
+
+    stompClient = new StompJs.Client({
+        webSocketFactory: () => new SockJS('/ws'),
+        reconnectDelay: 5000,
+        connectHeaders: {
+            'X-XSRF-TOKEN': getCsrfToken()
+        },
+        debug: () => {}
+    });
+
+    stompClient.onConnect = () => {
+        webSocketConnected = true;
+        stopPolling();
+
+        if (chatSubscription) {
+            chatSubscription.unsubscribe();
+        }
+        chatSubscription = stompClient.subscribe(`/topic/conversations/${CONVERSATION_ID}`, message => {
+            const msg = JSON.parse(message.body);
+            const appended = appendMessage(msg);
+            if (appended) {
+                markRead();
+            }
+        });
+    };
+
+    stompClient.onStompError = frame => {
+        console.error('STOMP error', frame);
+        webSocketConnected = false;
+        startPolling();
+    };
+
+    stompClient.onWebSocketError = event => {
+        console.error('WebSocket error', event);
+        webSocketConnected = false;
+        startPolling();
+    };
+
+    stompClient.onWebSocketClose = () => {
+        webSocketConnected = false;
+        chatSubscription = null;
+        startPolling();
+    };
+
+    stompClient.activate();
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    document.getElementById('loadingSpinner')?.remove();
+    await loadMessages();
+    await markRead();
+    startPolling();
+    connectWebSocket();
 });
 </script>
 </th:block>
