@@ -88,4 +88,12 @@ public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long>,
     @Query(value = "SELECT r FROM HelpRequest r LEFT JOIN FETCH r.requester WHERE r.status = :status ORDER BY r.createdAt DESC",
            countQuery = "SELECT count(r) FROM HelpRequest r WHERE r.status = :status")
     Page<HelpRequest> findByStatusPagedAdminWithRequester(@Param("status") HelpRequestStatus status, Pageable pageable);
+
+    @Query(value = "SELECT r FROM HelpRequest r LEFT JOIN FETCH r.requester WHERE LOWER(r.title) LIKE LOWER(CONCAT('%', :keyword, '%')) ORDER BY r.createdAt DESC",
+           countQuery = "SELECT count(r) FROM HelpRequest r WHERE LOWER(r.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<HelpRequest> findByTitleContainingAdmin(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query(value = "SELECT r FROM HelpRequest r LEFT JOIN FETCH r.requester WHERE r.status = :status AND LOWER(r.title) LIKE LOWER(CONCAT('%', :keyword, '%')) ORDER BY r.createdAt DESC",
+           countQuery = "SELECT count(r) FROM HelpRequest r WHERE r.status = :status AND LOWER(r.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<HelpRequest> findByStatusAndTitleContainingAdmin(@Param("status") HelpRequestStatus status, @Param("keyword") String keyword, Pageable pageable);
 }
