@@ -24,6 +24,7 @@ public class AdminInquiryController {
     @GetMapping
     public String list(@RequestParam(required = false) String status,
                        @RequestParam(required = false) String category,
+                       @RequestParam(required = false) String keyword,
                        @RequestParam(defaultValue = "0") int page,
                        Model model) {
         InquiryStatus statusEnum = null;
@@ -33,7 +34,7 @@ public class AdminInquiryController {
             if (category != null && !category.isBlank()) categoryEnum = InquiryCategory.valueOf(category);
         } catch (IllegalArgumentException ignored) {}
 
-        var inquiryPage = inquiryService.getFilteredPaged(categoryEnum, statusEnum, page);
+        var inquiryPage = inquiryService.getFilteredPaged(categoryEnum, statusEnum, keyword, page);
         int totalPages = inquiryPage.getTotalPages();
         int startPage  = Math.max(0, page - 2);
         int endPage    = Math.min(totalPages - 1, page + 2);
@@ -46,6 +47,7 @@ public class AdminInquiryController {
         model.addAttribute("endPage", endPage);
         model.addAttribute("selectedStatus", status);
         model.addAttribute("selectedCategory", category);
+        model.addAttribute("keyword", keyword);
         model.addAttribute("categories", InquiryCategory.values());
         model.addAttribute("activeMenu", "inquiries");
         model.addAttribute("title", "문의 관리");
@@ -82,5 +84,13 @@ public class AdminInquiryController {
         inquiryService.toggleStatus(id);
         ra.addFlashAttribute("message", "답변 상태가 변경되었습니다.");
         return "redirect:/admin/inquiries/" + id;
+    }
+
+    /** 관리자 문의 삭제 */
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable Long id, RedirectAttributes ra) {
+        inquiryService.delete(id, currentUserService.getCurrentUser());
+        ra.addFlashAttribute("message", "문의가 삭제되었습니다.");
+        return "redirect:/admin/inquiries";
     }
 }
