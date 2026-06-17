@@ -160,15 +160,6 @@ public class DisabledBoardController {
         return "redirect:/disabled/board/" + requestId;
     }
 
-    @PostMapping("/applications/{applicationId}/reject")
-    public String reject(@PathVariable Long applicationId,
-                         @RequestParam Long requestId,
-                         RedirectAttributes redirectAttributes) {
-        matchingService.reject(applicationId);
-        redirectAttributes.addFlashAttribute("message", "지원자를 거절했습니다.");
-        return "redirect:/disabled/board/" + requestId + "/applicants";
-    }
-
     // 활동 시작/종료 양측 확인 — 이용자(요청자) 측. 양측이 모두 확인하면 서비스가 상태를 전이한다.
     @PostMapping("/{id}/confirm-start")
     public String confirmStart(@PathVariable Long id, RedirectAttributes redirectAttributes) {

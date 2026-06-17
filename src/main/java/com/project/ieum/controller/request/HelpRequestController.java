@@ -125,13 +125,6 @@ public class HelpRequestController {
         return "redirect:/my/requests";
     }
 
-    @PostMapping("/applications/{applicationId}/reject")
-    public String reject(@PathVariable Long applicationId, RedirectAttributes redirectAttributes) {
-        matchingService.reject(applicationId);
-        redirectAttributes.addFlashAttribute("message", "지원자를 거절했습니다.");
-        return "redirect:/my/requests";
-    }
-
     @PostMapping("/applications/{applicationId}/withdraw")
     public String withdraw(@PathVariable Long applicationId, RedirectAttributes redirectAttributes) {
         matchingService.withdraw(applicationId);
