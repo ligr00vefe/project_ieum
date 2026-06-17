@@ -35,6 +35,23 @@
     <div th:if="${message}" class="mb-4 px-4 py-3 rounded-xl bg-teal-50 border border-teal-200 text-sm text-teal-700" th:text="${message}"></div>
     <div th:if="${error}"   class="mb-4 px-4 py-3 rounded-xl bg-red-50  border border-red-200  text-sm text-red-600"  th:text="${error}"></div>
 
+    <!-- 검색창 -->
+    <form th:action="@{/inquiries}" method="get" class="flex items-center gap-2 mb-4">
+        <input type="hidden" name="category" th:value="${selectedCategory}"/>
+        <input type="text" name="keyword" th:value="${keyword}"
+               placeholder="제목으로 검색..."
+               class="flex-1 px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
+        <button type="submit"
+                class="px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all">
+            검색
+        </button>
+        <a th:if="${keyword != null and !#strings.isEmpty(keyword)}"
+           th:href="@{/inquiries(category=${selectedCategory})}"
+           class="px-4 py-2.5 text-sm font-semibold text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
+            초기화
+        </a>
+    </form>
+
     <!-- 카테고리 필터 -->
     <div class="flex items-center gap-2 mb-5 flex-wrap">
         <a th:href="@{/inquiries(page=0)}"

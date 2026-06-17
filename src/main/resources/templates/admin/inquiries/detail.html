@@ -41,6 +41,17 @@
 
     <div class="space-y-4">
 
+        <!-- 문의 삭제 -->
+        <div class="flex justify-end">
+            <form th:action="@{/admin/inquiries/{id}/delete(id=${inquiry.id})}" method="post"
+                  onsubmit="return confirm('정말 삭제하시겠습니까?')">
+                <button type="submit"
+                        class="px-4 py-2 text-sm font-semibold text-red-600 border border-red-200 rounded-xl hover:bg-red-50 transition-colors">
+                    문의 삭제
+                </button>
+            </form>
+        </div>
+
         <!-- 문의 내용 -->
         <div class="bg-white rounded-2xl border border-slate-100 p-6">
             <!-- 배지 -->
