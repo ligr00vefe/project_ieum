@@ -47,3 +47,6 @@ uploads/
 
 ## Claude Code 메모리
 .claude/
+
+## Docker 환경변수 (자격증명)
+.env

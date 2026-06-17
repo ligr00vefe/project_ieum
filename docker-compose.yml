@@ -1,0 +1,42 @@
+name: ieum
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: ieum-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-ieum}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "${MYSQL_PORT:-33306}:3306"
+    volumes:
+      - ieum_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: ieum-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # DB 접속은 compose 환경변수로 주입. application-secret.properties는 이미지에 없음.
+      IEUM_DB_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-ieum}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      IEUM_DB_USERNAME: ${MYSQL_USER}
+      IEUM_DB_PASSWORD: ${MYSQL_PASSWORD}
+      # 데모 compose에서만 빈 볼륨 스키마 자동생성 (prod 기본은 validate)
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${DDL_AUTO:-update}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    restart: unless-stopped
+
+volumes:
+  ieum_mysql_data:
