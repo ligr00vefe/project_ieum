@@ -150,14 +150,6 @@ public class MatchingService {
         conversationRepository.findByApplication_Id(applicationId).ifPresent(Conversation::close);
     }
 
-    public void reject(Long applicationId) {
-        User currentUser = requireRole(UserRole.USER);
-        HelpRequestApplication application = getApplication(applicationId);
-        ensureRequester(application.getHelpRequest(), currentUser.getId());
-        application.reject();
-        conversationRepository.findByApplication_Id(applicationId).ifPresent(Conversation::close);
-    }
-
     public void withdraw(Long applicationId) {
         User currentUser = requireRole(UserRole.CAREGIVER);
         HelpRequestApplication application = getApplication(applicationId);
