@@ -37,6 +37,7 @@ public class InquiryController {
      */
     @GetMapping
     public String list(@RequestParam(required = false) String category,
+                       @RequestParam(required = false) String keyword,
                        @RequestParam(defaultValue = "0") int page,
                        Model model) {
         User currentUser = currentUserService.getCurrentUser();
@@ -45,7 +46,7 @@ public class InquiryController {
             if (category != null && !category.isBlank()) cat = InquiryCategory.valueOf(category);
         } catch (IllegalArgumentException ignored) { category = null; }
 
-        Page<Inquiry> inquiryPage = inquiryService.getAllPaged(cat, page);
+        Page<Inquiry> inquiryPage = inquiryService.getAllPaged(cat, keyword, page);
         int totalPages = inquiryPage.getTotalPages();
         int startPage  = Math.max(0, page - 2);
         int endPage    = Math.min(totalPages - 1, page + 2);
@@ -58,6 +59,7 @@ public class InquiryController {
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
         model.addAttribute("selectedCategory", category);
+        model.addAttribute("keyword", keyword);
         model.addAttribute("currentUserId", currentUser.getId());
         model.addAttribute("isAdmin", currentUser.getRole() == UserRole.ADMIN);
         model.addAttribute("categories", InquiryCategory.values());

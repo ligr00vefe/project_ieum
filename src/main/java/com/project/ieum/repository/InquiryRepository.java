@@ -26,4 +26,14 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
     Page<Inquiry> findByCategoryOrderByCreatedAtDesc(InquiryCategory category, Pageable pageable);
     Page<Inquiry> findByStatusOrderByCreatedAtDesc(InquiryStatus status, Pageable pageable);
     Page<Inquiry> findByCategoryAndStatusOrderByCreatedAtDesc(InquiryCategory category, InquiryStatus status, Pageable pageable);
+
+    // 제목 검색 (관리자용 — 비밀글 포함)
+    Page<Inquiry> findByTitleContainingIgnoreCaseOrderByCreatedAtDesc(String keyword, Pageable pageable);
+    Page<Inquiry> findByCategoryAndTitleContainingIgnoreCaseOrderByCreatedAtDesc(InquiryCategory category, String keyword, Pageable pageable);
+
+    // 제목 검색 (일반 사용자용 — 비밀글 제외)
+    Page<Inquiry> findByIsSecretFalseAndTitleContainingIgnoreCaseOrderByCreatedAtDesc(String keyword, Pageable pageable);
+    Page<Inquiry> findByCategoryAndIsSecretFalseAndTitleContainingIgnoreCaseOrderByCreatedAtDesc(InquiryCategory category, String keyword, Pageable pageable);
+    Page<Inquiry> findByStatusAndTitleContainingIgnoreCaseOrderByCreatedAtDesc(InquiryStatus status, String keyword, Pageable pageable);
+    Page<Inquiry> findByCategoryAndStatusAndTitleContainingIgnoreCaseOrderByCreatedAtDesc(InquiryCategory category, InquiryStatus status, String keyword, Pageable pageable);
 }
