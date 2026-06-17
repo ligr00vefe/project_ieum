@@ -71,8 +71,8 @@
         </div>
     </div>
 
-    <!-- 지원하기 (선정된 도우미에게는 아래 활동 관리 패널로 대체) -->
-    <div id="applySection" th:unless="${handshake != null and handshake.visible()}">
+    <!-- 지원하기 (선정된 도우미에게는 아래 활동 관리/완료 패널로 대체) -->
+    <div id="applySection" th:unless="${selectedCaregiver}">
         <!-- 매칭 완료 -->
         <div th:if="${request.status.name() != 'OPEN'}"
              class="w-full py-4 text-base font-bold text-gray-400 bg-gray-100 rounded-2xl flex items-center justify-center gap-2 cursor-not-allowed">
@@ -138,8 +138,29 @@
         </div>
     </div>
 
-    <!-- 이미 지원한 경우 항상 노출 (선정된 도우미에게는 위 활동 관리 패널로 대체) -->
-    <div th:if="${alreadyApplied and !(handshake != null and handshake.visible())}"
+    <!-- 활동 완료 (선정된 도우미에게만, COMPLETED) -->
+    <div th:if="${selectedCaregiver and request.status.name() == 'COMPLETED'}"
+         class="mt-3 bg-indigo-50 border border-indigo-100 rounded-2xl p-5">
+        <div class="flex items-center gap-3 mb-3">
+            <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+                <p class="text-sm font-bold text-indigo-900">활동이 완료되었습니다</p>
+                <p class="text-xs text-indigo-500 mt-0.5">수고하셨어요. 지난 대화는 채팅에서 확인할 수 있어요.</p>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <a th:if="${myConversationId != null}"
+               th:href="@{/chat/conversations/{cid}(cid=${myConversationId})}"
+               class="flex-1 py-2.5 text-sm font-semibold text-indigo-600 bg-white border border-indigo-200 rounded-xl text-center hover:bg-indigo-50 transition-all">채팅 확인하기</a>
+            <a th:href="@{/caregiver/mypage}"
+               class="flex-1 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl text-center hover:bg-gray-50 transition-all">마이페이지로</a>
+        </div>
+    </div>
+
+    <!-- 이미 지원한 경우 항상 노출 (선정된 도우미에게는 위 활동 관리/완료 패널로 대체) -->
+    <div th:if="${alreadyApplied and !selectedCaregiver}"
          class="mt-3 bg-teal-50 border border-teal-100 rounded-2xl p-5">
         <div class="flex items-center gap-3 mb-3">
             <div class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">

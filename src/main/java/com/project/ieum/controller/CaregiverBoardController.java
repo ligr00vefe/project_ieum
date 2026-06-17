@@ -188,6 +188,7 @@ public class CaregiverBoardController {
             matchingService.getMyConversationId(id, currentUserId).ifPresent(cid ->
                 model.addAttribute("myConversationId", cid));
         }
+        model.addAttribute("selectedCaregiver", matchingService.isSelectedCaregiver(id, currentUserId));
         model.addAttribute("handshake", matchingService.getHandshakeView(id, currentUserId));
         model.addAttribute("recommendations", recommendationService.recommendCaregivers(id, 5));
         model.addAttribute("content", "caregiver/board/detail");

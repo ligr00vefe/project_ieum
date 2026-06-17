@@ -223,6 +223,16 @@ public class MatchingService {
         return applicationRepository.existsByHelpRequest_IdAndCaregiver_UserId(requestId, userId);
     }
 
+    // 현재 사용자가 이 요청에 선정된 도우미인가(매칭~진행~완료 전 구간).
+    // 핸드셰이크 뷰는 MATCHED/IN_PROGRESS에서만 visible이라 COMPLETED 식별에 쓸 수 없어 별도 판별이 필요하다.
+    @Transactional(readOnly = true)
+    public boolean isSelectedCaregiver(Long requestId, Long userId) {
+        return applicationRepository.findByHelpRequest_IdAndStatusIn(
+                        requestId, List.of(ApplicationStatus.ACCEPTED, ApplicationStatus.COMPLETED))
+                .stream()
+                .anyMatch(app -> app.getCaregiver().getUserId().equals(userId));
+    }
+
     @Transactional(readOnly = true)
     public java.util.Optional<Long> getMyConversationId(Long requestId, Long userId) {
         return applicationRepository.findByHelpRequest_IdAndCaregiver_UserId(requestId, userId)
