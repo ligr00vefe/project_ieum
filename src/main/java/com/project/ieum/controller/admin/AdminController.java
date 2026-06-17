@@ -47,15 +47,25 @@ public class AdminController {
     // ── 회원 관리 ─────────────────────────────────────────────────
     @GetMapping("/users")
     public String userList(@RequestParam(required = false) String role,
+                           @RequestParam(required = false) String keyword,
                            @RequestParam(defaultValue = "0") int page,
                            Model model) {
         var pageable = PageRequest.of(page, 10);
-        var userPage = (role != null && !role.isBlank())
+        boolean hasKeyword = keyword != null && !keyword.isBlank();
+        boolean hasRole = role != null && !role.isBlank();
+
+        var userPage = (hasRole && hasKeyword)
+                ? userRepository.findByRoleAndEmailContainingAdmin(UserRole.valueOf(role), keyword, pageable)
+                : hasKeyword
+                ? userRepository.findByEmailContainingAdmin(keyword, pageable)
+                : hasRole
                 ? userRepository.findByRolePagedAdmin(UserRole.valueOf(role), pageable)
                 : userRepository.findAllPagedAdmin(pageable);
+
         var users = userPage.getContent().stream().map(AdminUserRow::from).toList();
         model.addAttribute("users", users);
         model.addAttribute("selectedRole", role);
+        model.addAttribute("keyword", keyword);
         model.addAttribute("activeMenu", "users");
         model.addAttribute("title", "회원 관리");
         addPageAttrs(model, userPage, page);
@@ -90,25 +100,36 @@ public class AdminController {
     // ── 매칭 관리 ─────────────────────────────────────────────────
     @GetMapping("/matching")
     public String matchingList(@RequestParam(required = false) String status,
+                               @RequestParam(required = false) String keyword,
                                @RequestParam(defaultValue = "0") int page,
                                Model model) {
         var pageable = PageRequest.of(page, 10);
         String resolvedStatus = status;
+        boolean hasKeyword = keyword != null && !keyword.isBlank();
         org.springframework.data.domain.Page<com.project.ieum.entity.request.HelpRequest> requestPage;
+
         if (status != null && !status.isBlank()) {
             try {
                 var statusEnum = HelpRequestStatus.valueOf(status);
-                requestPage = helpRequestRepository.findByStatusPagedAdminWithRequester(statusEnum, pageable);
+                requestPage = hasKeyword
+                        ? helpRequestRepository.findByStatusAndTitleContainingAdmin(statusEnum, keyword, pageable)
+                        : helpRequestRepository.findByStatusPagedAdminWithRequester(statusEnum, pageable);
             } catch (IllegalArgumentException e) {
-                requestPage = helpRequestRepository.findAllPagedAdminWithRequester(pageable);
+                requestPage = hasKeyword
+                        ? helpRequestRepository.findByTitleContainingAdmin(keyword, pageable)
+                        : helpRequestRepository.findAllPagedAdminWithRequester(pageable);
                 resolvedStatus = null;
             }
         } else {
-            requestPage = helpRequestRepository.findAllPagedAdminWithRequester(pageable);
+            requestPage = hasKeyword
+                    ? helpRequestRepository.findByTitleContainingAdmin(keyword, pageable)
+                    : helpRequestRepository.findAllPagedAdminWithRequester(pageable);
         }
+
         var requests = requestPage.getContent().stream().map(AdminMatchingRow::from).toList();
         model.addAttribute("requests", requests);
         model.addAttribute("selectedStatus", resolvedStatus);
+        model.addAttribute("keyword", keyword);
         model.addAttribute("activeMenu", "matching");
         model.addAttribute("title", "매칭 관리");
         addPageAttrs(model, requestPage, page);

@@ -38,4 +38,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "SELECT u FROM User u WHERE u.role = :role ORDER BY u.createdAt DESC",
            countQuery = "SELECT count(u) FROM User u WHERE u.role = :role")
     Page<User> findByRolePagedAdmin(@Param("role") UserRole role, Pageable pageable);
+
+    @Query(value = "SELECT u FROM User u WHERE LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) ORDER BY u.createdAt DESC",
+           countQuery = "SELECT count(u) FROM User u WHERE LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<User> findByEmailContainingAdmin(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query(value = "SELECT u FROM User u WHERE u.role = :role AND LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) ORDER BY u.createdAt DESC",
+           countQuery = "SELECT count(u) FROM User u WHERE u.role = :role AND LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<User> findByRoleAndEmailContainingAdmin(@Param("role") UserRole role, @Param("keyword") String keyword, Pageable pageable);
 }

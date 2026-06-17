@@ -11,6 +11,23 @@
         </div>
     </div>
 
+    <!-- 검색창 -->
+    <form th:action="@{/admin/users}" method="get" class="flex items-center gap-2 mb-4">
+        <input type="hidden" name="role" th:value="${selectedRole}"/>
+        <input type="text" name="keyword" th:value="${keyword}"
+               placeholder="이메일로 검색..."
+               class="flex-1 px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
+        <button type="submit"
+                class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors">
+            검색
+        </button>
+        <a th:if="${keyword != null and !#strings.isEmpty(keyword)}"
+           th:href="@{/admin/users(role=${selectedRole})}"
+           class="px-4 py-2 text-sm font-semibold text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+            초기화
+        </a>
+    </form>
+
     <!-- 필터 -->
     <div class="flex items-center gap-2 mb-4">
         <a th:href="@{/admin/users}"

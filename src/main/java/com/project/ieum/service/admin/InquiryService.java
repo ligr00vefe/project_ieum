@@ -72,19 +72,40 @@ public class InquiryService {
 
     private static final int PAGE_SIZE = 10;
 
-    /** 클라이언트 목록 (전체 or 카테고리 필터, 페이지네이션) */
+    /** 클라이언트 목록 (카테고리 필터 + 제목 검색, 페이지네이션) */
     @Transactional(readOnly = true)
-    public Page<Inquiry> getAllPaged(InquiryCategory category, int page) {
+    public Page<Inquiry> getAllPaged(InquiryCategory category, String keyword, int page) {
         var pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("createdAt").descending());
-        return category != null
-                ? inquiryRepository.findByCategoryOrderByCreatedAtDesc(category, pageable)
-                : inquiryRepository.findAllByOrderByCreatedAtDesc(pageable);
+        boolean hasKeyword = keyword != null && !keyword.isBlank();
+        if (hasKeyword && category != null) {
+            return inquiryRepository.findByCategoryAndIsSecretFalseAndTitleContainingIgnoreCaseOrderByCreatedAtDesc(category, keyword, pageable);
+        } else if (hasKeyword) {
+            return inquiryRepository.findByIsSecretFalseAndTitleContainingIgnoreCaseOrderByCreatedAtDesc(keyword, pageable);
+        } else if (category != null) {
+            return inquiryRepository.findByCategoryOrderByCreatedAtDesc(category, pageable);
+        } else {
+            return inquiryRepository.findAllByOrderByCreatedAtDesc(pageable);
+        }
     }
 
-    /** 관리자 목록 (카테고리 + 상태 복합 필터, 페이지네이션) */
+    /** 관리자 목록 (카테고리 + 상태 + 검색 복합 필터, 페이지네이션) */
     @Transactional(readOnly = true)
-    public Page<Inquiry> getFilteredPaged(InquiryCategory category, InquiryStatus status, int page) {
+    public Page<Inquiry> getFilteredPaged(InquiryCategory category, InquiryStatus status, String keyword, int page) {
         var pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("createdAt").descending());
+        boolean hasKeyword = keyword != null && !keyword.isBlank();
+
+        if (hasKeyword) {
+            if (category != null && status != null) {
+                return inquiryRepository.findByCategoryAndStatusAndTitleContainingIgnoreCaseOrderByCreatedAtDesc(category, status, keyword, pageable);
+            } else if (category != null) {
+                return inquiryRepository.findByCategoryAndTitleContainingIgnoreCaseOrderByCreatedAtDesc(category, keyword, pageable);
+            } else if (status != null) {
+                return inquiryRepository.findByStatusAndTitleContainingIgnoreCaseOrderByCreatedAtDesc(status, keyword, pageable);
+            } else {
+                return inquiryRepository.findByTitleContainingIgnoreCaseOrderByCreatedAtDesc(keyword, pageable);
+            }
+        }
+
         if (category != null && status != null) {
             return inquiryRepository.findByCategoryAndStatusOrderByCreatedAtDesc(category, status, pageable);
         } else if (category != null) {
@@ -105,10 +126,11 @@ public class InquiryService {
         inquiry.update(form.getTitle(), form.getBody(), form.getCategory(), form.isSecret());
     }
 
-    /** 본인 문의 삭제 — 작성자 본인만 가능 */
+    /** 문의 삭제 — 작성자 본인 또는 관리자 가능 */
     public void delete(Long id, User user) {
         Inquiry inquiry = getById(id);
-        if (!inquiry.getAuthor().getId().equals(user.getId())) {
+        boolean isAdmin = user.getRole() == com.project.ieum.entity.UserRole.ADMIN;
+        if (!isAdmin && !inquiry.getAuthor().getId().equals(user.getId())) {
             throw new ForbiddenException("본인의 문의만 삭제할 수 있습니다.");
         }
         inquiryRepository.delete(inquiry);
