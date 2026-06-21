@@ -70,6 +70,25 @@
                     </th:block>
                     <!-- 로그인 상태 - 일반 사용자 -->
                     <th:block th:if="${isAuthenticated and !isAdmin}">
+                        <!-- 알림 종 + 드롭다운 (비로그인/관리자는 렌더되지 않음) -->
+                        <div class="relative">
+                            <button type="button" id="notifBtn" aria-label="알림" aria-haspopup="true" aria-expanded="false"
+                                    class="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                </svg>
+                                <span id="notifBadge" class="hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full" aria-live="polite">0</span>
+                            </button>
+                            <div id="notifPanel" class="hidden absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg z-50">
+                                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                                    <span class="text-sm font-bold text-gray-900">알림</span>
+                                    <button type="button" id="notifReadAll" class="text-xs text-indigo-500 hover:text-indigo-700">모두 읽음</button>
+                                </div>
+                                <div id="notifList" class="divide-y divide-gray-50">
+                                    <p class="px-4 py-6 text-center text-xs text-gray-400">불러오는 중...</p>
+                                </div>
+                            </div>
+                        </div>
                         <a th:href="@{/mypage}"
                            class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -178,6 +197,82 @@
                 btn.setAttribute('aria-label', '메뉴 닫기');
             }
         }
+
+        // 알림 종/뱃지/드롭다운 — 종 버튼은 로그인 일반 사용자에게만 렌더되므로, 없으면 자동 비활성.
+        (function () {
+            var btn = document.getElementById('notifBtn');
+            if (!btn) return;
+            var panel = document.getElementById('notifPanel');
+            var badge = document.getElementById('notifBadge');
+            var list = document.getElementById('notifList');
+            var readAllBtn = document.getElementById('notifReadAll');
+            var csrfMeta = document.querySelector('meta[name="_csrf"]');
+            var csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+
+            function escapeHtml(s) {
+                return (s || '').replace(/[&<>"']/g, function (c) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+                });
+            }
+
+            function refreshBadge() {
+                fetch('/api/notifications/unread-count')
+                    .then(function (r) { return r.ok ? r.json() : null; })
+                    .then(function (d) {
+                        if (!d) return;
+                        var n = d.unreadCount || 0;
+                        if (n > 0) { badge.textContent = n > 99 ? '99+' : n; badge.classList.remove('hidden'); }
+                        else { badge.classList.add('hidden'); }
+                    }).catch(function () {});
+            }
+
+            function loadList() {
+                fetch('/api/notifications?page=0&size=10')
+                    .then(function (r) { return r.ok ? r.json() : null; })
+                    .then(function (d) {
+                        if (!d || !d.content || d.content.length === 0) {
+                            list.innerHTML = '<p class="px-4 py-6 text-center text-xs text-gray-400">알림이 없습니다.</p>';
+                            return;
+                        }
+                        list.innerHTML = d.content.map(function (n) {
+                            var unread = n.hasRead ? '' : 'bg-indigo-50/40';
+                            return '<a href="' + (n.url || '#') + '" class="block px-4 py-3 hover:bg-gray-50 ' + unread + '">'
+                                + '<p class="text-xs font-semibold text-gray-800">' + escapeHtml(n.title) + '</p>'
+                                + '<p class="text-xs text-gray-500 mt-0.5">' + escapeHtml(n.content) + '</p></a>';
+                        }).join('');
+                    }).catch(function () {});
+            }
+
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (panel.classList.contains('hidden')) {
+                    panel.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    loadList();
+                } else {
+                    panel.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!panel.classList.contains('hidden') && !panel.contains(e.target) && !btn.contains(e.target)) {
+                    panel.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            if (readAllBtn) {
+                readAllBtn.addEventListener('click', function () {
+                    var headers = {};
+                    if (csrfMeta && csrfHeaderMeta) { headers[csrfHeaderMeta.content] = csrfMeta.content; }
+                    fetch('/api/notifications/read-all', { method: 'POST', headers: headers })
+                        .then(function () { refreshBadge(); loadList(); }).catch(function () {});
+                });
+            }
+
+            refreshBadge();
+        })();
     </script>
 </th:block>
 </html>
