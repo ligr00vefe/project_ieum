@@ -7,6 +7,7 @@ import com.project.ieum.dto.request.MatchedPartyView;
 import com.project.ieum.entity.ApplicationStatus;
 import com.project.ieum.entity.User;
 import com.project.ieum.entity.UserRole;
+import com.project.ieum.entity.UserStatus;
 import com.project.ieum.entity.caregiver.CaregiverProfile;
 import com.project.ieum.entity.conversation.Conversation;
 import com.project.ieum.entity.conversation.ConversationStatus;
@@ -56,6 +57,13 @@ public class MatchingService {
 
         if (helpRequest.getStatus() != HelpRequestStatus.OPEN) {
             throw new IllegalStateException("열린 요청에만 지원할 수 있습니다.");
+        }
+        // (#22) 정지(BAN)된 사용자 보호 — 정지된 도우미는 지원 불가, 정지된 요청자의 글에도 지원 불가.
+        if (currentUser.getStatus() == UserStatus.BANNED) {
+            throw new ForbiddenException("정지된 계정은 지원할 수 없습니다.");
+        }
+        if (helpRequest.getRequester().getUser().getStatus() == UserStatus.BANNED) {
+            throw new ForbiddenException("정지된 사용자의 요청에는 지원할 수 없습니다.");
         }
         if (applicationRepository.existsByHelpRequest_IdAndCaregiver_UserId(requestId, currentUser.getId())) {
             throw new IllegalStateException("이미 지원한 요청입니다.");
