@@ -58,15 +58,16 @@ public class MatchingService {
         if (helpRequest.getStatus() != HelpRequestStatus.OPEN) {
             throw new IllegalStateException("열린 요청에만 지원할 수 있습니다.");
         }
+        if (applicationRepository.existsByHelpRequest_IdAndCaregiver_UserId(requestId, currentUser.getId())) {
+            throw new IllegalStateException("이미 지원한 요청입니다.");
+        }
         // (#22) 정지(BAN)된 사용자 보호 — 정지된 도우미는 지원 불가, 정지된 요청자의 글에도 지원 불가.
+        // (중복지원 체크 뒤에 둔다 — 정상 지원 경로에서만 requester.getUser() 접근, 불필요한 lazy 로딩/NPE 회피)
         if (currentUser.getStatus() == UserStatus.BANNED) {
             throw new ForbiddenException("정지된 계정은 지원할 수 없습니다.");
         }
         if (helpRequest.getRequester().getUser().getStatus() == UserStatus.BANNED) {
             throw new ForbiddenException("정지된 사용자의 요청에는 지원할 수 없습니다.");
-        }
-        if (applicationRepository.existsByHelpRequest_IdAndCaregiver_UserId(requestId, currentUser.getId())) {
-            throw new IllegalStateException("이미 지원한 요청입니다.");
         }
 
         HelpRequestApplication application = applicationRepository.save(HelpRequestApplication.builder()
