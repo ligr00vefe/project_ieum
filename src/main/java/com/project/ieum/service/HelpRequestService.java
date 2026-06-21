@@ -265,6 +265,14 @@ public class HelpRequestService {
         return helpRequestRepository.searchHelpRequests(condition, pageable, lat, lng);
     }
 
+    // 이용자 둘러보기 보드 — 남의 OPEN + 내 모든 상태(최신순). 키워드/서비스 카테고리 필터는 재사용, 거리정렬 없음.
+    @Transactional(readOnly = true)
+    public Page<HelpRequest> searchBoardForUser(HelpRequestSearchCondition condition, Pageable pageable) {
+        User me = requireRole(UserRole.USER);
+        condition.setOwnerScopeUserId(me.getId());
+        return helpRequestRepository.searchHelpRequests(condition, pageable, null, null);
+    }
+
     // 게시판 지역 필터 옵션 — 모집중 요청에 존재하는 시/도 → [시군구...] 맵(드롭다운 cascade용, 입력 순서 보존).
     @Transactional(readOnly = true)
     public Map<String, List<String>> getOpenRegionOptions() {
