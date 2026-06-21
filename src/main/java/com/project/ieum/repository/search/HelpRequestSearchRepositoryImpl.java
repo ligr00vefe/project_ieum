@@ -2,6 +2,7 @@ package com.project.ieum.repository.search;
 
 import com.project.ieum.dto.search.HelpRequestSearchCondition;
 import com.project.ieum.entity.request.HelpRequest;
+import com.project.ieum.entity.request.HelpRequestStatus;
 import com.project.ieum.entity.request.QHelpRequest;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.Expressions;
@@ -46,7 +47,11 @@ public class HelpRequestSearchRepositoryImpl implements HelpRequestSearchReposit
         if (condition.getToDate() != null) {
             where.and(request.desiredStartDatetime.loe(condition.getToDate().atTime(23, 59, 59)));
         }
-        if (condition.getStatus() != null) {
+        // 보드 모드(ownerScope): 남의 OPEN + 내 모든 상태. 그 외엔 기존 단일 status 필터.
+        if (condition.getOwnerScopeUserId() != null) {
+            where.and(request.status.eq(HelpRequestStatus.OPEN)
+                    .or(request.requester.userId.eq(condition.getOwnerScopeUserId())));
+        } else if (condition.getStatus() != null) {
             where.and(request.status.eq(condition.getStatus()));
         }
         // 키워드 — 제목/본문 부분일치(대소문자 무시).
@@ -83,6 +88,9 @@ public class HelpRequestSearchRepositoryImpl implements HelpRequestSearchReposit
             // id.desc() — 좌표·시작시각이 모두 동률일 때 결정적 순서를 보장(페이지 경계 중복/누락 방지).
             query.orderBy(nullCoordLast.asc(), cosineSimilarity.desc(),
                     request.desiredStartDatetime.asc(), request.id.desc());
+        } else if (condition.getOwnerScopeUserId() != null) {
+            // 둘러보기 보드 — 최신순(생성시각 내림차순), 동률은 id로 결정성 보장.
+            query.orderBy(request.createdAt.desc(), request.id.desc());
         } else {
             query.orderBy(request.desiredStartDatetime.asc(), request.id.desc());
         }
