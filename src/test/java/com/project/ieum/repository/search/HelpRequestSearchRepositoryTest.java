@@ -164,6 +164,57 @@ class HelpRequestSearchRepositoryTest {
                 new RegionOption("서울특별시", "마포구"));
     }
 
+    @Test
+    @DisplayName("ownerScope — 남의 OPEN + 내 모든 상태 포함, 남의 비OPEN은 제외")
+    void ownerScope_othersOpenPlusMineAll() {
+        UserProfile other = persistUserProfile("other@ieum.test");
+        HelpRequest myOpen = persist(b -> b.status(HelpRequestStatus.OPEN));
+        HelpRequest myClosed = persist(b -> b.status(HelpRequestStatus.CLOSED));
+        HelpRequest myCompleted = persist(b -> b.status(HelpRequestStatus.COMPLETED));
+        HelpRequest othersOpen = persist(b -> b.requester(other).status(HelpRequestStatus.OPEN));
+        persist(b -> b.requester(other).status(HelpRequestStatus.CLOSED)); // 남의 비OPEN → 제외 대상
+
+        HelpRequestSearchCondition cond = new HelpRequestSearchCondition();
+        cond.setOwnerScopeUserId(requester.getUserId());
+
+        var page = helpRequestRepository.searchHelpRequests(cond, PageRequest.of(0, 10));
+
+        assertThat(page.getContent()).extracting(HelpRequest::getId)
+                .containsExactlyInAnyOrder(myOpen.getId(), myClosed.getId(),
+                        myCompleted.getId(), othersOpen.getId());
+    }
+
+    @Test
+    @DisplayName("ownerScope + 키워드 — 범위 내에서 제목/본문 일치만 반환")
+    void ownerScope_withKeyword() {
+        UserProfile other = persistUserProfile("other2@ieum.test");
+        HelpRequest hit = persist(b -> b.requester(other).status(HelpRequestStatus.OPEN).title("병원 동행"));
+        persist(b -> b.requester(other).status(HelpRequestStatus.OPEN).title("장보기"));
+
+        HelpRequestSearchCondition cond = new HelpRequestSearchCondition();
+        cond.setOwnerScopeUserId(requester.getUserId());
+        cond.setKeyword("병원");
+
+        var page = helpRequestRepository.searchHelpRequests(cond, PageRequest.of(0, 10));
+
+        assertThat(page.getContent()).extracting(HelpRequest::getId).containsExactly(hit.getId());
+    }
+
+    @Test
+    @DisplayName("ownerScope 정렬 — 최신 생성순(createdAt desc, 동률은 id desc)")
+    void ownerScope_orderByLatest() {
+        HelpRequest first = persist(b -> b.status(HelpRequestStatus.OPEN).title("first"));
+        HelpRequest second = persist(b -> b.status(HelpRequestStatus.OPEN).title("second"));
+
+        HelpRequestSearchCondition cond = new HelpRequestSearchCondition();
+        cond.setOwnerScopeUserId(requester.getUserId());
+
+        var page = helpRequestRepository.searchHelpRequests(cond, PageRequest.of(0, 10));
+
+        assertThat(page.getContent()).extracting(HelpRequest::getId)
+                .containsExactly(second.getId(), first.getId());
+    }
+
     // ── 픽스처 헬퍼 ────────────────────────────────────────────────
 
     private UserProfile persistUserProfile(String email) {
