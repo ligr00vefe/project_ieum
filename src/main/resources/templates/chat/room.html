@@ -115,9 +115,17 @@
             </div>
 
             <!-- 채팅 메시지 영역 -->
-            <div id="chatMessages" class="flex-1 overflow-y-auto space-y-4 px-5 py-4">
-                <div id="loadingSpinner" class="flex justify-center py-8">
-                    <div class="w-6 h-6 border-2 border-indigo-300 border-t-indigo-600 rounded-full animate-spin"></div>
+            <div class="relative flex-1 flex flex-col overflow-hidden">
+                <!-- 이전 메시지 로딩 표시 (무한 스크롤) -->
+                <div id="topLoader" class="hidden absolute top-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-3 py-1.5 bg-white/90 border border-gray-100 rounded-full shadow-sm">
+                    <div class="w-3.5 h-3.5 border-2 border-indigo-300 border-t-indigo-600 rounded-full animate-spin"></div>
+                    <span class="text-xs text-gray-400 font-medium">이전 메시지 불러오는 중</span>
+                </div>
+
+                <div id="chatMessages" class="flex-1 overflow-y-auto space-y-4 px-5 py-4">
+                    <div id="loadingSpinner" class="flex justify-center py-8">
+                        <div class="w-6 h-6 border-2 border-indigo-300 border-t-indigo-600 rounded-full animate-spin"></div>
+                    </div>
                 </div>
             </div>
 
@@ -305,10 +313,14 @@ const PARTNER_IMAGE = /*[[${partnerProfileImage}]]*/ null;
 const PARTNER_FIRST = /*[[${partnerName != null ? partnerName.substring(0,1) : '?'}]]*/ '?';
 const PARTNER_COLOR = /*[[${isUser ? 'bg-teal-500' : 'bg-indigo-500'}]]*/ 'bg-indigo-500';
 
-let lastRenderedDate = null;
+const PAGE_SIZE = 25;                 // 한 번에 불러올 메시지 수 (무한 스크롤 단위)
 let polling = null;
 let stompClient = null;
 const renderedMessageIds = new Set();
+const messageStore = [];              // 화면에 표시 중인 메시지 (오래된→최신 정렬)
+let oldestLoadedPage = 0;             // 지금까지 불러온 가장 과거 페이지 번호
+let hasMoreOlder = false;             // 더 불러올 과거 메시지가 있는지
+let loadingOlder = false;             // 과거 메시지 로딩 진행 중 플래그(중복 호출 방지)
 
 function updatePresenceUI(onlineUserIds) {
     const isOnline = onlineUserIds.includes(PARTNER_ID);
@@ -399,45 +411,122 @@ function buildDateDivider(label) {
     </div>`;
 }
 
-async function loadMessages() {
+// 서버는 항상 sentAt DESC(최신순)로 한 페이지씩 내려준다(page 0=최신, 페이지 증가=과거).
+async function fetchMessages(page) {
     try {
-        const res = await fetch(`/api/chat/conversations/${CONVERSATION_ID}/messages?page=0&size=100&sort=sentAt,asc`);
-        if (!res.ok) return;
-        const data = await res.json();
-        const messages = (data.content || []).reverse();
-
-        const box = document.getElementById('chatMessages');
-        lastRenderedDate = null;
-        renderedMessageIds.clear();
-        let html = '';
-
-        const today = new Date().toDateString();
-        const yesterday = new Date(Date.now() - 86400000).toDateString();
-
-        for (const msg of messages) {
-            const msgDate = new Date(msg.sentAt).toDateString();
-            if (msgDate !== lastRenderedDate) {
-                let label;
-                if (msgDate === today) label = '오늘';
-                else if (msgDate === yesterday) label = '어제';
-                else label = fmtDate(msg.sentAt);
-                html += buildDateDivider(label);
-                lastRenderedDate = msgDate;
-            }
-            html += buildMessage(msg);
-            if (msg.id !== undefined && msg.id !== null) renderedMessageIds.add(msg.id);
-        }
-
-        if (messages.length === 0) {
-            html = `<div class="flex justify-center py-8">
-                <p class="text-sm text-gray-400">아직 메시지가 없습니다. 먼저 인사해보세요!</p>
-            </div>`;
-        }
-
-        box.innerHTML = html;
-        box.scrollTop = box.scrollHeight;
+        const res = await fetch(`/api/chat/conversations/${CONVERSATION_ID}/messages?page=${page}&size=${PAGE_SIZE}`);
+        if (!res.ok) return null;
+        return await res.json();   // Spring Page: { content, last, ... }
     } catch (e) {
         console.error('메시지 로드 실패', e);
+        return null;
+    }
+}
+
+// messageStore(오래된→최신)를 통째로 다시 그린다. 날짜 구분선도 여기서 일괄 계산한다.
+function renderAll() {
+    const box = document.getElementById('chatMessages');
+    if (messageStore.length === 0) {
+        box.innerHTML = `<div class="flex justify-center py-8">
+            <p class="text-sm text-gray-400">아직 메시지가 없습니다. 먼저 인사해보세요!</p>
+        </div>`;
+        return;
+    }
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    let html = '';
+    let prevDate = null;
+    for (const msg of messageStore) {
+        const msgDate = new Date(msg.sentAt).toDateString();
+        if (msgDate !== prevDate) {
+            let label;
+            if (msgDate === today) label = '오늘';
+            else if (msgDate === yesterday) label = '어제';
+            else label = fmtDate(msg.sentAt);
+            html += buildDateDivider(label);
+            prevDate = msgDate;
+        }
+        html += buildMessage(msg);
+    }
+    box.innerHTML = html;
+}
+
+function isNearBottom(box) {
+    return box.scrollHeight - box.scrollTop - box.clientHeight < 120;
+}
+
+function toggleTopLoader(show) {
+    document.getElementById('topLoader')?.classList.toggle('hidden', !show);
+}
+
+// 최초 로드: 가장 최신 페이지(page 0)를 받아 그리고 맨 아래로 스크롤한다.
+async function loadInitial() {
+    const data = await fetchMessages(0);
+    if (!data) return;
+    messageStore.length = 0;
+    renderedMessageIds.clear();
+    oldestLoadedPage = 0;
+    hasMoreOlder = !data.last;
+    const ascending = (data.content || []).slice().reverse();   // DESC→ASC
+    for (const msg of ascending) {
+        if (msg.id != null) renderedMessageIds.add(msg.id);
+        messageStore.push(msg);
+    }
+    renderAll();
+    const box = document.getElementById('chatMessages');
+    box.scrollTop = box.scrollHeight;
+}
+
+// 위로 스크롤 시 다음 과거 페이지를 불러와 맨 위에 붙인다(보던 스크롤 위치 보존).
+async function loadOlder() {
+    if (loadingOlder || !hasMoreOlder) return;
+    loadingOlder = true;
+    toggleTopLoader(true);
+
+    const box = document.getElementById('chatMessages');
+    const prevHeight = box.scrollHeight;
+    const prevTop = box.scrollTop;
+
+    const data = await fetchMessages(oldestLoadedPage + 1);
+    if (data) {
+        oldestLoadedPage += 1;
+        hasMoreOlder = !data.last;
+        const ascending = (data.content || []).slice().reverse();   // 과거 묶음(오래된→최신)
+        const fresh = [];
+        for (const msg of ascending) {
+            if (msg.id != null) {
+                if (renderedMessageIds.has(msg.id)) continue;
+                renderedMessageIds.add(msg.id);
+            }
+            fresh.push(msg);
+        }
+        if (fresh.length > 0) {
+            messageStore.unshift(...fresh);   // 모두 현재 가장 오래된 것보다 과거 → 앞에 삽입
+            renderAll();
+            box.scrollTop = box.scrollHeight - prevHeight + prevTop;   // 보던 위치 유지
+        }
+    }
+    toggleTopLoader(false);
+    loadingOlder = false;
+}
+
+// 실시간 연결이 끊겼다 붙거나 폴링 시: 최신 페이지만 받아 누락된 새 메시지를 이어붙인다.
+async function refreshLatest() {
+    const data = await fetchMessages(0);
+    if (!data) return;
+    const box = document.getElementById('chatMessages');
+    const near = isNearBottom(box);
+    const ascending = (data.content || []).slice().reverse();
+    let added = false;
+    for (const msg of ascending) {
+        if (msg.id != null && renderedMessageIds.has(msg.id)) continue;
+        if (msg.id != null) renderedMessageIds.add(msg.id);
+        messageStore.push(msg);
+        added = true;
+    }
+    if (added) {
+        renderAll();
+        if (near) box.scrollTop = box.scrollHeight;
     }
 }
 
@@ -491,26 +580,15 @@ async function sendMessage() {
 }
 
 function appendMessage(msg) {
-    if (msg.id !== undefined && msg.id !== null) {
-        if (renderedMessageIds.has(msg.id)) return;
-        renderedMessageIds.add(msg.id);
-    }
+    if (msg.id != null && renderedMessageIds.has(msg.id)) return;
+    if (msg.id != null) renderedMessageIds.add(msg.id);
 
     const box = document.getElementById('chatMessages');
-    const msgDate = new Date(msg.sentAt).toDateString();
-    const today = new Date().toDateString();
-
-    let html = '';
-    if (msgDate !== lastRenderedDate) {
-        html += buildDateDivider(msgDate === today ? '오늘' : fmtDate(msg.sentAt));
-        lastRenderedDate = msgDate;
-    }
-    html += buildMessage(msg);
-
-    const tmp = document.createElement('div');
-    tmp.innerHTML = html;
-    while (tmp.firstChild) box.appendChild(tmp.firstChild);
-    box.scrollTop = box.scrollHeight;
+    // 내가 보낸 메시지는 항상 따라 내려가고, 받은 메시지는 이미 맨 아래를 보고 있을 때만 내려간다.
+    const stick = msg.mine || isNearBottom(box);
+    messageStore.push(msg);
+    renderAll();
+    if (stick) box.scrollTop = box.scrollHeight;
 }
 
 function handleKeydown(e) {
@@ -532,13 +610,21 @@ function hideProfileModal() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('loadingSpinner')?.remove();
-    await loadMessages();
+    await loadInitial();
     await markRead();
     connectPresence();
+
+    // 위로 스크롤하면 과거 메시지를 추가로 불러온다(무한 스크롤).
+    const box = document.getElementById('chatMessages');
+    box.addEventListener('scroll', () => {
+        if (box.scrollTop < 60 && hasMoreOlder && !loadingOlder) loadOlder();
+    });
+
+    // 실시간(STOMP)이 주 경로이며, 누락 대비 안전망으로 최신 페이지만 가볍게 폴링한다.
     polling = setInterval(async () => {
-        await loadMessages();
+        await refreshLatest();
         await markRead();
-    }, 5000);
+    }, 7000);
 });
 </script>
 </th:block>
