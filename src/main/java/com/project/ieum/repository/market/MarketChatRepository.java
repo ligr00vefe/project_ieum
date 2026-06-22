@@ -54,6 +54,15 @@ public interface MarketChatRepository extends JpaRepository<MarketChat, Long> {
     // 특정 게시글의 채팅방 목록 — 상품 삭제 시 일괄 종료용
     List<MarketChat> findByPost_Id(Long postId);
 
+    // 관리자 상품 상세 — 해당 게시글의 채팅 목록 (buyer 정보 포함)
+    @Query("""
+        select c from MarketChat c
+        join fetch c.buyer b
+        where c.post.id = :postId
+        order by c.createdAt desc
+    """)
+    List<MarketChat> findByPostIdForAdmin(@Param("postId") Long postId);
+
     // 관리자 채팅 목록 — 상품 상태 필터 + 키워드 + 날짜 범위
     @Query(value = """
         select c from MarketChat c
