@@ -134,6 +134,19 @@
                     <input type="hidden" th:field="*{destinationAddress}" id="destinationAddress">
                 </div>
 
+                <!-- 출발지/도착지 경로 지도 (TMap appKey가 있고 두 주소가 모두 입력된 경우에만 노출) -->
+                <div th:if="${tmapAppKey != null and !tmapAppKey.isEmpty()}"
+                     id="routeMapSection" class="hidden">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">경로 미리보기</label>
+                    <div class="rounded-2xl overflow-hidden border border-gray-200 bg-gray-50">
+                        <div id="routeMapCanvas" class="w-full h-72"></div>
+                        <div id="routeInfo" class="px-4 py-3 text-xs text-gray-500 border-t border-gray-100 flex gap-4">
+                            <span id="routeDistance"></span>
+                            <span id="routeTime"></span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 도움 내용 -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">상세 내용</label>
@@ -249,6 +262,7 @@ function searchDeparture() {
         oncomplete: function(data) {
             document.getElementById('departureAddressDisplay').value = data.roadAddress;
             document.getElementById('departureAddress').value = data.roadAddress;
+            tryDrawRoute();
         }
     }).open();
 }
@@ -258,9 +272,177 @@ function searchDestination() {
         oncomplete: function(data) {
             document.getElementById('destinationAddressDisplay').value = data.roadAddress;
             document.getElementById('destinationAddress').value = data.roadAddress;
+            tryDrawRoute();
         }
     }).open();
 }
+</script>
+
+<!-- TMap 경로 그리기 (appKey 있을 때만) -->
+<script th:if="${tmapAppKey != null and !tmapAppKey.isEmpty()}" th:inline="javascript">
+(function () {
+    var TMAP_KEY = /*[[${tmapAppKey}]]*/ '';
+    var routeMap = null, routeMarkers = [], routePolylines = [];
+
+    function geocode(address) {
+        var url = 'https://apis.openapi.sk.com/tmap/geo/fullAddrGeo?version=1&addressFlag=F00'
+                + '&fullAddr=' + encodeURIComponent(address)
+                + '&appKey=' + TMAP_KEY;
+        return fetch(url)
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var item = data && data.coordinateInfo && data.coordinateInfo.coordinate
+                          && data.coordinateInfo.coordinate[0];
+                if (!item || !item.newLon || !item.newLat) return null;
+                return { lng: parseFloat(item.newLon), lat: parseFloat(item.newLat) };
+            });
+    }
+
+    function clearRoute() {
+        routePolylines.forEach(function (p) { p.setMap(null); });
+        routeMarkers.forEach(function (m) { m.setMap(null); });
+        routePolylines = [];
+        routeMarkers = [];
+    }
+
+    // 두 좌표 사이의 거리(m)로 적절한 줌 레벨 계산
+    function calcZoom(start, end) {
+        var R = 6371000;
+        var dLat = (end.lat - start.lat) * Math.PI / 180;
+        var dLng = (end.lng - start.lng) * Math.PI / 180;
+        var a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(start.lat*Math.PI/180)*Math.cos(end.lat*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+        var distM = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        if (distM > 20000) return 11;
+        if (distM > 10000) return 12;
+        if (distM > 5000)  return 13;
+        if (distM > 2000)  return 14;
+        return 15;
+    }
+
+    function drawRoute(start, end) {
+        clearRoute();
+
+        // 지도 중심을 경로 중간으로, 줌도 경로 거리에 맞게 즉시 이동
+        var midLat = (start.lat + end.lat) / 2;
+        var midLng = (start.lng + end.lng) / 2;
+        routeMap.setCenter(new Tmapv2.LatLng(midLat, midLng));
+        routeMap.setZoom(calcZoom(start, end));
+
+        var payload = {
+            startX: start.lng.toString(), startY: start.lat.toString(),
+            endX:   end.lng.toString(),   endY:   end.lat.toString(),
+            reqCoordType: 'WGS84GEO', resCoordType: 'WGS84GEO',
+            startName: '출발지', endName: '도착지'
+        };
+
+        fetch('https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1&appKey=' + TMAP_KEY, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            var features = data && data.features;
+            if (!features || !features.length) {
+                document.getElementById('routeDistance').textContent = '경로를 찾을 수 없습니다.';
+                return;
+            }
+
+            // 거리·시간 요약 (첫 번째 feature의 properties)
+            var summary = features[0].properties;
+            if (summary && summary.totalDistance != null) {
+                var distM   = summary.totalDistance;
+                var timeSec = summary.totalTime || 0;
+                document.getElementById('routeDistance').textContent =
+                    '총 거리: ' + (distM >= 1000 ? (distM / 1000).toFixed(1) + 'km' : Math.round(distM) + 'm');
+                document.getElementById('routeTime').textContent =
+                    '도보 예상: ' + Math.ceil(timeSec / 60) + '분';
+            }
+
+            // 폴리라인
+            features.forEach(function (f) {
+                if (f.geometry.type !== 'LineString') return;
+                var path = f.geometry.coordinates.map(function (c) {
+                    return new Tmapv2.LatLng(c[1], c[0]);
+                });
+                routePolylines.push(new Tmapv2.Polyline({
+                    path: path, strokeColor: '#4f46e5', strokeWeight: 5,
+                    strokeOpacity: 0.9, map: routeMap
+                }));
+            });
+
+            // 출발·도착 핀 마커 (파란색=출발, 초록색=도착)
+            var PIN_ANCHOR = new Tmapv2.Point(16, 40);
+            var PIN_SIZE   = new Tmapv2.Size(32, 40);
+            var startMarker = new Tmapv2.Marker({
+                position: new Tmapv2.LatLng(start.lat, start.lng),
+                map: routeMap, title: '출발지',
+                iconURL: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='40' viewBox='0 0 32 40'%3E%3Cpath d='M16 0C7.163 0 0 7.163 0 16c0 9.941 16 24 16 24S32 25.941 32 16C32 7.163 24.837 0 16 0z' fill='%234f46e5'/%3E%3Ccircle cx='16' cy='16' r='7' fill='white'/%3E%3C/svg%3E",
+                iconSize: PIN_SIZE, iconAnchor: PIN_ANCHOR
+            });
+            var endMarker = new Tmapv2.Marker({
+                position: new Tmapv2.LatLng(end.lat, end.lng),
+                map: routeMap, title: '도착지',
+                iconURL: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='40' viewBox='0 0 32 40'%3E%3Cpath d='M16 0C7.163 0 0 7.163 0 16c0 9.941 16 24 16 24S32 25.941 32 16C32 7.163 24.837 0 16 0z' fill='%230d9488'/%3E%3Ccircle cx='16' cy='16' r='7' fill='white'/%3E%3C/svg%3E",
+                iconSize: PIN_SIZE, iconAnchor: PIN_ANCHOR
+            });
+            routeMarkers.push(startMarker, endMarker);
+        })
+        .catch(function (err) {
+            console.error('TMap route error', err);
+            document.getElementById('routeDistance').textContent = '경로 API 호출에 실패했습니다.';
+        });
+    }
+
+    function initRouteMap(centerLat, centerLng) {
+        if (routeMap) return;
+        var canvas = document.getElementById('routeMapCanvas');
+        routeMap = new Tmapv2.Map('routeMapCanvas', {
+            center: new Tmapv2.LatLng(centerLat, centerLng),
+            width:  canvas.clientWidth  + 'px',
+            height: canvas.clientHeight + 'px',
+            zoom: 14
+        });
+    }
+
+    window.tryDrawRoute = function () {
+        var dep  = document.getElementById('departureAddress').value.trim();
+        var dest = document.getElementById('destinationAddress').value.trim();
+        if (!dep || !dest) return;
+
+        document.getElementById('routeMapSection').classList.remove('hidden');
+        document.getElementById('routeDistance').textContent = '경로를 불러오는 중...';
+        document.getElementById('routeTime').textContent = '';
+
+        function whenReady(tries) {
+            if (!window.Tmapv2) {
+                if (tries < 50) setTimeout(function () { whenReady(tries + 1); }, 100);
+                return;
+            }
+            // 지도가 없으면 임시 중심으로 초기화(이후 geocode 결과로 즉시 이동)
+            initRouteMap(37.5665, 126.9780);
+
+            Promise.all([geocode(dep), geocode(dest)]).then(function (results) {
+                var start = results[0], end = results[1];
+                if (!start || !end) {
+                    document.getElementById('routeDistance').textContent = '주소를 좌표로 변환할 수 없습니다.';
+                    return;
+                }
+                drawRoute(start, end);
+            }).catch(function () {
+                document.getElementById('routeDistance').textContent = '주소 변환에 실패했습니다.';
+            });
+        }
+        whenReady(0);
+    };
+
+    // 재게시 등 초기값이 있을 경우 자동 표시
+    document.addEventListener('DOMContentLoaded', function () {
+        var dep  = document.getElementById('departureAddress').value.trim();
+        var dest = document.getElementById('destinationAddress').value.trim();
+        if (dep && dest) tryDrawRoute();
+    });
+})();
 </script>
 </th:block>
 </html>
