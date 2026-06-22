@@ -21,6 +21,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -51,10 +52,32 @@ public class MarketController {
             return MarketPostResponse.from(post, thumbnail);
         });
 
+        // 현재 로그인 사용자 ID (비로그인은 null — 목록에서 내 상품 구분용)
+        Long currentUserId = null;
+        try {
+            currentUserId = currentUserService.getCurrentUser().getId();
+        } catch (Exception ignored) {}
+
         model.addAttribute("title", "이음 마켓");
         model.addAttribute("posts", responses);
         model.addAttribute("condition", condition);
         model.addAttribute("categories", marketPostService.getAllCategories());
+        model.addAttribute("currentUserId", currentUserId);
+
+        // 로그인 사용자의 상품을 채팅 수 포함해 별도로 조회 (내 상품 섹션 우선 표시용)
+        List<MarketPostResponse> myPosts = new ArrayList<>();
+        if (currentUserId != null) {
+            myPosts = marketPostService.getMyPosts().stream()
+                    .map(p -> {
+                        List<MarketPostImage> imgs = marketPostService.getImages(p.getId());
+                        String thumb = imgs.isEmpty() ? null : imgs.get(0).getImageUrl();
+                        int cnt = marketChatService.getChatCountByPost(p.getId());
+                        return MarketPostResponse.from(p, thumb, cnt);
+                    })
+                    .toList();
+        }
+        model.addAttribute("myPosts", myPosts);
+
         return "market/list";  // templates/market/list.html
     }
 
@@ -68,8 +91,9 @@ public class MarketController {
 
         // 현재 로그인 사용자가 판매자인지 여부 — 템플릿에서 수정/삭제 버튼 표시 여부 결정
         boolean isSeller = false;
+        User currentUser = null;
         try {
-            User currentUser = currentUserService.getCurrentUser();
+            currentUser = currentUserService.getCurrentUser();
             isSeller = post.getSeller().getId().equals(currentUser.getId());
         } catch (Exception ignored) {
             // 비로그인 접근 허용 — 상세 보기는 누구나 가능
@@ -81,6 +105,7 @@ public class MarketController {
         model.addAttribute("post", MarketPostResponse.from(post, thumbnail, chatCount));
         model.addAttribute("images", images);   // 슬라이드용 전체 이미지 목록
         model.addAttribute("isSeller", isSeller);
+        model.addAttribute("currentUser", currentUser);
         return "market/detail";  // templates/market/detail.html
     }
 

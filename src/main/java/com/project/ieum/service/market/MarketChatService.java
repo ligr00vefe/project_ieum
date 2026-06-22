@@ -217,4 +217,11 @@ public class MarketChatService {
     public int getChatCountByPost(Long postId) {
         return marketChatRepository.countByPost_Id(postId);
     }
+
+    // ── 관리자: 채팅방 강제 종료 ──
+    public void adminClose(Long chatId) {
+        MarketChat chat = marketChatRepository.findById(chatId)
+                .orElseThrow(() -> new NotFoundException("채팅방을 찾을 수 없습니다."));
+        chat.close();
+    }
 }
