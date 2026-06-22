@@ -138,7 +138,7 @@ public class AdminController {
 
     @GetMapping("/matching/{id}")
     public String matchingDetail(@PathVariable Long id, Model model) {
-        model.addAttribute("request", helpRequestRepository.findById(id)
+        model.addAttribute("request", helpRequestRepository.findAdminDetail(id)
                 .orElseThrow(() -> new com.project.ieum.exception.NotFoundException("요청을 찾을 수 없습니다.")));
         model.addAttribute("activeMenu", "matching");
         model.addAttribute("title", "매칭 상세");
