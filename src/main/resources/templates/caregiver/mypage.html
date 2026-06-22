@@ -506,14 +506,15 @@
         const fd = new FormData();
         fd.append('file', file);
         fetch('/api/profile/image', { method: 'POST', body: fd })
-            .then(r => r.json())
+            .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
             .then(data => {
                 const img = document.getElementById('mypage-profile-img');
                 img.src = data.imageUrl + '?t=' + Date.now();
                 img.className = 'w-full h-full object-cover object-top';
                 const def = document.getElementById('profile-default');
                 if (def) def.className = 'hidden';
-            });
+            })
+            .catch(() => alert('이미지 업로드에 실패했습니다. 잠시 후 다시 시도해주세요.'));
         this.value = '';
     });
 </script>
