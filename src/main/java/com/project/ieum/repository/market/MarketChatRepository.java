@@ -2,6 +2,7 @@ package com.project.ieum.repository.market;
 
 import com.project.ieum.entity.User;
 import com.project.ieum.entity.market.MarketChat;
+import com.project.ieum.entity.market.MarketPostStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -47,4 +50,42 @@ public interface MarketChatRepository extends JpaRepository<MarketChat, Long> {
 
     // 특정 게시글의 채팅방 수 — 관심 구매자 수 표시용 (선택 기능)
     int countByPost_Id(Long postId);
+
+    // 특정 게시글의 채팅방 목록 — 상품 삭제 시 일괄 종료용
+    List<MarketChat> findByPost_Id(Long postId);
+
+    // 관리자 채팅 목록 — 상품 상태 필터 + 키워드 + 날짜 범위
+    @Query(value = """
+        select c from MarketChat c
+        join fetch c.post p
+        join fetch c.seller s
+        join fetch c.buyer b
+        where (:postStatus is null or p.status = :postStatus)
+          and (:keyword is null
+               or lower(p.title) like lower(concat('%', :keyword, '%'))
+               or lower(s.email) like lower(concat('%', :keyword, '%'))
+               or lower(b.email) like lower(concat('%', :keyword, '%')))
+          and (:fromDate is null or c.createdAt >= :fromDate)
+          and (:toDate is null or c.createdAt <= :toDate)
+        order by c.createdAt desc
+    """,
+    countQuery = """
+        select count(c) from MarketChat c
+        join c.post p
+        join c.seller s
+        join c.buyer b
+        where (:postStatus is null or p.status = :postStatus)
+          and (:keyword is null
+               or lower(p.title) like lower(concat('%', :keyword, '%'))
+               or lower(s.email) like lower(concat('%', :keyword, '%'))
+               or lower(b.email) like lower(concat('%', :keyword, '%')))
+          and (:fromDate is null or c.createdAt >= :fromDate)
+          and (:toDate is null or c.createdAt <= :toDate)
+    """)
+    Page<MarketChat> findAdminChats(
+            @Param("postStatus") MarketPostStatus postStatus,
+            @Param("keyword") String keyword,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate,
+            Pageable pageable);
 }

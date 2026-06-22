@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,4 +41,55 @@ public interface MarketPostRepository extends JpaRepository<MarketPost, Long>,
     @Query(value = "SELECT p FROM MarketPost p LEFT JOIN FETCH p.seller LEFT JOIN FETCH p.category ORDER BY p.createdAt DESC",
             countQuery = "SELECT count(p) FROM MarketPost p")
     Page<MarketPost> findAllPagedWithFetch(Pageable pageable);
+
+    // 관리자 상품 필터 검색 — 상태 + 키워드 + 날짜 범위
+    @Query(value = """
+        select p from MarketPost p
+        join fetch p.seller s
+        join fetch p.category c
+        where (:status is null or p.status = :status)
+          and (:keyword is null
+               or lower(p.title) like lower(concat('%', :keyword, '%'))
+               or lower(s.email) like lower(concat('%', :keyword, '%')))
+          and (:fromDate is null or p.createdAt >= :fromDate)
+          and (:toDate is null or p.createdAt <= :toDate)
+        order by p.createdAt desc
+    """,
+    countQuery = """
+        select count(p) from MarketPost p
+        join p.seller s
+        where (:status is null or p.status = :status)
+          and (:keyword is null
+               or lower(p.title) like lower(concat('%', :keyword, '%'))
+               or lower(s.email) like lower(concat('%', :keyword, '%')))
+          and (:fromDate is null or p.createdAt >= :fromDate)
+          and (:toDate is null or p.createdAt <= :toDate)
+    """)
+    Page<MarketPost> findAdminPosts(
+            @Param("status") MarketPostStatus status,
+            @Param("keyword") String keyword,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate,
+            Pageable pageable);
+
+    // 관리자 매출 조회 — SOLD 상태 게시글 날짜 범위
+    @Query(value = """
+        select p from MarketPost p
+        join fetch p.seller s
+        join fetch p.category c
+        where p.status = com.project.ieum.entity.market.MarketPostStatus.SOLD
+          and (:fromDate is null or p.updatedAt >= :fromDate)
+          and (:toDate is null or p.updatedAt <= :toDate)
+        order by p.updatedAt desc
+    """,
+    countQuery = """
+        select count(p) from MarketPost p
+        where p.status = com.project.ieum.entity.market.MarketPostStatus.SOLD
+          and (:fromDate is null or p.updatedAt >= :fromDate)
+          and (:toDate is null or p.updatedAt <= :toDate)
+    """)
+    Page<MarketPost> findSoldPostsAdmin(
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate,
+            Pageable pageable);
 }

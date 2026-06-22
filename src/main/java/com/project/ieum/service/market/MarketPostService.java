@@ -127,11 +127,12 @@ public class MarketPostService {
     }
 
     // ── 게시글 삭제 (soft delete) ──
-    // REMOVED 상태로만 전환 — 진행 중인 채팅 기록 보존을 위해 하드 삭제 안 함
+    // REMOVED 상태로 전환 + 진행 중인 채팅방 모두 종료
     public void remove(Long postId) {
         User currentUser = currentUserService.getCurrentUser();
         MarketPost post = getOwnedPost(postId, currentUser.getId());
-        post.remove(); // 내부에서 SOLD 상태 방어 처리됨
+        post.remove();
+        marketChatRepository.findByPost_Id(postId).forEach(MarketChat::close);
     }
 
     // ── 상태 변경: 예약 처리 ──
