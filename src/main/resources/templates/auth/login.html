@@ -52,6 +52,15 @@
                     <p class="text-sm text-red-700 font-medium">이메일 또는 비밀번호가 올바르지 않습니다.</p>
                 </div>
 
+                <!-- 비밀번호 변경 완료 메시지 -->
+                <div th:if="${successMessage}"
+                     class="flex items-center gap-3 p-4 bg-green-50 border border-green-100 rounded-xl mb-6">
+                    <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <p class="text-sm text-green-700 font-medium" th:text="${successMessage}"></p>
+                </div>
+
                 <!-- Logout message -->
                 <div th:if="${param.logout}"
                      class="flex items-center gap-3 p-4 bg-green-50 border border-green-100 rounded-xl mb-6">
@@ -90,7 +99,7 @@
                             <label for="password" class="block text-sm font-semibold text-gray-700">
                                 비밀번호
                             </label>
-                            <a href="#" class="text-xs text-indigo-600 hover:text-indigo-700 font-medium hover:underline">
+                            <a th:href="@{/password/forgot}" class="text-xs text-indigo-600 hover:text-indigo-700 font-medium hover:underline">
                                 비밀번호 찾기
                             </a>
                         </div>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>새 비밀번호 설정 - 이음 Care Match</title>
+    <link th:href="@{/css/output.css}" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-slate-50 flex flex-col">
+
+    <div class="bg-white border-b border-gray-100 px-4 py-3.5">
+        <div class="max-w-7xl mx-auto flex items-center">
+            <a th:href="@{/}" class="flex items-center gap-2.5 group">
+                <div class="w-8 h-8 bg-teal-500 rounded-xl flex items-center justify-center group-hover:bg-teal-600 transition-colors">
+                    <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/>
+                    </svg>
+                </div>
+                <div class="leading-tight">
+                    <div class="text-[14px] font-bold text-gray-900">이음</div>
+                    <div class="text-[9px] text-gray-400 font-medium tracking-wide -mt-0.5">Care Match</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <main class="flex-1 flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-[420px]">
+
+            <div class="text-center mb-8">
+                <div class="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-7 h-7 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-extrabold text-gray-900 mb-2">새 비밀번호 설정</h1>
+                <p class="text-sm text-gray-500">8자 이상의 새 비밀번호를 입력해 주세요.</p>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+
+                <div th:if="${errorMessage}"
+                     class="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-xl mb-6">
+                    <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="text-sm text-red-700 font-medium" th:text="${errorMessage}"></p>
+                </div>
+
+                <!-- 토큰 만료 시 재시도 안내만 표시 -->
+                <div th:if="${errorMessage != null and token == null}" class="text-center mt-2">
+                    <a th:href="@{/password/forgot}"
+                       class="inline-block mt-4 py-3 px-6 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-all">
+                        비밀번호 찾기 다시 시도
+                    </a>
+                </div>
+
+                <form th:if="${token != null}" th:action="@{/password/reset}" method="post" class="space-y-5" novalidate>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <input type="hidden" name="token" th:value="${token}"/>
+
+                    <div class="space-y-1.5">
+                        <label for="newPassword" class="block text-sm font-semibold text-gray-700">새 비밀번호</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                            </div>
+                            <input type="password"
+                                   id="newPassword"
+                                   name="newPassword"
+                                   autocomplete="new-password"
+                                   placeholder="새 비밀번호 (8자 이상)"
+                                   minlength="8"
+                                   class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label for="confirmPassword" class="block text-sm font-semibold text-gray-700">비밀번호 확인</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                            </div>
+                            <input type="password"
+                                   id="confirmPassword"
+                                   name="confirmPassword"
+                                   autocomplete="new-password"
+                                   placeholder="비밀번호를 다시 입력하세요"
+                                   minlength="8"
+                                   class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                   required>
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                            class="w-full py-3.5 bg-indigo-600 text-white font-semibold text-sm rounded-xl hover:bg-indigo-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all shadow-sm shadow-indigo-100 mt-2">
+                        비밀번호 변경하기
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
