@@ -37,6 +37,10 @@ public interface MarketPostRepository extends JpaRepository<MarketPost, Long>,
     // 특정 상태의 게시글 수 — 관리자 통계용
     long countByStatus(MarketPostStatus status);
 
+    // 관리자 대시보드 최근 등록 상품 5개
+    @EntityGraph(attributePaths = {"seller", "category"})
+    List<MarketPost> findTop5ByOrderByCreatedAtDesc();
+
     // 관리자 전체 목록 — seller 정보 포함, 최신순
     @Query(value = "SELECT p FROM MarketPost p LEFT JOIN FETCH p.seller LEFT JOIN FETCH p.category ORDER BY p.createdAt DESC",
             countQuery = "SELECT count(p) FROM MarketPost p")

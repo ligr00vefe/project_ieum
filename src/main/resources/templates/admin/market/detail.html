@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+<div>
+
+    <!-- 브레드크럼 -->
+    <div class="flex items-center gap-3 mb-6">
+        <a th:href="@{/admin/market/posts}"
+           class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            거래 관리
+        </a>
+        <span class="text-slate-300">/</span>
+        <span class="text-sm font-medium text-slate-700" th:text="${post.title}">상품명</span>
+    </div>
+
+    <!-- 플래시 메시지 -->
+    <div th:if="${message}" class="mb-4 px-4 py-3 bg-teal-50 border border-teal-200 rounded-xl text-sm text-teal-700" th:text="${message}"></div>
+    <div th:if="${error}"   class="mb-4 px-4 py-3 bg-red-50  border border-red-200  rounded-xl text-sm text-red-600"  th:text="${error}"></div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        <!-- 왼쪽: 상품 정보 + 채팅 목록 -->
+        <div class="lg:col-span-2 space-y-4">
+
+            <!-- 상품 정보 -->
+            <div class="bg-white rounded-2xl border border-slate-100 p-5">
+                <h3 class="text-sm font-semibold text-slate-700 mb-4">상품 정보</h3>
+
+                <!-- 이미지 -->
+                <div th:if="${!#lists.isEmpty(images)}" class="flex gap-2 mb-5 overflow-x-auto pb-1">
+                    <div th:each="img : ${images}"
+                         class="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-slate-100">
+                        <img th:src="${img.imageUrl}" class="w-full h-full object-cover" th:alt="${post.title}">
+                    </div>
+                </div>
+                <div th:if="${#lists.isEmpty(images)}"
+                     class="flex items-center justify-center w-full h-20 mb-5 rounded-xl bg-slate-50 text-slate-300 text-xs">
+                    등록된 이미지 없음
+                </div>
+
+                <dl class="space-y-3">
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">상품명</dt>
+                        <dd class="text-sm text-slate-800 font-medium" th:text="${post.title}">-</dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">카테고리</dt>
+                        <dd class="text-sm text-slate-800" th:text="${post.category?.name ?: '-'}">-</dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">가격</dt>
+                        <dd class="text-sm text-slate-800 font-semibold"
+                            th:text="${#numbers.formatInteger(post.price, 1, 'COMMA') + '원'}">-</dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">판매자</dt>
+                        <dd class="text-sm text-slate-800" th:text="${post.seller?.email ?: '-'}">-</dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">거래 지역</dt>
+                        <dd class="text-sm text-slate-800"
+                            th:text="${post.sido + ' ' + post.sigungu}">-</dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">도로명 주소</dt>
+                        <dd class="text-sm text-slate-600" th:text="${post.roadAddress}">-</dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">등록일</dt>
+                        <dd class="text-sm text-slate-600"
+                            th:text="${#temporals.format(post.createdAt, 'yyyy.MM.dd HH:mm')}">-</dd>
+                    </div>
+                    <div th:if="${post.description}" class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">상품 설명</dt>
+                        <dd class="text-sm text-slate-600 whitespace-pre-wrap" th:text="${post.description}">-</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <!-- 채팅 목록 -->
+            <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-50 flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-slate-700">채팅 목록</h3>
+                    <span class="text-xs text-slate-400"
+                          th:text="${#lists.size(chats) + '건'}">0건</span>
+                </div>
+                <div class="divide-y divide-slate-50">
+                    <th:block th:each="chat : ${chats}">
+                    <div class="flex items-center justify-between px-5 py-3.5">
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm text-slate-700 font-medium truncate"
+                               th:text="${chat.buyer?.email ?: '-'}">구매자 이메일</p>
+                            <p class="text-xs text-slate-400 mt-0.5"
+                               th:text="${chat.lastMessageAt != null ? #temporals.format(chat.lastMessageAt, 'MM.dd HH:mm') + ' 마지막 메시지' : '메시지 없음'}">-</p>
+                        </div>
+                        <span th:text="${chat.status.name() == 'ACTIVE' ? '진행중' : '종료'}"
+                              th:classappend="${chat.status.name() == 'ACTIVE'} ? 'bg-teal-50 text-teal-600' : 'bg-slate-100 text-slate-400'"
+                              class="ml-3 flex-shrink-0 px-2 py-0.5 text-xs font-semibold rounded-full">상태</span>
+                    </div>
+                    </th:block>
+                    <div th:if="${#lists.isEmpty(chats)}"
+                         class="px-5 py-8 text-center text-sm text-slate-400">채팅 내역이 없습니다.</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 오른쪽: 상태 + 관리 -->
+        <div class="space-y-4">
+
+            <!-- 현재 상태 -->
+            <div class="bg-white rounded-2xl border border-slate-100 p-5">
+                <h3 class="text-sm font-semibold text-slate-700 mb-3">상품 상태</h3>
+                <span th:text="${post.status.name() == 'ACTIVE' ? '판매중' :
+                                 post.status.name() == 'RESERVED' ? '예약중' :
+                                 post.status.name() == 'SOLD' ? '판매완료' : '삭제됨'}"
+                      th:classappend="${post.status.name() == 'ACTIVE'} ? 'bg-green-50 text-green-600' :
+                                      ${post.status.name() == 'RESERVED'} ? 'bg-amber-50 text-amber-600' :
+                                      ${post.status.name() == 'SOLD'} ? 'bg-slate-100 text-slate-500' :
+                                                                         'bg-red-50 text-red-500'"
+                      class="inline-block px-2.5 py-1 text-xs font-semibold rounded-full">상태</span>
+            </div>
+
+            <!-- 관리 액션 -->
+            <div class="bg-white rounded-2xl border border-slate-100 p-5">
+                <h3 class="text-sm font-semibold text-slate-700 mb-3">관리</h3>
+                <div class="space-y-2">
+
+                    <!-- 삭제 처리 (ACTIVE, RESERVED 상태에서만) -->
+                    <form th:if="${post.status.name() == 'ACTIVE' or post.status.name() == 'RESERVED'}"
+                          th:action="@{/admin/market/posts/{id}/remove(id=${post.id})}"
+                          method="post"
+                          onsubmit="return confirm('이 상품을 삭제 처리하시겠습니까?\n연관된 채팅도 모두 종료됩니다.')">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit"
+                                class="w-full px-3 py-2 text-xs font-medium rounded-xl border border-red-100 text-red-600 hover:bg-red-50 transition-colors">
+                            상품 삭제 처리
+                        </button>
+                    </form>
+
+                    <!-- 이미 삭제됨 또는 판매완료 -->
+                    <p th:if="${post.status.name() == 'REMOVED'}"
+                       class="text-xs text-slate-400 text-center py-2">이미 삭제 처리된 상품입니다.</p>
+                    <p th:if="${post.status.name() == 'SOLD'}"
+                       class="text-xs text-slate-400 text-center py-2">거래 완료된 상품입니다.</p>
+
+                </div>
+            </div>
+
+            <!-- 마켓에서 보기 -->
+            <a th:href="@{/market/{id}(id=${post.id})}" target="_blank"
+               class="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-xs font-medium text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+                마켓 상품 페이지에서 보기
+            </a>
+
+        </div>
+    </div>
+
+</div>
+</th:block>
+</html>
