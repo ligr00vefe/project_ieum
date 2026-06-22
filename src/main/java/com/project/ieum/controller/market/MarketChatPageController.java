@@ -1,5 +1,6 @@
 package com.project.ieum.controller.market;
 
+import com.project.ieum.dto.market.MarketChatSummaryResponse;
 import com.project.ieum.entity.User;
 import com.project.ieum.entity.market.MarketChat;
 import com.project.ieum.entity.market.MarketPostImage;
@@ -80,10 +81,15 @@ public class MarketChatPageController {
         User currentUser = currentUserService.getCurrentUser();
         Page<MarketChat> chats = marketChatService.getMyChats(pageable);
 
-        // 각 채팅방의 마지막 메시지·대표 이미지·안읽음 수는 Service에서 통합 조회
-        // (Phase 5 템플릿 작업 시 필요에 따라 추가 보완)
+        // 썸네일 포함 SummaryResponse로 변환
+        Page<MarketChatSummaryResponse> chatSummaries = chats.map(chat -> {
+            List<MarketPostImage> imgs = marketPostService.getImages(chat.getPost().getId());
+            String thumb = imgs.isEmpty() ? null : imgs.get(0).getImageUrl();
+            return MarketChatSummaryResponse.from(chat, currentUser.getId(), thumb, null, 0);
+        });
+
         model.addAttribute("title", "마켓 채팅");
-        model.addAttribute("chats", chats);
+        model.addAttribute("chats", chatSummaries);
         model.addAttribute("currentUserId", currentUser.getId());
         return "market/chat-list";  // templates/market/chat-list.html
     }
