@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메일 발송 완료 - 이음 Care Match</title>
+    <link th:href="@{/css/output.css}" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-slate-50 flex flex-col">
+
+    <div class="bg-white border-b border-gray-100 px-4 py-3.5">
+        <div class="max-w-7xl mx-auto flex items-center">
+            <a th:href="@{/}" class="flex items-center gap-2.5 group">
+                <div class="w-8 h-8 bg-teal-500 rounded-xl flex items-center justify-center group-hover:bg-teal-600 transition-colors">
+                    <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/>
+                    </svg>
+                </div>
+                <div class="leading-tight">
+                    <div class="text-[14px] font-bold text-gray-900">이음</div>
+                    <div class="text-[9px] text-gray-400 font-medium tracking-wide -mt-0.5">Care Match</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <main class="flex-1 flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-[420px] text-center">
+
+            <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <svg class="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+
+            <h1 class="text-2xl font-extrabold text-gray-900 mb-3">메일을 확인해 주세요</h1>
+            <p class="text-sm text-gray-500 leading-relaxed mb-8">
+                입력하신 이메일 주소로 비밀번호 재설정 링크를 보냈습니다.<br>
+                링크는 <strong class="text-gray-700">30분</strong> 동안 유효합니다.<br>
+                메일이 오지 않는다면 스팸 폴더를 확인해 주세요.
+            </p>
+
+            <div class="space-y-3">
+                <a th:href="@{/password/forgot}"
+                   class="block w-full py-3.5 border border-gray-200 text-sm font-semibold text-gray-700 rounded-xl hover:bg-gray-50 transition-all">
+                    다시 보내기
+                </a>
+                <a th:href="@{/login}"
+                   class="block w-full py-3.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100">
+                    로그인으로 돌아가기
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
