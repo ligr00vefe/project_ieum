@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('상품 등록 - 이음마켓')}"></head>
+<body class="min-h-screen bg-[#f6f7ff] text-slate-900">
+<div th:replace="~{layout/header :: header}"></div>
+
+<main class="mx-auto w-full max-w-2xl px-4 py-6 sm:px-6 lg:px-8">
+
+    <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+        <p class="text-sm font-semibold text-orange-500">이음 마켓</p>
+        <h1 class="mt-1 text-2xl font-bold"
+            th:text="${postId == null} ? '상품 등록' : '상품 수정'">상품 등록</h1>
+
+        <form th:action="${postId == null} ? @{/market} : @{/market/{id}/edit(id=${postId})}"
+              method="post"
+              th:object="${form}"
+              enctype="multipart/form-data"
+              class="mt-6 space-y-5">
+
+            <input type="hidden" th:if="${_csrf != null}"
+                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+            <!-- 수정 시 삭제할 이미지 ID를 담는 컨테이너 (JS에서 동적으로 추가) -->
+            <div id="deleteImageIdsContainer"></div>
+
+            <!-- 상품 사진 (최대 5장) -->
+            <div>
+                <label class="mb-2 block text-sm font-semibold">
+                    상품 사진 <span class="text-slate-400 font-normal">(최대 5장, 첫 번째 사진이 대표 이미지)</span>
+                </label>
+                <div id="imagePreviewGrid" class="grid grid-cols-5 gap-2 mb-3">
+                    <div th:each="i : ${#numbers.sequence(0,4)}"
+                         class="image-slot relative aspect-square rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-slate-300 overflow-hidden cursor-pointer hover:border-orange-300 transition-colors"
+                         th:attr="data-index=${i}"
+                         onclick="triggerImageInput(this)">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <span th:if="${i == 0}"
+                              class="absolute bottom-1 text-[10px] text-orange-400 font-semibold">대표</span>
+                    </div>
+                </div>
+                <input type="file" id="imageFileInput" name="images"
+                       accept="image/*" multiple class="hidden"
+                       onchange="handleImageSelect(event)">
+                <p class="text-xs text-slate-400">JPG, PNG, WEBP 형식 / 파일당 최대 10MB</p>
+                <p th:if="${#fields.hasErrors('images')}" th:errors="*{images}"
+                   class="mt-1 text-sm text-red-600"></p>
+            </div>
+
+            <!-- 상품명 -->
+            <div>
+                <label for="title" class="mb-1 block text-sm font-semibold">상품명</label>
+                <input id="title" th:field="*{title}" type="text"
+                       placeholder="상품명을 입력해주세요"
+                       class="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
+                <p th:if="${#fields.hasErrors('title')}" th:errors="*{title}"
+                   class="mt-1 text-sm text-red-600"></p>
+            </div>
+
+            <!-- 카테고리 + 가격 -->
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="categoryId" class="mb-1 block text-sm font-semibold">카테고리</label>
+                    <select id="categoryId" th:field="*{categoryId}" required
+                            class="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
+                        <option value="">선택해주세요</option>
+                        <option th:each="cat : ${categories}"
+                                th:value="${cat.id}"
+                                th:text="${cat.name}">카테고리</option>
+                    </select>
+                    <p th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"
+                       class="mt-1 text-sm text-red-600"></p>
+                </div>
+                <div>
+                    <label for="price" class="mb-1 block text-sm font-semibold">판매가격 (원)</label>
+                    <input id="price" th:field="*{price}" type="number" placeholder="0" min="0"
+                           class="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
+                    <p th:if="${#fields.hasErrors('price')}" th:errors="*{price}"
+                       class="mt-1 text-sm text-red-600"></p>
+                </div>
+            </div>
+
+            <!-- 상품 설명 -->
+            <div>
+                <label for="description" class="mb-1 block text-sm font-semibold">
+                    상품 설명 <span class="text-slate-400 font-normal">(선택)</span>
+                </label>
+                <textarea id="description" th:field="*{description}" rows="5"
+                          placeholder="상품 상태, 구매 시기, 사용감 등을 자세히 설명해주세요."
+                          class="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200 resize-none"></textarea>
+                <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}"
+                   class="mt-1 text-sm text-red-600"></p>
+            </div>
+
+            <!-- 만남 장소 -->
+            <div>
+                <label class="mb-1 block text-sm font-semibold">만남 장소</label>
+                <button type="button" onclick="openAddressSearch()"
+                        class="w-full rounded-xl border-2 border-dashed border-slate-200 px-3 py-3 text-sm text-slate-500 hover:border-orange-300 hover:text-orange-500 transition-all text-left">
+                    <span id="addressDisplayText"
+                          th:text="${form.roadAddress != null and !form.roadAddress.isEmpty()} ? ${form.roadAddress} : '📍 클릭해서 주소 검색'">
+                        📍 클릭해서 주소 검색
+                    </span>
+                </button>
+                <input type="hidden" id="roadAddress" th:field="*{roadAddress}">
+                <input type="hidden" id="sido"        th:field="*{sido}">
+                <input type="hidden" id="sigungu"     th:field="*{sigungu}">
+                <input type="hidden" id="bname"       th:field="*{bname}">
+                <input type="hidden" id="zonecode"    th:field="*{zonecode}">
+                <p th:if="${#fields.hasErrors('roadAddress')}" th:errors="*{roadAddress}"
+                   class="mt-1 text-sm text-red-600"></p>
+                <input id="addressDetail" th:field="*{addressDetail}" type="text"
+                       placeholder="상세 장소 입력 (예: 2번 출구 앞, 편의점 앞)"
+                       class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
+            </div>
+
+            <!-- 버튼 -->
+            <div class="flex justify-end gap-3 pt-2">
+                <a th:href="${postId == null} ? @{/market} : @{/market/{id}(id=${postId})}"
+                   class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+                    취소
+                </a>
+                <button type="submit"
+                        class="rounded-xl bg-orange-500 px-6 py-2.5 text-sm font-bold text-white hover:bg-orange-600 transition-all shadow-sm">
+                    <span th:text="${postId == null} ? '등록하기' : '수정하기'">등록하기</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script th:inline="javascript">
+    // 수정 모드: 기존 이미지 정보 (id, url 쌍)
+    var existingImages = /*[[${existingImages}]]*/ [];
+</script>
+<script>
+function openAddressSearch() {
+    new daum.Postcode({
+        oncomplete: function(data) {
+            document.getElementById('roadAddress').value = data.roadAddress;
+            document.getElementById('sido').value        = data.sido;
+            document.getElementById('sigungu').value     = data.sigungu;
+            document.getElementById('bname').value       = data.bname;
+            document.getElementById('zonecode').value    = data.zonecode;
+            document.getElementById('addressDisplayText').textContent = data.roadAddress;
+        }
+    }).open();
+}
+
+const MAX_IMAGES = 5;
+let selectedFiles = [];          // 신규 업로드 파일
+let slotState = [];              // 'existing' | 'new' | null (슬롯별 상태)
+
+// 수정 모드: 기존 이미지를 슬롯에 미리 표시
+if (existingImages && existingImages.length > 0) {
+    existingImages.forEach((img, idx) => {
+        if (idx >= MAX_IMAGES) return;
+        slotState[idx] = 'existing';
+        renderExisting(idx, img.id, img.url);
+    });
+}
+
+function renderExisting(idx, imgId, url) {
+    const slot = document.querySelector(`.image-slot[data-index="${idx}"]`);
+    if (!slot) return;
+    slot.innerHTML = `
+        <img src="${url}" alt="기존 이미지" class="w-full h-full object-cover"
+             onerror="this.style.display='none'">
+        <button type="button" onclick="removeExisting(${idx}, ${imgId})"
+                class="absolute top-1 right-1 w-5 h-5 bg-black/60 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600 transition-all">✕</button>
+        ${idx === 0 ? '<span class="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] bg-orange-500 text-white px-1.5 rounded font-semibold">대표</span>' : ''}
+    `;
+    slot.onclick = null;
+}
+
+function removeExisting(idx, imgId) {
+    // 숨겨진 input에 삭제할 이미지 ID 추가
+    const container = document.getElementById('deleteImageIdsContainer');
+    const hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.name = 'deleteImageIds';
+    hidden.value = imgId;
+    container.appendChild(hidden);
+
+    slotState[idx] = null;
+    const slot = document.querySelector(`.image-slot[data-index="${idx}"]`);
+    if (slot) {
+        slot.innerHTML = `
+            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/>
+            </svg>
+            ${idx === 0 ? '<span class="absolute bottom-1 text-[10px] text-orange-400 font-semibold">대표</span>' : ''}
+        `;
+        slot.onclick = function() { triggerImageInput(slot); };
+    }
+}
+
+function triggerImageInput(slot) {
+    const idx = parseInt(slot.getAttribute('data-index'));
+    if (slotState[idx] === 'new') { removeNewImage(idx); return; }
+    if (slotState[idx] === 'existing') return;
+    document.getElementById('imageFileInput').setAttribute('data-target-idx', idx);
+    document.getElementById('imageFileInput').click();
+}
+
+function handleImageSelect(event) {
+    const files = Array.from(event.target.files);
+    const targetIdx = parseInt(event.target.getAttribute('data-target-idx') ?? '-1');
+
+    if (targetIdx >= 0 && targetIdx < MAX_IMAGES) {
+        // 특정 슬롯에 직접 삽입 (수정 모드에서 빈 슬롯 클릭 시)
+        if (files[0]) {
+            selectedFiles[targetIdx] = files[0];
+            slotState[targetIdx] = 'new';
+            renderNewPreview(targetIdx, files[0]);
+        }
+    } else {
+        // 등록 모드: 빈 슬롯부터 순서대로 채움
+        const remaining = MAX_IMAGES - slotState.filter(s => s !== null).length;
+        if (files.length > remaining) alert(`이미지는 최대 ${MAX_IMAGES}장까지 등록 가능합니다.`);
+        files.slice(0, remaining).forEach(file => {
+            const emptyIdx = slotState.findIndex((s, i) => i < MAX_IMAGES && !s);
+            if (emptyIdx === -1) return;
+            selectedFiles[emptyIdx] = file;
+            slotState[emptyIdx] = 'new';
+            renderNewPreview(emptyIdx, file);
+        });
+    }
+    event.target.value = '';
+    event.target.removeAttribute('data-target-idx');
+    syncFilesToInput();
+}
+
+function renderNewPreview(idx, file) {
+    const slot = document.querySelector(`.image-slot[data-index="${idx}"]`);
+    if (!slot) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        slot.innerHTML = `
+            <img src="${e.target.result}" alt="미리보기" class="w-full h-full object-cover">
+            <button type="button" onclick="removeNewImage(${idx})"
+                    class="absolute top-1 right-1 w-5 h-5 bg-black/60 text-white rounded-full text-xs flex items-center justify-center hover:bg-black transition-all">✕</button>
+            ${idx === 0 ? '<span class="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] bg-orange-500 text-white px-1.5 rounded font-semibold">대표</span>' : ''}
+        `;
+        slot.onclick = null;
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeNewImage(idx) {
+    selectedFiles[idx] = null;
+    slotState[idx] = null;
+    const slot = document.querySelector(`.image-slot[data-index="${idx}"]`);
+    if (slot) {
+        slot.innerHTML = `
+            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/>
+            </svg>
+            ${idx === 0 ? '<span class="absolute bottom-1 text-[10px] text-orange-400 font-semibold">대표</span>' : ''}
+        `;
+        slot.onclick = function() { triggerImageInput(slot); };
+    }
+    syncFilesToInput();
+}
+
+function syncFilesToInput() {
+    const dt = new DataTransfer();
+    selectedFiles.filter(Boolean).forEach(f => dt.items.add(f));
+    document.getElementById('imageFileInput').files = dt.files;
+}
+</script>
+</body>
+</html>
