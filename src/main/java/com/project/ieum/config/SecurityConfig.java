@@ -41,6 +41,7 @@ public class SecurityConfig {
                         "/",
                         "/login",
                         "/register/**",
+                        "/password/**",
                         "/how-to-use",
                         "/safe-meeting",
                         "/contact",
