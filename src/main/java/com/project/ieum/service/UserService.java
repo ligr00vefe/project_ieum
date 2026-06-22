@@ -391,7 +391,7 @@ public class UserService {
             url = userProfileRepository.findById(user.getId())
                     .map(p -> p.getProfileImageUrl()).orElse(null);
         }
-        if (url != null && (url.startsWith("/assets/profile_img/") || url.startsWith("/assets/profile_thumb_img/"))) {
+        if (url != null && url.startsWith("/assets/profile_thumb_img/")) {
             return null;
         }
         return url;
@@ -439,8 +439,9 @@ public class UserService {
             // 200×200 썸네일 생성
             try {
                 String thumbFilename = "user_" + userId + "_thumb.png";
-                Path thumbPath = Paths.get("profile_thumbs").resolve(thumbFilename);
-                ImageThumbUtil.generateThumb(new ByteArrayInputStream(bytes), thumbPath);
+                Path thumbDir = Paths.get("uploads/profile_thumb");
+                Files.createDirectories(thumbDir);
+                ImageThumbUtil.generateThumb(new ByteArrayInputStream(bytes), thumbDir.resolve(thumbFilename));
             } catch (Exception e) {
                 log.warn("썸네일 생성 실패 (원본은 저장됨) - userId={}", userId, e);
             }
@@ -493,7 +494,15 @@ public class UserService {
                 }
                 if (!exists) { slot = i; break; }
             }
-            if (slot == -1) throw new RuntimeException("최대 3개까지 등록 가능합니다.");
+            if (slot == -1) {
+                // 슬롯이 꽉 찼으면 가장 오래된 슬롯(1번) 삭제 후 재사용
+                slot = 1;
+                for (String ext : exts) {
+                    Path old = PROFILE_CUSTOM_DIR.resolve("user_" + userId + "_c1" + ext);
+                    if (Files.exists(old)) { Files.deleteIfExists(old); break; }
+                }
+                Files.deleteIfExists(PROFILE_THUMB_DIR.resolve("user_" + userId + "_c1_thumb.png"));
+            }
 
             String filename = "user_" + userId + "_c" + slot + extension;
             byte[] bytes = file.getBytes();

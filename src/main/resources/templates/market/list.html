@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('이음마켓')}"></head>
+<body class="min-h-screen bg-[#f6f7ff] text-slate-900">
+<div th:replace="~{layout/header :: header}"></div>
+
+<main class="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+
+    <!-- 페이지 헤더 -->
+    <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+            <p class="text-sm font-semibold text-orange-500">중고거래</p>
+            <h1 class="mt-1 text-2xl font-bold">이음 마켓</h1>
+            <p class="mt-1 text-sm text-slate-500">가까운 이웃과 물건을 사고파세요.</p>
+        </div>
+        <a th:if="${currentUserId != null}" th:href="@{/market/new}"
+           class="rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-orange-600 transition-all shadow-sm">
+            + 상품 등록
+        </a>
+    </div>
+
+    <!-- 플래시 메시지 -->
+    <div th:if="${message}" th:text="${message}"
+         class="mb-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-800"></div>
+
+    <!-- 검색/필터 바 -->
+    <form th:action="@{/market}" method="get" class="mb-6 flex flex-wrap gap-2">
+        <select name="categoryId"
+                class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
+            <option value="">전체 카테고리</option>
+            <option th:each="cat : ${categories}"
+                    th:value="${cat.id}"
+                    th:text="${cat.name}"
+                    th:selected="${condition.categoryId == cat.id}">카테고리</option>
+        </select>
+        <input type="text" name="keyword"
+               th:value="${condition.keyword}"
+               placeholder="상품명 검색"
+               class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm flex-1 min-w-[140px] focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
+        <input type="number" name="minPrice"
+               th:value="${condition.minPrice}"
+               placeholder="최소 가격"
+               class="w-28 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
+        <input type="number" name="maxPrice"
+               th:value="${condition.maxPrice}"
+               placeholder="최대 가격"
+               class="w-28 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
+        <button type="submit"
+                class="rounded-xl bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 transition-all">
+            검색
+        </button>
+        <a th:href="@{/market}" class="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-500 hover:bg-slate-50 transition-all">초기화</a>
+    </form>
+
+    <!-- 내 상품 섹션 (로그인 사용자 전용, 상단 우선 표시) -->
+    <div th:if="${currentUserId != null and !myPosts.isEmpty()}" class="mb-8">
+        <div class="mb-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-bold text-orange-500">내 상품</span>
+                <span class="rounded-full bg-orange-100 text-orange-600 text-xs font-semibold px-2 py-0.5"
+                      th:text="${myPosts.size()}">0</span>
+            </div>
+            <a th:href="@{/market/chats}"
+               class="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-orange-500 transition-colors">
+                💬 채팅 목록 보기 →
+            </a>
+        </div>
+        <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <article th:each="post : ${myPosts}"
+                     class="group rounded-2xl border-2 border-orange-200 bg-white shadow-sm hover:shadow-md transition-all overflow-hidden">
+                <a th:href="@{/market/{id}(id=${post.id})}" class="block">
+                    <div class="relative h-48 bg-slate-100 overflow-hidden">
+                        <img th:if="${post.thumbnailUrl != null}"
+                             th:src="${post.thumbnailUrl}"
+                             th:alt="${post.title}"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div th:if="${post.thumbnailUrl == null}"
+                             class="w-full h-full flex items-center justify-center text-slate-300">
+                            <svg class="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <!-- 내 상품 배지 -->
+                        <span class="absolute top-2 left-2 rounded-lg bg-orange-500 px-2 py-1 text-xs font-bold text-white">내 상품</span>
+                        <span th:if="${post.status.name() != 'ACTIVE'}"
+                              class="absolute top-2 right-2 rounded-lg px-2 py-1 text-xs font-bold text-white"
+                              th:classappend="${post.status.name() == 'RESERVED'} ? 'bg-amber-500' : 'bg-slate-500'"
+                              th:text="${post.statusLabel}">예약중</span>
+                    </div>
+                </a>
+                <div class="p-4">
+                    <p class="text-xs text-slate-400 mb-1" th:text="${post.categoryName}">전자기기</p>
+                    <h2 class="font-bold text-slate-900 truncate">
+                        <a th:href="@{/market/{id}(id=${post.id})}"
+                           th:text="${post.title}"
+                           class="hover:text-orange-500 transition-colors">상품명</a>
+                    </h2>
+                    <p class="mt-1.5 text-lg font-bold text-orange-500"
+                       th:text="${#numbers.formatInteger(post.price, 1, 'COMMA') + '원'}">10,000원</p>
+                    <div class="mt-2 flex items-center justify-between text-xs text-slate-400">
+                        <span th:text="${post.sigungu}">강남구</span>
+                        <a th:href="@{/market/chats}"
+                           th:if="${post.chatCount > 0}"
+                           class="flex items-center gap-1 text-orange-500 hover:text-orange-600 font-semibold transition-colors">
+                            💬 <span th:text="${post.chatCount}">0</span>
+                        </a>
+                        <span th:unless="${post.chatCount > 0}" class="text-slate-300">채팅 없음</span>
+                    </div>
+                </div>
+                <!-- 빠른 관리 링크 -->
+                <div class="border-t border-slate-100 px-4 py-2 flex items-center gap-3 bg-slate-50">
+                    <a th:href="@{/market/{id}/edit(id=${post.id})}"
+                       class="text-xs text-slate-500 hover:text-orange-500 transition-colors">수정</a>
+                    <span class="text-slate-200">|</span>
+                    <a th:href="@{/market/{id}(id=${post.id})}"
+                       class="text-xs text-slate-500 hover:text-orange-500 transition-colors">상세보기</a>
+                </div>
+            </article>
+        </section>
+        <div class="mt-6 border-t border-slate-100"></div>
+    </div>
+
+    <!-- 전체 상품 목록 그리드 -->
+    <div th:if="${!myPosts.isEmpty()}" class="mb-3">
+        <span class="text-sm font-semibold text-slate-500">다른 상품</span>
+    </div>
+    <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <article th:each="post : ${posts.content}"
+                 th:if="${currentUserId == null or post.sellerId != currentUserId}"
+                 class="group rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-md transition-all overflow-hidden">
+            <a th:href="@{/market/{id}(id=${post.id})}" class="block">
+                <div class="relative h-48 bg-slate-100 overflow-hidden">
+                    <img th:if="${post.thumbnailUrl != null}"
+                         th:src="${post.thumbnailUrl}"
+                         th:alt="${post.title}"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    <div th:if="${post.thumbnailUrl == null}"
+                         class="w-full h-full flex items-center justify-center text-slate-300">
+                        <svg class="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <span th:if="${post.status.name() != 'ACTIVE'}"
+                          class="absolute top-2 left-2 rounded-lg px-2 py-1 text-xs font-bold text-white"
+                          th:classappend="${post.status.name() == 'RESERVED'} ? 'bg-amber-500' : 'bg-slate-500'"
+                          th:text="${post.statusLabel}">예약중</span>
+                </div>
+            </a>
+            <div class="p-4">
+                <p class="text-xs text-slate-400 mb-1" th:text="${post.categoryName}">전자기기</p>
+                <h2 class="font-bold text-slate-900 truncate">
+                    <a th:href="@{/market/{id}(id=${post.id})}"
+                       th:text="${post.title}"
+                       class="hover:text-orange-500 transition-colors">상품명</a>
+                </h2>
+                <p class="mt-1.5 text-lg font-bold text-orange-500"
+                   th:text="${#numbers.formatInteger(post.price, 1, 'COMMA') + '원'}">10,000원</p>
+                <div class="mt-2 flex items-center justify-between text-xs text-slate-400">
+                    <span th:text="${post.sigungu}">강남구</span>
+                    <span th:text="${#temporals.format(post.createdAt, 'MM.dd')}">01.01</span>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- 빈 결과 -->
+    <div th:if="${posts.empty}"
+         class="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-slate-400 mt-4">
+        <p class="text-lg font-semibold mb-1">등록된 상품이 없습니다.</p>
+        <p class="text-sm">첫 번째로 상품을 등록해보세요!</p>
+    </div>
+
+    <!-- 페이지네이션 -->
+    <div th:if="${posts.totalPages > 1}"
+         th:replace="~{fragments/pagination :: pager(
+             ${posts.number},
+             ${posts.totalPages},
+             ${#numbers.max(0, posts.number - 2)},
+             ${#numbers.min(posts.totalPages - 1, posts.number + 2)},
+             '/market?'
+         )}"></div>
+
+</main>
+</body>
+</html>
