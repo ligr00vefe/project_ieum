@@ -10,9 +10,22 @@ spring:
       max-request-size: 30MB
   thymeleaf:
     cache: false
+  mail:
+    host: ${IEUM_MAIL_HOST:smtp.gmail.com}
+    port: ${IEUM_MAIL_PORT:587}
+    username: ${IEUM_MAIL_USERNAME:local@ieum.dev}
+    password: ${IEUM_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
 server:
   port: 8080
 ieum:
+  base-url: ${IEUM_BASE_URL:http://localhost:8080}
   upload:
     certification-path: ${IEUM_CERTIFICATION_UPLOAD_PATH:${user.home}/ieum/uploads/certifications}
 matching:

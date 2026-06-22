@@ -49,6 +49,9 @@ dependencies {
 	// XSS 방어용 HTML 새니타이저
 	implementation 'org.jsoup:jsoup:1.18.3'
 
+	// 비밀번호 찾기 이메일 발송
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
 	// Querydsl Settings
 	implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
