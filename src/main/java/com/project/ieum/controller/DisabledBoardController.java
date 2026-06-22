@@ -10,7 +10,7 @@ import com.project.ieum.service.MasterDataService;
 import com.project.ieum.service.MatchingService;
 import com.project.ieum.service.common.CurrentUserService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,7 +19,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/disabled/board")
-@RequiredArgsConstructor
 public class DisabledBoardController {
 
     private final HelpRequestService helpRequestService;
@@ -27,6 +26,21 @@ public class DisabledBoardController {
     private final MasterDataService masterDataService;
     private final CurrentUserService currentUserService;
     private final HelpRequestApplicationRepository applicationRepository;
+    private final String tmapAppKey;
+
+    public DisabledBoardController(HelpRequestService helpRequestService,
+                                   MatchingService matchingService,
+                                   MasterDataService masterDataService,
+                                   CurrentUserService currentUserService,
+                                   HelpRequestApplicationRepository applicationRepository,
+                                   @Value("${tmap.app-key:}") String tmapAppKey) {
+        this.helpRequestService = helpRequestService;
+        this.matchingService = matchingService;
+        this.masterDataService = masterDataService;
+        this.currentUserService = currentUserService;
+        this.applicationRepository = applicationRepository;
+        this.tmapAppKey = tmapAppKey;
+    }
 
     @GetMapping({"", "/"})
     public String list(Model model) {
@@ -45,6 +59,7 @@ public class DisabledBoardController {
         model.addAttribute("form", new HelpRequestForm());
         model.addAttribute("serviceCategories", masterDataService.getAllServiceCategories());
         model.addAttribute("personalityTags", masterDataService.getCaregiverPersonalityTags());
+        model.addAttribute("tmapAppKey", tmapAppKey);
         model.addAttribute("content", "disabled/board/create");
         return "layout/layout";
     }
@@ -59,6 +74,7 @@ public class DisabledBoardController {
             model.addAttribute("title", "요청 글 작성");
             model.addAttribute("serviceCategories", masterDataService.getAllServiceCategories());
             model.addAttribute("personalityTags", masterDataService.getCaregiverPersonalityTags());
+            model.addAttribute("tmapAppKey", tmapAppKey);
             model.addAttribute("content", "disabled/board/create");
             return "layout/layout";
         }
@@ -73,6 +89,7 @@ public class DisabledBoardController {
         model.addAttribute("form", helpRequestService.buildRepostForm(id));
         model.addAttribute("serviceCategories", masterDataService.getAllServiceCategories());
         model.addAttribute("personalityTags", masterDataService.getCaregiverPersonalityTags());
+        model.addAttribute("tmapAppKey", tmapAppKey);
         model.addAttribute("content", "disabled/board/create");
         return "layout/layout";
     }
@@ -89,6 +106,7 @@ public class DisabledBoardController {
         model.addAttribute("handshake", matchingService.getHandshakeView(id, currentUserId));
         matchingService.getMatchedParty(id)
                 .ifPresent(party -> model.addAttribute("matchedParty", party));
+        model.addAttribute("tmapAppKey", tmapAppKey);
         model.addAttribute("content", "disabled/board/detail");
         return "layout/layout";
     }
