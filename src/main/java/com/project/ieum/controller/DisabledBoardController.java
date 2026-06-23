@@ -1,9 +1,15 @@
 package com.project.ieum.controller;
 
 import com.project.ieum.dto.request.HelpRequestForm;
+import com.project.ieum.dto.search.HelpRequestSearchCondition;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import com.project.ieum.entity.UserRole;
+import com.project.ieum.entity.request.HelpRequest;
 import com.project.ieum.entity.request.HelpRequestApplication;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import com.project.ieum.repository.HelpRequestApplicationRepository;
 import com.project.ieum.service.HelpRequestService;
 import com.project.ieum.service.MasterDataService;
@@ -43,12 +49,30 @@ public class DisabledBoardController {
     }
 
     @GetMapping({"", "/"})
-    public String list(Model model) {
-        // 매칭 종축 ADR(이슈11 골조버그 ④): /disabled/board 는 이용자 본인 요청만 노출.
-        // main 이 추가한 전체활성 페이지네이션은 이 정책과 상충하므로 채택하지 않음.
+    public String list(@RequestParam(defaultValue = "0") int page,
+                       @RequestParam(required = false) String keyword,
+                       @RequestParam(required = false) List<Long> serviceCategoryId,
+                       Model model) {
+        // 이용자 둘러보기 보드 — 남의 OPEN + 내 모든 상태(이슈11 골조버그 ④ 역전, ADR 2026-06-21).
+        // 본인 요청 관리 동선은 마이페이지에 완비되어 보드를 둘러보기 surface로 전환한다.
+        HelpRequestSearchCondition condition = new HelpRequestSearchCondition();
+        condition.setKeyword(keyword);
+        condition.setServiceCategoryIds(serviceCategoryId);
+
+        Page<HelpRequest> requests = helpRequestService.searchBoardForUser(condition, PageRequest.of(page, 10));
+        int totalPages = requests.getTotalPages();
+
         model.addAttribute("title", "매칭 게시판");
-        model.addAttribute("requests", helpRequestService.getMyRequests());
+        model.addAttribute("requests", requests);
         model.addAttribute("currentUserId", currentUserService.getCurrentUser().getId());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("startPage", Math.max(0, page - 2));
+        model.addAttribute("endPage", Math.min(totalPages - 1, page + 2));
+        model.addAttribute("serviceCategories", masterDataService.getAllServiceCategories());
+        model.addAttribute("fKeyword", keyword);
+        model.addAttribute("fServiceCategoryIds", serviceCategoryId);
+        model.addAttribute("pageBaseUrl", buildBoardBaseUrl(keyword, serviceCategoryId));
         model.addAttribute("content", "disabled/board/list");
         return "layout/layout";
     }
@@ -191,5 +215,19 @@ public class DisabledBoardController {
         matchingService.confirmEnd(id);
         redirectAttributes.addFlashAttribute("message", "활동 종료를 확인했습니다.");
         return "redirect:/disabled/board/" + id;
+    }
+
+    // 페이지 이동 시 검색조건(keyword, serviceCategoryId 다중)을 유지하는 쿼리스트링 prefix('?' 또는 '&'로 끝남).
+    private String buildBoardBaseUrl(String keyword, List<Long> serviceCategoryIds) {
+        StringBuilder sb = new StringBuilder("/disabled/board?");
+        if (keyword != null && !keyword.isBlank()) {
+            sb.append("keyword=").append(URLEncoder.encode(keyword, StandardCharsets.UTF_8)).append('&');
+        }
+        if (serviceCategoryIds != null) {
+            for (Long id : serviceCategoryIds) {
+                sb.append("serviceCategoryId=").append(id).append('&');
+            }
+        }
+        return sb.toString();
     }
 }

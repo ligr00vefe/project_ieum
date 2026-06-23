@@ -23,4 +23,8 @@ public class HelpRequestSearchCondition {
 
     // 게시판 다중 선택 — 서비스 카테고리 여러 개(IN). 비어 있으면 단일 serviceCategoryId로 폴백.
     private List<Long> serviceCategoryIds;
+
+    // 이용자 둘러보기 보드 — 설정되면 "OPEN(남의 글) 또는 본인 글" 범위로 조회한다(status 단일 필터 대체).
+    // null이면 무영향 → /api/search·caregiver 보드 등 기존 경로는 회귀 0.
+    private Long ownerScopeUserId;
 }
