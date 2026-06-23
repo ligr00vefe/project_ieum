@@ -47,7 +47,7 @@ class ReportServiceTest {
     void create_self_throws() {
         when(currentUserService.getCurrentUser()).thenReturn(user(1L));
 
-        ReportForm form = new ReportForm(1L, null, ReportReason.ABUSE, null);
+        ReportForm form = new ReportForm(1L, null, null, ReportReason.ABUSE, null);
 
         assertThatThrownBy(() -> reportService.create(form)).isInstanceOf(BadRequestException.class);
         verify(reportRepository, never()).save(any());
@@ -61,7 +61,7 @@ class ReportServiceTest {
         when(reportRepository.existsByReporter_IdAndTarget_IdAndStatusIn(eq(1L), eq(2L), anyCollection()))
                 .thenReturn(true);
 
-        ReportForm form = new ReportForm(2L, null, ReportReason.FRAUD, "금전 요구");
+        ReportForm form = new ReportForm(2L, null, null, ReportReason.FRAUD, "금전 요구");
 
         assertThatThrownBy(() -> reportService.create(form)).isInstanceOf(BadRequestException.class);
         verify(reportRepository, never()).save(any());
@@ -76,7 +76,7 @@ class ReportServiceTest {
                 .thenReturn(false);
         when(reportRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        ReportForm form = new ReportForm(2L, 10L, ReportReason.NO_SHOW, "약속 불이행");
+        ReportForm form = new ReportForm(2L, 10L, null, ReportReason.NO_SHOW, "약속 불이행");
         reportService.create(form);
 
         verify(reportRepository).save(any(Report.class));
