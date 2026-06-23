@@ -19,7 +19,12 @@ import com.project.ieum.service.MasterDataService;
 import com.project.ieum.service.MatchingService;
 import com.project.ieum.service.ReviewService;
 import com.project.ieum.service.UserService;
+import com.project.ieum.dto.market.MarketPostResponse;
+import com.project.ieum.entity.market.MarketPost;
+import com.project.ieum.entity.market.MarketPostImage;
 import com.project.ieum.service.admin.NoticeService;
+import com.project.ieum.service.market.MarketChatService;
+import com.project.ieum.service.market.MarketPostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -48,6 +53,8 @@ public class UserController {
     private final CaregiverProfileRepository caregiverProfileRepository;
     private final HelpRequestApplicationRepository applicationRepository;
     private final NoticeService noticeService;
+    private final MarketPostService marketPostService;
+    private final MarketChatService marketChatService;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -141,6 +148,17 @@ public class UserController {
         model.addAttribute("expiredRequests", expiredRequests);
         model.addAttribute("matchingViews", helpRequestService.getMyMatchingViews());
 
+        // 이음마켓 — 내 상품 목록 (채팅 수 포함)
+        List<MarketPostResponse> myMarketPosts = marketPostService.getMyPosts().stream()
+                .map(p -> {
+                    List<MarketPostImage> imgs = marketPostService.getImages(p.getId());
+                    String thumb = imgs.isEmpty() ? null : imgs.get(0).getImageUrl();
+                    int cnt = marketChatService.getChatCountByPost(p.getId());
+                    return MarketPostResponse.from(p, thumb, cnt);
+                })
+                .toList();
+        model.addAttribute("myMarketPosts", myMarketPosts);
+
         model.addAttribute("content", "disabled/mypage");
         model.addAttribute("title", "마이페이지");
         return "layout/layout";
@@ -189,6 +207,17 @@ public class UserController {
         model.addAttribute("completedApplications", completedApplications);
         model.addAttribute("cancelledApplications", cancelledApplications);
         model.addAttribute("receivedReviews", reviewService.getPublicReviews(user.getId()));
+
+        // 이음마켓 — 내 상품 목록 (채팅 수 포함)
+        List<MarketPostResponse> myMarketPosts = marketPostService.getMyPosts().stream()
+                .map(p -> {
+                    List<MarketPostImage> imgs = marketPostService.getImages(p.getId());
+                    String thumb = imgs.isEmpty() ? null : imgs.get(0).getImageUrl();
+                    int cnt = marketChatService.getChatCountByPost(p.getId());
+                    return MarketPostResponse.from(p, thumb, cnt);
+                })
+                .toList();
+        model.addAttribute("myMarketPosts", myMarketPosts);
 
         model.addAttribute("content", "caregiver/mypage");
         model.addAttribute("title", "마이페이지");
