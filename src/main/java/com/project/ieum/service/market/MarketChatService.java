@@ -158,22 +158,18 @@ public class MarketChatService {
             throw new IllegalStateException("진행 중인 거래만 확정할 수 있습니다.");
         }
 
-        // 현재 사용자가 판매자인지 구매자인지 판별 후 각각 확정 처리
-        if (chat.getSeller().getId().equals(currentUser.getId())) {
-            if (chat.isSellerConfirmed()) {
-                throw new IllegalStateException("이미 거래완료를 누르셨습니다.");
-            }
-            chat.confirmBySeller();
-        } else if (chat.getBuyer().getId().equals(currentUser.getId())) {
-            if (chat.isBuyerConfirmed()) {
-                throw new IllegalStateException("이미 거래완료를 누르셨습니다.");
-            }
-            chat.confirmByBuyer();
+        // 판매자만 거래완료 처리 가능
+        if (!chat.getSeller().getId().equals(currentUser.getId())) {
+            throw new IllegalStateException("판매자만 거래완료를 처리할 수 있습니다.");
         }
+        if (chat.isSellerConfirmed()) {
+            throw new IllegalStateException("이미 거래완료를 누르셨습니다.");
+        }
+        chat.confirmBySeller();
 
-        // 양쪽 모두 확정 → 게시글 상태 SOLD 전환 + 알림
-        if (chat.isBothConfirmed()) {
-            chat.getPost().complete(); // MarketPost.complete() 호출
+        // 판매자 확정 즉시 → 게시글 상태 SOLD 전환 + 알림
+        {
+            chat.getPost().complete();
             chat.close();
 
             // 양쪽에게 거래완료 알림

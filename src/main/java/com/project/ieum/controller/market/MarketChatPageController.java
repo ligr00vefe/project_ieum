@@ -63,10 +63,7 @@ public class MarketChatPageController {
         model.addAttribute("isSeller", isSeller);
         model.addAttribute("opponentEmail", opponent.getEmail());
         model.addAttribute("opponentId", opponent.getId());
-        // 거래확정 버튼 표시 여부
         model.addAttribute("sellerConfirmed", chat.isSellerConfirmed());
-        model.addAttribute("buyerConfirmed", chat.isBuyerConfirmed());
-        model.addAttribute("isBothConfirmed", chat.isBothConfirmed());
 
         return "market/chat-room";  // templates/market/chat-room.html
     }
