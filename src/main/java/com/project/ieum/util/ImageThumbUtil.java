@@ -41,12 +41,10 @@ public class ImageThumbUtil {
         if (profileImageUrl.startsWith("/uploads/profiles/")) {
             String filename = profileImageUrl.substring("/uploads/profiles/".length());
             String base = stripExtension(filename);
-            return "/assets/profile_thumb_img/" + base + "_thumb.png";
+            return "/uploads/profile_thumb/" + base + "_thumb.png";
         }
         if (profileImageUrl.startsWith("/assets/profile_img/")) {
-            String filename = profileImageUrl.substring("/assets/profile_img/".length());
-            String base = stripExtension(filename);
-            return "/assets/profile_thumb_img/" + base + "_thumb.png";
+            return profileImageUrl;
         }
         return profileImageUrl;
     }
