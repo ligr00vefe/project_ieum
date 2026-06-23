@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class MarketPostResponse {
 
     private Long id;
+    private boolean sharing;
     private String title;
     private String description;
     private BigDecimal price;
@@ -48,12 +49,13 @@ public class MarketPostResponse {
     public static MarketPostResponse from(MarketPost post, String thumbnailUrl, int chatCount) {
         return MarketPostResponse.builder()
                 .id(post.getId())
+                .sharing(post.isSharing())
                 .title(post.getTitle())
                 .description(post.getDescription())
                 .price(post.getPrice())
                 .categoryName(post.getCategory().getName())
                 .status(post.getStatus())
-                .statusLabel(toStatusLabel(post.getStatus()))
+                .statusLabel(toStatusLabel(post.getStatus(), post.isSharing()))
                 .roadAddress(post.getRoadAddress())
                 .addressDetail(post.getAddressDetail())
                 .sido(post.getSido())
@@ -73,11 +75,11 @@ public class MarketPostResponse {
     }
 
     // 상태 → 한글 라벨 변환
-    private static String toStatusLabel(MarketPostStatus status) {
+    private static String toStatusLabel(MarketPostStatus status, boolean sharing) {
         return switch (status) {
-            case ACTIVE   -> "판매중";
+            case ACTIVE   -> sharing ? "나눔중" : "판매중";
             case RESERVED -> "예약중";
-            case SOLD     -> "판매완료";
+            case SOLD     -> sharing ? "나눔완료" : "판매완료";
             case REMOVED  -> "삭제됨";
         };
     }

@@ -12,6 +12,8 @@ import java.util.List;
 @Setter
 public class MarketPostForm {
 
+    private boolean sharing;
+
     @NotBlank(message = "상품명을 입력해주세요.")
     @Size(max = 120, message = "상품명은 120자 이하로 입력해주세요.")
     private String title;
