@@ -4,6 +4,7 @@ import com.project.ieum.dto.request.ReviewForm;
 import com.project.ieum.entity.User;
 import com.project.ieum.entity.UserRole;
 import com.project.ieum.entity.caregiver.CaregiverProfile;
+import com.project.ieum.entity.notification.NotificationType;
 import com.project.ieum.entity.request.HelpRequest;
 import com.project.ieum.entity.request.HelpRequestApplication;
 import com.project.ieum.entity.request.HelpRequestStatus;
@@ -15,6 +16,7 @@ import com.project.ieum.repository.CaregiverProfileRepository;
 import com.project.ieum.repository.HelpRequestRepository;
 import com.project.ieum.repository.ReviewRepository;
 import com.project.ieum.service.common.CurrentUserService;
+import com.project.ieum.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +35,7 @@ public class ReviewService {
     private final CaregiverProfileRepository caregiverProfileRepository;
     private final MatchingService matchingService;
     private final CurrentUserService currentUserService;
+    private final NotificationService notificationService;
 
     public Review create(Long requestId, ReviewForm form) {
         User currentUser = currentUserService.getCurrentUser();
@@ -63,6 +66,13 @@ public class ReviewService {
                 .visibility(form.getVisibility())
                 .build());
         refreshRating(caregiver.getUserId());
+        notificationService.create(
+                caregiver.getUser(),
+                NotificationType.REVIEW,
+                "새 후기가 등록되었어요",
+                "받은 활동에 대한 후기가 작성되었습니다.",
+                "/caregiver/mypage"
+        );
         return review;
     }
 

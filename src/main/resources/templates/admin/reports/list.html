@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+<div>
+
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h2 class="text-xl font-bold text-slate-900">신고 관리</h2>
+            <p class="text-sm text-slate-500 mt-0.5">접수된 신고를 검토하고 처리 상태를 변경하거나 대상을 정지할 수 있습니다.</p>
+        </div>
+    </div>
+
+    <div th:if="${message}"
+         class="mb-4 px-4 py-3 rounded-xl bg-teal-50 border border-teal-200 text-sm text-teal-700"
+         th:text="${message}"></div>
+
+    <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="border-b border-slate-100 bg-slate-50">
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">신고자</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">대상</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">사유</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">상세</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">상태</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">접수일</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">처리</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+                <th:block th:each="report : ${reports}">
+                <tr class="hover:bg-slate-50 transition-colors align-top">
+                    <td class="px-5 py-3.5 text-slate-600 text-xs" th:text="${report.reporter.email}">-</td>
+                    <td class="px-5 py-3.5">
+                        <div class="text-slate-600 text-xs" th:text="${report.target.email}">-</div>
+                        <form th:action="@{/admin/users/{id}/status(id=${report.target.id})}" method="post" class="mt-1">
+                            <input type="hidden" name="status" value="BANNED">
+                            <button type="submit" class="text-[11px] font-medium text-red-500 hover:text-red-700">대상 정지(BAN)</button>
+                        </form>
+                    </td>
+                    <td class="px-5 py-3.5 text-slate-700 text-xs" th:text="${report.reason.label}">사유</td>
+                    <td class="px-5 py-3.5">
+                        <p class="text-slate-600 text-xs truncate max-w-xs" th:text="${report.detail != null ? report.detail : '-'}">상세</p>
+                    </td>
+                    <td class="px-5 py-3.5">
+                        <span th:text="${report.status.label}"
+                              th:classappend="${report.status.name() == 'RECEIVED' ? 'bg-amber-50 text-amber-600' : report.status.name() == 'REVIEWING' ? 'bg-blue-50 text-blue-600' : report.status.name() == 'RESOLVED' ? 'bg-teal-50 text-teal-600' : 'bg-slate-100 text-slate-400'}"
+                              class="px-2 py-0.5 text-xs font-semibold rounded-full">상태</span>
+                    </td>
+                    <td class="px-5 py-3.5 text-slate-400 text-xs"
+                        th:text="${#temporals.format(report.createdAt, 'yyyy.MM.dd HH:mm')}">-</td>
+                    <td class="px-5 py-3.5">
+                        <form th:action="@{/admin/reports/{id}/status(id=${report.id})}" method="post" class="flex items-center gap-1">
+                            <label class="sr-only" th:for="'status-' + ${report.id}">신고 상태 변경</label>
+                            <select name="status" th:id="'status-' + ${report.id}"
+                                    class="px-2 py-1 text-xs border border-slate-200 rounded-lg bg-white">
+                                <option th:each="st : ${reportStatuses}" th:value="${st}"
+                                        th:text="${st.label}" th:selected="${st == report.status}">상태</option>
+                            </select>
+                            <button type="submit" class="text-xs font-medium text-indigo-500 hover:text-indigo-700">변경</button>
+                        </form>
+                    </td>
+                </tr>
+                </th:block>
+                <tr th:if="${#lists.isEmpty(reports)}">
+                    <td colspan="7" class="px-5 py-10 text-center text-sm text-slate-400">접수된 신고가 없습니다.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="~{fragments/pagination :: pager(${currentPage}, ${totalPages}, ${startPage}, ${endPage}, '/admin/reports?')}"></div>
+
+</div>
+</th:block>
+</html>
