@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/layout :: layout(~{::content})}">
-<th:block th:fragment="content">
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('이음마켓')}"></head>
+<body class="min-h-screen bg-[#f6f7ff] text-slate-900">
+<div th:replace="~{layout/header :: header}"></div>
+
+<main class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 
     <!-- 페이지 헤더 -->
     <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
@@ -198,10 +200,11 @@
          th:replace="~{fragments/pagination :: pager(
              ${posts.number},
              ${posts.totalPages},
-             ${startPage},
-             ${endPage},
+             ${#numbers.max(0, posts.number - 2)},
+             ${#numbers.min(posts.totalPages - 1, posts.number + 2)},
              ${paginationUrl}
          )}"></div>
 
-</section>
-</th:block>
+</main>
+</body>
+</html>
