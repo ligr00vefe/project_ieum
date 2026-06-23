@@ -4,6 +4,14 @@ spring:
     url: ${IEUM_DB_URL:jdbc:mysql://localhost:3306/db7?serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
     username: ${IEUM_DB_USERNAME:db7}
     password: ${IEUM_DB_PASSWORD:1234}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      max-lifetime: 580000        # 9분 40초 — MySQL wait_timeout(기본 600초)보다 짧게
+      connection-timeout: 30000
+      idle-timeout: 300000
+      keepalive-time: 120000      # 2분마다 커넥션 유지 핑 전송
+      connection-test-query: SELECT 1
   jpa:
     hibernate:
       ddl-auto: update

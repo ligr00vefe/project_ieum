@@ -41,4 +41,9 @@ public interface MarketReviewRepository extends JpaRepository<MarketReview, Long
 
     // 판매자가 받은 마켓 후기 총 건수
     int countByTarget_Id(Long targetUserId);
+
+    // 매너온도 계산: 기본 36.5 + 각 후기 별점에 따른 누적 변화량
+    // 5점=+3, 4점=+1.5, 3점=0, 2점=-1.5, 1점=-3 (delta = (rating-3)*1.5)
+    @Query("select 36.5 + coalesce(sum((r.rating - 3) * 1.5), 0) from MarketReview r where r.target.id = :targetUserId")
+    Double mannerTemperatureByTargetUserId(@Param("targetUserId") Long targetUserId);
 }
