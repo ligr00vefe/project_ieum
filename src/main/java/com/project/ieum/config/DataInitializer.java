@@ -386,21 +386,24 @@ public class DataInitializer implements CommandLineRunner {
                 "강남세브란스 병원 동행 요청", "오전 외래 진료 동행 부탁드립니다. 휠체어 이동 가능하신 분 선호합니다.",
                 LocalDateTime.of(2026, 6, 20, 9, 0), LocalDateTime.of(2026, 6, 20, 12, 0),
                 "서울 강남구 언주로 211", "강남구 역삼동 강남세브란스병원", "서울특별시", "강남구", "역삼동", "06273",
-                new BigDecimal("37.500636"), new BigDecimal("127.036503"), null, null,
+                new BigDecimal("37.500636"), new BigDecimal("127.036503"),
+                "서울 강남구 역삼동 648 역삼현대아파트", "서울 강남구 언주로 211 강남세브란스병원",
                 "휠체어 탑승 보조 필요", HelpRequestStatus.OPEN));
 
         helpRequestRepository.save(buildRequest(d02, scMap.get("SC001"),
                 "혜화동 외출 이동 보조 요청", "전동휠체어 이동 보조가 필요합니다. 지하철 혜화역 이용 예정입니다.",
                 LocalDateTime.of(2026, 6, 21, 14, 0), LocalDateTime.of(2026, 6, 21, 17, 0),
                 "서울 종로구 창경궁로 35", null, "서울특별시", "종로구", "혜화동", "03086",
-                new BigDecimal("37.582551"), new BigDecimal("127.001650"), "혜화역 1번 출구", "성신여대입구역",
+                new BigDecimal("37.582551"), new BigDecimal("127.001650"),
+                "서울 종로구 혜화동 혜화역 1번 출구", "서울 성북구 보문동 성신여대입구역 4번 출구",
                 "경사로 이동 보조 가능하신 분", HelpRequestStatus.OPEN));
 
         helpRequestRepository.save(buildRequest(d03, scMap.get("SC006"),
                 "홍대 근처 쇼핑 외출 지원", "시각장애 안내 경험 있는 분을 선호합니다. 홍대 상권 쇼핑 동행입니다.",
                 LocalDateTime.of(2026, 6, 22, 13, 0), LocalDateTime.of(2026, 6, 22, 16, 0),
                 "서울 마포구 양화로 188", null, "서울특별시", "마포구", "합정동", "04033",
-                new BigDecimal("37.549200"), new BigDecimal("126.914100"), null, null,
+                new BigDecimal("37.549200"), new BigDecimal("126.914100"),
+                "서울 마포구 합정동 합정역 8번 출구", "서울 마포구 와우산로 29나길 20 홍대입구역 9번 출구",
                 "시각 안내 경험자 우대", HelpRequestStatus.OPEN));
 
         helpRequestRepository.save(buildRequest(d04, scMap.get("SC005"),
@@ -414,35 +417,40 @@ public class DataInitializer implements CommandLineRunner {
                 "삼성서울병원 외래 동행", "CT 검사 및 진료 동행입니다. 오전 일찍 출발해야 합니다.",
                 LocalDateTime.of(2026, 6, 25, 8, 30), LocalDateTime.of(2026, 6, 25, 12, 0),
                 "서울 강남구 일원로 81", null, "서울특별시", "강남구", "일원동", "06351",
-                new BigDecimal("37.488400"), new BigDecimal("127.085700"), "지하철 수인분당선 일원역", "삼성서울병원",
+                new BigDecimal("37.488400"), new BigDecimal("127.085700"),
+                "서울 강남구 개포동 개포주공5단지아파트", "서울 강남구 일원로 81 삼성서울병원",
                 "전동휠체어 보조 가능하신 분", HelpRequestStatus.OPEN));
 
         helpRequestRepository.save(buildRequest(d01, scMap.get("SC001"),
                 "서초구 외출 이동 보조", "지하철 및 버스 이동 시 보조가 필요합니다.",
                 LocalDateTime.of(2026, 6, 26, 15, 0), LocalDateTime.of(2026, 6, 26, 18, 0),
                 "서울 서초구 서초대로 77길 33", null, "서울특별시", "서초구", "서초동", "06614",
-                new BigDecimal("37.483950"), new BigDecimal("127.032500"), "서초역 1번 출구", null,
+                new BigDecimal("37.483950"), new BigDecimal("127.032500"),
+                "서울 서초구 서초동 서초역 1번 출구", "서울 서초구 강남대로 27 교대역 12번 출구",
                 null, HelpRequestStatus.OPEN));
 
         helpRequestRepository.save(buildRequest(d02, scMap.get("SC004"),
-                "잠실 롯데병원 대기 동행", "장시간 대기가 예상됩니다. 함께 기다려 주실 분을 찾습니다.",
+                "잠실 아산병원 대기 동행", "장시간 대기가 예상됩니다. 함께 기다려 주실 분을 찾습니다.",
                 LocalDateTime.of(2026, 6, 27, 10, 0), LocalDateTime.of(2026, 6, 27, 14, 0),
                 "서울 송파구 올림픽로 43길 88", null, "서울특별시", "송파구", "신천동", "05551",
-                new BigDecimal("37.513700"), new BigDecimal("127.100000"), null, null,
+                new BigDecimal("37.513700"), new BigDecimal("127.100000"),
+                "서울 송파구 잠실동 잠실역 8번 출구", "서울 송파구 올림픽로 43길 88 서울아산병원",
                 null, HelpRequestStatus.OPEN));
 
         helpRequestRepository.save(buildRequest(d03, scMap.get("SC007"),
                 "한남동 주민센터 수어 통역 요청", "행정 업무 처리 시 수어 통역이 필요합니다.",
                 LocalDateTime.of(2026, 6, 28, 13, 0), LocalDateTime.of(2026, 6, 28, 15, 0),
                 "서울 용산구 한강대로 14가길 35", null, "서울특별시", "용산구", "한남동", "04418",
-                new BigDecimal("37.534605"), new BigDecimal("126.994304"), null, null,
+                new BigDecimal("37.534605"), new BigDecimal("126.994304"),
+                "서울 용산구 한남동 한강진역 2번 출구", "서울 용산구 한남대로27길 7 한남동주민센터",
                 "수어 통역 전문 자격증 소지자 우대", HelpRequestStatus.OPEN));
 
         helpRequestRepository.save(buildRequest(d04, scMap.get("SC006"),
                 "노원구 마트 장보기 지원", "대형마트 쇼핑 및 귀가 보조입니다. 짐 운반도 도움이 필요합니다.",
                 LocalDateTime.of(2026, 6, 30, 11, 0), LocalDateTime.of(2026, 6, 30, 14, 0),
                 "서울 노원구 동일로 1238", null, "서울특별시", "노원구", "월계동", "01796",
-                new BigDecimal("37.617559"), new BigDecimal("127.063050"), null, null,
+                new BigDecimal("37.617559"), new BigDecimal("127.063050"),
+                "서울 노원구 월계동 광운대역 1번 출구", "서울 노원구 동일로 1238 홈플러스 노원점",
                 null, HelpRequestStatus.OPEN));
 
         helpRequestRepository.save(buildRequest(d05, scMap.get("SC003"),
@@ -474,7 +482,8 @@ public class DataInitializer implements CommandLineRunner {
                 "여의도 공원 산책 동행", "휠체어 이동 보조가 필요합니다. 한강공원 산책 예정입니다.",
                 LocalDateTime.of(2026, 6, 18, 10, 0), LocalDateTime.of(2026, 6, 18, 13, 0),
                 "서울 영등포구 여의공원로 68", null, "서울특별시", "영등포구", "여의도동", "07340",
-                new BigDecimal("37.521000"), new BigDecimal("126.924000"), null, null,
+                new BigDecimal("37.521000"), new BigDecimal("126.924000"),
+                "서울 영등포구 여의도동 여의나루역 1번 출구", "서울 영등포구 여의공원로 68 여의도한강공원",
                 null, HelpRequestStatus.MATCHED));
 
         HelpRequestApplication matchedApp = helpRequestApplicationRepository.save(HelpRequestApplication.builder()
@@ -529,7 +538,8 @@ public class DataInitializer implements CommandLineRunner {
                 "강남 도서관 외출 동행 (진행 중)", "도서관 왕복 이동 보조 중입니다. 도우미가 종료확인을 누르면 활동이 완료됩니다.",
                 LocalDateTime.of(2026, 6, 17, 9, 0), LocalDateTime.of(2026, 6, 18, 18, 0),
                 "서울 강남구 테헤란로 7길 22", null, "서울특별시", "강남구", "역삼동", "06232",
-                new BigDecimal("37.500636"), new BigDecimal("127.036503"), null, null,
+                new BigDecimal("37.500636"), new BigDecimal("127.036503"),
+                "서울 강남구 역삼동 역삼역 2번 출구", "서울 강남구 테헤란로 7길 22 강남구립역삼도서관",
                 "이용자 종료확인 완료, 도우미 종료확인 대기", HelpRequestStatus.IN_PROGRESS));
 
         HelpRequestApplication inProgressApp1 = helpRequestApplicationRepository.save(HelpRequestApplication.builder()
@@ -553,7 +563,8 @@ public class DataInitializer implements CommandLineRunner {
                 "정형외과 진료 동행 (진행 중)", "진료 동행 중입니다. 이용자가 종료확인을 누르면 활동이 완료됩니다.",
                 LocalDateTime.of(2026, 6, 17, 10, 0), LocalDateTime.of(2026, 6, 18, 17, 0),
                 "서울 강남구 봉은사로 114", null, "서울특별시", "강남구", "삼성동", "06120",
-                new BigDecimal("37.513200"), new BigDecimal("127.062800"), null, null,
+                new BigDecimal("37.513200"), new BigDecimal("127.062800"),
+                "서울 강남구 삼성동 한티역 2번 출구", "서울 강남구 봉은사로 114 강남정형외과의원",
                 "도우미 종료확인 완료, 이용자 종료확인 대기", HelpRequestStatus.IN_PROGRESS));
 
         HelpRequestApplication inProgressApp2 = helpRequestApplicationRepository.save(HelpRequestApplication.builder()
