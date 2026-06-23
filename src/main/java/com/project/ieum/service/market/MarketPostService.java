@@ -67,14 +67,18 @@ public class MarketPostService {
         // 좌표 확보 실패(Optional.empty)여도 게시글 등록은 허용 — 거리 정렬에서만 null 처리됨
         GeoPoint geoPoint = geocodingService.geocode(form.getRoadAddress()).orElse(null);
 
+        // 나눔이면 가격 0 강제
+        BigDecimal price = form.isSharing() ? BigDecimal.ZERO : form.getPrice();
+
         // 게시글 엔티티 저장
         // @Builder.Default로 status = ACTIVE 자동 설정
         MarketPost post = marketPostRepository.save(MarketPost.builder()
                 .seller(currentUser)
                 .category(category)
+                .sharing(form.isSharing())
                 .title(form.getTitle())
                 .description(form.getDescription())
-                .price(form.getPrice())
+                .price(price)
                 .roadAddress(form.getRoadAddress())
                 .addressDetail(form.getAddressDetail())
                 .sido(form.getSido())
@@ -103,7 +107,8 @@ public class MarketPostService {
             throw new IllegalStateException("판매중 상태의 게시글만 수정할 수 있습니다.");
         }
 
-        post.update(form.getTitle(), form.getDescription(), form.getPrice());
+        BigDecimal updatePrice = form.isSharing() ? BigDecimal.ZERO : form.getPrice();
+        post.update(form.getTitle(), form.getDescription(), updatePrice, form.isSharing());
 
         // 기존 이미지 삭제
         if (!CollectionUtils.isEmpty(form.getDeleteImageIds())) {

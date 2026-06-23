@@ -86,6 +86,11 @@ public class MarketPost extends BasicEntity {  // BasicEntity 상속 → created
     @Builder.Default
     private MarketPostStatus status = MarketPostStatus.ACTIVE;
 
+    // 나눔 여부 — true이면 무료 나눔, false이면 판매
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean sharing = false;
+
     // ── 상태 전이 메서드 (HelpRequest 패턴 동일하게 적용) ──
 
     // 예약 처리
@@ -117,10 +122,11 @@ public class MarketPost extends BasicEntity {  // BasicEntity 상속 → created
     }
 
     // 상품 정보 수정 — ACTIVE 상태에서만 허용 (Service에서 상태 검증 후 호출)
-    public void update(String title, String description, BigDecimal price) {
+    public void update(String title, String description, BigDecimal price, boolean sharing) {
         this.title = title;
         this.description = description;
         this.price = price;
+        this.sharing = sharing;
     }
 
     // 내부 상태 가드 — HelpRequest.requireStatus와 동일한 패턴

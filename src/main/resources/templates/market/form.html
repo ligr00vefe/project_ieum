@@ -23,6 +23,27 @@
             <!-- 수정 시 삭제할 이미지 ID를 담는 컨테이너 (JS에서 동적으로 추가) -->
             <div id="deleteImageIdsContainer"></div>
 
+            <!-- 판매 / 나눔 선택 -->
+            <div>
+                <label class="mb-2 block text-sm font-semibold">거래 유형</label>
+                <div class="flex gap-3">
+                    <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="sharing" value="false" class="sr-only peer"
+                               th:checked="${!form.sharing}">
+                        <div class="rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-500 transition-all peer-checked:border-orange-400 peer-checked:bg-orange-50 peer-checked:text-orange-600">
+                            💰 판매
+                        </div>
+                    </label>
+                    <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="sharing" value="true" class="sr-only peer"
+                               th:checked="${form.sharing}">
+                        <div class="rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-500 transition-all peer-checked:border-teal-400 peer-checked:bg-teal-50 peer-checked:text-teal-600">
+                            🤝 나눔 (무료)
+                        </div>
+                    </label>
+                </div>
+            </div>
+
             <!-- 상품 사진 (최대 5장) -->
             <div>
                 <label class="mb-2 block text-sm font-semibold">
@@ -72,12 +93,16 @@
                     <p th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"
                        class="mt-1 text-sm text-red-600"></p>
                 </div>
-                <div>
+                <div id="priceField">
                     <label for="price" class="mb-1 block text-sm font-semibold">판매가격 (원)</label>
                     <input id="price" th:field="*{price}" type="number" placeholder="0" min="0"
                            class="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
                     <p th:if="${#fields.hasErrors('price')}" th:errors="*{price}"
                        class="mt-1 text-sm text-red-600"></p>
+                </div>
+                <div id="sharingNote" class="hidden rounded-xl bg-teal-50 border border-teal-200 px-4 py-3">
+                    <p class="text-sm font-semibold text-teal-700">🤝 무료 나눔으로 등록됩니다</p>
+                    <p class="text-xs text-teal-600 mt-0.5">가격 없이 필요한 분께 무료로 나눔해요.</p>
                 </div>
             </div>
 
@@ -136,6 +161,18 @@
     var existingImages = /*[[${existingImages}]]*/ [];
 </script>
 <script>
+// 판매/나눔 토글
+function updateSharingUI() {
+    const isSharing = document.querySelector('input[name="sharing"]:checked')?.value === 'true';
+    document.getElementById('priceField').classList.toggle('hidden', isSharing);
+    document.getElementById('sharingNote').classList.toggle('hidden', !isSharing);
+    if (isSharing) {
+        document.getElementById('price').value = '0';
+    }
+}
+document.querySelectorAll('input[name="sharing"]').forEach(r => r.addEventListener('change', updateSharingUI));
+updateSharingUI();
+
 function openAddressSearch() {
     new daum.Postcode({
         oncomplete: function(data) {

@@ -83,6 +83,13 @@ public class UserController {
         return "layout/layout";
     }
 
+    @GetMapping("/how-to-use")
+    public String howToUse(Model model) {
+        model.addAttribute("content", "guide/how-to-use");
+        model.addAttribute("title", "이용방법");
+        return "layout/layout";
+    }
+
     @GetMapping("/mypage")
     public String mypage(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
