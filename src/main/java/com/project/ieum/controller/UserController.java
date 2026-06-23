@@ -19,12 +19,18 @@ import com.project.ieum.service.MasterDataService;
 import com.project.ieum.service.MatchingService;
 import com.project.ieum.service.ReviewService;
 import com.project.ieum.service.UserService;
+import com.project.ieum.dto.market.MarketChatSummaryResponse;
 import com.project.ieum.dto.market.MarketPostResponse;
+import com.project.ieum.entity.market.MarketChat;
 import com.project.ieum.entity.market.MarketPost;
 import com.project.ieum.entity.market.MarketPostImage;
+import com.project.ieum.entity.market.MarketPostStatus;
+import com.project.ieum.repository.market.MarketChatRepository;
+import com.project.ieum.repository.market.MarketReviewRepository;
 import com.project.ieum.service.admin.NoticeService;
 import com.project.ieum.service.market.MarketChatService;
 import com.project.ieum.service.market.MarketPostService;
+import com.project.ieum.service.market.MarketReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -55,6 +61,9 @@ public class UserController {
     private final NoticeService noticeService;
     private final MarketPostService marketPostService;
     private final MarketChatService marketChatService;
+    private final MarketReviewService marketReviewService;
+    private final MarketChatRepository marketChatRepository;
+    private final MarketReviewRepository marketReviewRepository;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -166,6 +175,24 @@ public class UserController {
                 .toList();
         model.addAttribute("myMarketPosts", myMarketPosts);
 
+        // 이음마켓 — 마켓 후기 통계 + 매너온도
+        var marketPublicReviewsD = marketReviewService.getPublicReviews(user.getId());
+        double mannerTempD = marketReviewService.getMannerTemperature(user.getId());
+        model.addAttribute("mannerTemperature", String.format("%.1f", mannerTempD));
+        model.addAttribute("mannerTemperatureRaw", mannerTempD);
+        model.addAttribute("marketTotalReviews", marketPublicReviewsD.size());
+        model.addAttribute("marketReceivedReviews", marketPublicReviewsD);
+
+        // 이음마켓 — 내 구매 채팅 목록 (후기 작성 버튼 포함)
+        List<MarketChatSummaryResponse> myBuyChatsD = marketChatRepository.findByBuyerId(user.getId()).stream()
+                .map(chat -> {
+                    List<MarketPostImage> imgs = marketPostService.getImages(chat.getPost().getId());
+                    String thumb = imgs.isEmpty() ? null : imgs.get(0).getImageUrl();
+                    boolean hasReview = marketReviewRepository.existsByChat_Id(chat.getId());
+                    return MarketChatSummaryResponse.from(chat, user.getId(), thumb, null, 0, hasReview);
+                }).toList();
+        model.addAttribute("myBuyChats", myBuyChatsD);
+
         model.addAttribute("content", "disabled/mypage");
         model.addAttribute("title", "마이페이지");
         return "layout/layout";
@@ -225,6 +252,24 @@ public class UserController {
                 })
                 .toList();
         model.addAttribute("myMarketPosts", myMarketPosts);
+
+        // 이음마켓 — 마켓 후기 통계 + 매너온도
+        var marketPublicReviews = marketReviewService.getPublicReviews(user.getId());
+        double mannerTemp = marketReviewService.getMannerTemperature(user.getId());
+        model.addAttribute("mannerTemperature", String.format("%.1f", mannerTemp));
+        model.addAttribute("mannerTemperatureRaw", mannerTemp);
+        model.addAttribute("marketTotalReviews", marketPublicReviews.size());
+        model.addAttribute("marketReceivedReviews", marketPublicReviews);
+
+        // 이음마켓 — 내 구매 채팅 목록 (후기 작성 버튼 포함)
+        List<MarketChatSummaryResponse> myBuyChats = marketChatRepository.findByBuyerId(user.getId()).stream()
+                .map(chat -> {
+                    List<MarketPostImage> imgs = marketPostService.getImages(chat.getPost().getId());
+                    String thumb = imgs.isEmpty() ? null : imgs.get(0).getImageUrl();
+                    boolean hasReview = marketReviewRepository.existsByChat_Id(chat.getId());
+                    return MarketChatSummaryResponse.from(chat, user.getId(), thumb, null, 0, hasReview);
+                }).toList();
+        model.addAttribute("myBuyChats", myBuyChats);
 
         model.addAttribute("content", "caregiver/mypage");
         model.addAttribute("title", "마이페이지");

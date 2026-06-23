@@ -276,11 +276,13 @@ public class HelpRequestService {
         return helpRequestRepository.searchHelpRequests(condition, pageable, lat, lng);
     }
 
-    // 이용자 둘러보기 보드 — 남의 OPEN + 내 모든 상태(최신순). 키워드/서비스 카테고리 필터는 재사용, 거리정렬 없음.
+    // 이용자 둘러보기 보드 — 남의 OPEN + 내 모든 상태(최신순). 관리자는 전체 OPEN만 조회.
     @Transactional(readOnly = true)
     public Page<HelpRequest> searchBoardForUser(HelpRequestSearchCondition condition, Pageable pageable) {
-        User me = requireRole(UserRole.USER);
-        condition.setOwnerScopeUserId(me.getId());
+        User me = currentUserService.getCurrentUser();
+        if (me.getRole() != UserRole.ADMIN) {
+            condition.setOwnerScopeUserId(me.getId());
+        }
         return helpRequestRepository.searchHelpRequests(condition, pageable, null, null);
     }
 

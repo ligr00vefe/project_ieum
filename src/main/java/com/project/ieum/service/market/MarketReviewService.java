@@ -87,4 +87,13 @@ public class MarketReviewService {
     public double getAverageRating(Long sellerUserId) {
         return marketReviewRepository.averageRatingByTargetUserId(sellerUserId);
     }
+
+    // ── 판매자의 매너온도 ──
+    // 기본 36.5°C, 별점별 누적: 5점=+3, 4점=+1.5, 3점=0, 2점=-1.5, 1점=-3. 범위 0~99.
+    @Transactional(readOnly = true)
+    public double getMannerTemperature(Long sellerUserId) {
+        Double raw = marketReviewRepository.mannerTemperatureByTargetUserId(sellerUserId);
+        double temp = (raw != null) ? raw : 36.5;
+        return Math.min(99.0, Math.max(0.0, temp));
+    }
 }

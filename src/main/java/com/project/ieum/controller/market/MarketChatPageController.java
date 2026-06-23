@@ -2,9 +2,11 @@ package com.project.ieum.controller.market;
 
 import com.project.ieum.dto.market.MarketChatSummaryResponse;
 import com.project.ieum.entity.User;
+import com.project.ieum.entity.conversation.ConversationStatus;
 import com.project.ieum.entity.market.MarketChat;
 import com.project.ieum.entity.market.MarketPostImage;
 import com.project.ieum.service.common.CurrentUserService;
+import com.project.ieum.repository.market.MarketReviewRepository;
 import com.project.ieum.service.market.MarketChatService;
 import com.project.ieum.service.market.MarketPostService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class MarketChatPageController {
     private final MarketChatService marketChatService;
     private final MarketPostService marketPostService;
     private final CurrentUserService currentUserService;
+    private final MarketReviewRepository marketReviewRepository;
 
     // ── 채팅방 열기 (없으면 생성 → 채팅방으로 리다이렉트) ──
     // POST /market/{postId}/chat
@@ -44,9 +47,14 @@ public class MarketChatPageController {
     // GET /market/chat/{chatId}
     // 기존 ChatPageController.room()과 동일한 구조
     @GetMapping("/chat/{chatId}")
-    public String room(@PathVariable Long chatId, Model model) {
+    public String room(@PathVariable Long chatId, Model model, RedirectAttributes redirectAttributes) {
         User currentUser = currentUserService.getCurrentUser();
         MarketChat chat = marketChatService.getChatForUser(chatId);
+
+        if (chat.getStatus() == ConversationStatus.CLOSED) {
+            redirectAttributes.addFlashAttribute("errorMessage", "신고 처리로 인해 종료된 채팅방입니다.");
+            return "redirect:/market/chats";
+        }
 
         // 상대방 정보 결정 (현재 사용자가 판매자면 상대는 구매자, 반대도 동일)
         boolean isSeller = chat.getSeller().getId().equals(currentUser.getId());
@@ -82,7 +90,8 @@ public class MarketChatPageController {
         Page<MarketChatSummaryResponse> chatSummaries = chats.map(chat -> {
             List<MarketPostImage> imgs = marketPostService.getImages(chat.getPost().getId());
             String thumb = imgs.isEmpty() ? null : imgs.get(0).getImageUrl();
-            return MarketChatSummaryResponse.from(chat, currentUser.getId(), thumb, null, 0);
+            boolean hasReview = marketReviewRepository.existsByChat_Id(chat.getId());
+            return MarketChatSummaryResponse.from(chat, currentUser.getId(), thumb, null, 0, hasReview);
         });
 
         model.addAttribute("title", "마켓 채팅");

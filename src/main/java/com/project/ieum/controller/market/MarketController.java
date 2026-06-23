@@ -69,12 +69,17 @@ public class MarketController {
         if (condition.getMinPrice() != null) pageUrlBuilder.append("minPrice=").append(condition.getMinPrice()).append("&");
         if (condition.getMaxPrice() != null) pageUrlBuilder.append("maxPrice=").append(condition.getMaxPrice()).append("&");
 
+        int currentPage = responses.getNumber();
+        int totalPages  = responses.getTotalPages();
+
         model.addAttribute("title", "이음 마켓");
         model.addAttribute("posts", responses);
         model.addAttribute("condition", condition);
         model.addAttribute("paginationUrl", pageUrlBuilder.toString());
         model.addAttribute("categories", marketPostService.getAllCategories());
         model.addAttribute("currentUserId", currentUserId);
+        model.addAttribute("startPage", Math.max(0, currentPage - 2));
+        model.addAttribute("endPage", Math.min(totalPages - 1, currentPage + 2));
 
         // 로그인 사용자의 상품을 채팅 수 포함해 별도로 조회 (내 상품 섹션 우선 표시용)
         List<MarketPostResponse> myPosts = new ArrayList<>();
