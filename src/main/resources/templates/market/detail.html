@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/layout :: layout(~{::content})}">
-<th:block th:fragment="content">
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('상품 상세 - 이음마켓')}"></head>
+<body class="min-h-screen bg-[#f6f7ff] text-slate-900">
+<div th:replace="~{layout/header :: header}"></div>
+
+<main class="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
 
     <div th:if="${message}" th:text="${message}"
          class="mb-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-800"></div>
@@ -174,7 +176,7 @@
             </a>
         </aside>
     </div>
-</section>
+</main>
 
 <script th:inline="javascript">
 const TOTAL_SLIDES = /*[[${images.size()}]]*/ 0;
@@ -195,4 +197,5 @@ function goToSlide(idx) {
 function prevSlide() { goToSlide((currentSlide - 1 + TOTAL_SLIDES) % TOTAL_SLIDES); }
 function nextSlide() { goToSlide((currentSlide + 1) % TOTAL_SLIDES); }
 </script>
-</th:block>
+</body>
+</html>
