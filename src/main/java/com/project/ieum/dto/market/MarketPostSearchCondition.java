@@ -29,4 +29,7 @@ public class MarketPostSearchCondition {
     // 상태 필터 — 기본적으로 목록은 ACTIVE만 표시, null이면 전체
     // Controller에서 기본값 ACTIVE로 세팅해서 넘겨줌
     private MarketPostStatus status;
+
+    // 나눔 여부 필터 — true: 나눔만, false: 판매만, null: 전체
+    private Boolean sharing;
 }

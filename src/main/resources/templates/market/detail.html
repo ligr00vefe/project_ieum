@@ -70,8 +70,9 @@
                                         : 'bg-slate-100 text-slate-500')">판매중</span>
                 </div>
                 <h1 class="text-xl font-bold text-slate-900" th:text="${post.title}">상품명</h1>
-                <p class="mt-2 text-2xl font-bold text-orange-500"
+                <p th:if="${!post.sharing}" class="mt-2 text-2xl font-bold text-orange-500"
                    th:text="${#numbers.formatInteger(post.price, 1, 'COMMA') + '원'}">10,000원</p>
+                <p th:if="${post.sharing}" class="mt-2 text-2xl font-bold text-teal-500">무료 나눔</p>
                 <div class="mt-3 flex items-center gap-3 text-sm text-slate-400">
                     <span>📍 <span th:text="${post.sigungu}">강남구</span></span>
                     <span>·</span>

@@ -42,6 +42,9 @@ public class MarketController {
             @PageableDefault(size = 20) Pageable pageable,
             Model model) {
 
+        // 판매/나눔 기본값: 파라미터 없으면 판매(false)만 표시
+        if (condition.getSharing() == null) condition.setSharing(false);
+
         // 좌표는 이후 Phase 5(프론트)에서 Geolocation API로 받아 전달 — 지금은 null로 처리
         Page<MarketPost> posts = marketPostService.search(condition, pageable, null, null);
 
@@ -58,9 +61,18 @@ public class MarketController {
             currentUserId = currentUserService.getCurrentUser().getId();
         } catch (Exception ignored) {}
 
+        // 페이지네이션 URL (sharing + 기타 필터 파라미터 보존)
+        StringBuilder pageUrlBuilder = new StringBuilder("/market?sharing=").append(condition.getSharing()).append("&");
+        if (condition.getCategoryId() != null) pageUrlBuilder.append("categoryId=").append(condition.getCategoryId()).append("&");
+        if (condition.getKeyword() != null && !condition.getKeyword().isBlank())
+            pageUrlBuilder.append("keyword=").append(java.net.URLEncoder.encode(condition.getKeyword(), java.nio.charset.StandardCharsets.UTF_8)).append("&");
+        if (condition.getMinPrice() != null) pageUrlBuilder.append("minPrice=").append(condition.getMinPrice()).append("&");
+        if (condition.getMaxPrice() != null) pageUrlBuilder.append("maxPrice=").append(condition.getMaxPrice()).append("&");
+
         model.addAttribute("title", "이음 마켓");
         model.addAttribute("posts", responses);
         model.addAttribute("condition", condition);
+        model.addAttribute("paginationUrl", pageUrlBuilder.toString());
         model.addAttribute("categories", marketPostService.getAllCategories());
         model.addAttribute("currentUserId", currentUserId);
 
@@ -68,6 +80,7 @@ public class MarketController {
         List<MarketPostResponse> myPosts = new ArrayList<>();
         if (currentUserId != null) {
             myPosts = marketPostService.getMyPosts().stream()
+                    .filter(p -> condition.getSharing() == null || p.isSharing() == condition.getSharing())
                     .map(p -> {
                         List<MarketPostImage> imgs = marketPostService.getImages(p.getId());
                         String thumb = imgs.isEmpty() ? null : imgs.get(0).getImageUrl();
@@ -148,6 +161,7 @@ public class MarketController {
 
         // 폼에 기존 값 프리필
         MarketPostForm form = new MarketPostForm();
+        form.setSharing(post.isSharing());
         form.setTitle(post.getTitle());
         form.setDescription(post.getDescription());
         form.setPrice(post.getPrice());

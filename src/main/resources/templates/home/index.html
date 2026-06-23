@@ -33,10 +33,10 @@
                     <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse"></span>
                     신뢰할 수 있는 케어 매칭 플랫폼
                 </div>
-                <h1 class="text-5xl sm:text-6xl xl:text-[4.5rem] font-black text-white leading-[1.18] tracking-tight mb-7">
-                    마음으로<br>
-                    <span class="bg-gradient-to-r from-indigo-400 via-violet-400 to-teal-400 bg-clip-text text-transparent">연결되는</span><br>
-                    케어 파트너
+                <h1 class="flex flex-col gap-3 text-5xl sm:text-6xl xl:text-[4.5rem] font-black text-white tracking-tight mb-7">
+                    <span>마음으로</span>
+                    <span class="bg-gradient-to-r from-indigo-400 via-violet-400 to-teal-400 bg-clip-text text-transparent">연결되는</span>
+                    <span>케어 파트너</span>
                 </h1>
                 <p class="text-[1.05rem] text-gray-400 leading-relaxed mb-11 max-w-[420px]">
                     이음은 케어메이트와 활동지원사를<br class="hidden sm:block">
@@ -135,90 +135,45 @@
 </section>
 
 <!-- ===== FEATURES ===== -->
-<section class="py-20 lg:py-28 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-indigo-50 text-indigo-600 text-xs font-semibold rounded-full mb-4 uppercase tracking-widest">이음의 특징</div>
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">이음이 다른 이유</h2>
-            <p class="text-gray-500 text-lg max-w-xl mx-auto">단순한 중개를 넘어, 진정한 연결을 만들어갑니다</p>
+<section class="py-20 lg:py-28 bg-[#07071a] relative overflow-hidden">
+    <div class="mesh absolute inset-0 opacity-40"></div>
+    <div class="absolute top-0 left-1/4 w-[400px] h-[400px] bg-indigo-800 rounded-full blur-[120px] opacity-10 pointer-events-none"></div>
+    <div class="absolute bottom-0 right-1/4 w-80 h-80 bg-teal-800 rounded-full blur-[100px] opacity-10 pointer-events-none"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-16 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-indigo-500/15 border border-indigo-500/25 text-indigo-400 text-xs font-semibold rounded-full mb-5 uppercase tracking-widest">이음의 특징</div>
+                <h2 class="flex flex-col gap-2 text-4xl sm:text-5xl font-black text-white">
+                    <span>이음이</span>
+                    <span class="text-transparent bg-gradient-to-r from-indigo-400 to-teal-400 bg-clip-text">다른 이유</span>
+                </h2>
+            </div>
+            <p class="text-gray-400 lg:text-right text-base leading-relaxed max-w-xs">단순한 중개를 넘어,<br>진정한 연결을 만들어갑니다</p>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-            <div class="group relative p-7 rounded-3xl border border-gray-100 bg-white hover:shadow-2xl hover:shadow-indigo-100/80 hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-default">
-                <div class="absolute inset-0 bg-gradient-to-br from-indigo-50/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl"></div>
-                <div class="relative">
-                    <div class="w-13 h-13 bg-indigo-100 rounded-2xl flex items-center justify-center mb-6" style="width:52px;height:52px">
-                        <svg class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                    </div>
-                    <h3 class="text-base font-bold text-gray-900 mb-2.5">성향 기반 매칭</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed">단순 조건이 아닌 성향과 라이프스타일을 분석해 최적의 파트너를 추천합니다.</p>
-                </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-px bg-white/5 rounded-3xl overflow-hidden border border-white/5">
+            <div class="bg-[#07071a] p-10 group hover:bg-indigo-950/70 transition-colors duration-300 cursor-default">
+                <div class="text-[88px] font-black text-indigo-500/10 leading-none mb-1 select-none group-hover:text-indigo-500/20 transition-colors duration-300">01</div>
+                <h3 class="text-2xl font-bold text-white mb-3">성향 기반 매칭</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">단순 조건이 아닌 성향과 라이프스타일을 분석해 최적의 파트너를 추천합니다.</p>
+                <div class="mt-6 w-8 h-0.5 bg-indigo-500 group-hover:w-20 transition-all duration-500"></div>
             </div>
-            <div class="group relative p-7 rounded-3xl border border-gray-100 bg-white hover:shadow-2xl hover:shadow-teal-100/80 hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-default">
-                <div class="absolute inset-0 bg-gradient-to-br from-teal-50/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl"></div>
-                <div class="relative">
-                    <div class="bg-teal-100 rounded-2xl flex items-center justify-center mb-6" style="width:52px;height:52px">
-                        <svg class="w-6 h-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                    </div>
-                    <h3 class="text-base font-bold text-gray-900 mb-2.5">실시간 1:1 채팅</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed">매칭 전 충분한 소통으로 서로를 파악하고 신뢰를 쌓은 후 케어를 시작하세요.</p>
-                </div>
+            <div class="bg-[#07071a] p-10 group hover:bg-teal-950/70 transition-colors duration-300 cursor-default">
+                <div class="text-[88px] font-black text-teal-500/10 leading-none mb-1 select-none group-hover:text-teal-500/20 transition-colors duration-300">02</div>
+                <h3 class="text-2xl font-bold text-white mb-3">실시간 1:1 채팅</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">매칭 전 충분한 소통으로 서로를 파악하고 신뢰를 쌓은 후 케어를 시작하세요.</p>
+                <div class="mt-6 w-8 h-0.5 bg-teal-500 group-hover:w-20 transition-all duration-500"></div>
             </div>
-            <div class="group relative p-7 rounded-3xl border border-gray-100 bg-white hover:shadow-2xl hover:shadow-amber-100/80 hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-default">
-                <div class="absolute inset-0 bg-gradient-to-br from-amber-50/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl"></div>
-                <div class="relative">
-                    <div class="bg-amber-100 rounded-2xl flex items-center justify-center mb-6" style="width:52px;height:52px">
-                        <svg class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-                    </div>
-                    <h3 class="text-base font-bold text-gray-900 mb-2.5">투명한 리뷰</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed">활동 완료 후 상호 리뷰로 신뢰도를 높이고, 다음 매칭에서 더 나은 선택을 할 수 있습니다.</p>
-                </div>
+            <div class="bg-[#07071a] p-10 group hover:bg-amber-950/50 transition-colors duration-300 cursor-default">
+                <div class="text-[88px] font-black text-amber-500/10 leading-none mb-1 select-none group-hover:text-amber-500/20 transition-colors duration-300">03</div>
+                <h3 class="text-2xl font-bold text-white mb-3">투명한 리뷰</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">활동 완료 후 상호 리뷰로 신뢰도를 높이고, 다음 매칭에서 더 나은 선택을 할 수 있습니다.</p>
+                <div class="mt-6 w-8 h-0.5 bg-amber-500 group-hover:w-20 transition-all duration-500"></div>
             </div>
-            <div class="group relative p-7 rounded-3xl border border-gray-100 bg-white hover:shadow-2xl hover:shadow-rose-100/80 hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-default">
-                <div class="absolute inset-0 bg-gradient-to-br from-rose-50/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl"></div>
-                <div class="relative">
-                    <div class="bg-rose-100 rounded-2xl flex items-center justify-center mb-6" style="width:52px;height:52px">
-                        <svg class="w-6 h-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    </div>
-                    <h3 class="text-base font-bold text-gray-900 mb-2.5">유연한 일정 관리</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed">캘린더 기반으로 가능한 시간대를 설정하고, 일정 변경도 간편하게 관리하세요.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ===== HOW IT WORKS ===== -->
-<section class="py-20 lg:py-28 bg-slate-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-14">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-teal-50 text-teal-600 text-xs font-semibold rounded-full mb-4 uppercase tracking-widest">이용 방법</div>
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">이음, 어떻게 시작하나요?</h2>
-            <p class="text-gray-500 text-lg max-w-xl mx-auto">간단한 4단계로 나에게 맞는 케어를 만나보세요</p>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-            <div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-                <div class="flex items-center gap-3 mb-8">
-                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-lg flex-shrink-0">👤</div>
-                    <div><div class="font-bold text-gray-900">케어메이트</div><div class="text-xs text-gray-400">케어가 필요한 분들을 위한 여정</div></div>
-                </div>
-                <div class="space-y-5">
-                    <div class="flex gap-4"><div class="flex flex-col items-center flex-shrink-0"><div class="w-8 h-8 bg-indigo-600 text-white text-sm font-bold rounded-full flex items-center justify-center">1</div><div class="w-px flex-1 bg-indigo-100 my-2"></div></div><div class="pb-4"><div class="font-semibold text-gray-900 text-sm mb-1">회원가입 및 프로필 작성</div><p class="text-xs text-gray-400 leading-relaxed">장애 유형, 의사소통 방식, 성향 태그를 입력해 나를 표현해요.</p></div></div>
-                    <div class="flex gap-4"><div class="flex flex-col items-center flex-shrink-0"><div class="w-8 h-8 bg-indigo-600 text-white text-sm font-bold rounded-full flex items-center justify-center">2</div><div class="w-px flex-1 bg-indigo-100 my-2"></div></div><div class="pb-4"><div class="font-semibold text-gray-900 text-sm mb-1">도움 요청 등록</div><p class="text-xs text-gray-400 leading-relaxed">필요한 서비스, 시간대, 지역을 입력해 활동지원사를 찾아요.</p></div></div>
-                    <div class="flex gap-4"><div class="flex flex-col items-center flex-shrink-0"><div class="w-8 h-8 bg-indigo-600 text-white text-sm font-bold rounded-full flex items-center justify-center">3</div><div class="w-px flex-1 bg-indigo-100 my-2"></div></div><div class="pb-4"><div class="font-semibold text-gray-900 text-sm mb-1">채팅으로 신뢰 확인</div><p class="text-xs text-gray-400 leading-relaxed">지원한 활동지원사와 1:1 채팅으로 충분히 대화하세요.</p></div></div>
-                    <div class="flex gap-4"><div class="flex-shrink-0"><div class="w-8 h-8 bg-teal-500 text-white text-sm font-bold rounded-full flex items-center justify-center">✓</div></div><div><div class="font-semibold text-gray-900 text-sm mb-1">케어 시작!</div><p class="text-xs text-gray-400 leading-relaxed">신뢰할 수 있는 파트너와 함께하는 케어가 시작됩니다.</p></div></div>
-                </div>
-            </div>
-            <div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-                <div class="flex items-center gap-3 mb-8">
-                    <div class="w-10 h-10 bg-teal-500 rounded-xl flex items-center justify-center text-lg flex-shrink-0">👩‍⚕️</div>
-                    <div><div class="font-bold text-gray-900">활동지원사</div><div class="text-xs text-gray-400">케어를 제공하는 전문가의 여정</div></div>
-                </div>
-                <div class="space-y-5">
-                    <div class="flex gap-4"><div class="flex flex-col items-center flex-shrink-0"><div class="w-8 h-8 bg-teal-500 text-white text-sm font-bold rounded-full flex items-center justify-center">1</div><div class="w-px flex-1 bg-teal-100 my-2"></div></div><div class="pb-4"><div class="font-semibold text-gray-900 text-sm mb-1">전문 프로필 등록</div><p class="text-xs text-gray-400 leading-relaxed">자격증, 경력, 가능 업무와 케어 성향을 상세히 작성해요.</p></div></div>
-                    <div class="flex gap-4"><div class="flex flex-col items-center flex-shrink-0"><div class="w-8 h-8 bg-teal-500 text-white text-sm font-bold rounded-full flex items-center justify-center">2</div><div class="w-px flex-1 bg-teal-100 my-2"></div></div><div class="pb-4"><div class="font-semibold text-gray-900 text-sm mb-1">요청 게시판 탐색</div><p class="text-xs text-gray-400 leading-relaxed">내 활동 가능 지역·시간대에 맞는 요청을 찾아 지원하세요.</p></div></div>
-                    <div class="flex gap-4"><div class="flex flex-col items-center flex-shrink-0"><div class="w-8 h-8 bg-teal-500 text-white text-sm font-bold rounded-full flex items-center justify-center">3</div><div class="w-px flex-1 bg-teal-100 my-2"></div></div><div class="pb-4"><div class="font-semibold text-gray-900 text-sm mb-1">소통 후 매칭 확정</div><p class="text-xs text-gray-400 leading-relaxed">채팅으로 요구사항을 확인하고 매칭을 완료해요.</p></div></div>
-                    <div class="flex gap-4"><div class="flex-shrink-0"><div class="w-8 h-8 bg-teal-500 text-white text-sm font-bold rounded-full flex items-center justify-center">✓</div></div><div><div class="font-semibold text-gray-900 text-sm mb-1">활동 시작 &amp; 리뷰 축적</div><p class="text-xs text-gray-400 leading-relaxed">활동 후 긍정적인 리뷰가 쌓이면 더 많은 기회가 열립니다.</p></div></div>
-                </div>
+            <div class="bg-[#07071a] p-10 group hover:bg-rose-950/50 transition-colors duration-300 cursor-default">
+                <div class="text-[88px] font-black text-rose-500/10 leading-none mb-1 select-none group-hover:text-rose-500/20 transition-colors duration-300">04</div>
+                <h3 class="text-2xl font-bold text-white mb-3">유연한 일정 관리</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">캘린더 기반으로 가능한 시간대를 설정하고, 일정 변경도 간편하게 관리하세요.</p>
+                <div class="mt-6 w-8 h-0.5 bg-rose-500 group-hover:w-20 transition-all duration-500"></div>
             </div>
         </div>
     </div>
@@ -239,6 +194,90 @@
             <div class="flex flex-col items-center p-5 bg-slate-50 rounded-2xl hover:bg-indigo-50 hover:shadow-lg hover:shadow-indigo-100/60 hover:-translate-y-0.5 transition-all cursor-default group"><div class="text-3xl mb-3 group-hover:scale-110 transition-transform">💬</div><span class="text-sm font-semibold text-gray-700 group-hover:text-indigo-600 text-center">의사소통 보조</span><span class="text-xs text-gray-400 mt-1 text-center">소통 지원</span></div>
             <div class="flex flex-col items-center p-5 bg-slate-50 rounded-2xl hover:bg-indigo-50 hover:shadow-lg hover:shadow-indigo-100/60 hover:-translate-y-0.5 transition-all cursor-default group"><div class="text-3xl mb-3 group-hover:scale-110 transition-transform">📅</div><span class="text-sm font-semibold text-gray-700 group-hover:text-indigo-600 text-center">장기 케어</span><span class="text-xs text-gray-400 mt-1 text-center">정기적 장기 지원</span></div>
             <div class="flex flex-col items-center p-5 bg-slate-50 rounded-2xl hover:bg-indigo-50 hover:shadow-lg hover:shadow-indigo-100/60 hover:-translate-y-0.5 transition-all cursor-default group"><div class="text-3xl mb-3 group-hover:scale-110 transition-transform">🌙</div><span class="text-sm font-semibold text-gray-700 group-hover:text-indigo-600 text-center">야간 보호</span><span class="text-xs text-gray-400 mt-1 text-center">야간 상주 케어</span></div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== 이음마켓 소개 ===== -->
+<section class="py-20 lg:py-32 bg-slate-50 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+
+            <!-- Left: text -->
+            <div class="relative">
+                <div class="absolute -top-12 -left-12 w-56 h-56 bg-orange-100 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+                <div class="relative">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-orange-100 text-orange-600 text-xs font-semibold rounded-full mb-6 uppercase tracking-widest">이음마켓</div>
+                    <h2 class="flex flex-col gap-2 text-4xl sm:text-5xl font-black text-gray-900 mb-6">
+                        <span>처치곤란 장애인 용품,</span>
+                        <span><span class="text-orange-500">버리지 말고</span></span>
+                        <span>이음마켓에 올려보세요</span>
+                    </h2>
+                    <p class="text-gray-500 text-[1.05rem] leading-relaxed mb-8">
+                        성장하거나 장애 종류가 바뀌면 금방 안 쓰게 되는 보조기구, 특수 기기, 복지 용품들 — 일반 중고 플랫폼에선 수요가 없어 방치되던 물건들이 이음마켓에서는 반드시 필요한 누군가를 만납니다.
+                    </p>
+                    <ul class="space-y-5 mb-10">
+                        <li class="flex items-start gap-4">
+                            <div class="w-8 h-8 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-900 mb-0.5">자주 교체되는 장애인 보조용품</p>
+                                <p class="text-sm text-gray-500">성장·장애 변화로 수개월 만에 용도가 바뀌는 휠체어, 보조기구, 특수 침대 등을 거래하세요.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <div class="w-8 h-8 bg-teal-100 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg class="w-4 h-4 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-900 mb-0.5">판매 + 나눔 모두 가능</p>
+                                <p class="text-sm text-gray-500">비용을 회수하고 싶다면 판매로, 그냥 나누고 싶다면 나눔으로 올리면 됩니다.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <div class="w-8 h-8 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-900 mb-0.5">케어 현장을 아는 사람끼리 거래</p>
+                                <p class="text-sm text-gray-500">이음 회원 간 거래라 물건 상태와 용도를 정확히 이해합니다. 설명이 통하는 신뢰 거래.</p>
+                            </div>
+                        </li>
+                    </ul>
+                    <a th:href="@{/market}" class="inline-flex items-center gap-2.5 bg-orange-500 hover:bg-orange-600 transition-colors text-white font-bold px-7 py-4 rounded-2xl shadow-lg shadow-orange-200 active:scale-95">
+                        이음마켓 바로가기
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right: category highlights -->
+            <div class="relative">
+                <div class="absolute -bottom-8 -right-8 w-40 h-40 bg-teal-100 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+                <div class="relative grid grid-cols-2 gap-4">
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-3">
+                        <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-2xl">♿</div>
+                        <p class="font-bold text-gray-900 text-sm">이동 보조기구</p>
+                        <p class="text-xs text-gray-400 leading-relaxed">전동·수동 휠체어, 보행기, 스쿠터</p>
+                    </div>
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-3">
+                        <div class="w-12 h-12 bg-teal-50 rounded-xl flex items-center justify-center text-2xl">🛏️</div>
+                        <p class="font-bold text-gray-900 text-sm">특수 침대·가구</p>
+                        <p class="text-xs text-gray-400 leading-relaxed">전동 침대, 이동형 리프트, 욕창 매트</p>
+                    </div>
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-3">
+                        <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-2xl">👂</div>
+                        <p class="font-bold text-gray-900 text-sm">감각 보조기기</p>
+                        <p class="text-xs text-gray-400 leading-relaxed">보청기, 점자 단말기, 의사소통 기기</p>
+                    </div>
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-3">
+                        <div class="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-2xl">🪑</div>
+                        <p class="font-bold text-gray-900 text-sm">아동 특수용품</p>
+                        <p class="text-xs text-gray-400 leading-relaxed">자세 보조의자, 기립훈련기, 보조도구</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
