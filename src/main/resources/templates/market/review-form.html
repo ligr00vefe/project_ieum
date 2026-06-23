@@ -12,7 +12,17 @@
 
         <!-- 거래 상품 요약 -->
         <div class="mt-4 rounded-xl bg-slate-50 p-3 flex items-center gap-3">
-            <div class="w-12 h-12 rounded-lg bg-slate-200 flex-shrink-0 flex items-center justify-center text-slate-400 text-xs">사진</div>
+            <div class="w-12 h-12 rounded-lg bg-slate-200 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                <img th:if="${thumbnailUrl != null}"
+                     th:src="${thumbnailUrl}"
+                     th:alt="${post.title}"
+                     class="w-full h-full object-cover">
+                <svg th:unless="${thumbnailUrl != null}"
+                     class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+            </div>
             <div>
                 <p class="text-sm font-bold text-slate-800" th:text="${post.title}">상품명</p>
                 <p class="text-xs text-slate-400"
@@ -27,15 +37,19 @@
             <input type="hidden" th:if="${_csrf != null}"
                    th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
-            <!-- 별점 -->
+            <!-- 하트 평점 -->
             <div>
-                <label class="mb-2 block text-sm font-semibold">별점</label>
-                <div class="flex gap-1" id="starRating">
+                <label class="mb-2 block text-sm font-semibold">매너 평점</label>
+                <div class="flex gap-2" id="starRating">
                     <th:block th:each="i : ${#numbers.sequence(1,5)}">
                         <button type="button"
                                 th:attr="data-value=${i}"
                                 onclick="setRating(this)"
-                                class="star-btn text-3xl text-slate-200 hover:text-amber-400 transition-colors">★</button>
+                                class="star-btn transition-colors">
+                            <svg class="w-8 h-8 text-slate-200 hover:text-rose-400 transition-colors" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/>
+                            </svg>
+                        </button>
                     </th:block>
                 </div>
                 <input type="hidden" id="ratingInput" th:field="*{rating}">
@@ -84,9 +98,9 @@
 function setRating(btn) {
     const value = parseInt(btn.getAttribute('data-value'));
     document.getElementById('ratingInput').value = value;
-    document.querySelectorAll('.star-btn').forEach((star, idx) => {
-        star.classList.toggle('text-amber-400', idx < value);
-        star.classList.toggle('text-slate-200', idx >= value);
+    document.querySelectorAll('.star-btn svg').forEach((svg, idx) => {
+        svg.classList.toggle('text-rose-500', idx < value);
+        svg.classList.toggle('text-slate-200', idx >= value);
     });
 }
 const existing = document.getElementById('ratingInput').value;

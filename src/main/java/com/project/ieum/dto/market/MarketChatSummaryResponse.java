@@ -37,13 +37,18 @@ public class MarketChatSummaryResponse {
     private boolean sellerConfirmed;
     private boolean buyerConfirmed;
 
+    // 현재 사용자의 역할 (마이페이지 구매내역 필터용)
+    private boolean buyer;
+    private boolean hasReview;
+
     // ── 정적 팩토리 메서드 ──
     public static MarketChatSummaryResponse from(
             MarketChat chat,
             Long currentUserId,
             String postThumbnailUrl,
             MarketMessage lastMsg,
-            long unreadCount) {
+            long unreadCount,
+            boolean hasReview) {
 
         // 현재 사용자 기준으로 상대방 결정
         boolean isSeller = chat.getSeller().getId().equals(currentUserId);
@@ -71,6 +76,8 @@ public class MarketChatSummaryResponse {
                 .status(chat.getStatus())
                 .sellerConfirmed(chat.isSellerConfirmed())
                 .buyerConfirmed(chat.isBuyerConfirmed())
+                .buyer(!isSeller)
+                .hasReview(hasReview)
                 .build();
     }
 }
