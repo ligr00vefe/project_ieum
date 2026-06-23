@@ -4,6 +4,7 @@ import com.project.ieum.entity.User;
 import com.project.ieum.entity.UserRole;
 import com.project.ieum.entity.caregiver.CaregiverPersonalityTag;
 import com.project.ieum.entity.conversation.Conversation;
+import com.project.ieum.entity.conversation.ConversationStatus;
 import com.project.ieum.repository.CaregiverPersonalityTagRepository;
 import com.project.ieum.repository.ConversationRepository;
 import com.project.ieum.repository.ReviewRepository;
@@ -16,6 +17,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/chat")
@@ -37,10 +39,15 @@ public class ChatPageController {
     }
 
     @GetMapping("/conversations/{conversationId}")
-    public String room(@PathVariable Long conversationId, Model model) {
+    public String room(@PathVariable Long conversationId, Model model, RedirectAttributes redirectAttributes) {
         User currentUser = currentUserService.getCurrentUser();
         Conversation conversation = conversationRepository.findWithParticipantsById(conversationId)
                 .orElseThrow(() -> new IllegalArgumentException("대화방을 찾을 수 없습니다."));
+
+        if (conversation.getStatus() == ConversationStatus.CLOSED) {
+            redirectAttributes.addFlashAttribute("errorMessage", "신고 처리로 인해 종료된 채팅방입니다.");
+            return "redirect:/chat/conversations";
+        }
 
         boolean isUser = currentUser.getRole() == UserRole.USER;
         boolean isCaregiver = currentUser.getRole() == UserRole.CAREGIVER;
