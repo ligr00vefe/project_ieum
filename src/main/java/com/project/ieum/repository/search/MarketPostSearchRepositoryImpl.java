@@ -72,6 +72,11 @@ public class MarketPostSearchRepositoryImpl implements MarketPostSearchRepositor
             where.and(post.sigungu.eq(condition.getSigungu().trim()));
         }
 
+        // 나눔/판매 필터
+        if (condition.getSharing() != null) {
+            where.and(post.sharing.eq(condition.getSharing()));
+        }
+
         // 가격 범위 필터
         if (condition.getMinPrice() != null) {
             where.and(post.price.goe(condition.getMinPrice())); // goe = greater or equal (이상)
