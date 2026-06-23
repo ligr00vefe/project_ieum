@@ -60,6 +60,10 @@ public interface HelpRequestRepository extends JpaRepository<HelpRequest, Long>,
     @EntityGraph(attributePaths = {"serviceCategory", "requester"})
     Optional<HelpRequest> getHelpRequestById(Long id);
 
+    // 관리자 매칭 상세 — JPQL 명시적 JOIN FETCH로 안전하게 로딩
+    @Query("SELECT r FROM HelpRequest r LEFT JOIN FETCH r.requester LEFT JOIN FETCH r.serviceCategory WHERE r.id = :id")
+    Optional<HelpRequest> findAdminDetail(@Param("id") Long id);
+
     long countByStatus(HelpRequestStatus status);
     @Query("SELECT r FROM HelpRequest r LEFT JOIN FETCH r.requester LEFT JOIN FETCH r.serviceCategory ORDER BY r.createdAt DESC")
     List<HelpRequest> findAllByOrderByCreatedAtDesc();
