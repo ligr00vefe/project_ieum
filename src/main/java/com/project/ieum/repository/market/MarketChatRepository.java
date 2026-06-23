@@ -33,20 +33,34 @@ public interface MarketChatRepository extends JpaRepository<MarketChat, Long> {
     Optional<MarketChat> findWithDetailById(@Param("id") Long id);
 
     // 내 채팅 목록 — 판매자 또는 구매자로 참여한 채팅방, 최근 메시지 순 정렬
-    // seller.id, buyer.id: User 엔티티의 PK
+    // seller.id, buyer.id: User 엔티티의 PK — 삭제된 상품(REMOVED) 제외
     @Query(value = """
         select c from MarketChat c
         join fetch c.post p
         join fetch c.seller s
         join fetch c.buyer b
-        where s.id = :userId or b.id = :userId
+        where (s.id = :userId or b.id = :userId)
+          and p.status <> com.project.ieum.entity.market.MarketPostStatus.REMOVED
         order by c.lastMessageAt desc, c.id desc
     """,
             countQuery = """
         select count(c) from MarketChat c
-        where c.seller.id = :userId or c.buyer.id = :userId
+        where (c.seller.id = :userId or c.buyer.id = :userId)
+          and c.post.status <> com.project.ieum.entity.market.MarketPostStatus.REMOVED
     """)
     Page<MarketChat> findMyChats(@Param("userId") Long userId, Pageable pageable);
+
+    // 내가 구매자인 채팅방 목록 (마이페이지 구매내역용) — 삭제된 상품 제외
+    @Query("""
+        select c from MarketChat c
+        join fetch c.post p
+        join fetch c.seller s
+        join fetch c.buyer b
+        where b.id = :userId
+          and p.status <> com.project.ieum.entity.market.MarketPostStatus.REMOVED
+        order by c.lastMessageAt desc, c.id desc
+    """)
+    List<MarketChat> findByBuyerId(@Param("userId") Long userId);
 
     // 특정 게시글의 채팅방 수 — 관심 구매자 수 표시용 (선택 기능)
     int countByPost_Id(Long postId);
