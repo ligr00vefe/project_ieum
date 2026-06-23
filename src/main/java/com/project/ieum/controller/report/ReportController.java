@@ -26,10 +26,15 @@ public class ReportController {
     public String submit(@Valid @ModelAttribute ReportForm form,
                          BindingResult bindingResult,
                          RedirectAttributes redirectAttributes) {
-        // 신고 맥락이 대화방이면 그 방으로, 아니면 홈으로 되돌린다(오픈 리다이렉트 방지: 내부 경로만).
-        String back = (form.conversationId() != null)
-                ? "/chat/conversations/" + form.conversationId()
-                : "/";
+        // 신고 맥락에 따라 원래 채팅방으로 되돌린다(오픈 리다이렉트 방지: 내부 경로만).
+        String back;
+        if (form.conversationId() != null) {
+            back = "/chat/conversations/" + form.conversationId();
+        } else if (form.marketChatId() != null) {
+            back = "/market/chat/" + form.marketChatId();
+        } else {
+            back = "/";
+        }
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("reportError", "신고 정보를 다시 확인해 주세요.");
             return "redirect:" + back;
