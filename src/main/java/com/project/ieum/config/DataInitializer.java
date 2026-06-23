@@ -387,7 +387,7 @@ public class DataInitializer implements CommandLineRunner {
                 LocalDateTime.of(2026, 6, 20, 9, 0), LocalDateTime.of(2026, 6, 20, 12, 0),
                 "서울 강남구 언주로 211", "강남구 역삼동 강남세브란스병원", "서울특별시", "강남구", "역삼동", "06273",
                 new BigDecimal("37.500636"), new BigDecimal("127.036503"),
-                "서울 강남구 역삼동 648 역삼현대아파트", "서울 강남구 언주로 211 강남세브란스병원",
+                "서울 강남구 역삼로 175", "서울 강남구 언주로 211",
                 "휠체어 탑승 보조 필요", HelpRequestStatus.OPEN));
 
         helpRequestRepository.save(buildRequest(d02, scMap.get("SC001"),
@@ -395,7 +395,7 @@ public class DataInitializer implements CommandLineRunner {
                 LocalDateTime.of(2026, 6, 21, 14, 0), LocalDateTime.of(2026, 6, 21, 17, 0),
                 "서울 종로구 창경궁로 35", null, "서울특별시", "종로구", "혜화동", "03086",
                 new BigDecimal("37.582551"), new BigDecimal("127.001650"),
-                "서울 종로구 혜화동 혜화역 1번 출구", "서울 성북구 보문동 성신여대입구역 4번 출구",
+                "서울 종로구 창경궁로 112", "서울 성북구 보문로 168",
                 "경사로 이동 보조 가능하신 분", HelpRequestStatus.OPEN));
 
         helpRequestRepository.save(buildRequest(d03, scMap.get("SC006"),
@@ -403,7 +403,7 @@ public class DataInitializer implements CommandLineRunner {
                 LocalDateTime.of(2026, 6, 22, 13, 0), LocalDateTime.of(2026, 6, 22, 16, 0),
                 "서울 마포구 양화로 188", null, "서울특별시", "마포구", "합정동", "04033",
                 new BigDecimal("37.549200"), new BigDecimal("126.914100"),
-                "서울 마포구 합정동 합정역 8번 출구", "서울 마포구 와우산로 29나길 20 홍대입구역 9번 출구",
+                "서울 마포구 양화로 2", "서울 마포구 와우산로 29나길 20",
                 "시각 안내 경험자 우대", HelpRequestStatus.OPEN));
 
         helpRequestRepository.save(buildRequest(d04, scMap.get("SC005"),
@@ -418,7 +418,7 @@ public class DataInitializer implements CommandLineRunner {
                 LocalDateTime.of(2026, 6, 25, 8, 30), LocalDateTime.of(2026, 6, 25, 12, 0),
                 "서울 강남구 일원로 81", null, "서울특별시", "강남구", "일원동", "06351",
                 new BigDecimal("37.488400"), new BigDecimal("127.085700"),
-                "서울 강남구 개포동 개포주공5단지아파트", "서울 강남구 일원로 81 삼성서울병원",
+                "서울 강남구 개포로 227", "서울 강남구 일원로 81",
                 "전동휠체어 보조 가능하신 분", HelpRequestStatus.OPEN));
 
         helpRequestRepository.save(buildRequest(d01, scMap.get("SC001"),
@@ -426,7 +426,7 @@ public class DataInitializer implements CommandLineRunner {
                 LocalDateTime.of(2026, 6, 26, 15, 0), LocalDateTime.of(2026, 6, 26, 18, 0),
                 "서울 서초구 서초대로 77길 33", null, "서울특별시", "서초구", "서초동", "06614",
                 new BigDecimal("37.483950"), new BigDecimal("127.032500"),
-                "서울 서초구 서초동 서초역 1번 출구", "서울 서초구 강남대로 27 교대역 12번 출구",
+                "서울 서초구 강남대로 43", "서울 서초구 강남대로 27",
                 null, HelpRequestStatus.OPEN));
 
         helpRequestRepository.save(buildRequest(d02, scMap.get("SC004"),
@@ -434,7 +434,7 @@ public class DataInitializer implements CommandLineRunner {
                 LocalDateTime.of(2026, 6, 27, 10, 0), LocalDateTime.of(2026, 6, 27, 14, 0),
                 "서울 송파구 올림픽로 43길 88", null, "서울특별시", "송파구", "신천동", "05551",
                 new BigDecimal("37.513700"), new BigDecimal("127.100000"),
-                "서울 송파구 잠실동 잠실역 8번 출구", "서울 송파구 올림픽로 43길 88 서울아산병원",
+                "서울 송파구 올림픽로 240", "서울 송파구 올림픽로 43길 88",
                 null, HelpRequestStatus.OPEN));
 
         helpRequestRepository.save(buildRequest(d03, scMap.get("SC007"),
@@ -442,7 +442,7 @@ public class DataInitializer implements CommandLineRunner {
                 LocalDateTime.of(2026, 6, 28, 13, 0), LocalDateTime.of(2026, 6, 28, 15, 0),
                 "서울 용산구 한강대로 14가길 35", null, "서울특별시", "용산구", "한남동", "04418",
                 new BigDecimal("37.534605"), new BigDecimal("126.994304"),
-                "서울 용산구 한남동 한강진역 2번 출구", "서울 용산구 한남대로27길 7 한남동주민센터",
+                "서울 용산구 이태원로 249", "서울 용산구 한남대로27길 7",
                 "수어 통역 전문 자격증 소지자 우대", HelpRequestStatus.OPEN));
 
         helpRequestRepository.save(buildRequest(d04, scMap.get("SC006"),
@@ -450,7 +450,7 @@ public class DataInitializer implements CommandLineRunner {
                 LocalDateTime.of(2026, 6, 30, 11, 0), LocalDateTime.of(2026, 6, 30, 14, 0),
                 "서울 노원구 동일로 1238", null, "서울특별시", "노원구", "월계동", "01796",
                 new BigDecimal("37.617559"), new BigDecimal("127.063050"),
-                "서울 노원구 월계동 광운대역 1번 출구", "서울 노원구 동일로 1238 홈플러스 노원점",
+                "서울 노원구 화랑로 393", "서울 노원구 동일로 1238",
                 null, HelpRequestStatus.OPEN));
 
         helpRequestRepository.save(buildRequest(d05, scMap.get("SC003"),
@@ -483,7 +483,7 @@ public class DataInitializer implements CommandLineRunner {
                 LocalDateTime.of(2026, 6, 18, 10, 0), LocalDateTime.of(2026, 6, 18, 13, 0),
                 "서울 영등포구 여의공원로 68", null, "서울특별시", "영등포구", "여의도동", "07340",
                 new BigDecimal("37.521000"), new BigDecimal("126.924000"),
-                "서울 영등포구 여의도동 여의나루역 1번 출구", "서울 영등포구 여의공원로 68 여의도한강공원",
+                "서울 영등포구 여의나루로 61", "서울 영등포구 여의공원로 68",
                 null, HelpRequestStatus.MATCHED));
 
         HelpRequestApplication matchedApp = helpRequestApplicationRepository.save(HelpRequestApplication.builder()
@@ -504,7 +504,7 @@ public class DataInitializer implements CommandLineRunner {
                 "어린이대공원 근처 병원 동행", "소아 재활병원 정기 진료 동행입니다.",
                 LocalDateTime.of(2026, 6, 10, 9, 0), LocalDateTime.of(2026, 6, 10, 12, 0),
                 "서울 광진구 능동로 216", null, "서울특별시", "광진구", "능동", "05045",
-                new BigDecimal("37.546000"), new BigDecimal("127.084491"), "광진구 능동 자택", "건국대병원",
+                new BigDecimal("37.546000"), new BigDecimal("127.084491"), "서울 광진구 능동로 209", "서울 광진구 능동로 120길 4",
                 null, HelpRequestStatus.COMPLETED));
 
         HelpRequestApplication completedApp = helpRequestApplicationRepository.save(HelpRequestApplication.builder()
@@ -539,7 +539,7 @@ public class DataInitializer implements CommandLineRunner {
                 LocalDateTime.of(2026, 6, 17, 9, 0), LocalDateTime.of(2026, 6, 18, 18, 0),
                 "서울 강남구 테헤란로 7길 22", null, "서울특별시", "강남구", "역삼동", "06232",
                 new BigDecimal("37.500636"), new BigDecimal("127.036503"),
-                "서울 강남구 역삼동 역삼역 2번 출구", "서울 강남구 테헤란로 7길 22 강남구립역삼도서관",
+                "서울 강남구 테헤란로 2", "서울 강남구 테헤란로7길 22",
                 "이용자 종료확인 완료, 도우미 종료확인 대기", HelpRequestStatus.IN_PROGRESS));
 
         HelpRequestApplication inProgressApp1 = helpRequestApplicationRepository.save(HelpRequestApplication.builder()
@@ -564,7 +564,7 @@ public class DataInitializer implements CommandLineRunner {
                 LocalDateTime.of(2026, 6, 17, 10, 0), LocalDateTime.of(2026, 6, 18, 17, 0),
                 "서울 강남구 봉은사로 114", null, "서울특별시", "강남구", "삼성동", "06120",
                 new BigDecimal("37.513200"), new BigDecimal("127.062800"),
-                "서울 강남구 삼성동 한티역 2번 출구", "서울 강남구 봉은사로 114 강남정형외과의원",
+                "서울 강남구 봉은사로 417", "서울 강남구 봉은사로 114",
                 "도우미 종료확인 완료, 이용자 종료확인 대기", HelpRequestStatus.IN_PROGRESS));
 
         HelpRequestApplication inProgressApp2 = helpRequestApplicationRepository.save(HelpRequestApplication.builder()
