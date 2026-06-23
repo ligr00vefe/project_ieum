@@ -183,9 +183,8 @@ public class MarketPostService {
     @Transactional(readOnly = true)
     public List<MarketPost> getMyPosts() {
         User currentUser = currentUserService.getCurrentUser();
-        // REMOVED 상태 제외하고 조회
-        return marketPostRepository.findBySellerAndStatusNotOrderByCreatedAtDesc(
-                currentUser, MarketPostStatus.REMOVED);
+        return marketPostRepository.findBySellerAndStatusNotInOrderByCreatedAtDesc(
+                currentUser, java.util.List.of(MarketPostStatus.REMOVED, MarketPostStatus.SOLD));
     }
 
     // ── 카테고리 목록 조회 (등록 폼에서 드롭다운용) ──

@@ -25,12 +25,10 @@ public interface MarketPostRepository extends JpaRepository<MarketPost, Long>,
     @EntityGraph(attributePaths = {"seller", "category"})
     Optional<MarketPost> findWithDetailById(Long id);
 
-    // 내가 등록한 게시글 목록 — REMOVED 제외, 최신순
-    // findBySeller: seller 필드로 조회
-    // AndStatusNot: status가 특정 값이 아닌 것
+    // 내가 등록한 게시글 목록 — REMOVED·SOLD 제외, 최신순
     @EntityGraph(attributePaths = {"category"})
-    List<MarketPost> findBySellerAndStatusNotOrderByCreatedAtDesc(
-            User seller, MarketPostStatus status);  // status에 REMOVED 전달
+    List<MarketPost> findBySellerAndStatusNotInOrderByCreatedAtDesc(
+            User seller, java.util.Collection<MarketPostStatus> statuses);
 
     // 내가 구매 채팅한 게시글 목록은 MarketChatRepository에서 조회 (buyer_id 기준)
 
