@@ -21,6 +21,7 @@ import com.project.ieum.repository.ServiceCategoryRepository;
 import com.project.ieum.repository.UserProfileRepository;
 import com.project.ieum.service.common.CurrentUserService;
 import com.project.ieum.service.geocoding.GeocodingService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.ObjectProvider;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -36,6 +38,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,9 +74,17 @@ class HelpRequestServiceTest {
     private CurrentUserService currentUserService;
     @Mock
     private GeocodingService geocodingService;
+    @Mock
+    private ObjectProvider<HelpRequestService> selfProvider;
 
     @InjectMocks
     private HelpRequestService helpRequestService;
+
+    @BeforeEach
+    void setUpSelfProxy() {
+        // (#68) create()는 self 프록시로 persistCreated를 호출한다 — 단위테스트에선 self가 자기 자신을 반환하도록 stub.
+        lenient().when(selfProvider.getObject()).thenReturn(helpRequestService);
+    }
 
     @Nested
     @DisplayName("작성(create)")
