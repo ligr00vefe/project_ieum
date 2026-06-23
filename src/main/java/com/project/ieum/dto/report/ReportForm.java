@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Size;
 public record ReportForm(
         @NotNull Long targetUserId,
         Long conversationId,
+        Long marketChatId,
         @NotNull ReportReason reason,
         @Size(max = 1000, message = "상세 사유는 1000자 이내로 입력해 주세요.") String detail
 ) {}

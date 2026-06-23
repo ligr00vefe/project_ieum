@@ -26,8 +26,10 @@ public class AdminReportController {
     private final ReportService reportService;
 
     @GetMapping
-    public String list(@RequestParam(defaultValue = "0") int page, Model model) {
-        var reportPage = reportService.getReports(PageRequest.of(page, 10));
+    public String list(@RequestParam(defaultValue = "0") int page,
+                       @RequestParam(defaultValue = "all") String type,
+                       Model model) {
+        var reportPage = reportService.getReportsByType(type, PageRequest.of(page, 10));
         model.addAttribute("reports", reportPage.getContent());
         model.addAttribute("reportStatuses", ReportStatus.values());
         model.addAttribute("currentPage", page);
@@ -36,6 +38,7 @@ public class AdminReportController {
         model.addAttribute("endPage", Math.min(reportPage.getTotalPages() - 1, page + 2));
         model.addAttribute("activeMenu", "reports");
         model.addAttribute("title", "신고 관리");
+        model.addAttribute("activeType", type);
         return "admin/reports/list";
     }
 

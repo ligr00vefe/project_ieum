@@ -54,9 +54,13 @@ public class Report extends BasicEntity {
     @Builder.Default
     private ReportStatus status = ReportStatus.RECEIVED;
 
-    // 신고 맥락(대화방 id). 프로필에서의 신고 등 맥락이 없으면 null.
+    // 신고 맥락(매칭 대화방 id). 프로필에서의 신고 등 맥락이 없으면 null.
     @Column(name = "conversation_id")
     private Long conversationId;
+
+    // 신고 맥락(마켓 채팅방 id). 마켓 채팅 신고 시 채워진다.
+    @Column(name = "market_chat_id")
+    private Long marketChatId;
 
     public void changeStatus(ReportStatus status) {
         this.status = status;
