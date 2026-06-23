@@ -28,10 +28,12 @@ import com.project.ieum.service.common.CurrentUserService;
 import com.project.ieum.service.geocoding.GeoPoint;
 import com.project.ieum.service.geocoding.GeocodingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -60,8 +62,20 @@ public class HelpRequestService {
     private final ReviewRepository reviewRepository;
     private final CurrentUserService currentUserService;
     private final GeocodingService geocodingService;
+    // (#68) 트랜잭션 경계 분리용 self 프록시 — geocode(외부 HTTP)를 트랜잭션 밖에서 수행하기 위함.
+    private final ObjectProvider<HelpRequestService> selfProvider;
 
+    // (#68) 지오코딩(외부 HTTP)은 DB 커넥션을 잡지 않도록 트랜잭션 "밖"에서 먼저 수행하고, 좌표를 영속 메서드에
+    // 인자로 전달한다. self 프록시로 호출해야 persistCreated의 트랜잭션이 적용된다(같은 빈 직접 호출은 프록시 미적용).
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public HelpRequest create(HelpRequestForm form) {
+        GeoPoint geoPoint = geocodingService.geocode(form.getRoadAddress()).orElse(null);
+        return selfProvider.getObject().persistCreated(form, geoPoint);
+    }
+
+    // 트랜잭션 경계 — 겹침검사(검사-삽입 원자성)와 저장을 한 트랜잭션에 묶는다. 좌표는 트랜잭션 밖에서 받은 값.
+    @Transactional
+    public HelpRequest persistCreated(HelpRequestForm form, GeoPoint geoPoint) {
         User currentUser = requireRole(UserRole.USER);
         UserProfile requester = userProfileRepository.findById(currentUser.getId())
                 .orElseThrow(() -> new NotFoundException("이용자 프로필을 찾을 수 없습니다."));
@@ -76,10 +90,7 @@ public class HelpRequestService {
             throw new RequestTimeConflictException();
         }
 
-        // 위치 스냅샷 좌표는 생성 시점에 1회만 채운다(write-once). 주소검색 위젯은 좌표를 주지 않으므로
-        // 도로명주소를 지오코딩해 보강한다. 좌표는 발견/정렬용이라 미확보(null)여도 생성은 막지 않는다.
-        GeoPoint geoPoint = geocodingService.geocode(form.getRoadAddress()).orElse(null);
-
+        // 위치 스냅샷 좌표는 생성 시점에 1회만 채운다(write-once). 좌표는 발견/정렬용이라 미확보(null)여도 막지 않는다.
         // status는 지정하지 않는다 — 엔티티 @Builder.Default = OPEN 이 생성 시 고정값을 보장(누락 방지).
         HelpRequest helpRequest = HelpRequest.builder()
                 .requester(requester)
@@ -263,6 +274,14 @@ public class HelpRequestService {
                                                 Double lat, Double lng) {
         condition.setStatus(HelpRequestStatus.OPEN);
         return helpRequestRepository.searchHelpRequests(condition, pageable, lat, lng);
+    }
+
+    // 이용자 둘러보기 보드 — 남의 OPEN + 내 모든 상태(최신순). 키워드/서비스 카테고리 필터는 재사용, 거리정렬 없음.
+    @Transactional(readOnly = true)
+    public Page<HelpRequest> searchBoardForUser(HelpRequestSearchCondition condition, Pageable pageable) {
+        User me = requireRole(UserRole.USER);
+        condition.setOwnerScopeUserId(me.getId());
+        return helpRequestRepository.searchHelpRequests(condition, pageable, null, null);
     }
 
     // 게시판 지역 필터 옵션 — 모집중 요청에 존재하는 시/도 → [시군구...] 맵(드롭다운 cascade용, 입력 순서 보존).
