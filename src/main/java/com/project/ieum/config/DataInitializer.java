@@ -275,12 +275,12 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void initDummyDisabledUsers() {
-        record DummyUser(String email, String fullName, Gender gender, LocalDate birth, String phone, String dt) {}
+        record DummyUser(String email, String fullName, Gender gender, LocalDate birth, String phone, String dt, String guardianName, String guardianPhone) {}
         List<DummyUser> users = List.of(
-                new DummyUser("d02@test.com", "박민준", Gender.M, LocalDate.of(1988, 3, 15), "010-1111-1001", "DT001"),
-                new DummyUser("d03@test.com", "이수진", Gender.F, LocalDate.of(1995, 7, 22), "010-1111-1002", "DT002"),
-                new DummyUser("d04@test.com", "최재원", Gender.M, LocalDate.of(1979, 11, 8), "010-1111-1003", "DT007"),
-                new DummyUser("d05@test.com", "김지은", Gender.F, LocalDate.of(1993, 4, 30), "010-1111-1004", "DT001")
+                new DummyUser("d02@test.com", "박민준", Gender.M, LocalDate.of(1988, 3, 15), "010-1111-1001", "DT001", "박보호자", "010-9001-1001"),
+                new DummyUser("d03@test.com", "이수진", Gender.F, LocalDate.of(1995, 7, 22), "010-1111-1002", "DT002", "이보호자", "010-9001-1002"),
+                new DummyUser("d04@test.com", "최재원", Gender.M, LocalDate.of(1979, 11, 8), "010-1111-1003", "DT007", "최보호자", "010-9001-1003"),
+                new DummyUser("d05@test.com", "김지은", Gender.F, LocalDate.of(1993, 4, 30), "010-1111-1004", "DT001", "김보호자", "010-9001-1004")
         );
 
         for (DummyUser du : users) {
@@ -299,6 +299,8 @@ public class DataInitializer implements CommandLineRunner {
                     .fullName(du.fullName())
                     .birthDate(du.birth())
                     .gender(du.gender())
+                    .guardianName(du.guardianName())
+                    .guardianPhone(du.guardianPhone())
                     .build());
 
             disabilityTypeRepository.findAllByOrderBySortOrderAsc().stream()

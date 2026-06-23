@@ -33,22 +33,22 @@
                 상품 보기 →
             </a>
 
-            <!-- 거래 확정 버튼 -->
+            <!-- 거래 확정 버튼 (판매자 전용) -->
             <div class="mt-auto pt-4 border-t border-slate-100">
-                <div th:if="${!isBothConfirmed}">
-                    <p class="text-xs text-slate-400 mb-2 text-center">
-                        거래가 완료되었나요?<br>
-                        <span th:if="${isSeller and sellerConfirmed}" class="text-green-600 font-semibold">나: 확정 ✓</span>
-                        <span th:if="${!isSeller and buyerConfirmed}" class="text-green-600 font-semibold">나: 확정 ✓</span>
-                    </p>
-                    <button id="confirmBtn"
-                            th:disabled="${(isSeller and sellerConfirmed) or (!isSeller and buyerConfirmed)}"
-                            onclick="confirmPurchase()"
-                            class="w-full rounded-xl bg-orange-500 py-2.5 text-sm font-bold text-white hover:bg-orange-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                        거래완료
-                    </button>
+                <div th:if="${!sellerConfirmed}">
+                    <th:block th:if="${isSeller}">
+                        <p class="text-xs text-slate-400 mb-2 text-center">거래가 완료되었나요?</p>
+                        <button id="confirmBtn"
+                                onclick="confirmPurchase()"
+                                class="w-full rounded-xl bg-orange-500 py-2.5 text-sm font-bold text-white hover:bg-orange-600 transition-all">
+                            거래완료
+                        </button>
+                    </th:block>
+                    <th:block th:if="${!isSeller}">
+                        <p class="text-xs text-slate-400 text-center">판매자가 거래완료 처리하면<br>후기를 작성할 수 있어요.</p>
+                    </th:block>
                 </div>
-                <div th:if="${isBothConfirmed}">
+                <div th:if="${sellerConfirmed}">
                     <p class="text-center text-sm font-bold text-green-600 mb-2">🎉 거래 완료!</p>
                     <a th:if="${!isSeller}"
                        th:href="@{/market/review/{id}/new(id=${chatId})}"
