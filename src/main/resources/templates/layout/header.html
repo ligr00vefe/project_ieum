@@ -35,6 +35,11 @@
                        class="px-3.5 py-2 text-sm font-medium rounded-lg transition-all">
                         문의
                     </a>
+                    <a th:href="@{/market}"
+                       th:classappend="${currentUri.startsWith('/market')} ? 'text-orange-500 bg-orange-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                       class="px-3.5 py-2 text-sm font-medium rounded-lg transition-all">
+                        이음마켓
+                    </a>
                 </nav>
 
                 <!-- Auth Buttons -->
@@ -132,6 +137,7 @@
                 <a th:href="@{/board}"         class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">매칭게시판</a>
 <a th:href="@{/safe-meeting}"  class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">첫만남 안심가이드</a>
                 <a th:href="@{/inquiries}"     class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">문의</a>
+                <a th:href="@{/market}" class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition-all">이음마켓</a>
                 <div class="pt-3 mt-3 border-t border-gray-100 space-y-2">
                     <!-- 비로그인 -->
                     <th:block th:if="${!isAuthenticated}">

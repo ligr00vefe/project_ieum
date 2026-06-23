@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('채팅 - 이음마켓')}"></head>
+<body class="min-h-screen bg-[#f6f7ff] text-slate-900">
+<div th:replace="~{layout/header :: header}"></div>
+
+<main class="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
+    <div class="flex gap-5" style="height: calc(100vh - 160px); min-height: 600px;">
+
+        <!-- 왼쪽: 거래 상품 정보 패널 -->
+        <div class="hidden lg:flex w-64 flex-shrink-0 flex-col bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+            <div class="w-full aspect-square rounded-xl overflow-hidden bg-slate-100 mb-4">
+                <img th:if="${postThumbnail != null}" th:src="${postThumbnail}"
+                     th:alt="${post.title}" class="w-full h-full object-cover">
+                <div th:if="${postThumbnail == null}"
+                     class="w-full h-full flex items-center justify-center text-slate-300">
+                    <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"/>
+                    </svg>
+                </div>
+            </div>
+            <p class="font-bold text-slate-900 line-clamp-2 text-sm" th:text="${post.title}">상품명</p>
+            <p class="mt-1 text-base font-bold text-orange-500"
+               th:text="${#numbers.formatInteger(post.price, 1, 'COMMA') + '원'}">10,000원</p>
+            <span class="mt-1.5 inline-block rounded-lg px-2 py-0.5 text-xs font-bold w-fit"
+                  th:text="${post.status.name() == 'ACTIVE'} ? '판매중' : (${post.status.name() == 'RESERVED'} ? '예약중' : '판매완료')"
+                  th:classappend="${post.status.name() == 'ACTIVE'} ? 'bg-green-100 text-green-700'
+                                : (${post.status.name() == 'RESERVED'} ? 'bg-amber-100 text-amber-700'
+                                : 'bg-slate-100 text-slate-500')">판매중</span>
+            <a th:href="@{/market/{id}(id=${post.id})}"
+               class="mt-2 text-xs text-slate-400 hover:text-orange-500 transition-colors">
+                상품 보기 →
+            </a>
+
+            <!-- 거래 확정 버튼 -->
+            <div class="mt-auto pt-4 border-t border-slate-100">
+                <div th:if="${!isBothConfirmed}">
+                    <p class="text-xs text-slate-400 mb-2 text-center">
+                        거래가 완료되었나요?<br>
+                        <span th:if="${isSeller and sellerConfirmed}" class="text-green-600 font-semibold">나: 확정 ✓</span>
+                        <span th:if="${!isSeller and buyerConfirmed}" class="text-green-600 font-semibold">나: 확정 ✓</span>
+                    </p>
+                    <button id="confirmBtn"
+                            th:disabled="${(isSeller and sellerConfirmed) or (!isSeller and buyerConfirmed)}"
+                            onclick="confirmPurchase()"
+                            class="w-full rounded-xl bg-orange-500 py-2.5 text-sm font-bold text-white hover:bg-orange-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        거래완료
+                    </button>
+                </div>
+                <div th:if="${isBothConfirmed}">
+                    <p class="text-center text-sm font-bold text-green-600 mb-2">🎉 거래 완료!</p>
+                    <a th:if="${!isSeller}"
+                       th:href="@{/market/review/{id}/new(id=${chatId})}"
+                       class="block w-full rounded-xl border border-orange-300 py-2.5 text-center text-sm font-semibold text-orange-500 hover:bg-orange-50 transition-all">
+                        후기 작성하기
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 오른쪽: 채팅 영역 -->
+        <div class="flex-1 flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+
+            <!-- 모바일 전용: 상품 정보 띠 (lg에서는 왼쪽 패널이 대신함) -->
+            <a th:href="@{/market/{id}(id=${post.id})}"
+               class="lg:hidden flex items-center gap-3 px-4 py-3 bg-orange-50 border-b border-orange-100 hover:bg-orange-100 transition-colors">
+                <div class="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0 flex items-center justify-center text-slate-300">
+                    <img th:if="${postThumbnail != null}" th:src="${postThumbnail}" th:alt="${post.title}"
+                         class="w-full h-full object-cover">
+                    <svg th:unless="${postThumbnail != null}" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"/>
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-semibold text-slate-800 truncate" th:text="${post.title}">상품명</p>
+                    <p class="text-sm font-bold text-orange-500"
+                       th:text="${#numbers.formatInteger(post.price, 1, 'COMMA') + '원'}">10,000원</p>
+                </div>
+                <span class="text-[11px] rounded-full px-2 py-0.5 font-bold flex-shrink-0"
+                      th:text="${post.status.name() == 'ACTIVE'} ? '판매중' : (${post.status.name() == 'RESERVED'} ? '예약중' : '판매완료')"
+                      th:classappend="${post.status.name() == 'ACTIVE'} ? 'bg-green-100 text-green-700'
+                                    : (${post.status.name() == 'RESERVED'} ? 'bg-amber-100 text-amber-700'
+                                    : 'bg-slate-100 text-slate-500')">판매중</span>
+            </a>
+
+            <!-- 채팅 헤더 -->
+            <div class="flex-shrink-0 flex items-center gap-3 px-5 py-4 border-b border-slate-100">
+                <a th:href="@{/market/chats}"
+                   class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-all">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 font-bold flex-shrink-0"
+                     th:text="${opponentEmail.substring(0,1).toUpperCase()}">A</div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-slate-900" th:text="${opponentEmail}">상대방</p>
+                    <p class="text-xs text-slate-400" th:text="${isSeller} ? '구매 희망자' : '판매자'">구매 희망자</p>
+                </div>
+            </div>
+
+            <!-- 메시지 영역 -->
+            <div id="chatMessages" class="flex-1 overflow-y-auto space-y-4 px-5 py-4">
+                <div id="loadingSpinner" class="flex justify-center py-8">
+                    <div class="w-6 h-6 border-2 border-orange-300 border-t-orange-500 rounded-full animate-spin"></div>
+                </div>
+            </div>
+
+            <!-- 입력창 -->
+            <div class="flex-shrink-0 px-5 py-4 border-t border-slate-100">
+                <div class="flex items-center gap-3">
+                    <input id="messageInput" type="text"
+                           placeholder="메시지를 입력해주세요"
+                           onkeydown="handleKeydown(event)"
+                           class="flex-1 text-sm bg-slate-50 border border-slate-200 rounded-full px-5 py-3 focus:outline-none focus:border-orange-300 focus:bg-white transition-all">
+                    <button onclick="sendMessage()"
+                            class="flex-shrink-0 px-5 py-3 bg-orange-500 text-white text-sm font-bold rounded-full hover:bg-orange-600 transition-all">
+                        전송 →
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script th:inline="javascript">
+const CHAT_ID     = /*[[${chatId}]]*/ 0;
+const OPPONENT_ID = /*[[${opponentId}]]*/ 0;
+
+let stompClient = null;
+const renderedMessageIds = new Set();
+let lastRenderedDate = null;
+
+function connectStomp() {
+    const socket = new SockJS('/ws');
+    stompClient = Stomp.over(socket);
+    stompClient.debug = null;
+    stompClient.connect({}, () => {
+        stompClient.subscribe('/topic/market/' + CHAT_ID, msg => {
+            const received = JSON.parse(msg.body);
+            received.mine = String(received.senderId) !== String(OPPONENT_ID);
+            appendMessage(received);
+            markRead();
+        });
+    }, () => setTimeout(connectStomp, 3000));
+}
+
+function fmt(dateStr) {
+    return new Date(dateStr).toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'});
+}
+function fmtDate(dateStr) {
+    return new Date(dateStr).toLocaleDateString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric'});
+}
+
+function buildMessage(msg) {
+    const time = fmt(msg.sentAt);
+    const escaped = msg.body.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    if (msg.mine) {
+        return `<div class="flex items-end gap-2 flex-row-reverse">
+            <div class="max-w-[70%]">
+                <div class="bg-orange-500 rounded-2xl rounded-br-md px-4 py-3 shadow-sm">
+                    <p class="text-sm text-white">${escaped}</p>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1 mr-1 text-right">${time}</p>
+            </div>
+        </div>`;
+    }
+    return `<div class="flex items-end gap-2">
+        <div class="w-8 h-8 rounded-full bg-orange-100 text-orange-500 text-sm font-bold flex items-center justify-center flex-shrink-0">A</div>
+        <div class="max-w-[70%]">
+            <div class="bg-slate-50 border border-slate-100 rounded-2xl rounded-bl-md px-4 py-3">
+                <p class="text-sm text-slate-800">${escaped}</p>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-1 ml-1">${time}</p>
+        </div>
+    </div>`;
+}
+
+function buildDateDivider(label) {
+    return `<div class="flex items-center gap-3 my-2">
+        <div class="flex-1 h-px bg-slate-100"></div>
+        <span class="text-xs text-slate-400 font-medium">${label}</span>
+        <div class="flex-1 h-px bg-slate-100"></div>
+    </div>`;
+}
+
+async function loadMessages() {
+    try {
+        const res = await fetch(`/api/market/chat/${CHAT_ID}/messages?page=0&size=100&sort=sentAt,asc`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const messages = (data.content || []).reverse();
+        const box = document.getElementById('chatMessages');
+        lastRenderedDate = null;
+        renderedMessageIds.clear();
+        let html = '';
+        const today = new Date().toDateString();
+        const yesterday = new Date(Date.now() - 86400000).toDateString();
+        for (const msg of messages) {
+            const msgDate = new Date(msg.sentAt).toDateString();
+            if (msgDate !== lastRenderedDate) {
+                const label = msgDate === today ? '오늘' : msgDate === yesterday ? '어제' : fmtDate(msg.sentAt);
+                html += buildDateDivider(label);
+                lastRenderedDate = msgDate;
+            }
+            html += buildMessage(msg);
+            if (msg.id != null) renderedMessageIds.add(msg.id);
+        }
+        if (!messages.length) html = `<div class="flex justify-center py-8"><p class="text-sm text-slate-400">첫 메시지를 보내보세요!</p></div>`;
+        box.innerHTML = html;
+        box.scrollTop = box.scrollHeight;
+    } catch(e) { console.error(e); }
+}
+
+async function markRead() {
+    try {
+        await fetch(`/api/market/chat/${CHAT_ID}/read`, {
+            method: 'POST',
+            headers: { 'X-XSRF-TOKEN': getCsrfToken() }
+        });
+    } catch(e) {}
+}
+
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="_csrf"]');
+    return meta ? meta.getAttribute('content') : '';
+}
+
+async function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    input.disabled = true;
+    try {
+        const res = await fetch(`/api/market/chat/${CHAT_ID}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
+            body: JSON.stringify({ body: text })
+        });
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            alert(err.message || '전송 실패');
+            input.value = text;
+            return;
+        }
+        const msg = await res.json();
+        appendMessage(msg);
+    } catch(e) {
+        alert('전송 실패');
+        input.value = text;
+    } finally {
+        input.disabled = false;
+        input.focus();
+    }
+}
+
+function appendMessage(msg) {
+    if (msg.id != null) {
+        if (renderedMessageIds.has(msg.id)) return;
+        renderedMessageIds.add(msg.id);
+    }
+    const box = document.getElementById('chatMessages');
+    const msgDate = new Date(msg.sentAt).toDateString();
+    let html = '';
+    if (msgDate !== lastRenderedDate) {
+        html += buildDateDivider(msgDate === new Date().toDateString() ? '오늘' : fmtDate(msg.sentAt));
+        lastRenderedDate = msgDate;
+    }
+    html += buildMessage(msg);
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    while (tmp.firstChild) box.appendChild(tmp.firstChild);
+    box.scrollTop = box.scrollHeight;
+}
+
+function handleKeydown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+async function confirmPurchase() {
+    if (!confirm('거래완료로 처리하시겠습니까?\n상대방도 확정하면 자동으로 판매완료 처리됩니다.')) return;
+    const btn = document.getElementById('confirmBtn');
+    btn.disabled = true;
+    try {
+        const res = await fetch(`/api/market/chat/${CHAT_ID}/confirm`, {
+            method: 'POST',
+            headers: { 'X-XSRF-TOKEN': getCsrfToken() }
+        });
+        if (res.ok) {
+            btn.textContent = '확정 완료 ✓';
+            btn.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+            btn.classList.add('bg-green-500');
+        }
+    } catch(e) {
+        btn.disabled = false;
+        alert('오류가 발생했습니다.');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    document.getElementById('loadingSpinner')?.remove();
+    await loadMessages();
+    await markRead();
+    connectStomp();
+    setInterval(async () => { await loadMessages(); await markRead(); }, 5000);
+});
+</script>
+</body>
+</html>
