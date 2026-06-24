@@ -118,6 +118,65 @@ public class HelpRequestService {
         return saved;
     }
 
+    // OPEN 상태 요청 수정 — 지원자가 있으면 수정 불가(신뢰성 보호).
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void update(Long requestId, HelpRequestForm form) {
+        GeoPoint geoPoint = geocodingService.geocode(form.getRoadAddress()).orElse(null);
+        selfProvider.getObject().persistUpdated(requestId, form, geoPoint);
+    }
+
+    @Transactional
+    public void persistUpdated(Long requestId, HelpRequestForm form, GeoPoint geoPoint) {
+        User currentUser = requireRole(UserRole.USER);
+        HelpRequest helpRequest = getOwnedRequest(requestId, currentUser.getId());
+        if (helpRequest.getStatus() != HelpRequestStatus.OPEN) {
+            throw InvalidRequestStateException.cannotClose();
+        }
+        boolean hasApplicants = applicationRepository
+                .findByHelpRequest_IdOrderByCreatedAtDesc(requestId).stream()
+                .anyMatch(a -> a.getStatus() == ApplicationStatus.PENDING);
+        if (hasApplicants) {
+            throw new BadRequestException("이미 지원자가 있어 수정할 수 없습니다. 마감 후 재작성해 주세요.");
+        }
+        ServiceCategory category = getServiceCategory(form.getServiceCategoryId());
+        helpRequest.updateDetails(
+                form.getTitle(), form.getBody(),
+                form.getDesiredStartDatetime(), form.getDesiredEndDatetime(),
+                form.getRoadAddress(), form.getAddressDetail(),
+                form.getSido(), form.getSigungu(), form.getBname(), form.getZonecode(), form.getBcode(),
+                geoPoint != null ? geoPoint.latitude() : null,
+                geoPoint != null ? geoPoint.longitude() : null,
+                form.getDepartureAddress(), form.getDestinationAddress(), form.getSpecialNotes(),
+                category);
+        replaceTags(helpRequest, form.getPersonalityTagIds());
+    }
+
+    @Transactional(readOnly = true)
+    public HelpRequestForm buildEditForm(Long requestId) {
+        User currentUser = requireRole(UserRole.USER);
+        HelpRequest source = getOwnedRequest(requestId, currentUser.getId());
+        HelpRequestForm form = new HelpRequestForm();
+        form.setTitle(source.getTitle());
+        form.setBody(source.getBody());
+        form.setServiceCategoryId(source.getServiceCategory().getId());
+        form.setDesiredStartDatetime(source.getDesiredStartDatetime());
+        form.setDesiredEndDatetime(source.getDesiredEndDatetime());
+        form.setRoadAddress(source.getRoadAddress());
+        form.setAddressDetail(source.getAddressDetail());
+        form.setSido(source.getSido());
+        form.setSigungu(source.getSigungu());
+        form.setBname(source.getBname());
+        form.setZonecode(source.getZonecode());
+        form.setBcode(source.getBcode());
+        form.setDepartureAddress(source.getDepartureAddress());
+        form.setDestinationAddress(source.getDestinationAddress());
+        form.setSpecialNotes(source.getSpecialNotes());
+        form.setPersonalityTagIds(
+                helpRequestPersonalityTagRepository.findByHelpRequest_Id(requestId).stream()
+                        .map(t -> t.getTag().getId()).toList());
+        return form;
+    }
+
     // (이슈 #8 정본) update()/toForm() 제거: HelpRequest는 write-once.
     // 도우미가 본 내용/시간/위치가 지원 후 바뀌면 신뢰성이 깨지므로 생성 후 본문 수정을 막는다.
     // 변경이 필요하면 마감(cancel→CLOSED) 후 새로 작성한다.
