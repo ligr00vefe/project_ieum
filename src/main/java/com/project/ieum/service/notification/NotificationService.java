@@ -48,4 +48,13 @@ public class NotificationService {
         User currentUser = currentUserService.getCurrentUser();
         return notificationRepository.markAllRead(currentUser.getId());
     }
+
+    public void markRead(Long notificationId) {
+        User currentUser = currentUserService.getCurrentUser();
+        notificationRepository.findById(notificationId).ifPresent(n -> {
+            if (n.getReceiver().getId().equals(currentUser.getId())) {
+                n.markRead();
+            }
+        });
+    }
 }

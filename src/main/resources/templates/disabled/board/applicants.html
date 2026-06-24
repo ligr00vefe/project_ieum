@@ -44,7 +44,19 @@
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between mb-1.5">
                         <div class="flex items-center gap-2">
-                            <p class="text-base font-bold text-gray-900" th:text="${application.caregiver.fullName}">이름</p>
+                            <button type="button"
+                                    class="text-base font-bold text-gray-900 hover:text-indigo-600 transition-colors underline-offset-2 hover:underline"
+                                    th:attr="data-appl-id=${application.id},
+                                             data-name=${application.caregiver.fullName},
+                                             data-intro=${application.caregiver.introLong},
+                                             data-short=${application.caregiver.introShort},
+                                             data-rating=${application.caregiver.avgRating},
+                                             data-reviews=${application.caregiver.totalReviews},
+                                             data-experience=${application.caregiver.experience},
+                                             data-cert=${application.caregiver.certificationType},
+                                             data-img=${application.caregiver.profileImageUrl}"
+                                    onclick="openProfileModal(this)"
+                                    th:text="${application.caregiver.fullName}">이름</button>
                             <span class="px-2 py-0.5 bg-teal-50 text-teal-600 text-xs font-medium rounded-full">활동지원사</span>
                             <span th:if="${application.status.name() == 'ACCEPTED'}"
                                   class="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-xs font-medium rounded-full">수락됨</span>
@@ -85,5 +97,87 @@
     </div>
 
 </section>
+
+<!-- Caregiver profile modal -->
+<div id="profileModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeProfileModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6 z-10">
+        <button onclick="closeProfileModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <div class="flex items-center gap-4 mb-4">
+            <div id="modal-avatar" class="relative w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 font-bold text-xl flex-shrink-0 overflow-hidden"></div>
+            <div>
+                <h2 id="modal-name" class="text-lg font-bold text-gray-900"></h2>
+                <span class="px-2 py-0.5 bg-teal-50 text-teal-600 text-xs font-medium rounded-full">활동지원사</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-4 mb-4 text-sm text-gray-500">
+            <span id="modal-rating" class="flex items-center gap-1">
+                <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <span id="modal-rating-val">-</span>
+            </span>
+            <span id="modal-reviews"></span>
+            <span id="modal-experience"></span>
+        </div>
+        <div id="modal-cert" class="mb-4 hidden">
+            <span class="px-2 py-1 bg-gray-50 text-gray-500 text-xs rounded-lg" id="modal-cert-text"></span>
+        </div>
+        <div id="modal-short" class="text-sm text-gray-500 mb-3"></div>
+        <div id="modal-intro" class="text-sm text-gray-700 leading-relaxed whitespace-pre-line border-t border-gray-100 pt-3 max-h-48 overflow-y-auto"></div>
+    </div>
+</div>
+
+<script>
+function openProfileModal(btn) {
+    var name = btn.dataset.name || '';
+    var intro = btn.dataset.intro || '';
+    var short = btn.dataset.short || '';
+    var rating = parseFloat(btn.dataset.rating);
+    var reviews = parseInt(btn.dataset.reviews, 10);
+    var experience = btn.dataset.experience || '';
+    var cert = btn.dataset.cert || '';
+    var img = btn.dataset.img || '';
+
+    var avatar = document.getElementById('modal-avatar');
+    avatar.innerHTML = '';
+    if (img && img !== 'null') {
+        var imgEl = document.createElement('img');
+        imgEl.src = img;
+        imgEl.className = 'w-full h-full object-cover';
+        imgEl.onerror = function() { avatar.innerHTML = name.charAt(0); };
+        avatar.appendChild(imgEl);
+    } else {
+        avatar.textContent = name.charAt(0);
+    }
+
+    document.getElementById('modal-name').textContent = name;
+    document.getElementById('modal-rating-val').textContent = isNaN(rating) ? '-' : rating.toFixed(1);
+    document.getElementById('modal-reviews').textContent = isNaN(reviews) || reviews === 0 ? '' : '리뷰 ' + reviews + '건';
+    document.getElementById('modal-experience').textContent = experience && experience !== 'null' ? '경력 ' + experience : '';
+    document.getElementById('modal-short').textContent = short && short !== 'null' ? short : '';
+    document.getElementById('modal-intro').textContent = intro && intro !== 'null' ? intro : '';
+
+    var certEl = document.getElementById('modal-cert');
+    if (cert && cert !== 'null') {
+        document.getElementById('modal-cert-text').textContent = cert;
+        certEl.classList.remove('hidden');
+    } else {
+        certEl.classList.add('hidden');
+    }
+
+    document.getElementById('profileModal').classList.remove('hidden');
+    document.getElementById('profileModal').classList.add('flex');
+}
+
+function closeProfileModal() {
+    document.getElementById('profileModal').classList.add('hidden');
+    document.getElementById('profileModal').classList.remove('flex');
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeProfileModal();
+});
+</script>
 </th:block>
 </html>

@@ -253,10 +253,24 @@
                         }
                         list.innerHTML = d.content.map(function (n) {
                             var unread = n.hasRead ? '' : 'bg-indigo-50/40';
-                            return '<a href="' + (n.url || '#') + '" class="block px-4 py-3 hover:bg-gray-50 ' + unread + '">'
-                                + '<p class="text-xs font-semibold text-gray-800">' + escapeHtml(n.title) + '</p>'
-                                + '<p class="text-xs text-gray-500 mt-0.5">' + escapeHtml(n.content) + '</p></a>';
+                            var dot = n.hasRead ? '' : '<span class="w-1.5 h-1.5 bg-indigo-500 rounded-full flex-shrink-0 mt-1"></span>';
+                            return '<button type="button" data-notif-id="' + n.id + '" data-notif-url="' + escapeHtml(n.url || '') + '"'
+                                + ' class="w-full text-left px-4 py-3 hover:bg-gray-50 ' + unread + ' flex items-start gap-2">'
+                                + dot
+                                + '<span><p class="text-xs font-semibold text-gray-800">' + escapeHtml(n.title) + '</p>'
+                                + '<p class="text-xs text-gray-500 mt-0.5">' + escapeHtml(n.content) + '</p></span></button>';
                         }).join('');
+                        // 개별 클릭 → 읽음 처리 후 해당 URL로 이동
+                        list.querySelectorAll('[data-notif-id]').forEach(function (el) {
+                            el.addEventListener('click', function () {
+                                var nid = el.getAttribute('data-notif-id');
+                                var nurl = el.getAttribute('data-notif-url');
+                                var headers = {'Content-Type': 'application/json'};
+                                if (csrfMeta && csrfHeaderMeta) { headers[csrfHeaderMeta.content] = csrfMeta.content; }
+                                fetch('/api/notifications/' + nid + '/read', {method: 'POST', headers: headers})
+                                    .finally(function () { if (nurl) window.location.href = nurl; });
+                            });
+                        });
                     }).catch(function () {});
             }
 

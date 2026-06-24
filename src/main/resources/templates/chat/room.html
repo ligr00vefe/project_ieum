@@ -63,10 +63,15 @@
 
             <!-- 액션 버튼 -->
             <div class="w-full space-y-2 mt-auto">
-                <button onclick="showMatchConfirmModal()"
+                <button th:if="${!hasPendingInvitation}"
+                        onclick="showMatchConfirmModal()"
                         class="w-full py-3 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100">
                     ✓ 매칭 확정하기
                 </button>
+                <div th:if="${hasPendingInvitation}"
+                     class="w-full py-3 text-sm font-semibold text-center text-amber-600 bg-amber-50 border border-amber-200 rounded-xl cursor-not-allowed">
+                    초대 응답 대기 중
+                </div>
                 <button onclick="showProfileModal()"
                         class="w-full py-3 text-sm font-semibold text-indigo-600 border border-indigo-200 rounded-xl hover:bg-indigo-50 transition-all">
                     프로필 자세히 보기
@@ -176,8 +181,7 @@
         </div>
         <h2 class="text-lg font-bold text-gray-900 mb-2">매칭을 확정하시겠어요?</h2>
         <p class="text-sm text-gray-500 leading-relaxed mb-6">
-            ✔ 활동지원사에게 매칭 확정 알림이 발송됩니다.<br>
-            ✔ 활동 일정이 마이페이지에 등록됩니다.
+            ✔ 활동지원사에게 매칭 확정 알림이 발송됩니다.
         </p>
         <div class="flex gap-3">
             <button onclick="hideMatchConfirmModal()"
@@ -279,18 +283,26 @@
 
             <!-- 후기 리스트 -->
             <div>
-                <p class="text-xs font-semibold text-gray-400 mb-3">
-                    후기
-                    <span class="text-gray-600 font-bold ml-1"
-                          th:text="${caregiverTotalReviews ?: 0}">0</span>건
-                </p>
+                <div class="flex items-center justify-between mb-3">
+                    <p class="text-xs font-semibold text-gray-400">
+                        후기
+                        <span class="text-gray-600 font-bold ml-1"
+                              th:text="${caregiverTotalReviews ?: 0}">0</span>건
+                    </p>
+                    <select id="reviewSort" onchange="sortReviews(this.value)"
+                            class="text-xs text-gray-500 border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-indigo-300">
+                        <option value="recent">최신순</option>
+                        <option value="high">별점 높은 순</option>
+                        <option value="low">별점 낮은 순</option>
+                    </select>
+                </div>
 
                 <div th:if="${caregiverReviews != null and !#lists.isEmpty(caregiverReviews)}"
-                     class="space-y-3">
+                     id="reviewList" class="space-y-3">
                     <div th:each="rv : ${caregiverReviews}"
-                         class="bg-gray-50 rounded-2xl p-4">
+                         th:attr="data-rating=${rv.rating ?: 0}, data-date=${rv.createdAt}"
+                         class="review-item bg-gray-50 rounded-2xl p-4">
                         <div class="flex items-center justify-between mb-2">
-                            <!-- 별점 -->
                             <div class="flex">
                                 <th:block th:each="i : ${#numbers.sequence(1,5)}">
                                     <svg th:classappend="${rv.rating != null and rv.rating >= i} ? 'text-amber-400 fill-amber-400' : 'text-gray-200 fill-gray-200'"
@@ -782,6 +794,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         await markRead();
     }, 7000);
 });
+
+// 후기 3건 제한 + 정렬
+(function () {
+    var LIMIT = 3;
+
+    function applyLimit() {
+        var items = document.querySelectorAll('#reviewList .review-item');
+        items.forEach(function (el, i) { el.style.display = i < LIMIT ? '' : 'none'; });
+    }
+
+    function sortReviews(order) {
+        var list = document.getElementById('reviewList');
+        if (!list) return;
+        var items = Array.from(list.querySelectorAll('.review-item'));
+        items.sort(function (a, b) {
+            if (order === 'high') return Number(b.dataset.rating) - Number(a.dataset.rating);
+            if (order === 'low')  return Number(a.dataset.rating) - Number(b.dataset.rating);
+            return b.dataset.date.localeCompare(a.dataset.date); // recent
+        });
+        items.forEach(function (el) { list.appendChild(el); });
+        applyLimit();
+    }
+    window.sortReviews = sortReviews;
+
+    document.addEventListener('DOMContentLoaded', applyLimit);
+})();
 </script>
 </th:block>
 </html>
