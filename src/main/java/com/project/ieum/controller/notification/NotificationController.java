@@ -30,4 +30,10 @@ public class NotificationController {
         notificationService.markAllRead();
         return new UnreadNotificationResponse(notificationService.countMyUnread());
     }
+
+    @PostMapping("/{id}/read")
+    public UnreadNotificationResponse readOne(@PathVariable Long id) {
+        notificationService.markRead(id);
+        return new UnreadNotificationResponse(notificationService.countMyUnread());
+    }
 }

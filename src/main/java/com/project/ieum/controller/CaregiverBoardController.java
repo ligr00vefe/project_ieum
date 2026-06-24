@@ -192,6 +192,8 @@ public class CaregiverBoardController {
         model.addAttribute("handshake", matchingService.getHandshakeView(id, currentUserId));
         model.addAttribute("recommendations", recommendationService.recommendCaregivers(id, 5));
         model.addAttribute("tmapAppKey", tmapAppKey);
+        matchingService.getMyPendingInvitation(id, currentUserId)
+                .ifPresent(inv -> model.addAttribute("myInvitation", inv));
         model.addAttribute("content", "caregiver/board/detail");
         return "layout/layout";
     }
@@ -209,6 +211,30 @@ public class CaregiverBoardController {
         matchingService.apply(id, applyRequest);
         redirectAttributes.addFlashAttribute("applied", true);
         return "redirect:/caregiver/board/" + id;
+    }
+
+    @PostMapping("/applications/{applicationId}/withdraw")
+    public String withdraw(@PathVariable Long applicationId,
+                           RedirectAttributes redirectAttributes) {
+        matchingService.withdraw(applicationId);
+        redirectAttributes.addFlashAttribute("message", "지원이 취소되었습니다.");
+        return "redirect:/caregiver/mypage";
+    }
+
+    @PostMapping("/invitations/{invitationId}/accept")
+    public String acceptInvitation(@PathVariable Long invitationId,
+                                   RedirectAttributes redirectAttributes) {
+        Long conversationId = matchingService.acceptInvitation(invitationId);
+        return "redirect:/chat/conversations/" + conversationId;
+    }
+
+    @PostMapping("/invitations/{invitationId}/reject")
+    public String rejectInvitation(@PathVariable Long invitationId,
+                                   @RequestParam Long requestId,
+                                   RedirectAttributes redirectAttributes) {
+        matchingService.rejectInvitation(invitationId);
+        redirectAttributes.addFlashAttribute("message", "초대를 거절했습니다.");
+        return "redirect:/caregiver/board/" + requestId;
     }
 
     // 활동 시작/종료 양측 확인 — 도우미(선정된 활동지원사) 측.

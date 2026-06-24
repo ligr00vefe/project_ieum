@@ -84,7 +84,7 @@
                 💬 채팅 목록 보기 →
             </a>
         </div>
-        <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <article th:each="post : ${myPosts}"
                      class="group rounded-2xl border-2 border-orange-200 bg-white shadow-sm hover:shadow-md transition-all overflow-hidden">
                 <a th:href="@{/market/{id}(id=${post.id})}" class="block">
@@ -145,7 +145,7 @@
     <div th:if="${!myPosts.isEmpty()}" class="mb-3">
         <span class="text-sm font-semibold text-slate-500">다른 상품</span>
     </div>
-    <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <article th:each="post : ${posts.content}"
                  th:if="${currentUserId == null or post.sellerId != currentUserId}"
                  class="group rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-md transition-all overflow-hidden">
@@ -200,8 +200,8 @@
          th:replace="~{fragments/pagination :: pager(
              ${posts.number},
              ${posts.totalPages},
-             ${#numbers.max(0, posts.number - 2)},
-             ${#numbers.min(posts.totalPages - 1, posts.number + 2)},
+             ${posts.number > 2 ? posts.number - 2 : 0},
+             ${posts.number + 2 < posts.totalPages ? posts.number + 2 : posts.totalPages - 1},
              ${paginationUrl}
          )}"></div>
 

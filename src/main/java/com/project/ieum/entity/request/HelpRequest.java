@@ -150,7 +150,34 @@ public class HelpRequest extends BasicEntity {
     }
   }
 
-  // (이슈 #8 정본) 본문 수정 메서드(updateDetails)는 제거함.
-  // 근거: HelpRequest는 write-once — 도우미가 본 내용/시간/위치가 지원 후 바뀌면 신뢰성이 깨지므로,
-  //       생성 후에는 상태 전이(match/startProgress/complete/close)만 허용한다. 수정이 필요하면 마감(close) 후 재작성.
+  // OPEN 상태에서만 수정 허용 — 지원자가 아직 없거나 PENDING 상태인 경우에만 케어메이트가 내용을 수정할 수 있다.
+  // 서비스 계층에서 지원자 존재 여부를 추가로 검사한다.
+  public void updateDetails(String title, String body,
+                            LocalDateTime desiredStartDatetime, LocalDateTime desiredEndDatetime,
+                            String roadAddress, String addressDetail,
+                            String sido, String sigungu, String bname, String zonecode, String bcode,
+                            java.math.BigDecimal latitude, java.math.BigDecimal longitude,
+                            String departureAddress, String destinationAddress, String specialNotes,
+                            ServiceCategory serviceCategory) {
+    if (this.status != HelpRequestStatus.OPEN) {
+      throw new IllegalStateException("모집 중(OPEN) 상태에서만 수정할 수 있습니다.");
+    }
+    this.title = title;
+    this.body = body;
+    this.desiredStartDatetime = desiredStartDatetime;
+    this.desiredEndDatetime = desiredEndDatetime;
+    this.roadAddress = roadAddress;
+    this.addressDetail = addressDetail;
+    this.sido = sido;
+    this.sigungu = sigungu;
+    this.bname = bname;
+    this.zonecode = zonecode;
+    this.bcode = bcode;
+    this.latitude = latitude;
+    this.longitude = longitude;
+    this.departureAddress = departureAddress;
+    this.destinationAddress = destinationAddress;
+    this.specialNotes = specialNotes;
+    this.serviceCategory = serviceCategory;
+  }
 }

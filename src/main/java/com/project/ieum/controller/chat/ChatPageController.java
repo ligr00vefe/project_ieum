@@ -6,6 +6,8 @@ import com.project.ieum.entity.caregiver.CaregiverPersonalityTag;
 import com.project.ieum.entity.conversation.Conversation;
 import com.project.ieum.entity.conversation.ConversationStatus;
 import com.project.ieum.repository.CaregiverPersonalityTagRepository;
+import com.project.ieum.entity.request.InvitationStatus;
+import com.project.ieum.repository.CaregiverInvitationRepository;
 import com.project.ieum.repository.ConversationRepository;
 import com.project.ieum.repository.ReviewRepository;
 import com.project.ieum.service.MatchingService;
@@ -30,6 +32,7 @@ public class ChatPageController {
     private final ReviewRepository reviewRepository;
     private final ReviewService reviewService;
     private final CaregiverPersonalityTagRepository caregiverPersonalityTagRepository;
+    private final CaregiverInvitationRepository caregiverInvitationRepository;
 
     @GetMapping("/conversations")
     public String conversations(Model model) {
@@ -94,11 +97,15 @@ public class ChatPageController {
             partnerId = requester.getUserId();
         }
 
+        boolean hasPendingInvitation = isUser &&
+                caregiverInvitationRepository.existsByHelpRequest_IdAndStatus(requestId, InvitationStatus.PENDING);
+
         model.addAttribute("title", "채팅");
         model.addAttribute("conversationId", conversationId);
         model.addAttribute("partnerId", partnerId);
         model.addAttribute("isUser", isUser);
         model.addAttribute("isCaregiver", isCaregiver);
+        model.addAttribute("hasPendingInvitation", hasPendingInvitation);
         model.addAttribute("partnerName", partnerName);
         model.addAttribute("partnerProfileImage", partnerProfileImage);
         model.addAttribute("partnerSubtitle", partnerSubtitle);

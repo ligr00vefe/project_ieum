@@ -1,9 +1,6 @@
 package com.project.ieum.service.password;
 
-import com.project.ieum.entity.PasswordResetToken;
 import com.project.ieum.entity.User;
-import com.project.ieum.exception.BusinessException;
-import com.project.ieum.repository.PasswordResetTokenRepository;
 import com.project.ieum.repository.UserRepository;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -15,17 +12,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.HexFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Service
@@ -33,7 +25,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PasswordResetService {
 
     private final UserRepository userRepository;
-    private final PasswordResetTokenRepository tokenRepository;
     private final JavaMailSender mailSender;
     private final PasswordEncoder passwordEncoder;
 
@@ -43,144 +34,112 @@ public class PasswordResetService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-    private static final int TOKEN_EXPIRE_MINUTES = 30;
-    private static final int RATE_LIMIT_MAX = 5;
-    private static final long RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000L; // 1시간
+    private static final long COOLDOWN_DAYS = 7;
+    private static final String CHARS_UPPER  = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+    private static final String CHARS_LOWER  = "abcdefghjkmnpqrstuvwxyz";
+    private static final String CHARS_DIGIT  = "23456789";
+    private static final String CHARS_SPECIAL = "@$!%*#?&";
 
-    /** IP별 요청 횟수 추적 (애플리케이션 재시작 시 초기화 — 운영 규모에서는 Redis로 교체) */
-    private final Map<String, RateLimitEntry> rateLimitMap = new ConcurrentHashMap<>();
+    /** 이메일 → 마지막 발급 시각 (서버 재시작 시 초기화 — 소규모 서비스 전제) */
+    private final Map<String, LocalDateTime> lastSentMap = new ConcurrentHashMap<>();
+
+    public record TempPasswordResult(boolean sent, LocalDateTime nextAvailableAt) {}
 
     /**
-     * 비밀번호 재설정 메일 요청.
-     * 계정 존재 여부와 관계없이 동일한 처리 흐름을 유지해 User Enumeration을 방지한다.
+     * 임시 비밀번호 발급 요청.
+     * - 계정이 없으면 조용히 성공 처리 (User Enumeration 방지)
+     * - 7일 쿨다운 적용
      */
     @Transactional
-    public void requestReset(String email, String clientIp) {
-        checkRateLimit(clientIp);
+    public TempPasswordResult requestTempPassword(String email) {
+        LocalDateTime now = LocalDateTime.now();
+
+        // 쿨다운 체크
+        LocalDateTime last = lastSentMap.get(email.toLowerCase());
+        if (last != null) {
+            LocalDateTime nextAvailable = last.plusDays(COOLDOWN_DAYS);
+            if (now.isBefore(nextAvailable)) {
+                return new TempPasswordResult(false, nextAvailable);
+            }
+        }
 
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
-            // 계정 없어도 조용히 반환 — 호출자는 항상 "메일 발송됨" 메시지를 보여준다
-            return;
+            // 계정 없어도 발급된 것처럼 처리 (User Enumeration 방지)
+            lastSentMap.put(email.toLowerCase(), now);
+            return new TempPasswordResult(true, null);
         }
 
         User user = userOpt.get();
+        String tempPassword = generateTempPassword();
+        user.changePassword(passwordEncoder.encode(tempPassword));
+        userRepository.save(user);
 
-        // 기존 미사용 토큰 전부 무효화
-        tokenRepository.deleteAllByUser(user);
+        lastSentMap.put(email.toLowerCase(), now);
+        sendTempPasswordEmail(email, tempPassword);
 
-        String rawToken = generateRawToken();
-        String tokenHash = hash(rawToken);
-
-        PasswordResetToken token = PasswordResetToken.builder()
-                .user(user)
-                .tokenHash(tokenHash)
-                .expiresAt(LocalDateTime.now().plusMinutes(TOKEN_EXPIRE_MINUTES))
-                .used(false)
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        tokenRepository.save(token);
-        sendResetEmail(user.getEmail(), rawToken);
+        return new TempPasswordResult(true, null);
     }
 
-    /**
-     * 토큰 유효성 검증. 폼 렌더링 시 사전 확인용.
-     */
-    @Transactional(readOnly = true)
-    public boolean isTokenValid(String rawToken) {
-        String tokenHash = hash(rawToken);
-        return tokenRepository.findByTokenHash(tokenHash)
-                .map(PasswordResetToken::isValid)
-                .orElse(false);
+    /** 쿨다운 잔여 확인 (GET /password/forgot 에서 이메일 없이 호출 불가 — 이메일 제출 후 리다이렉트로 처리) */
+    public Optional<LocalDateTime> getNextAvailableAt(String email) {
+        LocalDateTime last = lastSentMap.get(email.toLowerCase());
+        if (last == null) return Optional.empty();
+        LocalDateTime next = last.plusDays(COOLDOWN_DAYS);
+        return LocalDateTime.now().isBefore(next) ? Optional.of(next) : Optional.empty();
     }
 
-    /**
-     * 비밀번호 실제 변경. 토큰 검증 후 변경하고 즉시 무효화.
-     */
-    @Transactional
-    public void resetPassword(String rawToken, String newPassword) {
-        String tokenHash = hash(rawToken);
-        PasswordResetToken token = tokenRepository.findByTokenHash(tokenHash)
-                .orElseThrow(() -> new BusinessException("INVALID_TOKEN", "유효하지 않은 링크입니다."));
-
-        if (!token.isValid()) {
-            throw new BusinessException("INVALID_TOKEN", "링크가 만료되었거나 이미 사용된 링크입니다.");
+    private String generateTempPassword() {
+        SecureRandom rng = new SecureRandom();
+        char[] pw = new char[10];
+        // 각 문자 종류 최소 1개 보장
+        pw[0] = CHARS_UPPER.charAt(rng.nextInt(CHARS_UPPER.length()));
+        pw[1] = CHARS_LOWER.charAt(rng.nextInt(CHARS_LOWER.length()));
+        pw[2] = CHARS_DIGIT.charAt(rng.nextInt(CHARS_DIGIT.length()));
+        pw[3] = CHARS_SPECIAL.charAt(rng.nextInt(CHARS_SPECIAL.length()));
+        String all = CHARS_UPPER + CHARS_LOWER + CHARS_DIGIT + CHARS_SPECIAL;
+        for (int i = 4; i < 10; i++) pw[i] = all.charAt(rng.nextInt(all.length()));
+        // 셔플
+        for (int i = 9; i > 0; i--) {
+            int j = rng.nextInt(i + 1);
+            char tmp = pw[i]; pw[i] = pw[j]; pw[j] = tmp;
         }
-
-        User user = token.getUser();
-        user.changePassword(passwordEncoder.encode(newPassword));
-        token.markUsed();
-
-        // 해당 유저의 나머지 토큰도 전부 정리
-        tokenRepository.deleteAllByUser(user);
+        return new String(pw);
     }
 
-    // ── private helpers ──────────────────────────────────────────────────────
-
-    private String generateRawToken() {
-        try {
-            byte[] bytes = SecureRandom.getInstanceStrong().generateSeed(32);
-            return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SecureRandom 초기화 실패", e);
-        }
-    }
-
-    private String hash(String rawToken) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] bytes = digest.digest(rawToken.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(bytes);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 지원 없음", e);
-        }
-    }
-
-    private void sendResetEmail(String to, String rawToken) {
-        String resetUrl = baseUrl + "/password/reset?token=" + rawToken;
+    private void sendTempPasswordEmail(String to, String tempPassword) {
         String html = """
                 <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#f8fafc;border-radius:16px;">
-                  <h2 style="color:#4f46e5;margin-bottom:8px;">비밀번호 재설정</h2>
-                  <p style="color:#374151;line-height:1.6;">아래 버튼을 클릭하여 새 비밀번호를 설정하세요.<br>
-                  링크는 <strong>30분</strong> 동안만 유효합니다.</p>
-                  <a href="%s"
-                     style="display:inline-block;margin:24px 0;padding:14px 28px;background:#4f46e5;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;">
-                    비밀번호 재설정하기
+                  <h2 style="color:#4f46e5;margin-bottom:8px;">임시 비밀번호 발급 안내</h2>
+                  <p style="color:#374151;line-height:1.6;">
+                    아래 임시 비밀번호로 로그인 후 반드시 <strong>비밀번호를 변경</strong>해 주세요.
+                  </p>
+                  <div style="margin:24px 0;padding:20px 32px;background:#fff;border-radius:12px;border:2px solid #4f46e5;text-align:center;">
+                    <span style="font-size:28px;font-weight:800;letter-spacing:4px;color:#4f46e5;">%s</span>
+                  </div>
+                  <a href="%s/login"
+                     style="display:inline-block;padding:14px 28px;background:#4f46e5;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;">
+                    이음 로그인하기
                   </a>
-                  <p style="color:#9ca3af;font-size:13px;">본인이 요청하지 않았다면 이 메일을 무시하세요.<br>
-                  비밀번호는 변경되지 않습니다.</p>
+                  <p style="color:#9ca3af;font-size:13px;margin-top:24px;">
+                    본인이 요청하지 않았다면 즉시 고객센터로 문의해 주세요.
+                  </p>
                 </div>
-                """.formatted(resetUrl);
-
+                """.formatted(tempPassword, baseUrl);
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
             helper.setFrom(fromEmail);
             helper.setTo(to);
-            helper.setSubject("[이음] 비밀번호 재설정 안내");
+            helper.setSubject("[이음] 임시 비밀번호가 발급되었습니다");
             helper.setText(html, true);
             mailSender.send(message);
         } catch (Exception e) {
-            log.error("비밀번호 재설정 메일 발송 실패: {}", to, e);
-            // 메일 실패를 클라이언트에 노출하지 않음 (User Enumeration 방지)
+            log.error("임시 비밀번호 메일 발송 실패: to={}", to, e);
         }
     }
 
-    private void checkRateLimit(String clientIp) {
-        long now = System.currentTimeMillis();
-        RateLimitEntry entry = rateLimitMap.compute(clientIp, (ip, existing) -> {
-            if (existing == null || now - existing.windowStart > RATE_LIMIT_WINDOW_MS) {
-                return new RateLimitEntry(now, new AtomicInteger(1));
-            }
-            existing.count.incrementAndGet();
-            return existing;
-        });
-
-        if (entry.count.get() > RATE_LIMIT_MAX) {
-            throw new BusinessException("RATE_LIMIT", "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.");
-        }
+    public static String formatDateTime(LocalDateTime dt) {
+        return dt.format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분"));
     }
-
-    private record RateLimitEntry(long windowStart, AtomicInteger count) {}
 }

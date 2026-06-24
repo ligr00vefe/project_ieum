@@ -13,32 +13,48 @@ import com.project.ieum.entity.conversation.Conversation;
 import com.project.ieum.entity.conversation.ConversationStatus;
 import com.project.ieum.entity.conversation.Message;
 import com.project.ieum.entity.notification.NotificationType;
+import com.project.ieum.entity.request.CaregiverInvitation;
 import com.project.ieum.entity.request.ConfirmParty;
 import com.project.ieum.entity.request.HelpRequest;
 import com.project.ieum.entity.request.HelpRequestApplication;
 import com.project.ieum.entity.request.HelpRequestPersonalityTag;
 import com.project.ieum.entity.request.HelpRequestStatus;
+import com.project.ieum.entity.request.InvitationStatus;
 import com.project.ieum.exception.ForbiddenException;
 import com.project.ieum.exception.NotFoundException;
 import com.project.ieum.repository.*;
+import com.project.ieum.repository.CaregiverInvitationRepository;
 import com.project.ieum.service.common.CurrentUserService;
 import com.project.ieum.service.notification.NotificationService;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class MatchingService {
 
+    @Value("${ieum.base-url:http://localhost:8080}")
+    private String baseUrl;
+
+    @Value("${spring.mail.username}")
+    private String fromEmail;
+
+    private final JavaMailSender mailSender;
     private final HelpRequestRepository helpRequestRepository;
     private final HelpRequestApplicationRepository applicationRepository;
     private final CaregiverProfileRepository caregiverProfileRepository;
@@ -48,6 +64,7 @@ public class MatchingService {
     private final NotificationService notificationService;
     private final HelpRequestPersonalityTagRepository helpRequestPersonalityTagRepository;
     private final CaregiverPersonalityTagRepository caregiverPersonalityTagRepository;
+    private final CaregiverInvitationRepository invitationRepository;
 
     public HelpRequestApplication apply(Long requestId, ApplyRequest applyRequest) {
         User currentUser = requireRole(UserRole.CAREGIVER);
@@ -165,8 +182,23 @@ public class MatchingService {
         if (!application.getCaregiver().getUserId().equals(currentUser.getId())) {
             throw new ForbiddenException("본인의 지원만 취소할 수 있습니다.");
         }
+        HelpRequest helpRequest = application.getHelpRequest();
+        boolean wasAccepted = application.getStatus() == ApplicationStatus.ACCEPTED;
+
         application.cancel();
         conversationRepository.findByApplication_Id(applicationId).ifPresent(Conversation::close);
+
+        // 매칭 확정(ACCEPTED) 상태에서 취소 → 케어메이트와 동일하게 게시물 CLOSED 처리
+        if (wasAccepted) {
+            helpRequest.close();
+            notificationService.create(
+                    helpRequest.getRequester().getUser(),
+                    NotificationType.MATCHING,
+                    "매칭이 취소되었어요",
+                    application.getCaregiver().getFullName() + " 활동지원사가 '" + helpRequest.getTitle() + "' 매칭을 취소했습니다.",
+                    "/disabled/board/" + helpRequest.getId()
+            );
+        }
     }
 
     // 활동 시작 확인(핸드셰이크): 이용자·도우미가 각자 호출. 양측이 모두 확인하면 MATCHED→IN_PROGRESS.
@@ -287,6 +319,192 @@ public class MatchingService {
         return result;
     }
 
+    // ── 초대 기능 ──────────────────────────────────────────────────────────────
+
+    public CaregiverInvitation invite(Long requestId, Long caregiverId) {
+        User currentUser = requireRole(UserRole.USER);
+        HelpRequest helpRequest = getRequest(requestId);
+        ensureRequester(helpRequest, currentUser.getId());
+        if (helpRequest.getStatus() != HelpRequestStatus.OPEN) {
+            throw new IllegalStateException("모집 중인 게시물에만 초대할 수 있습니다.");
+        }
+        if (invitationRepository.existsByHelpRequest_IdAndCaregiver_UserId(requestId, caregiverId)) {
+            throw new IllegalStateException("이미 초대한 활동지원사입니다.");
+        }
+        CaregiverProfile caregiver = caregiverProfileRepository.findById(caregiverId)
+                .orElseThrow(() -> new NotFoundException("활동지원사를 찾을 수 없습니다."));
+
+        CaregiverInvitation invitation = invitationRepository.save(CaregiverInvitation.builder()
+                .helpRequest(helpRequest)
+                .caregiver(caregiver)
+                .status(InvitationStatus.PENDING)
+                .build());
+
+        notificationService.create(
+                caregiver.getUser(),
+                NotificationType.INVITATION,
+                "도움 요청 초대가 왔어요",
+                currentUser.getEmail().split("@")[0] + " 이용자가 '" + helpRequest.getTitle() + "' 요청에 초대했습니다.",
+                "/caregiver/board/" + requestId
+        );
+        sendInvitationEmail(caregiver.getUser().getEmail(), caregiver.getFullName(), helpRequest, requestId);
+        return invitation;
+    }
+
+    private void sendInvitationEmail(String to, String caregiverName, HelpRequest req, Long requestId) {
+        String postUrl = baseUrl + "/caregiver/board/" + requestId;
+        String requesterName = req.getRequester() != null ? req.getRequester().getFullName() : "";
+        String category = req.getServiceCategory() != null ? req.getServiceCategory().getName() : "";
+        String timeRange = "";
+        if (req.getDesiredStartDatetime() != null) {
+            timeRange = req.getDesiredStartDatetime()
+                    .format(java.time.format.DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm"));
+            if (req.getDesiredEndDatetime() != null) {
+                timeRange += " ~ " + req.getDesiredEndDatetime()
+                        .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
+            }
+        }
+        String address = req.getRoadAddress() != null ? req.getRoadAddress() : "";
+        if (req.getAddressDetail() != null && !req.getAddressDetail().isBlank()) {
+            address += " " + req.getAddressDetail();
+        }
+        String departure = req.getDepartureAddress() != null ? req.getDepartureAddress() : "";
+        String destination = req.getDestinationAddress() != null ? req.getDestinationAddress() : "";
+
+        String detailRows = buildDetailRow("요청자", requesterName)
+                + buildDetailRow("서비스 유형", category)
+                + buildDetailRow("활동 일시", timeRange)
+                + buildDetailRow("활동 장소", address)
+                + (departure.isBlank() ? "" : buildDetailRow("출발지", departure))
+                + (destination.isBlank() ? "" : buildDetailRow("도착지", destination));
+
+        String html = """
+                <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px;background:#f8fafc;border-radius:16px;">
+                  <h2 style="color:#0d9488;margin-bottom:8px;">이음 — 매칭 초대가 도착했어요!</h2>
+                  <p style="color:#374151;line-height:1.6;">
+                    안녕하세요, <strong>%s</strong> 활동지원사님.<br>
+                    이음 케어메이트로부터 아래 도움 요청에 대한 초대 쪽지가 도착했습니다.
+                  </p>
+                  <div style="margin:20px 0;padding:16px 20px;background:#fff;border-radius:12px;border-left:4px solid #0d9488;">
+                    <p style="margin:0 0 12px;font-size:16px;font-weight:700;color:#111827;">%s</p>
+                    <table style="width:100%%;border-collapse:collapse;font-size:14px;">%s</table>
+                  </div>
+                  <p style="color:#374151;line-height:1.6;">
+                    사이트에서 확인 후 수락 또는 거절하실 수 있습니다.<br>
+                    수락하시면 매칭이 확정되고 대화방이 열립니다.
+                  </p>
+                  <a href="%s"
+                     style="display:inline-block;margin:24px 0 8px;padding:14px 28px;background:#0d9488;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;">
+                    사이트에서 확인하기
+                  </a>
+                  <p style="color:#9ca3af;font-size:13px;margin-top:16px;">
+                    본인에게 온 초대가 아니라면 이 메일을 무시해 주세요.
+                  </p>
+                </div>
+                """.formatted(caregiverName, req.getTitle(), detailRows, postUrl);
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject("[이음] 매칭 초대 쪽지가 도착했습니다 — " + req.getTitle());
+            helper.setText(html, true);
+            mailSender.send(message);
+        } catch (Exception e) {
+            log.error("초대 메일 발송 실패: to={}", to, e);
+        }
+    }
+
+    private String buildDetailRow(String label, String value) {
+        if (value == null || value.isBlank()) return "";
+        return "<tr><td style=\"color:#6b7280;padding:4px 8px 4px 0;white-space:nowrap;vertical-align:top;\">" + label
+                + "</td><td style=\"color:#111827;padding:4px 0;\">" + value + "</td></tr>";
+    }
+
+    public Long acceptInvitation(Long invitationId) {
+        User currentUser = requireRole(UserRole.CAREGIVER);
+        CaregiverInvitation invitation = invitationRepository.findById(invitationId)
+                .orElseThrow(() -> new NotFoundException("초대를 찾을 수 없습니다."));
+        if (!invitation.getCaregiver().getUserId().equals(currentUser.getId())) {
+            throw new ForbiddenException("본인에게 온 초대만 수락할 수 있습니다.");
+        }
+        if (invitation.getStatus() != InvitationStatus.PENDING) {
+            throw new IllegalStateException("대기 중인 초대만 수락할 수 있습니다.");
+        }
+        HelpRequest helpRequest = invitation.getHelpRequest();
+        if (helpRequest.getStatus() != HelpRequestStatus.OPEN) {
+            throw new IllegalStateException("모집 중인 게시물만 수락할 수 있습니다.");
+        }
+
+        CaregiverProfile caregiver = invitation.getCaregiver();
+        HelpRequestApplication application = applicationRepository.save(HelpRequestApplication.builder()
+                .helpRequest(helpRequest)
+                .caregiver(caregiver)
+                .status(com.project.ieum.entity.ApplicationStatus.PENDING)
+                .build());
+        Conversation conversation = conversationRepository.save(com.project.ieum.entity.conversation.Conversation.builder()
+                .application(application)
+                .requester(helpRequest.getRequester())
+                .caregiver(caregiver)
+                .status(ConversationStatus.ACTIVE)
+                .createdAt(LocalDateTime.now())
+                .lastMessageAt(LocalDateTime.now())
+                .build());
+
+        invitation.accept();
+        application.accept();
+        helpRequest.match();
+
+        applicationRepository.findByHelpRequest_IdAndStatus(helpRequest.getId(), com.project.ieum.entity.ApplicationStatus.PENDING)
+                .forEach(app -> {
+                    if (!app.getId().equals(application.getId())) {
+                        app.cancel();
+                        conversationRepository.findByApplication_Id(app.getId()).ifPresent(Conversation::close);
+                    }
+                });
+        invitationRepository.findByHelpRequest_IdAndStatus(helpRequest.getId(), InvitationStatus.PENDING)
+                .forEach(inv -> {
+                    if (!inv.getId().equals(invitation.getId())) inv.reject();
+                });
+
+        notificationService.create(
+                helpRequest.getRequester().getUser(),
+                NotificationType.INVITATION,
+                "초대를 수락했어요",
+                caregiver.getFullName() + " 활동지원사가 '" + helpRequest.getTitle() + "' 초대를 수락했습니다.",
+                "/chat/conversations/" + conversation.getId()
+        );
+        return conversation.getId();
+    }
+
+    public void rejectInvitation(Long invitationId) {
+        User currentUser = requireRole(UserRole.CAREGIVER);
+        CaregiverInvitation invitation = invitationRepository.findById(invitationId)
+                .orElseThrow(() -> new NotFoundException("초대를 찾을 수 없습니다."));
+        if (!invitation.getCaregiver().getUserId().equals(currentUser.getId())) {
+            throw new ForbiddenException("본인에게 온 초대만 거절할 수 있습니다.");
+        }
+        if (invitation.getStatus() != InvitationStatus.PENDING) {
+            throw new IllegalStateException("대기 중인 초대만 거절할 수 있습니다.");
+        }
+        invitation.reject();
+
+        notificationService.create(
+                invitation.getHelpRequest().getRequester().getUser(),
+                NotificationType.INVITATION,
+                "초대를 거절했어요",
+                invitation.getCaregiver().getFullName() + " 활동지원사가 '" + invitation.getHelpRequest().getTitle() + "' 초대를 거절했습니다.",
+                "/disabled/board/" + invitation.getHelpRequest().getId()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.Optional<CaregiverInvitation> getMyPendingInvitation(Long requestId, Long caregiverId) {
+        return invitationRepository.findByHelpRequest_IdAndCaregiver_UserId(requestId, caregiverId)
+                .filter(inv -> inv.getStatus() == InvitationStatus.PENDING);
+    }
+
     @Transactional(readOnly = true)
     public List<HelpRequestApplication> getMyApplications() {
         User currentUser = requireRole(UserRole.CAREGIVER);
@@ -363,6 +581,13 @@ public class MatchingService {
                 .findByStatusAndDesiredStartDatetimeBefore(HelpRequestStatus.OPEN, now.plusHours(1))) {
             helpRequest.close();
             cancelApplicationsAndCloseConversations(helpRequest.getId(), ApplicationStatus.PENDING);
+            notificationService.create(
+                    helpRequest.getRequester().getUser(),
+                    NotificationType.MATCHING,
+                    "도움 요청이 자동 마감됐어요",
+                    "'" + helpRequest.getTitle() + "' 요청의 희망 시작 시간이 지나 자동 마감되었습니다.",
+                    "/disabled/board/" + helpRequest.getId()
+            );
         }
     }
 

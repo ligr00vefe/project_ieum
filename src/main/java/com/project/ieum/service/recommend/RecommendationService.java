@@ -9,6 +9,7 @@ import com.project.ieum.entity.caregiver.CaregiverProfile;
 import com.project.ieum.entity.request.HelpRequest;
 import com.project.ieum.entity.request.HelpRequestPersonalityTag;
 import com.project.ieum.repository.*;
+import com.project.ieum.repository.HelpRequestApplicationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -31,19 +32,20 @@ public class RecommendationService {
     private final CaregiverAvailabilityRepository caregiverAvailabilityRepository;
     private final CaregiverPersonalityTagRepository caregiverPersonalityTagRepository;
     private final HelpRequestPersonalityTagRepository helpRequestPersonalityTagRepository;
+    private final HelpRequestApplicationRepository helpRequestApplicationRepository;
 
     public List<CaregiverRecommendationResponse> recommendCaregivers(Long helpRequestId, int limit) {
         HelpRequest request = helpRequestRepository.findById(helpRequestId)
                 .orElseThrow(() -> new IllegalArgumentException("도움 요청을 찾을 수 없습니다."));
 
+        // 이미 지원한 활동지원사 ID 집합 — 추천 목록에서 제외
+        Set<Long> appliedCaregiverIds = helpRequestApplicationRepository
+                .findByHelpRequest_IdOrderByCreatedAtDesc(helpRequestId)
+                .stream()
+                .map(a -> a.getCaregiver().getUserId())
+                .collect(Collectors.toSet());
+
         CaregiverSearchCondition condition = new CaregiverSearchCondition();
-        if (request.getDesiredStartDatetime() != null) {
-            condition.setDayOfWeek((short) (request.getDesiredStartDatetime().getDayOfWeek().getValue() % 7));
-            condition.setStartTime(request.getDesiredStartDatetime().toLocalTime());
-            if (request.getDesiredEndDatetime() != null) {
-                condition.setEndTime(request.getDesiredEndDatetime().toLocalTime());
-            }
-        }
 
         List<CaregiverProfile> candidates = caregiverProfileRepository
                 .searchCaregivers(condition, PageRequest.of(0, Math.max(limit * 5, 30)))
@@ -56,6 +58,7 @@ public class RecommendationService {
                 .collect(Collectors.toSet());
 
         return candidates.stream()
+                .filter(c -> !appliedCaregiverIds.contains(c.getUserId()))
                 .map(caregiver -> score(request, requestTagIds, caregiver))
                 .sorted(Comparator.comparingInt(CaregiverRecommendationResponse::getScore).reversed())
                 .limit(limit)
