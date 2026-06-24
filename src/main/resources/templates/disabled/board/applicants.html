@@ -4,13 +4,15 @@
 <th:block th:fragment="content">
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <div class="flex items-center gap-2 text-sm text-gray-400 mb-6">
-        <a th:href="@{/disabled/board}" class="hover:text-indigo-600 transition-colors">게시판</a>
-        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        <a th:href="@{/disabled/board/{id}(id=${request.id})}" class="hover:text-indigo-600 transition-colors">게시물 상세</a>
-        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        <span class="text-gray-600 font-medium">지원자 리스트</span>
-    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="flex items-center gap-2 text-sm text-gray-400 mb-6 list-none p-0 m-0">
+            <li><a th:href="@{/disabled/board}" class="hover:text-indigo-600 transition-colors">게시판</a></li>
+            <li aria-hidden="true"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></li>
+            <li><a th:href="@{/disabled/board/{id}(id=${request.id})}" class="hover:text-indigo-600 transition-colors">게시물 상세</a></li>
+            <li aria-hidden="true"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></li>
+            <li><span class="text-gray-600 font-medium" aria-current="page">지원자 리스트</span></li>
+        </ol>
+    </nav>
 
     <div th:if="${message}" th:text="${message}" class="mb-4 rounded-md border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-800"></div>
 

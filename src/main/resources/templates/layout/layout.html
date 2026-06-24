@@ -16,16 +16,29 @@
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col">
 
+    <!-- 스킵 내비게이션 -->
+    <a href="#main-content"
+       class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-indigo-600 focus:text-white focus:rounded-lg focus:text-sm focus:font-semibold focus:shadow-lg">
+        본문으로 건너뛰기
+    </a>
+
     <!-- Header -->
     <div th:replace="~{layout/header :: header}"></div>
 
     <!-- Main Content -->
-    <main class="flex-1">
+    <main id="main-content" class="flex-1">
         <th:block th:replace="~{__${content}__ :: content}"></th:block>
     </main>
 
     <!-- Footer -->
     <div th:replace="~{layout/footer :: footer}"></div>
+
+    <!-- 포커스 가시성 전역 보강 -->
+    <style>
+        :focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
+        .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0 }
+        .focus\:not-sr-only:focus { position:static;width:auto;height:auto;padding:inherit;margin:inherit;overflow:visible;clip:auto;white-space:normal }
+    </style>
 
 </body>
 </html>
