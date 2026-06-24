@@ -44,6 +44,7 @@ public class UserService {
     private final UserPersonalityTagRepository userPersonalityTagRepository;
     private final CaregiverAvailabilityMapper caregiverAvailabilityMapper;
     private final PasswordEncoder passwordEncoder;
+    private final WelcomeEmailService welcomeEmailService;
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // 장애인 전체 등록 (단일 트랜잭션)
@@ -110,6 +111,7 @@ public class UserService {
         }
 
         log.info("장애인 회원가입 완료 - userId={}", user.getId());
+        welcomeEmailService.sendWelcome(user.getEmail(), info.getName(), false);
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -184,6 +186,7 @@ public class UserService {
         }
 
         log.info("활동지원사 회원가입 완료 - userId={}", user.getId());
+        welcomeEmailService.sendWelcome(user.getEmail(), info.getName(), true);
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

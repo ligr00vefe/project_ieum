@@ -93,21 +93,24 @@
                               th:text="'경력 ' + ${appl.caregiver.experience}">경력</span>
                     </div>
                     <div th:if="${appl.status.name() == 'PENDING'}" class="flex gap-2 mt-3">
-                        <a th:href="@{/chat/conversations/{cid}(cid=${conversationIdMap[appl.id]})}"
+                        <a th:if="${!hasPendingInvitation}"
+                           th:href="@{/chat/conversations/{cid}(cid=${conversationIdMap[appl.id]})}"
                            class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-xl text-center hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100 whitespace-nowrap">채팅하기</a>
-                        <form th:action="@{/disabled/board/applications/{aid}/accept(aid=${appl.id})}" method="post"
-                              onsubmit="return confirm('이 지원자를 수락하시겠습니까? 나머지 지원자는 자동으로 마감됩니다.')">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                            <input type="hidden" name="requestId" th:value="${request.id}"/>
-                            <button type="submit"
-                                    class="px-4 py-2 text-sm font-medium text-teal-600 border border-teal-200 rounded-xl hover:bg-teal-50 transition-all whitespace-nowrap">수락</button>
-                        </form>
+                        <span th:if="${hasPendingInvitation}"
+                              class="px-4 py-2 text-sm font-semibold text-amber-600 bg-amber-50 border border-amber-200 rounded-xl text-center cursor-not-allowed whitespace-nowrap">초대 응답 대기 중</span>
+<!--                        <form th:action="@{/disabled/board/applications/{aid}/accept(aid=${appl.id})}" method="post"-->
+<!--                              onsubmit="return confirm('이 지원자를 수락하시겠습니까? 나머지 지원자는 자동으로 마감됩니다.')">-->
+<!--                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>-->
+<!--                            <input type="hidden" name="requestId" th:value="${request.id}"/>-->
+<!--                            <button type="submit"-->
+<!--                                    class="px-4 py-2 text-sm font-medium text-teal-600 border border-teal-200 rounded-xl hover:bg-teal-50 transition-all whitespace-nowrap">수락</button>-->
+<!--                        </form>-->
                     </div>
                     <div th:if="${appl.status.name() == 'ACCEPTED'}" class="flex gap-2 mt-3">
                         <a th:href="@{/chat/conversations/{cid}(cid=${conversationIdMap[appl.id]})}"
                            class="flex-1 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-xl text-center hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100">채팅 이어하기</a>
                         <form th:action="@{/disabled/board/applications/{aid}/cancel-match(aid=${appl.id})}" method="post"
-                              onsubmit="return confirm('매칭을 취소하시겠습니까? 지원 상태가 대기중으로 되돌아갑니다.')">
+                              onsubmit="return confirm('매칭이 취소되고 게시물이 삭제됩니다.\n정말 취소하시겠습니까?')">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                             <input type="hidden" name="requestId" th:value="${request.id}"/>
                             <button type="submit"

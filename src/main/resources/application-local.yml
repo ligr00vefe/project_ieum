@@ -19,19 +19,20 @@ spring:
       hibernate:
         format_sql: true
     show-sql: true
-  # 로컬 개발: Mailpit 로컬 SMTP 서버 사용 (https://mailpit.axllent.org)
-  # mailpit 실행 시 localhost:1025 SMTP, localhost:8025 Web UI
   mail:
-    host: ${IEUM_MAIL_HOST:localhost}
-    port: ${IEUM_MAIL_PORT:1025}
-    username: ${IEUM_MAIL_USERNAME:local@ieum.dev}
+    host: ${IEUM_MAIL_HOST:smtp.gmail.com}
+    port: ${IEUM_MAIL_PORT:587}
+    username: ${IEUM_MAIL_USERNAME:}
     password: ${IEUM_MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
-          auth: false
+          auth: true
           starttls:
-            enable: false
+            enable: true
+            required: true
+          ssl:
+            trust: smtp.gmail.com
 server:
   servlet:
     session:
