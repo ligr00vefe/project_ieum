@@ -205,8 +205,8 @@
                             onclick="toggleAvailability()"
                             class="relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2">
                         <span id="toggle-knob"
-                              th:classappend="${availabilityStatus != null and availabilityStatus.name() == 'AVAILABLE'} ? '' : 'translate-x-0'"
-                              class="absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200"></span>
+                              th:classappend="${availabilityStatus != null and availabilityStatus.name() == 'AVAILABLE'} ? 'translate-x-6' : 'translate-x-0'"
+                              class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200"></span>
                     </button>
                 </div>
                 <a th:href="@{/mypage/password}"
@@ -281,52 +281,70 @@
                 </div>
                 <div id="tab-pending" class="tab-content">
                     <div th:if="${pendingApplications != null and !pendingApplications.isEmpty()}" class="divide-y divide-gray-50">
-                        <a th:each="app : ${pendingApplications}"
-                           th:href="@{/caregiver/board/{id}(id=${app.helpRequest.id})}"
-                           class="p-5 flex items-start gap-4 hover:bg-gray-50 transition-colors block">
+                        <div th:each="app : ${pendingApplications}" class="p-5 flex items-start gap-4">
                             <div class="w-9 h-9 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
                                  th:text="${app.helpRequest.requester.fullName != null ? #strings.substring(app.helpRequest.requester.fullName, 0, 1) : '?'}">김</div>
                             <div class="flex-1 min-w-0">
-                                <div class="flex items-start justify-between gap-2">
-                                    <div>
-                                        <p class="text-sm font-semibold text-gray-900" th:text="${app.helpRequest.title}">제목</p>
-                                        <p class="text-xs text-gray-500 mt-0.5"
-                                           th:text="${(app.helpRequest.requester.fullName != null ? app.helpRequest.requester.fullName : '익명') + ' · ' + app.helpRequest.sido + ' ' + app.helpRequest.sigungu}">이름 · 지역</p>
+                                <a th:href="@{/caregiver/board/{id}(id=${app.helpRequest.id})}" class="block hover:opacity-80 transition-opacity">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-900" th:text="${app.helpRequest.title}">제목</p>
+                                            <p class="text-xs text-gray-500 mt-0.5"
+                                               th:text="${(app.helpRequest.requester.fullName != null ? app.helpRequest.requester.fullName : '익명') + ' · ' + app.helpRequest.sido + ' ' + app.helpRequest.sigungu}">이름 · 지역</p>
+                                        </div>
+                                        <span class="px-2 py-0.5 bg-amber-50 text-amber-600 text-xs font-medium rounded-full flex-shrink-0">응답 대기</span>
                                     </div>
-                                    <span class="px-2 py-0.5 bg-amber-50 text-amber-600 text-xs font-medium rounded-full flex-shrink-0">응답 대기</span>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
-                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                    <span th:text="${#temporals.format(app.helpRequest.desiredStartDatetime, 'yyyy.MM.dd HH:mm')}">일시</span>
-                                </p>
+                                    <p class="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <span th:text="${#temporals.format(app.helpRequest.desiredStartDatetime, 'yyyy.MM.dd HH:mm')}">일시</span>
+                                    </p>
+                                </a>
+                                <form th:action="@{/caregiver/board/applications/{aid}/withdraw(aid=${app.id})}"
+                                      method="post" class="mt-2"
+                                      onsubmit="return confirm('지원을 취소하시겠습니까?')">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button type="submit"
+                                            class="text-xs text-red-500 border border-red-200 rounded-lg px-3 py-1 hover:bg-red-50 transition-all">
+                                        지원 취소
+                                    </button>
+                                </form>
                             </div>
-                        </a>
+                        </div>
                     </div>
                     <div th:if="${pendingApplications == null or pendingApplications.isEmpty()}"
                          class="py-10 text-center text-sm text-gray-400">대기 중인 신청이 없어요</div>
                 </div>
                 <div id="tab-accepted" class="tab-content hidden">
                     <div th:if="${acceptedApplications != null and !acceptedApplications.isEmpty()}" class="divide-y divide-gray-50">
-                        <a th:each="app : ${acceptedApplications}"
-                           th:href="@{/caregiver/board/{id}(id=${app.helpRequest.id})}"
-                           class="p-5 flex items-start gap-4 hover:bg-gray-50 transition-colors block">
+                        <div th:each="app : ${acceptedApplications}" class="p-5 flex items-start gap-4">
                             <div class="w-9 h-9 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
                                  th:text="${app.helpRequest.requester.fullName != null ? #strings.substring(app.helpRequest.requester.fullName, 0, 1) : '?'}">김</div>
                             <div class="flex-1 min-w-0">
-                                <div class="flex items-start justify-between gap-2">
-                                    <div>
-                                        <p class="text-sm font-semibold text-gray-900" th:text="${app.helpRequest.title}">제목</p>
-                                        <p class="text-xs text-gray-500 mt-0.5"
-                                           th:text="${(app.helpRequest.requester.fullName != null ? app.helpRequest.requester.fullName : '익명') + ' · ' + app.helpRequest.sido + ' ' + app.helpRequest.sigungu}">이름 · 지역</p>
+                                <a th:href="@{/caregiver/board/{id}(id=${app.helpRequest.id})}" class="block hover:opacity-80 transition-opacity">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-900" th:text="${app.helpRequest.title}">제목</p>
+                                            <p class="text-xs text-gray-500 mt-0.5"
+                                               th:text="${(app.helpRequest.requester.fullName != null ? app.helpRequest.requester.fullName : '익명') + ' · ' + app.helpRequest.sido + ' ' + app.helpRequest.sigungu}">이름 · 지역</p>
+                                        </div>
+                                        <span class="px-2 py-0.5 bg-teal-50 text-teal-600 text-xs font-medium rounded-full flex-shrink-0">확정</span>
                                     </div>
-                                    <span class="px-2 py-0.5 bg-teal-50 text-teal-600 text-xs font-medium rounded-full flex-shrink-0">확정</span>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
-                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                    <span th:text="${#temporals.format(app.helpRequest.desiredStartDatetime, 'yyyy.MM.dd HH:mm')}">일시</span>
-                                </p>
+                                    <p class="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <span th:text="${#temporals.format(app.helpRequest.desiredStartDatetime, 'yyyy.MM.dd HH:mm')}">일시</span>
+                                    </p>
+                                </a>
+                                <form th:action="@{/caregiver/board/applications/{aid}/withdraw(aid=${app.id})}"
+                                      method="post" class="mt-2"
+                                      onsubmit="return confirm('매칭을 취소하시겠습니까?\n취소하면 게시물이 마감되며 재매칭이 불가합니다.')">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button type="submit"
+                                            class="text-xs text-red-500 border border-red-200 rounded-lg px-3 py-1 hover:bg-red-50 transition-all">
+                                        매칭 취소
+                                    </button>
+                                </form>
                             </div>
-                        </a>
+                        </div>
                     </div>
                     <div th:if="${acceptedApplications == null or acceptedApplications.isEmpty()}"
                          class="py-10 text-center text-sm text-gray-400">확정된 신청이 없어요</div>
@@ -736,11 +754,16 @@
     function toggleAvailability() {
         const btn = document.getElementById('availability-toggle');
         const knob = document.getElementById('toggle-knob');
-        const isOn = btn.classList.contains('bg-teal-500');
-        btn.classList.toggle('bg-teal-500', !isOn);
-        btn.classList.toggle('bg-gray-300', isOn);
-        knob.style.right = isOn ? 'auto' : '0.125rem';
-        knob.style.left = isOn ? '0.125rem' : 'auto';
+        fetch('/api/profile/caregiver/availability/toggle', { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                const isOn = data.status === 'AVAILABLE';
+                btn.classList.toggle('bg-teal-500', isOn);
+                btn.classList.toggle('bg-gray-300', !isOn);
+                knob.classList.toggle('translate-x-6', isOn);
+                knob.classList.toggle('translate-x-0', !isOn);
+            })
+            .catch(() => alert('상태 변경에 실패했습니다. 다시 시도해주세요.'));
     }
 
     // 탈퇴 모달

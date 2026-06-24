@@ -76,6 +76,20 @@ public class AuthController {
             return "register/step1";
         }
 
+        // 이메일 인증 확인 (인증 후 1시간 이내만 유효)
+        String verifiedEmail = (String) session.getAttribute("emailVerified");
+        java.time.LocalDateTime verifiedAt = (java.time.LocalDateTime) session.getAttribute("emailVerifiedAt");
+        boolean verifyExpired = verifiedAt == null || verifiedAt.isBefore(java.time.LocalDateTime.now().minusHours(1));
+        if (verifiedEmail == null || !verifiedEmail.equalsIgnoreCase(basicInfo.getEmail()) || verifyExpired) {
+            session.removeAttribute("emailVerified");
+            session.removeAttribute("emailVerifiedAt");
+            model.addAttribute("userType", type);
+            model.addAttribute("emailVerifyError", verifyExpired && verifiedEmail != null
+                    ? "이메일 인증이 만료되었습니다. 다시 인증해 주세요."
+                    : "이메일 인증을 완료해 주세요.");
+            return "register/step1";
+        }
+
         if (userService.existsByEmail(basicInfo.getEmail())) {
             bindingResult.rejectValue("email", "duplicate", "이미 사용 중인 이메일입니다.");
             model.addAttribute("userType", type);
@@ -246,7 +260,10 @@ public class AuthController {
             }
 
             session.removeAttribute(REGISTRATION_SESSION_KEY);
-            return "redirect:/";
+            session.removeAttribute("emailVerified");
+            session.removeAttribute("emailVerifiedAt");
+            redirectAttributes.addFlashAttribute("registeredType", type);
+            return "redirect:/register/complete";
 
         } catch (Exception e) {
             log.error("회원가입 실패: {}", e.getMessage(), e);
@@ -254,6 +271,13 @@ public class AuthController {
                     "회원가입 처리 중 오류가 발생했습니다: " + e.getMessage());
             return "redirect:/register/" + type + "/step4";
         }
+    }
+
+    @GetMapping("/complete")
+    public String completePage(@ModelAttribute("registeredType") String registeredType,
+                               org.springframework.ui.Model model) {
+        model.addAttribute("userType", registeredType);
+        return "register/complete";
     }
 
     // ─── 세션 유틸 ───────────────────────────────────────────────────────────────

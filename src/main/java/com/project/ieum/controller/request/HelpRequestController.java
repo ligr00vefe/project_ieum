@@ -74,7 +74,7 @@ public class HelpRequestController {
         }
         matchingService.apply(requestId, applyRequest);
         redirectAttributes.addFlashAttribute("message", "지원이 완료되었습니다. 대화방에서 사전 상담을 이어갈 수 있습니다.");
-        return "redirect:/me";
+        return "redirect:/caregiver/mypage";
     }
 
     @GetMapping("/my/requests")
@@ -129,7 +129,7 @@ public class HelpRequestController {
     public String withdraw(@PathVariable Long applicationId, RedirectAttributes redirectAttributes) {
         matchingService.withdraw(applicationId);
         redirectAttributes.addFlashAttribute("message", "지원을 취소했습니다.");
-        return "redirect:/me";
+        return "redirect:/caregiver/mypage";
     }
 
     @PostMapping("/requests/{requestId}/start")

@@ -17,11 +17,12 @@
         <div class="p-7 sm:p-8">
 
             <div class="mb-7">
-                <h1 class="text-xl font-bold text-gray-900">도움 요청 작성</h1>
+                <h1 class="text-xl font-bold text-gray-900" th:text="${editMode} ? '도움 요청 수정' : '도움 요청 작성'">도움 요청 작성</h1>
                 <p class="text-sm text-gray-500 mt-1">필요한 도움 내용을 자세히 작성해주세요.</p>
             </div>
 
-            <form th:action="@{/disabled/board/create}" th:object="${form}" method="post" class="space-y-6">
+            <form th:action="${editMode} ? @{/disabled/board/{id}/edit(id=${requestId})} : @{/disabled/board/create}"
+                  th:object="${form}" method="post" class="space-y-6">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
                 <!-- 제목 -->
