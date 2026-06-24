@@ -4,9 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication
+@EnableAsync
 public class IeumApplication {
 
 	private static final Logger log = LoggerFactory.getLogger(IeumApplication.class);

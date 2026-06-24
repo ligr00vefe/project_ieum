@@ -1,6 +1,8 @@
 package com.project.ieum.controller;
 
 import com.project.ieum.entity.User;
+import com.project.ieum.entity.caregiver.CaregiverAvailabilityStatus;
+import com.project.ieum.repository.CaregiverProfileRepository;
 import com.project.ieum.repository.UserRepository;
 import com.project.ieum.service.UserService;
 import com.project.ieum.util.ImageThumbUtil;
@@ -31,6 +33,7 @@ public class ProfileImageController {
 
     private final UserRepository userRepository;
     private final UserService userService;
+    private final CaregiverProfileRepository caregiverProfileRepository;
 
     /** 프리셋 이미지 폴더 스캔 — user_ 파일 제외, 알파벳 순 정렬 */
     private List<String> scanPresetImages() {
@@ -94,6 +97,20 @@ public class ProfileImageController {
                 "profileImageUrl", url,
                 "thumbUrl", thumbUrl != null ? thumbUrl : ""
         ));
+    }
+
+    /** 활동지원사 활동 상태 토글 (AVAILABLE ↔ OFFLINE) */
+    @PostMapping("/caregiver/availability/toggle")
+    public ResponseEntity<?> toggleAvailability(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        var profile = caregiverProfileRepository.findById(user.getId())
+                .orElseThrow(() -> new IllegalStateException("케어기버 프로필이 없습니다."));
+        CaregiverAvailabilityStatus next = profile.getAvailabilityStatus() == CaregiverAvailabilityStatus.AVAILABLE
+                ? CaregiverAvailabilityStatus.OFFLINE
+                : CaregiverAvailabilityStatus.AVAILABLE;
+        profile.changeAvailability(next);
+        caregiverProfileRepository.save(profile);
+        return ResponseEntity.ok(Map.of("status", next.name()));
     }
 
     /** 커스텀 업로드 이미지 삭제 */

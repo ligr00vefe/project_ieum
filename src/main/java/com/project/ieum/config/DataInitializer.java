@@ -1,6 +1,7 @@
 package com.project.ieum.config;
 
 import com.project.ieum.entity.*;
+import com.project.ieum.entity.caregiver.CaregiverAvailability;
 import com.project.ieum.entity.caregiver.CaregiverPersonalityTag;
 import com.project.ieum.entity.caregiver.CaregiverProfile;
 import com.project.ieum.entity.conversation.Conversation;
@@ -40,6 +41,7 @@ public class DataInitializer implements CommandLineRunner {
     private final UserCommunicationMethodRepository userCommunicationMethodRepository;
     private final UserPersonalityTagRepository userPersonalityTagRepository;
     private final CaregiverPersonalityTagRepository caregiverPersonalityTagRepository;
+    private final CaregiverAvailabilityRepository caregiverAvailabilityRepository;
     private final HelpRequestRepository helpRequestRepository;
     private final HelpRequestApplicationRepository helpRequestApplicationRepository;
     private final ConversationRepository conversationRepository;
@@ -359,6 +361,16 @@ public class DataInitializer implements CommandLineRunner {
                     .forEach(t -> caregiverPersonalityTagRepository.save(
                             CaregiverPersonalityTag.builder().caregiver(profile).tag(t).build()));
 
+            // 더미 가용시간: 월~일 전일(0~6, 08:00~22:00)
+            for (short day = 0; day <= 6; day++) {
+                caregiverAvailabilityRepository.save(CaregiverAvailability.builder()
+                        .caregiver(profile)
+                        .dayOfWeek(day)
+                        .startTime(java.time.LocalTime.of(8, 0))
+                        .endTime(java.time.LocalTime.of(22, 0))
+                        .build());
+            }
+
             log.info("더미 활동지원사 계정 생성 완료 - email={}", dc.email());
         }
     }
@@ -448,9 +460,9 @@ public class DataInitializer implements CommandLineRunner {
         helpRequestRepository.save(buildRequest(d04, scMap.get("SC006"),
                 "노원구 마트 장보기 지원", "대형마트 쇼핑 및 귀가 보조입니다. 짐 운반도 도움이 필요합니다.",
                 LocalDateTime.of(2026, 6, 30, 11, 0), LocalDateTime.of(2026, 6, 30, 14, 0),
-                "서울 노원구 동일로 1238", null, "서울특별시", "노원구", "월계동", "01796",
+                "서울특별시 노원구 동일로 1238", null, "서울특별시", "노원구", "월계동", "01796",
                 new BigDecimal("37.617559"), new BigDecimal("127.063050"),
-                "서울 노원구 화랑로 393", "서울 노원구 동일로 1238",
+                "서울특별시 노원구 화랑로 393", "서울특별시 노원구 동일로 1238",
                 null, HelpRequestStatus.OPEN));
 
         helpRequestRepository.save(buildRequest(d05, scMap.get("SC003"),

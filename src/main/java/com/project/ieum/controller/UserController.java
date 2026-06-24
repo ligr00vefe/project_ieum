@@ -366,8 +366,8 @@ public class UserController {
             redirectAttributes.addFlashAttribute("errorMessage", "새 비밀번호가 일치하지 않습니다.");
             return "redirect:/mypage/password";
         }
-        if (newPassword.length() < 8) {
-            redirectAttributes.addFlashAttribute("errorMessage", "비밀번호는 8자 이상이어야 합니다.");
+        if (!newPassword.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")) {
+            redirectAttributes.addFlashAttribute("errorMessage", "비밀번호는 영문·숫자·특수문자(@$!%*#?&)를 포함한 8자 이상이어야 합니다.");
             return "redirect:/mypage/password";
         }
         try {
