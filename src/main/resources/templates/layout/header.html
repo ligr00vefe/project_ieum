@@ -22,26 +22,31 @@
                 <nav class="hidden md:flex items-center gap-1" aria-label="주요 메뉴">
                     <a th:href="@{/board}"
                        th:classappend="${currentUri.startsWith('/board') or currentUri.startsWith('/disabled/board') or currentUri.startsWith('/caregiver/board')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                       th:attr="aria-current=${(currentUri.startsWith('/board') or currentUri.startsWith('/disabled/board') or currentUri.startsWith('/caregiver/board')) ? 'page' : null}"
                        class="px-3.5 py-2 text-sm font-medium rounded-lg transition-all">
                         매칭게시판
                     </a>
-<a th:href="@{/safe-meeting}"
+                    <a th:href="@{/safe-meeting}"
                        th:classappend="${currentUri.startsWith('/safe-meeting')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                       th:attr="aria-current=${currentUri.startsWith('/safe-meeting') ? 'page' : null}"
                        class="px-3.5 py-2 text-sm font-medium rounded-lg transition-all">
                         첫만남 안심가이드
                     </a>
                     <a th:href="@{/how-to-use}"
                        th:classappend="${currentUri.startsWith('/how-to-use')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                       th:attr="aria-current=${currentUri.startsWith('/how-to-use') ? 'page' : null}"
                        class="px-3.5 py-2 text-sm font-medium rounded-lg transition-all">
                         이용방법
                     </a>
                     <a th:href="@{/inquiries}"
                        th:classappend="${currentUri.startsWith('/inquiries')} ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                       th:attr="aria-current=${currentUri.startsWith('/inquiries') ? 'page' : null}"
                        class="px-3.5 py-2 text-sm font-medium rounded-lg transition-all">
                         문의
                     </a>
                     <a th:href="@{/market}"
                        th:classappend="${currentUri.startsWith('/market')} ? 'text-orange-500 bg-orange-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+                       th:attr="aria-current=${currentUri.startsWith('/market') ? 'page' : null}"
                        class="px-3.5 py-2 text-sm font-medium rounded-lg transition-all">
                         이음마켓
                     </a>

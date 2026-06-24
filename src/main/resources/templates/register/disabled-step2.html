@@ -30,22 +30,34 @@
         <div class="w-full max-w-lg">
 
             <!-- Step indicator -->
-            <div class="flex items-center gap-2 mb-6 px-1">
+            <nav aria-label="가입 단계" class="mb-6 px-1">
+                <ol class="flex items-center gap-2 w-full list-none p-0 m-0">
                 <th:block th:each="i : ${#numbers.sequence(1, 4)}">
+                    <li class="flex-shrink-0" th:attr="aria-current=${i == 2} ? 'step' : null">
                     <div th:classappend="${i == 2} ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' : (${i < 2} ? 'bg-indigo-200 text-indigo-600' : 'bg-gray-200 text-gray-400')"
-                         class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all flex-shrink-0">
+                         class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all">
                         <th:block th:if="${i < 2}">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
                             </svg>
+                            <span class="sr-only" th:text="'단계 ' + ${i} + ' 완료'"></span>
                         </th:block>
-                        <th:block th:if="${i >= 2}" th:text="${i}"></th:block>
+                        <th:block th:if="${i == 2}">
+                            <span th:text="${i}" aria-hidden="true"></span>
+                            <span class="sr-only">단계 2 현재</span>
+                        </th:block>
+                        <th:block th:if="${i > 2}">
+                            <span th:text="${i}" aria-hidden="true"></span>
+                            <span class="sr-only" th:text="'단계 ' + ${i}"></span>
+                        </th:block>
                     </div>
-                    <div th:if="${i < 4}"
-                         th:classappend="${i < 2} ? 'bg-indigo-300' : 'bg-gray-200'"
-                         class="flex-1 h-0.5 min-w-[2rem] rounded-full"></div>
+                    </li>
+                    <li th:if="${i < 4}" aria-hidden="true"
+                        th:classappend="${i < 2} ? 'bg-indigo-300' : 'bg-gray-200'"
+                        class="flex-1 h-0.5 min-w-[2rem] rounded-full"></li>
                 </th:block>
-            </div>
+                </ol>
+            </nav>
 
             <!-- Card -->
             <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
