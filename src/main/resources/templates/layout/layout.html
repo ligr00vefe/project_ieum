@@ -8,28 +8,37 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <!-- Canonical -->
-    <link rel="canonical" th:href="${canonical != null ? canonical : 'https://ieumcare.shop' + #httpServletRequest.requestURI}">
+    <link rel="canonical" th:href="${canonical != null ? canonical : 'https://ieumcare.shop' + requestURI}">
     <!-- SEO -->
-    <meta name="description" th:content="${description != null ? description : '케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼'}">
+    <meta name="keywords" content="이음, 이음케어, 이음 케어, ieum, ieumcare, ieum care, 케어 매칭, care match, 케어 매칭 플랫폼, 활동지원사, 케어메이트, 장애인 활동 지원, 돌봄 서비스">
+    <meta name="description" th:content="${description != null ? description : '케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼 - 이음(ieum)'}">
     <!-- Open Graph -->
     <meta property="og:type"        content="website">
-    <meta property="og:site_name"   content="이음 Care Match">
-    <meta property="og:url"         th:content="${canonical != null ? canonical : 'https://ieumcare.shop' + #httpServletRequest.requestURI}">
-    <meta property="og:title"       th:content="${ogTitle != null ? ogTitle : (title != null ? title + ' - 이음' : '이음 Care Match')}">
-    <meta property="og:description" th:content="${ogDescription != null ? ogDescription : (description != null ? description : '케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼')}">
+    <meta property="og:site_name"   content="이음">
+    <meta property="og:url"         th:content="${canonical != null ? canonical : 'https://ieumcare.shop' + requestURI}">
+    <meta property="og:title"       th:content="${ogTitle != null ? ogTitle : (title != null ? title + ' - 이음' : '이음')}">
+    <meta property="og:description" th:content="${ogDescription != null ? ogDescription : (description != null ? description : '케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼 - 이음(ieum)')}">
     <meta property="og:image"       th:content="${ogImage != null ? ogImage : 'https://ieumcare.shop/images/og-default.png'}">
     <!-- Twitter Card -->
     <meta name="twitter:card"        content="summary_large_image">
-    <meta name="twitter:title"       th:content="${ogTitle != null ? ogTitle : (title != null ? title + ' - 이음' : '이음 Care Match')}">
-    <meta name="twitter:description" th:content="${description != null ? description : '케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼'}">
+    <meta name="twitter:title"       th:content="${ogTitle != null ? ogTitle : (title != null ? title + ' - 이음' : '이음')}">
+    <meta name="twitter:description" th:content="${description != null ? description : '케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼 - 이음(ieum)'}">
     <meta name="twitter:image"       th:content="${ogImage != null ? ogImage : 'https://ieumcare.shop/images/og-default.png'}">
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <!-- TMap JS SDK — 공식 권장대로 head에 정적 로드. 정적 <script>는 파싱 중 실행되어
          SDK 내부의 document.write가 정상 동작한다(동적 삽입 시 차단·미정의 위험).
          tmapAppKey를 model에 담은 페이지에서만 로드. -->
-    <script th:if="${tmapAppKey != null and !tmapAppKey.isEmpty()}"
+    <script th:if="${loadTmapSdk == true and tmapAppKey != null and !tmapAppKey.isEmpty()}"
             th:src="@{https://apis.openapi.sk.com/tmap/jsv2(version=1,appKey=${tmapAppKey})}"></script>
+    <script th:if="${kakaoMapKey != null and !kakaoMapKey.isEmpty()}" th:inline="javascript">
+    (function() {
+        var kakaoKey = /*[[${kakaoMapKey}]]*/ '';
+        var s = document.createElement('script');
+        s.src = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey=' + kakaoKey;
+        document.head.appendChild(s);
+    })();
+    </script>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col">
 
