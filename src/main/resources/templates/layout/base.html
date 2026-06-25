@@ -10,20 +10,21 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <!-- Canonical -->
-    <link rel="canonical" th:href="'https://ieumcare.shop' + #httpServletRequest.requestURI">
+    <link rel="canonical" th:href="'https://ieumcare.shop' + ${requestURI}">
     <!-- SEO -->
-    <meta name="description" th:content="${description != null ? description : '케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼'}">
+    <meta name="keywords" content="이음, 이음케어, 이음 케어, ieum, ieumcare, ieum care, 케어 매칭, care match, 케어 매칭 플랫폼, 활동지원사, 케어메이트, 장애인 활동 지원, 돌봄 서비스">
+    <meta name="description" th:content="${description != null ? description : '케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼 - 이음(ieum)'}">
     <!-- Open Graph -->
     <meta property="og:type"        content="website">
-    <meta property="og:site_name"   content="이음 Care Match">
-    <meta property="og:url"         th:content="'https://ieumcare.shop' + #httpServletRequest.requestURI">
+    <meta property="og:site_name"   content="이음">
+    <meta property="og:url"         th:content="'https://ieumcare.shop' + ${requestURI}">
     <meta property="og:title"       th:content="${pageTitle} + ' | 이음'">
-    <meta property="og:description" th:content="${description != null ? description : '케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼'}">
+    <meta property="og:description" th:content="${description != null ? description : '케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼 - 이음(ieum)'}">
     <meta property="og:image"       content="https://ieumcare.shop/images/og-default.png">
     <!-- Twitter Card -->
     <meta name="twitter:card"        content="summary_large_image">
     <meta name="twitter:title"       th:content="${pageTitle} + ' | 이음'">
-    <meta name="twitter:description" th:content="${description != null ? description : '케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼'}">
+    <meta name="twitter:description" th:content="${description != null ? description : '케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼 - 이음(ieum)'}">
     <meta name="twitter:image"       content="https://ieumcare.shop/images/og-default.png">
 </head>
 <body th:fragment="body(content)" class="min-h-screen bg-[#f6f7ff] text-slate-900">
