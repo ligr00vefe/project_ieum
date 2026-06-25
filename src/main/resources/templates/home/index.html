@@ -1,188 +1,176 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="content">
 
 <style>
-@keyframes float-a { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-@keyframes float-b { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-@keyframes node-glow { 0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.5)} 50%{box-shadow:0 0 0 14px rgba(99,102,241,0)} }
-.fc1{animation:float-a 7s ease-in-out infinite}
-.fc2{animation:float-b 7s ease-in-out infinite 2s}
-.mesh{background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:48px 48px}
+@import url('https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap');
 
-/* Story animation */
-.s-card{opacity:0;transform:translateX(-28px);transition:opacity .7s ease,transform .7s ease}
-.s-card.r{transform:translateX(28px)}
-.s-card.on{opacity:1!important;transform:translateX(0)!important}
-.s-node{opacity:0;transform:scale(.4);transition:opacity .5s ease,transform .5s ease .1s}
-.s-node.on{opacity:1;transform:scale(1)}
+.font-banner { font-family: 'Jua', 'Noto Sans KR', sans-serif; letter-spacing: -0.01em; }
 
-/* Section fade-up */
 .fade-up{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease}
 .fade-up.visible{opacity:1;transform:translateY(0)}
-.fade-up.delay-1{transition-delay:.1s}
-.fade-up.delay-2{transition-delay:.2s}
-.fade-up.delay-3{transition-delay:.3s}
-.fade-up.delay-4{transition-delay:.4s}
-.fade-up.delay-5{transition-delay:.5s}
+.fade-up.delay-1{transition-delay:.1s}.fade-up.delay-2{transition-delay:.2s}
+.fade-up.delay-3{transition-delay:.3s}.fade-up.delay-4{transition-delay:.4s}
+
+/* Story zigzag */
+.s-card{opacity:0;transform:translateX(-40px);transition:opacity .7s ease,transform .7s ease}
+.s-card.r{transform:translateX(40px)}
+.s-card.on{opacity:1!important;transform:translateX(0)!important}
+.s-node{opacity:0;transform:scale(.3);transition:opacity .5s ease,transform .5s ease .1s}
+.s-node.on{opacity:1;transform:scale(1)}
+@keyframes node-glow{0%,100%{box-shadow:0 0 0 0 rgba(94,234,212,.75)}50%{box-shadow:0 0 0 22px rgba(94,234,212,0)}}
+.s-node.on > div { animation: node-glow 2.2s ease-in-out infinite; }
+
+/* Testimonials: CSS marquee infinite scroll */
+.testi-col{flex:1;overflow:hidden;position:relative;}
+.testi-track{display:flex;flex-direction:column;gap:16px;will-change:transform;}
+@keyframes marquee-up{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+@keyframes marquee-down{from{transform:translateY(-50%)}to{transform:translateY(0)}}
+.track-up{animation:marquee-up 28s linear infinite;}
+.track-down{animation:marquee-down 24s linear infinite;}
+.testi-col:hover .testi-track{animation-play-state:paused;}
 </style>
 
 <!-- ===== HERO ===== -->
-<section class="relative bg-[#0c0c24] overflow-hidden">
-    <div class="mesh absolute inset-0"></div>
-    <div class="absolute -top-32 right-1/3 w-[500px] h-[500px] bg-indigo-700 rounded-full blur-[140px] opacity-20 pointer-events-none"></div>
-    <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-teal-600 rounded-full blur-[120px] opacity-15 pointer-events-none"></div>
-
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-36">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-
-            <!-- Left copy -->
-            <div>
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-500/15 border border-indigo-500/25 text-indigo-300 text-xs font-semibold rounded-full mb-8 tracking-widest uppercase">
-                    <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse"></span>
-                    신뢰할 수 있는 케어 매칭 플랫폼
-                </div>
-                <h1 class="flex flex-col gap-3 text-5xl sm:text-6xl xl:text-[4.5rem] font-black text-white tracking-tight mb-7">
-                    <span>마음으로</span>
-                    <span class="bg-gradient-to-r from-indigo-400 via-violet-400 to-teal-400 bg-clip-text text-transparent">연결되는</span>
-                    <span>케어 파트너</span>
-                </h1>
-                <p class="text-[1.05rem] text-gray-400 leading-relaxed mb-11 max-w-[420px]">
-                    이음은 케어메이트와 활동지원사를<br class="hidden sm:block">
-                    성향 기반 AI 매칭으로 연결합니다.<br class="hidden sm:block">
-                    전문성과 따뜻함, 두 가지를 모두 경험하세요.
-                </p>
-
-                <!-- CTA buttons -->
-                <div class="flex flex-col sm:flex-row gap-3 mb-14">
-                    <th:block th:if="${!isAuthenticated}">
-                        <a th:href="@{/register/type-select}"
-                           class="inline-flex items-center justify-center gap-2 px-7 py-4 bg-indigo-500 text-white font-bold text-[15px] rounded-2xl hover:bg-indigo-400 active:scale-95 transition-all shadow-2xl shadow-indigo-500/30">
-                            지금 무료로 시작하기
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                        </a>
-                        <a th:href="@{/inquiries}"
-                           class="inline-flex items-center justify-center px-7 py-4 border border-white/15 text-white/70 font-semibold text-[15px] rounded-2xl hover:bg-white/8 hover:border-white/30 active:scale-95 transition-all">
-                            문의하기
-                        </a>
-                    </th:block>
-                    <th:block th:if="${isUser}">
-                        <a th:href="@{/disabled/board/create}"
-                           class="inline-flex items-center justify-center gap-2 px-7 py-4 bg-indigo-500 text-white font-bold text-[15px] rounded-2xl hover:bg-indigo-400 active:scale-95 transition-all shadow-2xl shadow-indigo-500/30">
-                            활동 요청 작성하기
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                        </a>
-                    </th:block>
-                    <th:block th:if="${isCaregiver}">
-                        <a th:href="@{/requests/list}"
-                           class="inline-flex items-center justify-center gap-2 px-7 py-4 bg-teal-500 text-white font-bold text-[15px] rounded-2xl hover:bg-teal-400 active:scale-95 transition-all shadow-2xl shadow-teal-500/30">
-                            매칭게시판
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                        </a>
-                        <a th:href="@{/matching}"
-                           class="inline-flex items-center justify-center px-7 py-4 border border-white/15 text-white/70 font-semibold text-[15px] rounded-2xl hover:bg-white/8 hover:border-white/30 active:scale-95 transition-all">
-                            매칭 현황 보기
-                        </a>
-                    </th:block>
-                </div>
-
-                <!-- Stats -->
-                <div class="flex items-center gap-4 sm:gap-8 pt-6 sm:pt-8 border-t border-white/8">
-                    <div><div class="text-xl sm:text-3xl font-black text-white leading-none"><span class="stat-counter" data-target="2500">0</span><span class="text-indigo-400">+</span></div><div class="text-[10px] sm:text-xs text-gray-500 mt-0.5 font-medium whitespace-nowrap">등록 케어메이트</div></div>
-                    <div class="w-px h-8 sm:h-10 bg-white/10 flex-shrink-0"></div>
-                    <div><div class="text-xl sm:text-3xl font-black text-white leading-none"><span class="stat-counter" data-target="1200">0</span><span class="text-indigo-400">+</span></div><div class="text-[10px] sm:text-xs text-gray-500 mt-0.5 font-medium whitespace-nowrap">활동지원사</div></div>
-                    <div class="w-px h-8 sm:h-10 bg-white/10 flex-shrink-0"></div>
-                    <div><div class="text-xl sm:text-3xl font-black text-white leading-none"><span class="stat-counter" data-target="98">0</span><span class="text-indigo-400">%</span></div><div class="text-[10px] sm:text-xs text-gray-500 mt-0.5 font-medium whitespace-nowrap">매칭 만족도</div></div>
-                </div>
+<section class="relative overflow-hidden min-h-[92vh] flex items-center">
+    <div class="absolute inset-0">
+        <img src="/images/main/hero.jpg" alt="" class="w-full h-full object-cover object-center" aria-hidden="true">
+        <div class="absolute inset-0 bg-gradient-to-r from-teal-900/85 via-teal-800/50 to-teal-700/15"></div>
+    </div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-36 w-full">
+        <div class="max-w-2xl">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-white/15 border border-white/30 text-white text-xs font-semibold rounded-full mb-8 tracking-widest uppercase backdrop-blur-sm">
+                <span class="w-1.5 h-1.5 bg-teal-300 rounded-full animate-pulse"></span>
+                신뢰할 수 있는 케어 매칭 플랫폼
             </div>
-
-            <!-- Right floating cards -->
-            <div class="hidden lg:block relative h-[420px]">
-                <div class="fc1 absolute top-2 right-6 w-[280px] bg-white/8 backdrop-blur-xl border border-white/15 rounded-3xl p-5 shadow-2xl">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-11 h-11 bg-indigo-500/25 rounded-2xl flex items-center justify-center text-xl flex-shrink-0">👤</div>
-                        <div><div class="text-white font-semibold text-sm">이○○ 님</div><div class="text-white/40 text-xs">지체장애 · 서울 강남구</div></div>
-                        <span class="ml-auto px-2.5 py-1 bg-green-500/20 text-green-400 text-xs font-semibold rounded-full border border-green-500/20 whitespace-nowrap">매칭완료</span>
-                    </div>
-                    <div class="flex flex-wrap gap-1.5">
-                        <span class="px-2.5 py-1 bg-indigo-500/20 text-indigo-300 text-xs rounded-lg font-medium border border-indigo-500/15">이동보조</span>
-                        <span class="px-2.5 py-1 bg-indigo-500/20 text-indigo-300 text-xs rounded-lg font-medium border border-indigo-500/15">병원 동행</span>
-                        <span class="px-2.5 py-1 bg-white/8 text-white/40 text-xs rounded-lg font-medium">매뉴얼 형</span>
-                    </div>
-                </div>
-
-                <div class="absolute top-[46%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-                    <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-500/50">
-                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
-                    </div>
-                </div>
-
-                <div class="fc2 absolute bottom-4 left-4 w-[280px] bg-white/8 backdrop-blur-xl border border-white/15 rounded-3xl p-5 shadow-2xl">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-11 h-11 bg-teal-500/25 rounded-2xl flex items-center justify-center text-xl flex-shrink-0">👩‍⚕️</div>
-                        <div><div class="text-white font-semibold text-sm">박○○ 활동지원사</div><div class="text-white/40 text-xs">경력 5년 · 사회복지사 2급</div></div>
-                        <div class="ml-auto flex items-center gap-1 flex-shrink-0">
-                            <svg class="w-3.5 h-3.5 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                            <span class="text-xs font-bold text-white">4.9</span>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap gap-1.5">
-                        <span class="px-2.5 py-1 bg-teal-500/20 text-teal-300 text-xs rounded-lg font-medium border border-teal-500/15">친절함</span>
-                        <span class="px-2.5 py-1 bg-teal-500/20 text-teal-300 text-xs rounded-lg font-medium border border-teal-500/15">전문성</span>
-                        <span class="px-2.5 py-1 bg-white/8 text-white/40 text-xs rounded-lg font-medium">오전 가능</span>
-                    </div>
-                </div>
-
-                <div class="absolute top-[38%] right-0 bg-indigo-600/90 backdrop-blur border border-indigo-400/30 text-white px-5 py-3 rounded-2xl shadow-2xl text-center">
-                    <div class="text-2xl font-black">94%</div>
-                    <div class="text-[10px] font-medium text-indigo-300">매칭률</div>
-                </div>
+            <h1 class="font-banner flex flex-col gap-1 text-5xl sm:text-6xl xl:text-7xl text-white tracking-tight mb-8 leading-[1.08]">
+                <span>마음으로</span>
+                <span class="text-teal-300">연결되는</span>
+                <span>케어 파트너</span>
+            </h1>
+            <p class="text-[1.1rem] text-white/80 leading-relaxed mb-11 max-w-[460px]">
+                이음은 케어메이트와 활동지원사를<br class="hidden sm:block">
+                성향 기반 AI 매칭으로 연결합니다.<br class="hidden sm:block">
+                전문성과 따뜻함, 두 가지를 모두 경험하세요.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 mb-14">
+                <th:block th:if="${!isAuthenticated}">
+                    <a th:href="@{/register/type-select}" class="inline-flex items-center justify-center gap-2 px-7 py-4 bg-teal-500 text-white font-bold text-[15px] rounded-2xl hover:bg-teal-400 active:scale-95 transition-all shadow-2xl shadow-teal-900/40">
+                        지금 무료로 시작하기
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                    <a th:href="@{/inquiries}" class="inline-flex items-center justify-center px-7 py-4 border border-white/30 text-white font-semibold text-[15px] rounded-2xl hover:bg-white/15 active:scale-95 transition-all backdrop-blur-sm">문의하기</a>
+                </th:block>
+                <th:block th:if="${isUser}">
+                    <a th:href="@{/disabled/board/create}" class="inline-flex items-center justify-center gap-2 px-7 py-4 bg-teal-500 text-white font-bold text-[15px] rounded-2xl hover:bg-teal-400 active:scale-95 transition-all shadow-2xl shadow-teal-900/40">
+                        활동 요청 작성하기<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                    </a>
+                </th:block>
+                <th:block th:if="${isCaregiver}">
+                    <a th:href="@{/requests/list}" class="inline-flex items-center justify-center gap-2 px-7 py-4 bg-teal-500 text-white font-bold text-[15px] rounded-2xl hover:bg-teal-400 active:scale-95 transition-all shadow-2xl shadow-teal-900/40">
+                        매칭게시판<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                    </a>
+                    <a th:href="@{/matching}" class="inline-flex items-center justify-center px-7 py-4 border border-white/30 text-white font-semibold text-[15px] rounded-2xl hover:bg-white/15 active:scale-95 transition-all backdrop-blur-sm">매칭 현황 보기</a>
+                </th:block>
+            </div>
+            <div class="flex items-center gap-4 sm:gap-8 pt-6 sm:pt-8 border-t border-white/20">
+                <div><div class="text-xl sm:text-3xl font-black text-white leading-none"><span class="stat-counter" data-target="2500">0</span><span class="text-teal-300">+</span></div><div class="text-[10px] sm:text-xs text-white/60 mt-0.5 font-medium whitespace-nowrap">등록 케어메이트</div></div>
+                <div class="w-px h-8 sm:h-10 bg-white/20 flex-shrink-0"></div>
+                <div><div class="text-xl sm:text-3xl font-black text-white leading-none"><span class="stat-counter" data-target="1200">0</span><span class="text-teal-300">+</span></div><div class="text-[10px] sm:text-xs text-white/60 mt-0.5 font-medium whitespace-nowrap">활동지원사</div></div>
+                <div class="w-px h-8 sm:h-10 bg-white/20 flex-shrink-0"></div>
+                <div><div class="text-xl sm:text-3xl font-black text-white leading-none"><span class="stat-counter" data-target="98">0</span><span class="text-teal-300">%</span></div><div class="text-[10px] sm:text-xs text-white/60 mt-0.5 font-medium whitespace-nowrap">매칭 만족도</div></div>
             </div>
         </div>
     </div>
-
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-70">
+        <div class="w-px h-10 bg-white/40 animate-pulse"></div>
+        <span class="text-white/50 text-[10px] tracking-widest uppercase">Scroll</span>
+    </div>
 </section>
 
 <!-- ===== FEATURES ===== -->
-<section class="py-20 lg:py-28 bg-[#07071a] relative overflow-hidden">
-    <div class="mesh absolute inset-0 opacity-40"></div>
-    <div class="absolute top-0 left-1/4 w-[400px] h-[400px] bg-indigo-800 rounded-full blur-[120px] opacity-10 pointer-events-none"></div>
-    <div class="absolute bottom-0 right-1/4 w-80 h-80 bg-teal-800 rounded-full blur-[100px] opacity-10 pointer-events-none"></div>
+<section class="py-20 lg:py-28 bg-white relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-teal-50 rounded-full blur-3xl opacity-60 pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-16 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 fade-up">
             <div>
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-indigo-500/15 border border-indigo-500/25 text-indigo-400 text-xs font-semibold rounded-full mb-5 uppercase tracking-widest">이음의 특징</div>
-                <h2 class="flex flex-col gap-2 text-4xl sm:text-5xl font-black text-white">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-teal-50 border border-teal-200 text-teal-700 text-xs font-semibold rounded-full mb-5 uppercase tracking-widest">이음의 특징</div>
+                <h2 class="font-banner flex flex-col gap-2 text-4xl sm:text-5xl text-gray-900 leading-[1.2]">
                     <span>이음이</span>
-                    <span class="text-transparent bg-gradient-to-r from-indigo-400 to-teal-400 bg-clip-text">다른 이유</span>
+                    <span class="text-teal-500">다른 이유</span>
                 </h2>
             </div>
-            <p class="text-gray-400 lg:text-right text-base leading-relaxed max-w-xs">단순한 중개를 넘어,<br>진정한 연결을 만들어갑니다</p>
+            <p class="text-gray-500 lg:text-right text-base leading-relaxed max-w-xs">단순한 중개를 넘어,<br>진정한 연결을 만들어갑니다</p>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-px bg-white/5 rounded-3xl overflow-hidden border border-white/5 fade-up delay-2">
-            <div class="bg-[#07071a] p-10 group hover:bg-indigo-950/70 transition-colors duration-300 cursor-default">
-                <div class="text-[88px] font-black text-indigo-500/10 leading-none mb-1 select-none group-hover:text-indigo-500/20 transition-colors duration-300">01</div>
-                <h3 class="text-2xl font-bold text-white mb-3">성향 기반 매칭</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">단순 조건이 아닌 성향과 라이프스타일을 분석해 최적의 파트너를 추천합니다.</p>
-                <div class="mt-6 w-8 h-0.5 bg-indigo-500 group-hover:w-20 transition-all duration-500"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="fade-up bg-gray-50 border border-gray-100 p-8 rounded-3xl group hover:bg-teal-50 hover:border-teal-200 transition-all duration-300 cursor-default">
+                <div class="w-12 h-12 bg-teal-100 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-teal-200 transition-colors">
+                    <svg class="w-6 h-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">성향 기반 매칭</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">단순 조건이 아닌 성향과 라이프스타일을 분석해 최적의 파트너를 추천합니다.</p>
+                <div class="mt-6 w-8 h-0.5 bg-teal-400 group-hover:w-16 transition-all duration-500"></div>
             </div>
-            <div class="bg-[#07071a] p-10 group hover:bg-teal-950/70 transition-colors duration-300 cursor-default">
-                <div class="text-[88px] font-black text-teal-500/10 leading-none mb-1 select-none group-hover:text-teal-500/20 transition-colors duration-300">02</div>
-                <h3 class="text-2xl font-bold text-white mb-3">실시간 1:1 채팅</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">매칭 전 충분한 소통으로 서로를 파악하고 신뢰를 쌓은 후 케어를 시작하세요.</p>
-                <div class="mt-6 w-8 h-0.5 bg-teal-500 group-hover:w-20 transition-all duration-500"></div>
+            <div class="fade-up delay-2 bg-gray-50 border border-gray-100 p-8 rounded-3xl group hover:bg-teal-50 hover:border-teal-200 transition-all duration-300 cursor-default">
+                <div class="w-12 h-12 bg-teal-100 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-teal-200 transition-colors">
+                    <svg class="w-6 h-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">실시간 1:1 채팅</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">매칭 전 충분한 소통으로 서로를 파악하고 신뢰를 쌓은 후 케어를 시작하세요.</p>
+                <div class="mt-6 w-8 h-0.5 bg-teal-400 group-hover:w-16 transition-all duration-500"></div>
             </div>
-            <div class="bg-[#07071a] p-10 group hover:bg-amber-950/50 transition-colors duration-300 cursor-default">
-                <div class="text-[88px] font-black text-amber-500/10 leading-none mb-1 select-none group-hover:text-amber-500/20 transition-colors duration-300">03</div>
-                <h3 class="text-2xl font-bold text-white mb-3">투명한 리뷰</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">활동 완료 후 상호 리뷰로 신뢰도를 높이고, 다음 매칭에서 더 나은 선택을 할 수 있습니다.</p>
-                <div class="mt-6 w-8 h-0.5 bg-amber-500 group-hover:w-20 transition-all duration-500"></div>
+            <div class="fade-up bg-gray-50 border border-gray-100 p-8 rounded-3xl group hover:bg-amber-50 hover:border-amber-200 transition-all duration-300 cursor-default">
+                <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-amber-200 transition-colors">
+                    <svg class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">투명한 리뷰</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">활동 완료 후 상호 리뷰로 신뢰도를 높이고, 다음 매칭에서 더 나은 선택을 할 수 있습니다.</p>
+                <div class="mt-6 w-8 h-0.5 bg-amber-400 group-hover:w-16 transition-all duration-500"></div>
             </div>
-            <div class="bg-[#07071a] p-10 group hover:bg-rose-950/50 transition-colors duration-300 cursor-default">
-                <div class="text-[88px] font-black text-rose-500/10 leading-none mb-1 select-none group-hover:text-rose-500/20 transition-colors duration-300">04</div>
-                <h3 class="text-2xl font-bold text-white mb-3">유연한 일정 관리</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">캘린더 기반으로 가능한 시간대를 설정하고, 일정 변경도 간편하게 관리하세요.</p>
-                <div class="mt-6 w-8 h-0.5 bg-rose-500 group-hover:w-20 transition-all duration-500"></div>
+            <div class="fade-up delay-2 bg-gray-50 border border-gray-100 p-8 rounded-3xl group hover:bg-rose-50 hover:border-rose-200 transition-all duration-300 cursor-default">
+                <div class="w-12 h-12 bg-rose-100 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-rose-200 transition-colors">
+                    <svg class="w-6 h-6 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">유연한 일정 관리</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">캘린더 기반으로 가능한 시간대를 설정하고, 일정 변경도 간편하게 관리하세요.</p>
+                <div class="mt-6 w-8 h-0.5 bg-rose-400 group-hover:w-16 transition-all duration-500"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== PHOTO — care01 + care02 ===== -->
+<section class="relative py-20 lg:py-28 overflow-hidden bg-teal-500">
+    <div class="absolute inset-0 pointer-events-none" style="background-image:radial-gradient(circle,rgba(255,255,255,0.2) 1.5px,transparent 1.5px);background-size:28px 28px;opacity:0.45;"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <div class="fade-up">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/20 border border-white/30 text-white text-xs font-semibold rounded-full mb-6 uppercase tracking-widest">함께하는 이음</div>
+                <h2 class="font-banner text-4xl sm:text-5xl text-white mb-6 leading-[1.2]">
+                    케어메이트와<br><span class="text-teal-200">활동지원사가</span><br>만나는 곳
+                </h2>
+                <p class="text-teal-50 text-[1.05rem] leading-relaxed mb-8">
+                    이음은 케어가 필요한 분과 도움을 드리고 싶은 분이 서로를 신뢰하며 만나는 플랫폼입니다. 성향 기반 매칭으로 처음 만나도 편안하게 시작할 수 있습니다.
+                </p>
+                <div class="flex items-center gap-6">
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-white leading-none"><span class="stat-counter2" data-target="94">0</span><span class="text-white">%</span></div>
+                        <div class="text-xs text-teal-100 mt-1">매칭 성공률</div>
+                    </div>
+                    <div class="w-px h-10 bg-white/30"></div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-white leading-none"><span class="stat-counter2" data-target="4">0</span><span class="text-white">.9</span></div>
+                        <div class="text-xs text-teal-100 mt-1">평균 만족도</div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 fade-up delay-3">
+                <div class="rounded-2xl overflow-hidden aspect-[3/4] shadow-2xl">
+                    <img src="/images/main/care01.jpg" alt="케어 현장" class="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-700">
+                </div>
+                <div class="rounded-2xl overflow-hidden aspect-[3/4] shadow-2xl mt-8">
+                    <img src="/images/main/care02.jpg" alt="케어 현장" class="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-700">
+                </div>
             </div>
         </div>
     </div>
@@ -192,289 +180,317 @@
 <section class="py-20 lg:py-28 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-14 fade-up">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-amber-50 text-amber-600 text-xs font-semibold rounded-full mb-4 uppercase tracking-widest">서비스 유형</div>
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">다양한 케어 서비스</h2>
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-teal-50 text-teal-700 text-xs font-semibold rounded-full mb-4 uppercase tracking-widest">서비스 유형</div>
+            <h2 class="font-banner text-3xl sm:text-4xl text-gray-900 mb-4 leading-[1.2]">다양한 케어 서비스</h2>
             <p class="text-gray-500 text-lg max-w-xl mx-auto">필요한 도움을 정확하게 연결해드립니다</p>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 fade-up delay-2">
-            <div class="flex flex-col items-center p-5 bg-slate-50 rounded-2xl hover:bg-indigo-50 hover:shadow-lg hover:shadow-indigo-100/60 hover:-translate-y-0.5 transition-all cursor-default group"><div class="text-3xl mb-3 group-hover:scale-110 transition-transform">🚶</div><span class="text-sm font-semibold text-gray-700 group-hover:text-indigo-600 text-center">이동 보조</span><span class="text-xs text-gray-400 mt-1 text-center">이동, 외출 동행</span></div>
-            <div class="flex flex-col items-center p-5 bg-slate-50 rounded-2xl hover:bg-indigo-50 hover:shadow-lg hover:shadow-indigo-100/60 hover:-translate-y-0.5 transition-all cursor-default group"><div class="text-3xl mb-3 group-hover:scale-110 transition-transform">🏥</div><span class="text-sm font-semibold text-gray-700 group-hover:text-indigo-600 text-center">병원 동행</span><span class="text-xs text-gray-400 mt-1 text-center">병원 방문 동행</span></div>
-            <div class="flex flex-col items-center p-5 bg-slate-50 rounded-2xl hover:bg-indigo-50 hover:shadow-lg hover:shadow-indigo-100/60 hover:-translate-y-0.5 transition-all cursor-default group"><div class="text-3xl mb-3 group-hover:scale-110 transition-transform">🏠</div><span class="text-sm font-semibold text-gray-700 group-hover:text-indigo-600 text-center">일상 생활</span><span class="text-xs text-gray-400 mt-1 text-center">가사, 생활 보조</span></div>
-            <div class="flex flex-col items-center p-5 bg-slate-50 rounded-2xl hover:bg-indigo-50 hover:shadow-lg hover:shadow-indigo-100/60 hover:-translate-y-0.5 transition-all cursor-default group"><div class="text-3xl mb-3 group-hover:scale-110 transition-transform">💬</div><span class="text-sm font-semibold text-gray-700 group-hover:text-indigo-600 text-center">의사소통 보조</span><span class="text-xs text-gray-400 mt-1 text-center">소통 지원</span></div>
-            <div class="flex flex-col items-center p-5 bg-slate-50 rounded-2xl hover:bg-indigo-50 hover:shadow-lg hover:shadow-indigo-100/60 hover:-translate-y-0.5 transition-all cursor-default group"><div class="text-3xl mb-3 group-hover:scale-110 transition-transform">📅</div><span class="text-sm font-semibold text-gray-700 group-hover:text-indigo-600 text-center">장기 케어</span><span class="text-xs text-gray-400 mt-1 text-center">정기적 장기 지원</span></div>
-            <div class="flex flex-col items-center p-5 bg-slate-50 rounded-2xl hover:bg-indigo-50 hover:shadow-lg hover:shadow-indigo-100/60 hover:-translate-y-0.5 transition-all cursor-default group"><div class="text-3xl mb-3 group-hover:scale-110 transition-transform">🌙</div><span class="text-sm font-semibold text-gray-700 group-hover:text-indigo-600 text-center">야간 보호</span><span class="text-xs text-gray-400 mt-1 text-center">야간 상주 케어</span></div>
+            <div class="flex flex-col items-center p-5 bg-slate-50 rounded-2xl hover:bg-teal-50 hover:shadow-lg hover:shadow-teal-100/60 hover:-translate-y-0.5 transition-all cursor-default group"><div class="text-3xl mb-3 group-hover:scale-110 transition-transform">🚶</div><span class="text-sm font-semibold text-gray-700 group-hover:text-teal-700 text-center">이동 보조</span><span class="text-xs text-gray-400 mt-1 text-center">이동, 외출 동행</span></div>
+            <div class="flex flex-col items-center p-5 bg-slate-50 rounded-2xl hover:bg-teal-50 hover:shadow-lg hover:shadow-teal-100/60 hover:-translate-y-0.5 transition-all cursor-default group"><div class="text-3xl mb-3 group-hover:scale-110 transition-transform">🏥</div><span class="text-sm font-semibold text-gray-700 group-hover:text-teal-700 text-center">병원 동행</span><span class="text-xs text-gray-400 mt-1 text-center">병원 방문 동행</span></div>
+            <div class="flex flex-col items-center p-5 bg-slate-50 rounded-2xl hover:bg-teal-50 hover:shadow-lg hover:shadow-teal-100/60 hover:-translate-y-0.5 transition-all cursor-default group"><div class="text-3xl mb-3 group-hover:scale-110 transition-transform">🏠</div><span class="text-sm font-semibold text-gray-700 group-hover:text-teal-700 text-center">일상 생활</span><span class="text-xs text-gray-400 mt-1 text-center">가사, 생활 보조</span></div>
+            <div class="flex flex-col items-center p-5 bg-slate-50 rounded-2xl hover:bg-teal-50 hover:shadow-lg hover:shadow-teal-100/60 hover:-translate-y-0.5 transition-all cursor-default group"><div class="text-3xl mb-3 group-hover:scale-110 transition-transform">💬</div><span class="text-sm font-semibold text-gray-700 group-hover:text-teal-700 text-center">의사소통 보조</span><span class="text-xs text-gray-400 mt-1 text-center">소통 지원</span></div>
+            <div class="flex flex-col items-center p-5 bg-slate-50 rounded-2xl hover:bg-teal-50 hover:shadow-lg hover:shadow-teal-100/60 hover:-translate-y-0.5 transition-all cursor-default group"><div class="text-3xl mb-3 group-hover:scale-110 transition-transform">📅</div><span class="text-sm font-semibold text-gray-700 group-hover:text-teal-700 text-center">장기 케어</span><span class="text-xs text-gray-400 mt-1 text-center">정기적 장기 지원</span></div>
+            <div class="flex flex-col items-center p-5 bg-slate-50 rounded-2xl hover:bg-teal-50 hover:shadow-lg hover:shadow-teal-100/60 hover:-translate-y-0.5 transition-all cursor-default group"><div class="text-3xl mb-3 group-hover:scale-110 transition-transform">🌙</div><span class="text-sm font-semibold text-gray-700 group-hover:text-teal-700 text-center">야간 보호</span><span class="text-xs text-gray-400 mt-1 text-center">야간 상주 케어</span></div>
         </div>
     </div>
 </section>
 
-<!-- ===== 이음마켓 소개 ===== -->
-<section class="py-20 lg:py-32 bg-slate-50 overflow-hidden">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-
-            <!-- Left: text -->
-            <div class="relative">
-                <div class="absolute -top-12 -left-12 w-56 h-56 bg-orange-100 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
-                <div class="relative fade-up">
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-orange-100 text-orange-600 text-xs font-semibold rounded-full mb-6 uppercase tracking-widest">이음마켓</div>
-                    <h2 class="flex flex-col gap-2 text-4xl sm:text-5xl font-black text-gray-900 mb-6">
-                        <span>처치곤란 장애인 용품,</span>
-                        <span><span class="text-orange-500">버리지 말고</span></span>
-                        <span>이음마켓에 올려보세요</span>
-                    </h2>
-                    <p class="text-gray-500 text-[1.05rem] leading-relaxed mb-8">
-                        성장하거나 장애 종류가 바뀌면 금방 안 쓰게 되는 보조기구, 특수 기기, 복지 용품들 — 일반 중고 플랫폼에선 수요가 없어 방치되던 물건들이 이음마켓에서는 반드시 필요한 누군가를 만납니다.
-                    </p>
-                    <ul class="space-y-5 mb-10">
-                        <li class="flex items-start gap-4">
-                            <div class="w-8 h-8 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            </div>
-                            <div>
-                                <p class="font-bold text-gray-900 mb-0.5">자주 교체되는 장애인 보조용품</p>
-                                <p class="text-sm text-gray-500">성장·장애 변화로 수개월 만에 용도가 바뀌는 휠체어, 보조기구, 특수 침대 등을 거래하세요.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-4">
-                            <div class="w-8 h-8 bg-teal-100 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg class="w-4 h-4 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            </div>
-                            <div>
-                                <p class="font-bold text-gray-900 mb-0.5">판매 + 나눔 모두 가능</p>
-                                <p class="text-sm text-gray-500">비용을 회수하고 싶다면 판매로, 그냥 나누고 싶다면 나눔으로 올리면 됩니다.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-4">
-                            <div class="w-8 h-8 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            </div>
-                            <div>
-                                <p class="font-bold text-gray-900 mb-0.5">케어 현장을 아는 사람끼리 거래</p>
-                                <p class="text-sm text-gray-500">이음 회원 간 거래라 물건 상태와 용도를 정확히 이해합니다. 설명이 통하는 신뢰 거래.</p>
-                            </div>
-                        </li>
-                    </ul>
-                    <a th:href="@{/market}" class="inline-flex items-center gap-2.5 bg-orange-500 hover:bg-orange-600 transition-colors text-white font-bold px-7 py-4 rounded-2xl shadow-lg shadow-orange-200 active:scale-95">
-                        이음마켓 바로가기
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Right: category highlights -->
-            <div class="relative">
-                <div class="absolute -bottom-8 -right-8 w-40 h-40 bg-teal-100 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
-                <div class="relative grid grid-cols-2 gap-4 fade-up delay-3">
-                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-3">
-                        <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-2xl">♿</div>
-                        <p class="font-bold text-gray-900 text-sm">이동 보조기구</p>
-                        <p class="text-xs text-gray-400 leading-relaxed">전동·수동 휠체어, 보행기, 스쿠터</p>
-                    </div>
-                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-3">
-                        <div class="w-12 h-12 bg-teal-50 rounded-xl flex items-center justify-center text-2xl">🛏️</div>
-                        <p class="font-bold text-gray-900 text-sm">특수 침대·가구</p>
-                        <p class="text-xs text-gray-400 leading-relaxed">전동 침대, 이동형 리프트, 욕창 매트</p>
-                    </div>
-                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-3">
-                        <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-2xl">👂</div>
-                        <p class="font-bold text-gray-900 text-sm">감각 보조기기</p>
-                        <p class="text-xs text-gray-400 leading-relaxed">보청기, 점자 단말기, 의사소통 기기</p>
-                    </div>
-                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-3">
-                        <div class="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-2xl">🪑</div>
-                        <p class="font-bold text-gray-900 text-sm">아동 특수용품</p>
-                        <p class="text-xs text-gray-400 leading-relaxed">자세 보조의자, 기립훈련기, 보조도구</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ===== SCROLL STORY — ZIGZAG SVG ===== -->
-<section class="relative bg-[#07071a] py-28 lg:py-36 overflow-hidden">
-    <div class="mesh absolute inset-0 opacity-60"></div>
-    <div class="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-indigo-800 rounded-full blur-[140px] opacity-15 pointer-events-none"></div>
-    <div class="absolute bottom-1/4 right-1/3 w-96 h-96 bg-teal-700 rounded-full blur-[120px] opacity-15 pointer-events-none"></div>
+<!-- ===== STORY ZIGZAG ===== -->
+<section class="relative py-28 lg:py-36 overflow-hidden bg-teal-500">
+    <div class="absolute inset-0 pointer-events-none" style="background-image:radial-gradient(circle,rgba(255,255,255,0.2) 1.5px,transparent 1.5px);background-size:28px 28px;opacity:0.45;"></div>
+    <div class="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full blur-[180px] opacity-20 pointer-events-none" style="background:radial-gradient(circle,#fff 0%,transparent 70%)"></div>
+    <div class="absolute bottom-10 right-20 w-72 h-72 rounded-full blur-[100px] opacity-10 pointer-events-none" style="background:radial-gradient(circle,#fff 0%,transparent 70%)"></div>
+    <!-- Decorative concentric rings -->
+    <svg class="absolute -right-28 -top-28 w-[420px] h-[420px] pointer-events-none" viewBox="0 0 420 420" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="210" cy="210" r="209" stroke="rgba(255,255,255,0.12)" stroke-width="1"/><circle cx="210" cy="210" r="148" stroke="rgba(255,255,255,0.08)" stroke-width="1"/><circle cx="210" cy="210" r="88" stroke="rgba(255,255,255,0.14)" stroke-width="1"/></svg>
+    <svg class="absolute left-8 bottom-8 w-52 h-52 pointer-events-none" viewBox="0 0 208 208" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="104" cy="104" r="103" stroke="rgba(255,255,255,0.10)" stroke-width="1"/><circle cx="104" cy="104" r="60" stroke="rgba(255,255,255,0.08)" stroke-width="1"/></svg>
 
     <div class="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-24">
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 text-xs font-semibold rounded-full mb-5 uppercase tracking-widest">이음 이야기</div>
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">이음이 걸어온 길</h2>
-            <p class="text-gray-400 text-lg">사람과 사람을 연결하는 따뜻한 플랫폼의 가치</p>
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-white/20 border border-white/30 text-white text-xs font-semibold rounded-full mb-5 uppercase tracking-widest">이음 이야기</div>
+            <h2 class="font-banner text-3xl sm:text-4xl text-white mb-4 leading-[1.2]">이음이 이어온 길</h2>
+            <p class="text-teal-100 text-lg">사람과 사람을 연결하는 따뜻한 플랫폼의 가치</p>
         </div>
 
-        <!-- Timeline: nodes at alternating 17% / 83% of container -->
         <div class="relative" id="storyContainer">
-
-            <!-- SVG drawn by JS -->
             <svg id="storySvg" class="absolute inset-0 pointer-events-none" style="width:100%;height:100%;overflow:visible">
                 <defs>
                     <linearGradient id="zg" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="#6366f1"/>
-                        <stop offset="50%" stop-color="#14b8a6"/>
-                        <stop offset="100%" stop-color="#a78bfa"/>
+                        <stop offset="0%"   stop-color="#14b8a6"/>
+                        <stop offset="50%"  stop-color="#2dd4bf"/>
+                        <stop offset="100%" stop-color="#5eead4"/>
                     </linearGradient>
                     <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="4" result="blur"/>
+                        <feGaussianBlur stdDeviation="5" result="blur"/>
                         <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
                     </filter>
                 </defs>
-                <!-- dim background path -->
-                <path id="sBg"  fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2"/>
-                <!-- glow layer -->
-                <path id="sGlow" fill="none" stroke="url(#zg)" stroke-width="10" stroke-linecap="round" opacity="0.2" filter="url(#glow)"/>
-                <!-- main animated path -->
-                <path id="sLine" fill="none" stroke="url(#zg)" stroke-width="2.5" stroke-linecap="round" filter="url(#glow)"/>
+                <!-- Segment 1 thin → Segment 3 thick -->
+                <path id="sBg1"   fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+                <path id="sGlow1" fill="none" stroke="url(#zg)" stroke-width="24" stroke-linecap="round" opacity="0.15" filter="url(#glow)"/>
+                <path id="sLine1" fill="none" stroke="url(#zg)" stroke-width="5" stroke-linecap="round" filter="url(#glow)"/>
+                <path id="sBg2"   fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+                <path id="sGlow2" fill="none" stroke="url(#zg)" stroke-width="40" stroke-linecap="round" opacity="0.13" filter="url(#glow)"/>
+                <path id="sLine2" fill="none" stroke="url(#zg)" stroke-width="8"   stroke-linecap="round" filter="url(#glow)"/>
+                <path id="sBg3"   fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+                <path id="sGlow3" fill="none" stroke="url(#zg)" stroke-width="56" stroke-linecap="round" opacity="0.12" filter="url(#glow)"/>
+                <path id="sLine3" fill="none" stroke="url(#zg)" stroke-width="12"   stroke-linecap="round" filter="url(#glow)"/>
             </svg>
 
-            <!-- Step 1 — card LEFT, node at ~17% -->
+            <!-- Step 1 — node 8%, card right -->
             <div class="relative min-h-[200px] flex items-center mb-28">
-                <!-- Node absolutely at 17% -->
-                <div class="s-node absolute z-10" style="left:17%;top:50%;transform:translate(-50%,-50%)">
-                    <div class="w-14 h-14 bg-indigo-600 rounded-full flex items-center justify-center shadow-2xl shadow-indigo-500/60" style="animation:node-glow 2.5s ease-in-out infinite">
+                <div class="s-node absolute z-10" style="left:8%;top:50%;transform:translate(-50%,-50%)">
+                    <div class="w-14 h-14 bg-teal-500 rounded-full flex items-center justify-center shadow-2xl shadow-teal-300/60">
                         <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                     </div>
                 </div>
-                <!-- Card: starts after node, goes right -->
-                <div class="s-card w-[55%] ml-[28%]">
-                    <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-7 hover:border-indigo-500/40 hover:bg-indigo-900/20 transition-all duration-500">
-                        <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Step 01</span>
-                        <h3 class="text-xl font-bold text-white mt-2 mb-3">신뢰를 쌓다</h3>
-                        <p class="text-sm text-gray-400 leading-relaxed">서로 다른 필요를 가진 사람들이 만나 신뢰를 쌓고 진정한 파트너십을 만들어 갑니다.</p>
+                <div class="s-card w-[62%] ml-[20%]">
+                    <div class="bg-white border border-teal-100 rounded-3xl p-7 shadow-sm hover:border-teal-300 hover:shadow-md transition-all duration-500">
+                        <span class="text-[10px] font-bold text-teal-500 uppercase tracking-widest">Step 01</span>
+                        <h3 class="text-xl font-bold text-gray-900 mt-2 mb-3">신뢰를 쌓다</h3>
+                        <p class="text-sm text-gray-500 leading-relaxed">서로 다른 필요를 가진 사람들이 만나 신뢰를 쌓고 진정한 파트너십을 만들어 갑니다.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Step 2 — card RIGHT, node at ~83% -->
+            <!-- Step 2 — node 92%, card left -->
             <div class="relative min-h-[200px] flex items-center mb-28">
-                <!-- Card: starts from left, ends before node -->
-                <div class="s-card r w-[55%] mr-[28%]">
-                    <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-7 hover:border-teal-500/40 hover:bg-teal-900/20 transition-all duration-500">
+                <div class="s-card r w-[62%] mr-[20%]">
+                    <div class="bg-white border border-teal-100 rounded-3xl p-7 shadow-sm hover:border-teal-300 hover:shadow-md transition-all duration-500">
                         <span class="text-[10px] font-bold text-teal-400 uppercase tracking-widest">Step 02</span>
-                        <h3 class="text-xl font-bold text-white mt-2 mb-3">전문성을 더하다</h3>
-                        <p class="text-sm text-gray-400 leading-relaxed">성향 분석과 AI 매칭 기술로 서로에게 가장 잘 맞는 파트너를 찾아드립니다.</p>
+                        <h3 class="text-xl font-bold text-gray-900 mt-2 mb-3">전문성을 더하다</h3>
+                        <p class="text-sm text-gray-500 leading-relaxed">성향 분석과 AI 매칭 기술로 서로에게 가장 잘 맞는 파트너를 찾아드립니다.</p>
                     </div>
                 </div>
-                <!-- Node at 83% -->
-                <div class="s-node absolute z-10" style="left:83%;top:50%;transform:translate(-50%,-50%)">
-                    <div class="w-14 h-14 bg-teal-500 rounded-full flex items-center justify-center shadow-2xl shadow-teal-500/60">
+                <div class="s-node absolute z-10" style="left:92%;top:50%;transform:translate(-50%,-50%)">
+                    <div class="w-14 h-14 bg-teal-400 rounded-full flex items-center justify-center shadow-2xl shadow-teal-300/60">
                         <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                     </div>
                 </div>
             </div>
 
-            <!-- Step 3 — card LEFT, node at ~17% -->
+            <!-- Step 3 — node 8%, card right -->
             <div class="relative min-h-[200px] flex items-center mb-28">
-                <div class="s-node absolute z-10" style="left:17%;top:50%;transform:translate(-50%,-50%)">
-                    <div class="w-14 h-14 bg-amber-500 rounded-full flex items-center justify-center shadow-2xl shadow-amber-500/60">
+                <div class="s-node absolute z-10" style="left:8%;top:50%;transform:translate(-50%,-50%)">
+                    <div class="w-14 h-14 bg-amber-500 rounded-full flex items-center justify-center shadow-2xl shadow-amber-300/60">
                         <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     </div>
                 </div>
-                <div class="s-card w-[55%] ml-[28%]">
-                    <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-7 hover:border-amber-500/40 hover:bg-amber-900/10 transition-all duration-500">
-                        <span class="text-[10px] font-bold text-amber-400 uppercase tracking-widest">Step 03</span>
-                        <h3 class="text-xl font-bold text-white mt-2 mb-3">변화를 만들다</h3>
-                        <p class="text-sm text-gray-400 leading-relaxed">단 한 번의 매칭이 삶을 바꿉니다. 이음은 오늘도 더 많은 연결을 위해 나아갑니다.</p>
+                <div class="s-card w-[62%] ml-[20%]">
+                    <div class="bg-white border border-teal-100 rounded-3xl p-7 shadow-sm hover:border-amber-200 hover:shadow-md transition-all duration-500">
+                        <span class="text-[10px] font-bold text-amber-500 uppercase tracking-widest">Step 03</span>
+                        <h3 class="text-xl font-bold text-gray-900 mt-2 mb-3">변화를 만들다</h3>
+                        <p class="text-sm text-gray-500 leading-relaxed">단 한 번의 매칭이 삶을 바꿉니다. 이음은 오늘도 더 많은 연결을 위해 나아갑니다.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Step 4 — card RIGHT, node at ~83% -->
+            <!-- Step 4 — node 92%, card left -->
             <div class="relative min-h-[200px] flex items-center">
-                <div class="s-card r w-[55%] mr-[28%]">
-                    <div class="bg-gradient-to-br from-indigo-900/50 to-teal-900/30 backdrop-blur-sm border border-indigo-500/30 rounded-3xl p-7 transition-all duration-500">
-                        <span class="text-[10px] font-bold text-violet-400 uppercase tracking-widest">Step 04</span>
-                        <h3 class="text-xl font-bold text-white mt-2 mb-3">함께 성장하다</h3>
-                        <p class="text-sm text-gray-400 leading-relaxed">이음과 함께한 모든 순간이 모여 더 따뜻한 사회를 만들어 갑니다. 지금 여러분의 이음 이야기를 시작하세요.</p>
+                <div class="s-card r w-[62%] mr-[20%]">
+                    <div class="bg-gradient-to-br from-teal-50 to-white border border-teal-200 rounded-3xl p-7 shadow-sm hover:shadow-md transition-all duration-500">
+                        <span class="text-[10px] font-bold text-teal-500 uppercase tracking-widest">Step 04</span>
+                        <h3 class="text-xl font-bold text-gray-900 mt-2 mb-3">함께 성장하다</h3>
+                        <p class="text-sm text-gray-500 leading-relaxed">이음과 함께한 모든 순간이 모여 더 따뜻한 사회를 만들어 갑니다. 지금 여러분의 이음 이야기를 시작하세요.</p>
                     </div>
                 </div>
-                <div class="s-node absolute z-10" style="left:83%;top:50%;transform:translate(-50%,-50%)">
-                    <div class="w-14 h-14 rounded-full flex items-center justify-center shadow-2xl shadow-violet-500/60" style="background:linear-gradient(135deg,#6366f1,#14b8a6)">
+                <div class="s-node absolute z-10" style="left:92%;top:50%;transform:translate(-50%,-50%)">
+                    <div class="w-14 h-14 rounded-full flex items-center justify-center shadow-2xl shadow-teal-300/60" style="background:linear-gradient(135deg,#14b8a6,#2dd4bf)">
                         <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                     </div>
                 </div>
             </div>
-
-        </div><!-- /storyContainer -->
+        </div>
     </div>
 </section>
 
-<!-- ===== TESTIMONIALS ===== -->
-<section class="py-20 lg:py-28 bg-gradient-to-br from-indigo-700 to-indigo-900 overflow-hidden relative">
-    <div class="absolute top-10 left-10 w-48 h-48 bg-white rounded-full blur-3xl opacity-5 pointer-events-none"></div>
-    <div class="absolute bottom-10 right-10 w-64 h-64 bg-teal-300 rounded-full blur-3xl opacity-10 pointer-events-none"></div>
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-14 fade-up">
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">이음을 경험한 분들의 이야기</h2>
-            <p class="text-indigo-200 text-lg">실제 이용자들이 전하는 솔직한 후기</p>
+<!-- ===== 이음마켓 ===== -->
+<section class="py-20 lg:py-32 bg-white overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+            <div class="relative fade-up">
+                <div class="absolute -top-12 -left-12 w-56 h-56 bg-orange-100 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+                <div class="relative">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-orange-100 text-orange-600 text-xs font-semibold rounded-full mb-6 uppercase tracking-widest">이음마켓</div>
+                    <h2 class="font-banner flex flex-col gap-2 text-4xl sm:text-5xl text-gray-900 mb-6 leading-[1.2]">
+                        <span>처치곤란 장애인 용품,</span>
+                        <span><span class="text-orange-500">버리지 말고</span></span>
+                        <span>이음마켓에 올려보세요</span>
+                    </h2>
+                    <p class="text-gray-500 text-[1.05rem] leading-relaxed mb-8">성장하거나 장애 종류가 바뀌면 금방 안 쓰게 되는 보조기구, 특수 기기, 복지 용품들 — 일반 중고 플랫폼에선 수요가 없어 방치되던 물건들이 이음마켓에서는 반드시 필요한 누군가를 만납니다.</p>
+                    <ul class="space-y-5 mb-10">
+                        <li class="flex items-start gap-4"><div class="w-8 h-8 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"><svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div><div><p class="font-bold text-gray-900 mb-0.5">자주 교체되는 장애인 보조용품</p><p class="text-sm text-gray-500">성장·장애 변화로 수개월 만에 용도가 바뀌는 휠체어, 보조기구, 특수 침대 등을 거래하세요.</p></div></li>
+                        <li class="flex items-start gap-4"><div class="w-8 h-8 bg-teal-100 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"><svg class="w-4 h-4 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div><div><p class="font-bold text-gray-900 mb-0.5">판매 + 나눔 모두 가능</p><p class="text-sm text-gray-500">비용을 회수하고 싶다면 판매로, 그냥 나누고 싶다면 나눔으로 올리면 됩니다.</p></div></li>
+                        <li class="flex items-start gap-4"><div class="w-8 h-8 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"><svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div><div><p class="font-bold text-gray-900 mb-0.5">케어 현장을 아는 사람끼리 거래</p><p class="text-sm text-gray-500">이음 회원 간 거래라 물건 상태와 용도를 정확히 이해합니다. 설명이 통하는 신뢰 거래.</p></div></li>
+                    </ul>
+                    <a th:href="@{/market}" class="inline-flex items-center gap-2.5 bg-orange-500 hover:bg-orange-600 transition-colors text-white font-bold px-7 py-4 rounded-2xl shadow-lg shadow-orange-200 active:scale-95">
+                        이음마켓 바로가기<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                </div>
+            </div>
+            <div class="relative fade-up delay-3">
+                <div class="absolute -bottom-8 -right-8 w-40 h-40 bg-teal-100 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+                <div class="relative grid grid-cols-2 gap-4">
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-3"><div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-2xl">♿</div><p class="font-bold text-gray-900 text-sm">이동 보조기구</p><p class="text-xs text-gray-400 leading-relaxed">전동·수동 휠체어, 보행기, 스쿠터</p></div>
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-3"><div class="w-12 h-12 bg-teal-50 rounded-xl flex items-center justify-center text-2xl">🛏️</div><p class="font-bold text-gray-900 text-sm">특수 침대·가구</p><p class="text-xs text-gray-400 leading-relaxed">전동 침대, 이동형 리프트, 욕창 매트</p></div>
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-3"><div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-2xl">👂</div><p class="font-bold text-gray-900 text-sm">감각 보조기기</p><p class="text-xs text-gray-400 leading-relaxed">보청기, 점자 단말기, 의사소통 기기</p></div>
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-3"><div class="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-2xl">🪑</div><p class="font-bold text-gray-900 text-sm">아동 특수용품</p><p class="text-xs text-gray-400 leading-relaxed">자세 보조의자, 기립훈련기, 보조도구</p></div>
+                </div>
+            </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-up delay-2">
-            <div class="bg-white/10 backdrop-blur-sm rounded-3xl p-7 border border-white/15">
-                <div class="flex items-center gap-1 mb-5">
-                    <svg class="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    <svg class="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    <svg class="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    <svg class="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    <svg class="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    </div>
+</section>
+
+<!-- ===== TESTIMONIALS — 2컬럼 무한 세로 슬라이드 ===== -->
+<section class="py-20 lg:py-28 overflow-hidden relative bg-teal-500" style="background: linear-gradient(135deg, #0f766e 0%, #14b8a6 40%, #0e9488 70%, #0f766e 100%);">
+    <!-- Flowing pattern overlay -->
+    <div class="absolute inset-0 pointer-events-none" style="background-image:radial-gradient(circle at 15% 30%, rgba(255,255,255,0.08) 0%, transparent 45%), radial-gradient(circle at 85% 70%, rgba(255,255,255,0.06) 0%, transparent 40%), radial-gradient(circle at 50% 5%, rgba(45,212,191,0.2) 0%, transparent 50%);"></div>
+    <div class="absolute inset-0 pointer-events-none opacity-[0.08]" style="background-image: repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 50%); background-size: 24px 24px;"></div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
+
+            <!-- Left: title -->
+            <div class="lg:w-80 flex-shrink-0 fade-up">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/15 border border-white/25 text-white text-xs font-semibold rounded-full mb-6 uppercase tracking-widest">이용 후기</div>
+                <h2 class="font-banner text-4xl sm:text-5xl text-white leading-[1.3] mb-4">
+                    이음을 경험한<br>분들의 이야기
+                </h2>
+                <p class="text-teal-100 text-base leading-relaxed">실제 이용자들이 전하는 솔직한 후기</p>
+                <div class="mt-8 flex items-center gap-3">
+                    <div class="flex gap-0.5">
+                        <svg class="w-5 h-5 text-amber-300 fill-amber-300" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-5 h-5 text-amber-300 fill-amber-300" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-5 h-5 text-amber-300 fill-amber-300" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-5 h-5 text-amber-300 fill-amber-300" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-5 h-5 text-amber-300 fill-amber-300" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </div>
+                    <span class="text-white font-bold">4.9</span>
+                    <span class="text-teal-200 text-sm">/ 5.0</span>
                 </div>
-                <p class="text-white/85 text-sm leading-relaxed mb-6">"성향 매칭이 정말 잘 맞아서 처음 만난 지원사 분과 금방 편해졌어요. 기존 지원사 서비스보다 훨씬 만족스럽습니다."</p>
-                <div class="flex items-center gap-3"><div class="w-9 h-9 bg-indigo-400 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">김</div><div><div class="text-white text-sm font-semibold">김○○ 님</div><div class="text-indigo-200 text-xs">케어메이트</div></div></div>
             </div>
-            <div class="bg-white/10 backdrop-blur-sm rounded-3xl p-7 border border-white/15">
-                <div class="flex items-center gap-1 mb-5">
-                    <svg class="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    <svg class="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    <svg class="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    <svg class="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    <svg class="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+
+                        <!-- Right: 2-column CSS marquee infinite scroll -->
+            <div class="flex-1 flex gap-3" style="mask-image:linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);-webkit-mask-image:linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);overflow:hidden;height:520px;">
+
+                <!-- Column 1: scrolls up -->
+                <div class="testi-col">
+                    <div class="testi-track track-up">
+                        <!-- original set -->
+                        <div class="bg-white rounded-xl p-5 shadow-sm flex flex-col" style="min-height:180px;flex-shrink:0;">
+                            <div class="text-amber-400 text-sm mb-2">★★★★★</div>
+                            <p class="text-gray-700 text-sm leading-relaxed flex-1">"소개해 준 선생님이 아이 특성을 딱 이해해 주셔서 정말 다행이에요."</p>
+                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between"><span class="font-semibold text-gray-900 text-sm">권OO 님</span><span class="text-xs text-teal-600 bg-teal-50 px-2.5 py-1 rounded-lg font-medium">케어 매칭</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 shadow-sm flex flex-col" style="min-height:180px;flex-shrink:0;">
+                            <div class="text-amber-400 text-sm mb-2">★★★★★</div>
+                            <p class="text-gray-700 text-sm leading-relaxed flex-1">"일반 중고마켓에선 못 찾을 전동휠체어를 이음마켓에서 바로 구했어요."</p>
+                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between"><span class="font-semibold text-gray-900 text-sm">류OO 님</span><span class="text-xs text-orange-600 bg-orange-50 px-2.5 py-1 rounded-lg font-medium">이음마켓</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 shadow-sm flex flex-col" style="min-height:180px;flex-shrink:0;">
+                            <div class="text-amber-400 text-sm mb-2">★★★★★</div>
+                            <p class="text-gray-700 text-sm leading-relaxed flex-1">"성향 매칭이 기대 이상이에요. 첫 만남부터 편했고 없어선 안 될 파트너가 됐습니다."</p>
+                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between"><span class="font-semibold text-gray-900 text-sm">강OO 님</span><span class="text-xs text-teal-600 bg-teal-50 px-2.5 py-1 rounded-lg font-medium">케어 매칭</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 shadow-sm flex flex-col" style="min-height:180px;flex-shrink:0;">
+                            <div class="text-amber-400 text-sm mb-2">★★★★★</div>
+                            <p class="text-gray-700 text-sm leading-relaxed flex-1">"아이 자세보조의자를 나눔했는데 너무 보람 있었어요. 일반 중고마켓엔 없는 온기가 있어요."</p>
+                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between"><span class="font-semibold text-gray-900 text-sm">신OO 님</span><span class="text-xs text-orange-600 bg-orange-50 px-2.5 py-1 rounded-lg font-medium">이음마켓</span></div>
+                        </div>
+                        <!-- duplicate set for seamless loop -->
+                        <div class="bg-white rounded-xl p-5 shadow-sm flex flex-col" style="min-height:180px;flex-shrink:0;">
+                            <div class="text-amber-400 text-sm mb-2">★★★★★</div>
+                            <p class="text-gray-700 text-sm leading-relaxed flex-1">"소개해 준 선생님이 아이 특성을 딱 이해해 주셔서 정말 다행이에요."</p>
+                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between"><span class="font-semibold text-gray-900 text-sm">권OO 님</span><span class="text-xs text-teal-600 bg-teal-50 px-2.5 py-1 rounded-lg font-medium">케어 매칭</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 shadow-sm flex flex-col" style="min-height:180px;flex-shrink:0;">
+                            <div class="text-amber-400 text-sm mb-2">★★★★★</div>
+                            <p class="text-gray-700 text-sm leading-relaxed flex-1">"일반 중고마켓에선 못 찾을 전동휠체어를 이음마켓에서 바로 구했어요."</p>
+                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between"><span class="font-semibold text-gray-900 text-sm">류OO 님</span><span class="text-xs text-orange-600 bg-orange-50 px-2.5 py-1 rounded-lg font-medium">이음마켓</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 shadow-sm flex flex-col" style="min-height:180px;flex-shrink:0;">
+                            <div class="text-amber-400 text-sm mb-2">★★★★★</div>
+                            <p class="text-gray-700 text-sm leading-relaxed flex-1">"성향 매칭이 기대 이상이에요. 첫 만남부터 편했고 없어선 안 될 파트너가 됐습니다."</p>
+                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between"><span class="font-semibold text-gray-900 text-sm">강OO 님</span><span class="text-xs text-teal-600 bg-teal-50 px-2.5 py-1 rounded-lg font-medium">케어 매칭</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 shadow-sm flex flex-col" style="min-height:180px;flex-shrink:0;">
+                            <div class="text-amber-400 text-sm mb-2">★★★★★</div>
+                            <p class="text-gray-700 text-sm leading-relaxed flex-1">"아이 자세보조의자를 나눔했는데 너무 보람 있었어요. 일반 중고마켓엔 없는 온기가 있어요."</p>
+                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between"><span class="font-semibold text-gray-900 text-sm">신OO 님</span><span class="text-xs text-orange-600 bg-orange-50 px-2.5 py-1 rounded-lg font-medium">이음마켓</span></div>
+                        </div>
+                    </div>
                 </div>
-                <p class="text-white/85 text-sm leading-relaxed mb-6">"일정 관리 기능이 정말 편리해요. 원하는 시간대에 요청을 등록하면 딱 맞는 분들이 지원해주셔서 좋습니다."</p>
-                <div class="flex items-center gap-3"><div class="w-9 h-9 bg-teal-400 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">박</div><div><div class="text-white text-sm font-semibold">박○○ 님</div><div class="text-indigo-200 text-xs">활동지원사</div></div></div>
-            </div>
-            <div class="bg-white/10 backdrop-blur-sm rounded-3xl p-7 border border-white/15">
-                <div class="flex items-center gap-1 mb-5">
-                    <svg class="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    <svg class="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    <svg class="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    <svg class="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    <svg class="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+
+                <!-- Column 2: scrolls down -->
+                <div class="testi-col">
+                    <div class="testi-track track-down">
+                        <!-- original set -->
+                        <div class="bg-white rounded-xl p-5 shadow-sm flex flex-col" style="min-height:180px;flex-shrink:0;">
+                            <div class="text-amber-400 text-sm mb-2">★★★★★</div>
+                            <p class="text-gray-700 text-sm leading-relaxed flex-1">"활동 전 채팅으로 충분히 대화할 수 있어서 불안감 없이 시작할 수 있었어요."</p>
+                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between"><span class="font-semibold text-gray-900 text-sm">황OO 님</span><span class="text-xs text-teal-600 bg-teal-50 px-2.5 py-1 rounded-lg font-medium">케어 매칭</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 shadow-sm flex flex-col" style="min-height:180px;flex-shrink:0;">
+                            <div class="text-amber-400 text-sm mb-2">★★★★★</div>
+                            <p class="text-gray-700 text-sm leading-relaxed flex-1">"보청기를 저렴하게 구했어요. 판매자가 직접 쓰신 분이라 믿음이 갔습니다."</p>
+                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between"><span class="font-semibold text-gray-900 text-sm">오OO 님</span><span class="text-xs text-orange-600 bg-orange-50 px-2.5 py-1 rounded-lg font-medium">이음마켓</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 shadow-sm flex flex-col" style="min-height:180px;flex-shrink:0;">
+                            <div class="text-amber-400 text-sm mb-2">★★★★★</div>
+                            <p class="text-gray-700 text-sm leading-relaxed flex-1">"이음 덕분에 잘 맞는 분을 금방 만났어요. 리뷰 시스템 덕분에 신뢰감 있게 시작했습니다."</p>
+                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between"><span class="font-semibold text-gray-900 text-sm">최OO 님</span><span class="text-xs text-teal-600 bg-teal-50 px-2.5 py-1 rounded-lg font-medium">케어 매칭</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 shadow-sm flex flex-col" style="min-height:180px;flex-shrink:0;">
+                            <div class="text-amber-400 text-sm mb-2">★★★★★</div>
+                            <p class="text-gray-700 text-sm leading-relaxed flex-1">"매트리스 올렸더니 하루 만에 연락 왔어요. 진짜 필요한 분께 전달돼서 기쁩니다."</p>
+                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between"><span class="font-semibold text-gray-900 text-sm">문OO 님</span><span class="text-xs text-orange-600 bg-orange-50 px-2.5 py-1 rounded-lg font-medium">이음마켓</span></div>
+                        </div>
+                        <!-- duplicate set for seamless loop -->
+                        <div class="bg-white rounded-xl p-5 shadow-sm flex flex-col" style="min-height:180px;flex-shrink:0;">
+                            <div class="text-amber-400 text-sm mb-2">★★★★★</div>
+                            <p class="text-gray-700 text-sm leading-relaxed flex-1">"활동 전 채팅으로 충분히 대화할 수 있어서 불안감 없이 시작할 수 있었어요."</p>
+                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between"><span class="font-semibold text-gray-900 text-sm">황OO 님</span><span class="text-xs text-teal-600 bg-teal-50 px-2.5 py-1 rounded-lg font-medium">케어 매칭</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 shadow-sm flex flex-col" style="min-height:180px;flex-shrink:0;">
+                            <div class="text-amber-400 text-sm mb-2">★★★★★</div>
+                            <p class="text-gray-700 text-sm leading-relaxed flex-1">"보청기를 저렴하게 구했어요. 판매자가 직접 쓰신 분이라 믿음이 갔습니다."</p>
+                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between"><span class="font-semibold text-gray-900 text-sm">오OO 님</span><span class="text-xs text-orange-600 bg-orange-50 px-2.5 py-1 rounded-lg font-medium">이음마켓</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 shadow-sm flex flex-col" style="min-height:180px;flex-shrink:0;">
+                            <div class="text-amber-400 text-sm mb-2">★★★★★</div>
+                            <p class="text-gray-700 text-sm leading-relaxed flex-1">"이음 덕분에 잘 맞는 분을 금방 만났어요. 리뷰 시스템 덕분에 신뢰감 있게 시작했습니다."</p>
+                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between"><span class="font-semibold text-gray-900 text-sm">최OO 님</span><span class="text-xs text-teal-600 bg-teal-50 px-2.5 py-1 rounded-lg font-medium">케어 매칭</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl p-5 shadow-sm flex flex-col" style="min-height:180px;flex-shrink:0;">
+                            <div class="text-amber-400 text-sm mb-2">★★★★★</div>
+                            <p class="text-gray-700 text-sm leading-relaxed flex-1">"매트리스 올렸더니 하루 만에 연락 왔어요. 진짜 필요한 분께 전달돼서 기쁩니다."</p>
+                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between"><span class="font-semibold text-gray-900 text-sm">문OO 님</span><span class="text-xs text-orange-600 bg-orange-50 px-2.5 py-1 rounded-lg font-medium">이음마켓</span></div>
+                        </div>
+                    </div>
                 </div>
-                <p class="text-white/85 text-sm leading-relaxed mb-6">"아들이 시각장애가 있어 늘 걱정이었는데, 이음에서 소통 방식까지 맞춰주셔서 정말 안심이 됩니다."</p>
-                <div class="flex items-center gap-3"><div class="w-9 h-9 bg-rose-400 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">이</div><div><div class="text-white text-sm font-semibold">이○○ 님</div><div class="text-indigo-200 text-xs">보호자</div></div></div>
-            </div>
+
+            </div><!-- /columns -->
         </div>
     </div>
 </section>
 
 <!-- ===== NOTICES ===== -->
-<section class="py-20 lg:py-24 bg-slate-50">
+<section class="py-20 lg:py-24 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-end justify-between mb-8 fade-up">
             <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 text-indigo-600 text-xs font-semibold rounded-full mb-3 uppercase tracking-widest">공지사항</div>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900">최신 공지</h2>
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-teal-100 text-teal-700 text-xs font-semibold rounded-full mb-3 uppercase tracking-widest">공지사항</div>
+                <h2 class="font-banner text-2xl sm:text-3xl text-gray-900 leading-[1.2]">최신 공지</h2>
             </div>
-            <a th:href="@{/notices}" class="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-indigo-600 border border-indigo-200 rounded-xl hover:bg-indigo-50 transition-colors">
-                더 보기
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <a th:href="@{/notices}" class="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-teal-600 border border-teal-200 rounded-xl hover:bg-teal-50 transition-colors">
+                더 보기<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
             </a>
         </div>
         <div th:if="${recentNotices != null and !#lists.isEmpty(recentNotices)}" class="rounded-2xl border border-gray-200 overflow-hidden bg-white">
             <th:block th:each="notice, iter : ${recentNotices}">
-                <a th:href="@{/notices/{id}(id=${notice.id})}"
-                   th:classappend="${!iter.last} ? 'border-b border-gray-200'"
-                   class="flex items-center gap-4 px-5 py-4 hover:bg-indigo-50/50 transition-colors group">
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2">
-                            <span th:if="${notice.isPinned}" class="px-2 py-0.5 bg-amber-50 text-amber-600 text-[10px] font-bold rounded-md border border-amber-200">고정</span>
-                            <p class="text-sm font-semibold text-gray-800 truncate group-hover:text-indigo-600 transition-colors" th:text="${notice.title}">공지 제목</p>
-                        </div>
-                    </div>
+                <a th:href="@{/notices/{id}(id=${notice.id})}" th:classappend="${!iter.last} ? 'border-b border-gray-200'" class="flex items-center gap-4 px-5 py-4 hover:bg-teal-50/50 transition-colors group">
+                    <div class="flex-1 min-w-0"><div class="flex items-center gap-2"><span th:if="${notice.isPinned}" class="px-2 py-0.5 bg-amber-50 text-amber-600 text-[10px] font-bold rounded-md border border-amber-200">고정</span><p class="text-sm font-semibold text-gray-800 truncate group-hover:text-teal-700 transition-colors" th:text="${notice.title}">공지 제목</p></div></div>
                     <span class="flex-shrink-0 text-xs text-gray-400 whitespace-nowrap" th:text="${#temporals.format(notice.createdAt, 'yyyy.MM.dd')}">날짜</span>
-                    <svg class="w-4 h-4 text-gray-300 group-hover:text-indigo-400 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
+                    <svg class="w-4 h-4 text-gray-300 group-hover:text-teal-500 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </a>
             </th:block>
         </div>
@@ -484,26 +500,13 @@
     </div>
 </section>
 
-<!-- ===== 안전 정책 안내 ===== -->
+<!-- ===== 안전 정책 ===== -->
 <section class="py-14 bg-rose-50 border-y border-rose-100">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
-            <div class="w-14 h-14 bg-rose-100 rounded-2xl flex items-center justify-center flex-shrink-0 mx-auto sm:mx-0">
-                <svg class="w-7 h-7 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-            </div>
-            <div class="flex-1">
-                <h3 class="text-base font-bold text-rose-700 mb-1">이음 신고 및 안전 정책</h3>
-                <p class="text-sm text-rose-600 leading-relaxed">
-                    부적절한 언행·사기·약속 불이행 등 불쾌한 경험은 채팅창의 <strong>신고 버튼</strong>으로 즉시 접수하세요.<br>
-                    신고 3회 누적 시 경고 회원으로 등록되며, 관리자 검토 후 이용이 정지될 수 있습니다. 허위 신고는 제재 대상입니다.
-                </p>
-            </div>
-            <a th:href="@{/safe-meeting}"
-               class="flex-shrink-0 px-5 py-2.5 bg-rose-500 text-white text-sm font-semibold rounded-xl hover:bg-rose-600 transition-all whitespace-nowrap">
-                안전 가이드 보기
-            </a>
+            <div class="w-14 h-14 bg-rose-100 rounded-2xl flex items-center justify-center flex-shrink-0 mx-auto sm:mx-0"><svg class="w-7 h-7 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></div>
+            <div class="flex-1"><h3 class="text-base font-bold text-rose-700 mb-1">이음 신고 및 안전 정책</h3><p class="text-sm text-rose-600 leading-relaxed">부적절한 언행·사기·약속 불이행 등 불쾌한 경험은 채팅창의 <strong>신고 버튼</strong>으로 즉시 접수하세요.<br>신고 3회 누적 시 경고 회원으로 등록되며, 관리자 검토 후 이용이 정지될 수 있습니다. 허위 신고는 제재 대상입니다.</p></div>
+            <a th:href="@{/safe-meeting}" class="flex-shrink-0 px-5 py-2.5 bg-rose-500 text-white text-sm font-semibold rounded-xl hover:bg-rose-600 transition-all whitespace-nowrap">안전 가이드 보기</a>
         </div>
     </div>
 </section>
@@ -511,164 +514,127 @@
 <!-- ===== CTA ===== -->
 <section class="py-20 lg:py-28 bg-white">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center fade-up">
-        <div class="w-16 h-16 bg-gradient-to-br from-indigo-100 to-teal-100 rounded-2xl flex items-center justify-center mx-auto mb-7">
-            <svg class="w-8 h-8 text-indigo-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/></svg>
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-7" style="background:linear-gradient(135deg,#ccfbf1,#99f6e4);">
+            <svg class="w-8 h-8 text-teal-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/></svg>
         </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">지금 이음으로 시작하세요</h2>
+        <h2 class="font-banner text-3xl sm:text-4xl text-gray-900 mb-4 leading-[1.2]">지금 이음으로 시작하세요</h2>
         <p class="text-gray-500 text-lg mb-10 leading-relaxed">회원가입은 무료이며 5분이면 완료됩니다.<br>나에게 딱 맞는 케어 파트너를 지금 만나보세요.</p>
         <th:block th:if="${!isAuthenticated}">
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a th:href="@{/register/type-select}" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-indigo-600 text-white font-semibold rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95">서비스 이용자로 시작하기<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
-                <a th:href="@{/register/type-select}" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-teal-500 text-white font-semibold rounded-2xl hover:bg-teal-600 transition-all shadow-lg shadow-teal-200 active:scale-95">활동지원사로 가입하기<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
+                <a th:href="@{/register/type-select}" class="inline-flex items-center justify-center gap-2 px-8 py-4 text-white font-semibold rounded-2xl hover:opacity-90 transition-all shadow-lg active:scale-95 bg-teal-500">서비스 이용자로 시작하기<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
+                <a th:href="@{/register/type-select}" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-teal-400 text-white font-semibold rounded-2xl hover:bg-teal-300 transition-all shadow-lg shadow-teal-200 active:scale-95">활동지원사로 가입하기<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
             </div>
-            <p class="mt-6 text-sm text-gray-400">이미 계정이 있으신가요? <a th:href="@{/login}" class="text-indigo-600 font-semibold hover:underline ml-1">로그인</a></p>
+            <p class="mt-6 text-sm text-gray-400">이미 계정이 있으신가요? <a th:href="@{/login}" class="text-teal-600 font-semibold hover:underline ml-1">로그인</a></p>
         </th:block>
         <th:block th:if="${isUser}">
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a th:href="@{/disabled/board/create}" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-indigo-600 text-white font-semibold rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95">활동 요청 작성하기<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg></a>
+                <a th:href="@{/disabled/board/create}" class="inline-flex items-center justify-center gap-2 px-8 py-4 text-white font-semibold rounded-2xl hover:opacity-90 transition-all shadow-lg active:scale-95 bg-teal-500">활동 요청 작성하기<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg></a>
             </div>
         </th:block>
         <th:block th:if="${isCaregiver}">
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a th:href="@{/matching}" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-teal-500 text-white font-semibold rounded-2xl hover:bg-teal-600 transition-all shadow-lg shadow-teal-200 active:scale-95">매칭 현황 보기<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
+                <a th:href="@{/matching}" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-teal-400 text-white font-semibold rounded-2xl hover:bg-teal-300 transition-all shadow-lg shadow-teal-200 active:scale-95">매칭 현황 보기<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
             </div>
         </th:block>
     </div>
 </section>
 
-<!-- ===== STORY ZIGZAG SCRIPT ===== -->
 <script>
+/* Stat counter */
 (function () {
-    var container = document.getElementById('storyContainer');
-    var svg       = document.getElementById('storySvg');
-    var sLine     = document.getElementById('sLine');
-    var sBg       = document.getElementById('sBg');
-    var sGlow     = document.getElementById('sGlow');
-    var nodes     = Array.from(document.querySelectorAll('.s-node'));
-    var cards     = Array.from(document.querySelectorAll('.s-card'));
-    if (!container || !nodes.length) return;
-
-    var totalLen = 0;
-
-    function buildPath() {
-        var cRect = container.getBoundingClientRect();
-        var W = cRect.width, H = cRect.height;
-        svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
-        svg.style.width  = W + 'px';
-        svg.style.height = H + 'px';
-
-        var pts = nodes.map(function (n) {
-            var r = n.getBoundingClientRect();
-            return {
-                x: r.left + r.width  / 2 - cRect.left,
-                y: r.top  + r.height / 2 - cRect.top
-            };
-        });
-
-        if (pts.length < 2) return;
-
-        /* Build smooth cubic bezier zigzag through all points */
-        var d = 'M ' + pts[0].x + ' ' + pts[0].y;
-        for (var i = 1; i < pts.length; i++) {
-            var p  = pts[i], pv = pts[i - 1];
-            var midY = (pv.y + p.y) / 2;
-            /* Control points: stay at each node's X, meet at midY */
-            d += ' C ' + pv.x + ' ' + midY
-               + ', '  + p.x  + ' ' + midY
-               + ', '  + p.x  + ' ' + p.y;
-        }
-
-        [sLine, sBg, sGlow].forEach(function (el) { if (el) el.setAttribute('d', d); });
-
-        totalLen = sLine.getTotalLength ? sLine.getTotalLength() : 600;
-        sLine.style.strokeDasharray  = totalLen;
-        sGlow.style.strokeDasharray  = totalLen;
-        sLine.style.strokeDashoffset = totalLen;
-        sGlow.style.strokeDashoffset = totalLen;
-
-        onScroll();
-    }
-
-    function onScroll() {
-        if (!totalLen) return;
-        var cRect = container.getBoundingClientRect();
-        var vh    = window.innerHeight;
-
-        /* progress: 0 when container top hits bottom of viewport, 1 when bottom exits */
-        var progress = Math.max(0, Math.min(1,
-            (vh - cRect.top) / (cRect.height + vh * 0.25)
-        ));
-
-        var offset = totalLen * (1 - progress);
-        sLine.style.strokeDashoffset = offset;
-        sGlow.style.strokeDashoffset = offset;
-
-        /* reveal nodes + cards progressively */
-        nodes.forEach(function (node, i) {
-            var threshold = (i / nodes.length) * 0.75;
-            if (progress > threshold) {
-                node.classList.add('on');
-                if (cards[i]) cards[i].classList.add('on');
-            }
-        });
-    }
-
-    /* init */
-    function init() { setTimeout(buildPath, 80); }
-    if (document.readyState === 'complete') { init(); }
-    else { window.addEventListener('load', init); }
-
-    window.addEventListener('resize', buildPath, { passive: true });
-    window.addEventListener('scroll', onScroll,  { passive: true });
-})();
-</script>
-
-<script>
-(function () {
-    var counters = Array.from(document.querySelectorAll('.stat-counter'));
-    if (!counters.length) return;
-
     function animateCounter(el) {
-        var target = parseInt(el.dataset.target, 10) || 0;
-        var duration = 1200;
-        var startTime = null;
-
-        function step(timestamp) {
-            if (startTime === null) startTime = timestamp;
-            var progress = Math.min((timestamp - startTime) / duration, 1);
-            var eased = 1 - Math.pow(1 - progress, 3);
-            var current = Math.round(target * eased);
-            el.textContent = current.toLocaleString('en-US');
-            if (progress < 1) {
-                requestAnimationFrame(step);
-            } else {
-                el.textContent = target.toLocaleString('en-US');
-            }
+        var t = parseInt(el.dataset.target, 10) || 0, d = 1200, s = null;
+        function step(ts) {
+            if (!s) s = ts;
+            var p = Math.min((ts - s) / d, 1), e = 1 - Math.pow(1 - p, 3);
+            el.textContent = Math.round(t * e).toLocaleString('en-US');
+            if (p < 1) requestAnimationFrame(step); else el.textContent = t.toLocaleString('en-US');
         }
         requestAnimationFrame(step);
     }
-
-    var observer = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-            if (entry.isIntersecting) {
-                animateCounter(entry.target);
-                observer.unobserve(entry.target);
-            }
-        });
+    var obs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) { animateCounter(e.target); obs.unobserve(e.target); } });
     }, { threshold: 0.4 });
-
-    counters.forEach(function (el) { observer.observe(el); });
+    document.querySelectorAll('.stat-counter, .stat-counter2').forEach(function (el) { obs.observe(el); });
 })();
-</script>
 
-<script>
+/* Fade-up */
 (function () {
     var obs = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) { if (e.isIntersecting) e.target.classList.add('visible'); });
     }, { threshold: 0.12 });
     document.querySelectorAll('.fade-up').forEach(function (el) { obs.observe(el); });
 })();
+
+/* Story zigzag SVG — 3 segments with increasing thickness */
+(function () {
+    var container = document.getElementById('storyContainer');
+    var svg       = document.getElementById('storySvg');
+    var nodes     = Array.from(document.querySelectorAll('.s-node'));
+    var cards     = Array.from(document.querySelectorAll('.s-card'));
+    if (!container || !nodes.length) return;
+
+    var segments = [];
+
+    function buildPath() {
+        var cRect = container.getBoundingClientRect();
+        var W = cRect.width, H = cRect.height;
+        svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+        svg.style.width = W + 'px';
+        svg.style.height = H + 'px';
+
+        var pts = nodes.map(function (n) {
+            var r = n.getBoundingClientRect();
+            return { x: r.left + r.width / 2 - cRect.left, y: r.top + r.height / 2 - cRect.top };
+        });
+        if (pts.length < 2) return;
+
+        segments = [];
+        for (var i = 1; i < pts.length; i++) {
+            var p = pts[i], pv = pts[i - 1];
+            var midY = (pv.y + p.y) / 2;
+            var d = 'M ' + pv.x + ' ' + pv.y + ' C ' + pv.x + ' ' + midY + ', ' + p.x + ' ' + midY + ', ' + p.x + ' ' + p.y;
+            var lineEl = document.getElementById('sLine' + i);
+            var glowEl = document.getElementById('sGlow' + i);
+            var bgEl   = document.getElementById('sBg' + i);
+            [lineEl, glowEl, bgEl].forEach(function(el) { if (el) el.setAttribute('d', d); });
+            var len = lineEl && lineEl.getTotalLength ? lineEl.getTotalLength() : 400;
+            if (lineEl) { lineEl.style.strokeDasharray = len; lineEl.style.strokeDashoffset = len; }
+            if (glowEl) { glowEl.style.strokeDasharray = len; glowEl.style.strokeDashoffset = len; }
+            segments.push({ lineEl: lineEl, glowEl: glowEl, len: len });
+        }
+        onScroll();
+    }
+
+    function onScroll() {
+        if (!segments.length) return;
+        var cRect = container.getBoundingClientRect();
+        var vh = window.innerHeight;
+        var progress = Math.max(0, Math.min(1, (vh - cRect.top) / (cRect.height + vh * 0.3)));
+        var n = segments.length;
+        segments.forEach(function(seg, i) {
+            var segP = Math.max(0, Math.min(1, (progress - i / n) / (1 / n)));
+            var offset = seg.len * (1 - segP);
+            if (seg.lineEl) seg.lineEl.style.strokeDashoffset = offset;
+            if (seg.glowEl) seg.glowEl.style.strokeDashoffset = offset;
+        });
+        nodes.forEach(function (node, i) {
+            if (progress > (i / nodes.length) * 0.75) {
+                node.classList.add('on');
+                if (cards[i]) cards[i].classList.add('on');
+            }
+        });
+    }
+
+    function init() { setTimeout(buildPath, 80); }
+    if (document.readyState === 'complete') init();
+    else window.addEventListener('load', init);
+
+    window.addEventListener('resize', buildPath, { passive: true });
+    window.addEventListener('scroll', onScroll,  { passive: true });
+})();
 </script>
+
 
 </th:block>
 </html>
