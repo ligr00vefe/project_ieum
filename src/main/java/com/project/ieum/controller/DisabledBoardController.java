@@ -94,6 +94,7 @@ public class DisabledBoardController {
         model.addAttribute("serviceCategories", masterDataService.getAllServiceCategories());
         model.addAttribute("personalityTags", masterDataService.getCaregiverPersonalityTags());
         model.addAttribute("tmapAppKey", tmapAppKey);
+        model.addAttribute("loadTmapSdk", true);
         model.addAttribute("content", "disabled/board/create");
         return "layout/layout";
     }
@@ -109,6 +110,7 @@ public class DisabledBoardController {
             model.addAttribute("serviceCategories", masterDataService.getAllServiceCategories());
             model.addAttribute("personalityTags", masterDataService.getCaregiverPersonalityTags());
             model.addAttribute("tmapAppKey", tmapAppKey);
+        model.addAttribute("loadTmapSdk", true);
             model.addAttribute("content", "disabled/board/create");
             return "layout/layout";
         }
@@ -126,6 +128,7 @@ public class DisabledBoardController {
         model.addAttribute("serviceCategories", masterDataService.getAllServiceCategories());
         model.addAttribute("personalityTags", masterDataService.getCaregiverPersonalityTags());
         model.addAttribute("tmapAppKey", tmapAppKey);
+        model.addAttribute("loadTmapSdk", true);
         model.addAttribute("content", "disabled/board/create");
         return "layout/layout";
     }
@@ -143,6 +146,7 @@ public class DisabledBoardController {
             model.addAttribute("serviceCategories", masterDataService.getAllServiceCategories());
             model.addAttribute("personalityTags", masterDataService.getCaregiverPersonalityTags());
             model.addAttribute("tmapAppKey", tmapAppKey);
+        model.addAttribute("loadTmapSdk", true);
             model.addAttribute("content", "disabled/board/create");
             return "layout/layout";
         }
@@ -162,6 +166,7 @@ public class DisabledBoardController {
         model.addAttribute("serviceCategories", masterDataService.getAllServiceCategories());
         model.addAttribute("personalityTags", masterDataService.getCaregiverPersonalityTags());
         model.addAttribute("tmapAppKey", tmapAppKey);
+        model.addAttribute("loadTmapSdk", true);
         model.addAttribute("content", "disabled/board/create");
         return "layout/layout";
     }
@@ -180,6 +185,7 @@ public class DisabledBoardController {
         matchingService.getMatchedParty(id)
                 .ifPresent(party -> model.addAttribute("matchedParty", party));
         model.addAttribute("tmapAppKey", tmapAppKey);
+        model.addAttribute("loadTmapSdk", true);
         // 추천 활동지원사 — OPEN 상태 + 본인 게시물일 때만 노출
         boolean isOwner = request.getRequester().getUserId().equals(currentUserId);
         model.addAttribute("hasPendingInvitation", false);
