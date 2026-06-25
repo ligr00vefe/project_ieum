@@ -105,6 +105,7 @@ public class CaregiverBoardController {
         model.addAttribute("lat", lat);
         model.addAttribute("lng", lng);
         model.addAttribute("tmapAppKey", tmapAppKey);
+        model.addAttribute("loadTmapSdk", true);
         if (locationSorted) {
             model.addAttribute("distanceMap", buildDistanceLabels(requestPage.getContent(), lat, lng));
         }
@@ -192,6 +193,7 @@ public class CaregiverBoardController {
         model.addAttribute("handshake", matchingService.getHandshakeView(id, currentUserId));
         model.addAttribute("recommendations", recommendationService.recommendCaregivers(id, 5));
         model.addAttribute("tmapAppKey", tmapAppKey);
+        model.addAttribute("loadTmapSdk", true);
         matchingService.getMyPendingInvitation(id, currentUserId)
                 .ifPresent(inv -> model.addAttribute("myInvitation", inv));
         model.addAttribute("content", "caregiver/board/detail");
