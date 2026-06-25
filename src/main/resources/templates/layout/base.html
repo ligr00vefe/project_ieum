@@ -7,6 +7,24 @@
     <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
     <title th:text="${pageTitle} + ' | 이음'">이음</title>
     <link th:href="@{/css/output.css}" rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <!-- Canonical -->
+    <link rel="canonical" th:href="'https://ieumcare.shop' + #httpServletRequest.requestURI">
+    <!-- SEO -->
+    <meta name="description" th:content="${description != null ? description : '케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼'}">
+    <!-- Open Graph -->
+    <meta property="og:type"        content="website">
+    <meta property="og:site_name"   content="이음 Care Match">
+    <meta property="og:url"         th:content="'https://ieumcare.shop' + #httpServletRequest.requestURI">
+    <meta property="og:title"       th:content="${pageTitle} + ' | 이음'">
+    <meta property="og:description" th:content="${description != null ? description : '케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼'}">
+    <meta property="og:image"       content="https://ieumcare.shop/images/og-default.png">
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       th:content="${pageTitle} + ' | 이음'">
+    <meta name="twitter:description" th:content="${description != null ? description : '케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼'}">
+    <meta name="twitter:image"       content="https://ieumcare.shop/images/og-default.png">
 </head>
 <body th:fragment="body(content)" class="min-h-screen bg-[#f6f7ff] text-slate-900">
     <div th:replace="~{layout/header :: header}"></div>
