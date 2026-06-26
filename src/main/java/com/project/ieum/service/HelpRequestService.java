@@ -324,7 +324,7 @@ public class HelpRequestService {
 
     @Transactional(readOnly = true)
     public Page<HelpRequest> getOpenRequests(Pageable pageable) {
-        return helpRequestRepository.findByStatusOrderByDesiredStartDatetimeAscIdDesc(HelpRequestStatus.OPEN, pageable);
+        return helpRequestRepository.findByStatusOrderByCreatedAtDesc(HelpRequestStatus.OPEN, pageable);
     }
 
     // 게시판 동적 검색 — 모집중(OPEN)만 대상으로 조건 필터링. 좌표가 있으면 가까운 순 정렬(#66 보존).

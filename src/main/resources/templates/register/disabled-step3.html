@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -7,24 +7,7 @@
     <link th:href="@{/css/output.css}" rel="stylesheet">
 </head>
 <body class="min-h-screen bg-slate-50 flex flex-col">
-
-    <!-- Top bar -->
-    <div class="bg-white border-b border-gray-100 px-4 py-3.5">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <a th:href="@{/}" class="flex items-center gap-2.5 group">
-                <div class="w-8 h-8 bg-teal-500 rounded-xl flex items-center justify-center group-hover:bg-teal-600 transition-colors">
-                    <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/>
-                    </svg>
-                </div>
-                <div class="leading-tight">
-                    <div class="text-[14px] font-bold text-gray-900">이음</div>
-                    <div class="text-[9px] text-gray-400 font-medium tracking-wide -mt-0.5">Care Match</div>
-                </div>
-            </a>
-            <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-full border border-indigo-100">케어메이트 가입</span>
-        </div>
-    </div>
+    <div th:replace="~{fragments/register-header :: header('badge')}"></div>
 
     <main class="flex-1 flex items-start justify-center px-4 py-8">
         <div class="w-full max-w-lg">

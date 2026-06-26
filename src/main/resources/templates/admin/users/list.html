@@ -14,6 +14,7 @@
     <!-- 검색창 -->
     <form th:action="@{/admin/users}" method="get" class="flex items-center gap-2 mb-4">
         <input type="hidden" name="role" th:value="${selectedRole}"/>
+        <input type="hidden" name="warnedOnly" th:value="${warnedOnly}"/>
         <input type="text" name="keyword" th:value="${keyword}"
                placeholder="이메일로 검색..."
                class="flex-1 px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
@@ -29,9 +30,9 @@
     </form>
 
     <!-- 필터 -->
-    <div class="flex items-center gap-2 mb-4">
+    <div class="flex items-center gap-2 mb-4 flex-wrap">
         <a th:href="@{/admin/users}"
-           th:classappend="${selectedRole == null} ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
+           th:classappend="${selectedRole == null and !warnedOnly} ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
            class="px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors">전체</a>
         <a th:href="@{/admin/users(role='USER')}"
            th:classappend="${selectedRole == 'USER'} ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
@@ -42,6 +43,9 @@
         <a th:href="@{/admin/users(role='ADMIN')}"
            th:classappend="${selectedRole == 'ADMIN'} ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
            class="px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors">관리자</a>
+        <a th:href="@{/admin/users(warnedOnly=true)}"
+           th:classappend="${warnedOnly} ? 'bg-amber-500 text-white' : 'bg-white text-amber-600 border border-amber-200 hover:bg-amber-50'"
+           class="px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors">⚠ 경고 회원</a>
     </div>
 
     <!-- 테이블 -->
@@ -83,7 +87,7 @@
     </div>
 
     <!-- 페이지네이션 -->
-    <div th:replace="~{fragments/pagination :: pager(${currentPage}, ${totalPages}, ${startPage}, ${endPage}, '/admin/users?' + (selectedRole != null ? 'role=' + selectedRole + '&' : ''))}"></div>
+    <div th:replace="~{fragments/pagination :: pager(${currentPage}, ${totalPages}, ${startPage}, ${endPage}, ${'/admin/users?' + (warnedOnly ? 'warnedOnly=true&' : '') + (selectedRole != null ? 'role=' + selectedRole + '&' : '') + (keyword != null ? 'keyword=' + keyword + '&' : '')})}"></div>
 
 </div>
 </th:block>

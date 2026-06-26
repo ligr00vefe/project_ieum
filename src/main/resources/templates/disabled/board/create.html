@@ -229,7 +229,9 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-<script>
+<script th:inline="javascript">
+const PREFILL_START = /*[[${prefillStartDate}]]*/ null;
+const PREFILL_END   = /*[[${prefillEndDate}]]*/ null;
 document.addEventListener('DOMContentLoaded', function () {
     const pickerConfig = {
         locale: 'ko',
@@ -242,8 +244,19 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById(hiddenId).value = dateStr ? dateStr.replace(' ', 'T') : '';
         }
     };
-    flatpickr('#startPicker', pickerConfig);
-    flatpickr('#endPicker', { ...pickerConfig });
+    const startFp = flatpickr('#startPicker', pickerConfig);
+    const endFp   = flatpickr('#endPicker', { ...pickerConfig });
+
+    if (PREFILL_START) {
+        const startVal = PREFILL_START + ' 09:00';
+        startFp.setDate(startVal, true);
+        document.getElementById('desiredStartDatetime').value = PREFILL_START + 'T09:00';
+    }
+    if (PREFILL_END) {
+        const endVal = PREFILL_END + ' 18:00';
+        endFp.setDate(endVal, true);
+        document.getElementById('desiredEndDatetime').value = PREFILL_END + 'T18:00';
+    }
 });
 
 function searchAddress() {

@@ -80,6 +80,13 @@ public class MarketChatService {
                 });
     }
 
+    // ── 채팅방 상세 조회 (관리자용, 참여자 검증 없음) ──
+    @Transactional(readOnly = true)
+    public MarketChat getChatById(Long chatId) {
+        return marketChatRepository.findWithDetailById(chatId)
+                .orElseThrow(() -> new NotFoundException("채팅방을 찾을 수 없습니다."));
+    }
+
     // ── 채팅방 상세 조회 (참여자 검증 포함) ──
     @Transactional(readOnly = true)
     public MarketChat getChatForUser(Long chatId) {

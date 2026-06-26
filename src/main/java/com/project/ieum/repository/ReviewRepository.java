@@ -39,6 +39,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     int countByAuthor_UserId(Long authorUserId);
 
+    @Query("SELECT r FROM Review r LEFT JOIN FETCH r.helpRequest hr LEFT JOIN FETCH hr.serviceCategory LEFT JOIN FETCH r.target WHERE r.author.userId = :authorUserId ORDER BY r.createdAt DESC")
+    List<Review> findByAuthorWithFetch(@Param("authorUserId") Long authorUserId);
+
     @Query("select coalesce(avg(r.rating), 0) from Review r where r.target.userId = :targetUserId")
     Double averageRatingByTargetUserId(@Param("targetUserId") Long targetUserId);
 }

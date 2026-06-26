@@ -90,17 +90,23 @@
                 </div>
                 <div class="divide-y divide-slate-50">
                     <th:block th:each="chat : ${chats}">
-                    <div class="flex items-center justify-between px-5 py-3.5">
+                    <a th:href="@{/market/chat/{id}(id=${chat.id})}"
+                       class="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 transition-colors">
                         <div class="min-w-0 flex-1">
                             <p class="text-sm text-slate-700 font-medium truncate"
                                th:text="${chat.buyer?.email ?: '-'}">구매자 이메일</p>
                             <p class="text-xs text-slate-400 mt-0.5"
                                th:text="${chat.lastMessageAt != null ? #temporals.format(chat.lastMessageAt, 'MM.dd HH:mm') + ' 마지막 메시지' : '메시지 없음'}">-</p>
                         </div>
-                        <span th:text="${chat.status.name() == 'ACTIVE' ? '진행중' : '종료'}"
-                              th:classappend="${chat.status.name() == 'ACTIVE'} ? 'bg-teal-50 text-teal-600' : 'bg-slate-100 text-slate-400'"
-                              class="ml-3 flex-shrink-0 px-2 py-0.5 text-xs font-semibold rounded-full">상태</span>
-                    </div>
+                        <div class="flex items-center gap-2 ml-3 flex-shrink-0">
+                            <span th:text="${chat.status.name() == 'ACTIVE' ? '진행중' : '종료'}"
+                                  th:classappend="${chat.status.name() == 'ACTIVE' ? 'bg-teal-50 text-teal-600' : 'bg-slate-100 text-slate-400'}"
+                                  class="px-2 py-0.5 text-xs font-semibold rounded-full">상태</span>
+                            <svg class="w-3.5 h-3.5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </div>
+                    </a>
                     </th:block>
                     <div th:if="${#lists.isEmpty(chats)}"
                          class="px-5 py-8 text-center text-sm text-slate-400">채팅 내역이 없습니다.</div>
@@ -118,10 +124,7 @@
                 <span th:text="${post.status.name() == 'ACTIVE' ? '판매중' :
                                  post.status.name() == 'RESERVED' ? '예약중' :
                                  post.status.name() == 'SOLD' ? '판매완료' : '삭제됨'}"
-                      th:classappend="${post.status.name() == 'ACTIVE'} ? 'bg-green-50 text-green-600' :
-                                      ${post.status.name() == 'RESERVED'} ? 'bg-amber-50 text-amber-600' :
-                                      ${post.status.name() == 'SOLD'} ? 'bg-slate-100 text-slate-500' :
-                                                                         'bg-red-50 text-red-500'"
+                      th:classappend="${post.status.name() == 'ACTIVE' ? 'bg-green-50 text-green-600' : (post.status.name() == 'RESERVED' ? 'bg-amber-50 text-amber-600' : (post.status.name() == 'SOLD' ? 'bg-slate-100 text-slate-500' : 'bg-red-50 text-red-500'))}"
                       class="inline-block px-2.5 py-1 text-xs font-semibold rounded-full">상태</span>
             </div>
 

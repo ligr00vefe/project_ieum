@@ -48,24 +48,33 @@ public class AdminController {
     @GetMapping("/users")
     public String userList(@RequestParam(required = false) String role,
                            @RequestParam(required = false) String keyword,
+                           @RequestParam(defaultValue = "false") boolean warnedOnly,
                            @RequestParam(defaultValue = "0") int page,
                            Model model) {
         var pageable = PageRequest.of(page, 10);
         boolean hasKeyword = keyword != null && !keyword.isBlank();
         boolean hasRole = role != null && !role.isBlank();
 
-        var userPage = (hasRole && hasKeyword)
-                ? userRepository.findByRoleAndEmailContainingAdmin(UserRole.valueOf(role), keyword, pageable)
-                : hasKeyword
-                ? userRepository.findByEmailContainingAdmin(keyword, pageable)
-                : hasRole
-                ? userRepository.findByRolePagedAdmin(UserRole.valueOf(role), pageable)
-                : userRepository.findAllPagedAdmin(pageable);
+        org.springframework.data.domain.Page<com.project.ieum.entity.User> userPage;
+        if (warnedOnly) {
+            userPage = hasKeyword
+                    ? userRepository.findByStatusAndEmailContainingAdmin(UserStatus.WARNED, keyword, pageable)
+                    : userRepository.findByStatusPagedAdmin(UserStatus.WARNED, pageable);
+        } else {
+            userPage = (hasRole && hasKeyword)
+                    ? userRepository.findByRoleAndEmailContainingAdmin(UserRole.valueOf(role), keyword, pageable)
+                    : hasKeyword
+                    ? userRepository.findByEmailContainingAdmin(keyword, pageable)
+                    : hasRole
+                    ? userRepository.findByRolePagedAdmin(UserRole.valueOf(role), pageable)
+                    : userRepository.findAllPagedAdmin(pageable);
+        }
 
         var users = userPage.getContent().stream().map(AdminUserRow::from).toList();
         model.addAttribute("users", users);
         model.addAttribute("selectedRole", role);
         model.addAttribute("keyword", keyword);
+        model.addAttribute("warnedOnly", warnedOnly);
         model.addAttribute("activeMenu", "users");
         model.addAttribute("title", "회원 관리");
         addPageAttrs(model, userPage, page);
@@ -94,6 +103,18 @@ public class AdminController {
         user.changeStatus(UserStatus.valueOf(status));
         userRepository.save(user);
         ra.addFlashAttribute("message", "회원 상태가 변경되었습니다.");
+        return "redirect:/admin/users/" + id;
+    }
+
+    @PostMapping("/users/{id}/warn/reset")
+    public String resetWarn(@PathVariable Long id, RedirectAttributes ra) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new com.project.ieum.exception.NotFoundException("회원을 찾을 수 없습니다."));
+        if (user.getStatus() == UserStatus.WARNED) {
+            user.changeStatus(UserStatus.ACTIVE);
+            userRepository.save(user);
+            ra.addFlashAttribute("message", "경고 상태가 초기화되어 활성 회원으로 변경되었습니다.");
+        }
         return "redirect:/admin/users/" + id;
     }
 
@@ -174,15 +195,26 @@ public class AdminController {
         model.addAttribute("endPage", Math.min(p.getTotalPages() - 1, page + 2));
     }
 
+    @GetMapping("/reviews/{id}")
+    public String reviewDetail(@PathVariable Long id, Model model) {
+        var review = reviewRepository.findById(id)
+                .orElseThrow(() -> new com.project.ieum.exception.NotFoundException("리뷰를 찾을 수 없습니다."));
+        model.addAttribute("review", review);
+        model.addAttribute("activeMenu", "reviews");
+        model.addAttribute("title", "리뷰 상세");
+        return "admin/reviews/detail";
+    }
+
     @PostMapping("/reviews/{id}/visibility")
     public String toggleVisibility(@PathVariable Long id,
                                    @RequestParam String visibility,
+                                   @RequestParam(required = false) String from,
                                    RedirectAttributes ra) {
         var review = reviewRepository.findById(id)
                 .orElseThrow(() -> new com.project.ieum.exception.NotFoundException("리뷰를 찾을 수 없습니다."));
         review.changeVisibility(ReviewVisibility.valueOf(visibility));
         reviewRepository.save(review);
         ra.addFlashAttribute("message", "리뷰 공개 상태가 변경되었습니다.");
-        return "redirect:/admin/reviews";
+        return "detail".equals(from) ? "redirect:/admin/reviews/" + id : "redirect:/admin/reviews";
     }
 }
