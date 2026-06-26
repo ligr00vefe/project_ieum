@@ -39,8 +39,7 @@
                         <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">역할</dt>
                         <dd>
                             <span th:text="${user.role.name() == 'USER' ? '이용자' : user.role.name() == 'CAREGIVER' ? '활동지원사' : '관리자'}"
-                                  th:classappend="${user.role.name() == 'USER'} ? 'bg-indigo-50 text-indigo-600' :
-                                                  ${user.role.name() == 'CAREGIVER'} ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-600'"
+                                  th:classappend="${user.role.name() == 'USER' ? 'bg-indigo-50 text-indigo-600' : (user.role.name() == 'CAREGIVER' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-600')}"
                                   class="px-2 py-0.5 text-xs font-semibold rounded-full">역할</span>
                         </dd>
                     </div>
@@ -74,8 +73,7 @@
                                          req.status.name() == 'MATCHED' ? '매칭완료' :
                                          req.status.name() == 'IN_PROGRESS' ? '진행중' :
                                          req.status.name() == 'COMPLETED' ? '완료' : '종료'}"
-                              th:classappend="${req.status.name() == 'OPEN'} ? 'bg-indigo-50 text-indigo-600' :
-                                              ${req.status.name() == 'COMPLETED'} ? 'bg-teal-50 text-teal-600' : 'bg-slate-100 text-slate-500'"
+                              th:classappend="${req.status.name() == 'OPEN' ? 'bg-indigo-50 text-indigo-600' : (req.status.name() == 'COMPLETED' ? 'bg-teal-50 text-teal-600' : 'bg-slate-100 text-slate-500')}"
                               class="ml-3 flex-shrink-0 px-2 py-0.5 text-xs font-semibold rounded-full">상태</span>
                     </div>
                     </th:block>
@@ -93,9 +91,9 @@
                     <p class="text-xs text-slate-400 mb-1.5">현재 상태</p>
                     <span th:text="${user.status.name() == 'ACTIVE' ? '활성' :
                                      user.status.name() == 'PAUSED' ? '일시중지' :
+                                     user.status.name() == 'WARNED' ? '경고' :
                                      user.status.name() == 'BANNED' ? '정지' : '탈퇴'}"
-                          th:classappend="${user.status.name() == 'ACTIVE'} ? 'bg-teal-50 text-teal-600' :
-                                          ${user.status.name() == 'BANNED'} ? 'bg-red-50 text-red-500' : 'bg-slate-100 text-slate-500'"
+                          th:classappend="${user.status.name() == 'ACTIVE' ? 'bg-teal-50 text-teal-600' : (user.status.name() == 'WARNED' ? 'bg-amber-50 text-amber-600' : (user.status.name() == 'BANNED' ? 'bg-red-50 text-red-500' : 'bg-slate-100 text-slate-500'))}"
                           class="inline-block px-2.5 py-1 text-xs font-semibold rounded-full">상태</span>
                 </div>
                 <div class="space-y-2">
@@ -120,7 +118,16 @@
                         <button type="submit"
                                 th:disabled="${user.status.name() == 'BANNED'}"
                                 class="w-full px-3 py-2 text-xs font-medium rounded-xl border border-red-100 text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                            계정 정지
+                            계정 정지 (BAN)
+                        </button>
+                    </form>
+                    <!-- 경고 회원 초기화 버튼 -->
+                    <form th:if="${user.status.name() == 'WARNED'}"
+                          th:action="@{/admin/users/{id}/warn/reset(id=${user.id})}" method="post"
+                          onsubmit="return confirm('경고 상태를 초기화하고 활성 회원으로 변경하시겠습니까?')">
+                        <button type="submit"
+                                class="w-full px-3 py-2 text-xs font-medium rounded-xl border border-amber-200 text-amber-700 hover:bg-amber-50 transition-colors">
+                            경고 초기화 (활성 전환)
                         </button>
                     </form>
                 </div>

@@ -31,11 +31,13 @@ public record AdminUserRow(
         String statusLabel = switch (statusName) {
             case "ACTIVE" -> "활성";
             case "PAUSED" -> "일시중지";
+            case "WARNED" -> "경고";
             case "BANNED" -> "정지";
             default -> "탈퇴";
         };
         String statusClass = switch (statusName) {
             case "ACTIVE" -> "bg-teal-50 text-teal-600";
+            case "WARNED" -> "bg-amber-50 text-amber-600";
             case "BANNED" -> "bg-red-50 text-red-500";
             default -> "bg-slate-100 text-slate-500";
         };

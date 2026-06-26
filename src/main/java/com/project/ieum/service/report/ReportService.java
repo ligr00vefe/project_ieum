@@ -11,7 +11,9 @@ import com.project.ieum.repository.ConversationRepository;
 import com.project.ieum.repository.ReportRepository;
 import com.project.ieum.repository.UserRepository;
 import com.project.ieum.repository.market.MarketChatRepository;
+import com.project.ieum.entity.notification.NotificationType;
 import com.project.ieum.service.common.CurrentUserService;
+import com.project.ieum.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +35,7 @@ public class ReportService {
     private final CurrentUserService currentUserService;
     private final ConversationRepository conversationRepository;
     private final MarketChatRepository marketChatRepository;
+    private final NotificationService notificationService;
 
     public Report create(ReportForm form) {
         User reporter = currentUserService.getCurrentUser();
@@ -65,6 +68,21 @@ public class ReportService {
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new NotFoundException("신고를 찾을 수 없습니다."));
         report.changeStatus(status);
+
+        // 신고자에게 상태 변경 알림
+        String statusLabel = switch (status) {
+            case RECEIVED  -> "접수";
+            case REVIEWING -> "검토중";
+            case RESOLVED  -> "처리완료";
+            case REJECTED  -> "반려됨";
+        };
+        notificationService.create(
+                report.getReporter(),
+                NotificationType.SYSTEM,
+                "신고 처리 상태 변경",
+                "접수하신 신고의 상태가 '" + statusLabel + "'(으)로 변경되었습니다.",
+                "/admin/reports"
+        );
 
         if (status == ReportStatus.RESOLVED) {
             // 연결된 채팅방 자동 종료

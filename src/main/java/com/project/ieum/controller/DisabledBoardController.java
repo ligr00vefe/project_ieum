@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import com.project.ieum.repository.HelpRequestApplicationRepository;
 import com.project.ieum.entity.request.InvitationStatus;
 import com.project.ieum.repository.CaregiverInvitationRepository;
+import com.project.ieum.repository.ReviewRepository;
 import com.project.ieum.service.HelpRequestService;
 import com.project.ieum.service.MasterDataService;
 import com.project.ieum.service.MatchingService;
@@ -38,6 +39,7 @@ public class DisabledBoardController {
     private final HelpRequestApplicationRepository applicationRepository;
     private final RecommendationService recommendationService;
     private final CaregiverInvitationRepository caregiverInvitationRepository;
+    private final ReviewRepository reviewRepository;
     private final String tmapAppKey;
 
     public DisabledBoardController(HelpRequestService helpRequestService,
@@ -47,6 +49,7 @@ public class DisabledBoardController {
                                    HelpRequestApplicationRepository applicationRepository,
                                    RecommendationService recommendationService,
                                    CaregiverInvitationRepository caregiverInvitationRepository,
+                                   ReviewRepository reviewRepository,
                                    @Value("${tmap.app-key:}") String tmapAppKey) {
         this.helpRequestService = helpRequestService;
         this.matchingService = matchingService;
@@ -55,6 +58,7 @@ public class DisabledBoardController {
         this.applicationRepository = applicationRepository;
         this.recommendationService = recommendationService;
         this.caregiverInvitationRepository = caregiverInvitationRepository;
+        this.reviewRepository = reviewRepository;
         this.tmapAppKey = tmapAppKey;
     }
 
@@ -88,13 +92,17 @@ public class DisabledBoardController {
     }
 
     @GetMapping("/create")
-    public String createForm(Model model) {
+    public String createForm(Model model,
+                             @RequestParam(required = false) String startDate,
+                             @RequestParam(required = false) String endDate) {
         model.addAttribute("title", "요청 글 작성");
         model.addAttribute("form", new HelpRequestForm());
         model.addAttribute("serviceCategories", masterDataService.getAllServiceCategories());
         model.addAttribute("personalityTags", masterDataService.getCaregiverPersonalityTags());
         model.addAttribute("tmapAppKey", tmapAppKey);
         model.addAttribute("loadTmapSdk", true);
+        model.addAttribute("prefillStartDate", startDate);
+        model.addAttribute("prefillEndDate", endDate);
         model.addAttribute("content", "disabled/board/create");
         return "layout/layout";
     }
@@ -199,6 +207,7 @@ public class DisabledBoardController {
             matchingService.getMyPendingInvitation(id, currentUserId)
                     .ifPresent(inv -> model.addAttribute("myInvitation", inv));
         }
+        model.addAttribute("hasReview", reviewRepository.existsByHelpRequest_Id(id));
         model.addAttribute("content", "disabled/board/detail");
         return "layout/layout";
     }

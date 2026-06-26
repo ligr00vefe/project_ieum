@@ -2,19 +2,23 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/layout :: layout(~{::content})}">
 <th:block th:fragment="content">
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-5">
-
+<!-- 알림 메시지 -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
     <div th:if="${successMessage}" th:text="${successMessage}"
-         class="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"></div>
+         class="mb-2 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"></div>
     <div th:if="${errorMessage}" th:text="${errorMessage}"
-         class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"></div>
+         class="mb-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"></div>
     <div th:if="${message}" th:text="${message}"
-         class="mb-4 rounded-md border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-800"></div>
+         class="mb-2 rounded-md border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-800"></div>
+</div>
 
-    <!-- 프로필 요약 배너 -->
-    <div class="bg-indigo-600 rounded-3xl p-7 text-white shadow-lg shadow-indigo-200 relative overflow-hidden">
-        <div class="absolute -top-6 -right-6 w-32 h-32 bg-white/10 rounded-full"></div>
-        <div class="absolute -bottom-8 -right-2 w-20 h-20 bg-white/5 rounded-full"></div>
+<!-- 풀너비 컬러 배너 (프로필 + 미니달력) -->
+<div class="bg-indigo-600 w-full">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="flex flex-col lg:flex-row gap-8 items-start">
+
+    <!-- 프로필 요약 -->
+    <div class="flex-1 text-white relative">
         <div class="relative flex items-top gap-5">
             <!-- 아바타 -->
             <div class="w-20 h-20 rounded-full overflow-hidden flex-shrink-0 bg-white/20 shadow-md">
@@ -102,6 +106,50 @@
             </div>
         </div>
     </div>
+
+    <!-- 미니 달력 (투명 배경, 흰색 스타일) -->
+    <div class="lg:w-72 flex-shrink-0 w-full">
+        <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span class="text-sm font-bold text-white">일정 달력</span>
+            </div>
+            <a href="/calendar" class="text-xs text-white/70 hover:text-white font-semibold transition-colors">전체 보기 →</a>
+        </div>
+        <!-- 월 네비게이션 -->
+        <div class="flex items-center justify-between mb-1">
+            <button onclick="miniPrev()" class="p-1.5 rounded-lg hover:bg-white/10 transition-colors">
+                <svg class="w-4 h-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <span id="mini-month-title" class="text-sm font-semibold text-white">2026년 6월</span>
+            <button onclick="miniNext()" class="p-1.5 rounded-lg hover:bg-white/10 transition-colors">
+                <svg class="w-4 h-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+        <!-- 요일 헤더 -->
+        <div class="grid grid-cols-7 border-b border-white/20 mb-1">
+            <div th:each="day : ${ {'일','월','화','수','목','금','토'} }"
+                 th:text="${day}"
+                 class="text-center text-[11px] font-semibold text-white/50 py-1.5"></div>
+        </div>
+        <!-- 날짜 그리드 -->
+        <div id="mini-cal-grid" class="grid grid-cols-7"></div>
+        <!-- 범례 -->
+        <div class="mt-3 pt-3 border-t border-white/20 flex items-center gap-4">
+            <span class="flex items-center gap-1.5 text-[11px] text-white/70">
+                <span class="w-3 h-3 rounded-full bg-white flex-shrink-0"></span>등록/지원
+            </span>
+            <span class="flex items-center gap-1.5 text-[11px] text-white/70">
+                <span class="w-3 h-3 rounded-full bg-orange-400 flex-shrink-0"></span>매칭완료
+            </span>
+        </div>
+    </div>
+
+</div><!-- /flex -->
+</div><!-- /max-w container -->
+</div><!-- /bg-indigo-600 -->
+
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
 
     <!-- 메인 탭 -->
     <div class="bg-white rounded-2xl border border-gray-200 p-1.5">
@@ -229,7 +277,7 @@
                 </button>
                 <button onclick="showMatchingSubTab('reviews')" id="msub-btn-reviews"
                         class="msub-btn flex-1 py-2 text-xs font-medium rounded-xl bg-white text-gray-500 border border-gray-200 text-center">
-                    후기 작성
+                    후기
                 </button>
             </div>
 
@@ -262,9 +310,9 @@
                     </button>
                 </div>
                 <div id="rtab-waiting" class="rtab-content">
-                    <div th:if="${waitingRequests != null and !waitingRequests.isEmpty()}" class="divide-y divide-gray-50">
+                    <div th:if="${waitingRequests != null and !waitingRequests.isEmpty()}" id="pg-waiting-list" class="divide-y divide-gray-50">
                         <a th:each="req : ${waitingRequests}" th:href="@{/disabled/board/{id}(id=${req.id})}"
-                           class="block p-5 hover:bg-gray-50 transition-colors">
+                           class="pg-item block p-5 hover:bg-gray-50 transition-colors">
                             <div class="flex items-start gap-3">
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 mb-1">
@@ -282,11 +330,12 @@
                         </a>
                     </div>
                     <div th:if="${waitingRequests == null or waitingRequests.isEmpty()}" class="py-10 text-center text-sm text-gray-400">대기 중인 요청이 없어요</div>
+                    <div id="pg-waiting-nav" class="hidden px-5 py-3 flex items-center justify-center gap-1"></div>
                 </div>
                 <div id="rtab-matched" class="rtab-content hidden">
-                    <div th:if="${matchedRequests != null and !matchedRequests.isEmpty()}" class="divide-y divide-gray-50">
+                    <div th:if="${matchedRequests != null and !matchedRequests.isEmpty()}" id="pg-matched-list" class="divide-y divide-gray-50">
                         <a th:each="req : ${matchedRequests}" th:href="@{/disabled/board/{id}(id=${req.id})}"
-                           class="block p-5 hover:bg-gray-50 transition-colors">
+                           class="pg-item block p-5 hover:bg-gray-50 transition-colors">
                             <div class="flex items-start gap-3">
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 mb-1">
@@ -306,11 +355,12 @@
                         </a>
                     </div>
                     <div th:if="${matchedRequests == null or matchedRequests.isEmpty()}" class="py-10 text-center text-sm text-gray-400">매칭된 요청이 없어요</div>
+                    <div id="pg-matched-nav" class="hidden px-5 py-3 flex items-center justify-center gap-1"></div>
                 </div>
                 <div id="rtab-completed" class="rtab-content hidden">
-                    <div th:if="${completedRequestsList != null and !completedRequestsList.isEmpty()}" class="divide-y divide-gray-50">
+                    <div th:if="${completedRequestsList != null and !completedRequestsList.isEmpty()}" id="pg-completed-list" class="divide-y divide-gray-50">
                         <a th:each="req : ${completedRequestsList}" th:href="@{/disabled/board/{id}(id=${req.id})}"
-                           class="block p-5 hover:bg-gray-50 transition-colors">
+                           class="pg-item block p-5 hover:bg-gray-50 transition-colors">
                             <div class="flex items-start gap-3">
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 mb-1">
@@ -328,11 +378,12 @@
                         </a>
                     </div>
                     <div th:if="${completedRequestsList == null or completedRequestsList.isEmpty()}" class="py-10 text-center text-sm text-gray-400">완료된 요청이 없어요</div>
+                    <div id="pg-completed-nav" class="hidden px-5 py-3 flex items-center justify-center gap-1"></div>
                 </div>
                 <div id="rtab-expired" class="rtab-content hidden">
-                    <div th:if="${expiredRequests != null and !expiredRequests.isEmpty()}" class="divide-y divide-gray-50">
+                    <div th:if="${expiredRequests != null and !expiredRequests.isEmpty()}" id="pg-expired-list" class="divide-y divide-gray-50">
                         <a th:each="req : ${expiredRequests}" th:href="@{/disabled/board/{id}(id=${req.id})}"
-                           class="block p-5 hover:bg-gray-50 transition-colors opacity-70">
+                           class="pg-item block p-5 hover:bg-gray-50 transition-colors opacity-70">
                             <div class="flex items-start gap-3">
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 mb-1">
@@ -350,95 +401,65 @@
                         </a>
                     </div>
                     <div th:if="${expiredRequests == null or expiredRequests.isEmpty()}" class="py-10 text-center text-sm text-gray-400">기간이 만료된 요청이 없어요</div>
+                    <div id="pg-expired-nav" class="hidden px-5 py-3 flex items-center justify-center gap-1"></div>
                 </div>
             </div>
 
-            <!-- ── 후기 작성 서브탭 ── -->
+            <!-- ── 내가 쓴 후기 서브탭 ── -->
             <div id="msub-reviews" class="msub-content hidden">
-                <div class="divide-y divide-gray-50" th:if="${matchingViews != null and !matchingViews.isEmpty()}">
-                    <th:block th:each="view : ${matchingViews}">
-                        <div th:if="${view.completed and view.review == null}" class="p-5">
-                            <div class="flex items-start gap-4">
-                                <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
-                                     th:text="${view.caregiverName != null ? #strings.substring(view.caregiverName, 0, 1) : '?'}">박</div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <p class="text-sm font-semibold text-gray-900"
-                                           th:text="${(view.caregiverName != null ? view.caregiverName : '활동지원사') + ' 활동지원사'}">박이민 활동지원사</p>
-                                        <span class="px-2 py-0.5 bg-green-50 text-green-600 text-xs font-medium rounded-full">후기 작성 가능</span>
-                                    </div>
-                                    <p class="text-xs text-gray-500 mb-1" th:text="${(view.serviceCategory != null ? view.serviceCategory : '') + ' · ' + view.location}">외래진료 동행 · 서울 강남구</p>
-                                    <p class="text-xs text-gray-400" th:text="${#temporals.format(view.startDatetime, 'yyyy.MM.dd HH:mm', new java.util.Locale('ko')) + ' · 완료'}">완료</p>
-                                </div>
-                            </div>
-                            <form th:action="@{/reviews/requests/{id}(id=${view.requestId})}" method="post" class="mt-4">
-                                <input type="hidden" th:id="'rating-input-' + ${view.requestId}" name="rating" value="0">
-                                <input type="hidden" name="visibility" value="PUBLIC">
-                                <div class="p-4 bg-indigo-50 rounded-2xl">
-                                    <p class="text-xs font-semibold text-indigo-700 mb-3">활동은 어떠셨나요?</p>
-                                    <div class="flex gap-1 mb-3" th:id="'stars-' + ${view.requestId}">
-                                        <button type="button" th:onclick="|setRating('${view.requestId}', 1)|" class="text-2xl text-gray-300 hover:text-yellow-400 transition-colors star-btn">★</button>
-                                        <button type="button" th:onclick="|setRating('${view.requestId}', 2)|" class="text-2xl text-gray-300 hover:text-yellow-400 transition-colors star-btn">★</button>
-                                        <button type="button" th:onclick="|setRating('${view.requestId}', 3)|" class="text-2xl text-gray-300 hover:text-yellow-400 transition-colors star-btn">★</button>
-                                        <button type="button" th:onclick="|setRating('${view.requestId}', 4)|" class="text-2xl text-gray-300 hover:text-yellow-400 transition-colors star-btn">★</button>
-                                        <button type="button" th:onclick="|setRating('${view.requestId}', 5)|" class="text-2xl text-gray-300 hover:text-yellow-400 transition-colors star-btn">★</button>
-                                    </div>
-                                    <textarea name="body" rows="3" placeholder="활동지원사에 대한 솔직한 후기를 남겨주세요. (선택)"
-                                              class="w-full px-3 py-2.5 text-sm text-gray-700 bg-white border border-indigo-100 rounded-xl resize-none placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent transition-all"></textarea>
-                                    <div class="flex justify-end mt-2">
-                                        <button type="submit" class="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all">후기 등록</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div th:if="${view.completed and view.review != null}" class="p-5">
-                            <div class="flex items-start gap-4">
-                                <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
-                                     th:text="${view.caregiverName != null ? #strings.substring(view.caregiverName, 0, 1) : '?'}">김</div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <p class="text-sm font-semibold text-gray-900" th:text="${(view.caregiverName != null ? view.caregiverName : '활동지원사') + ' 활동지원사'}">김수진 활동지원사</p>
-                                        <span class="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs font-medium rounded-full">작성 완료</span>
-                                    </div>
-                                    <p class="text-xs text-gray-500 mb-1" th:text="${(view.serviceCategory != null ? view.serviceCategory : '') + ' · ' + view.location}">장보기 동행 · 서울 마포구</p>
-                                    <p class="text-xs text-gray-400" th:text="${#temporals.format(view.startDatetime, 'yyyy.MM.dd HH:mm', new java.util.Locale('ko')) + ' · 완료'}">완료</p>
-                                </div>
-                            </div>
-                            <div class="mt-4 p-4 bg-gray-50 rounded-2xl">
-                                <div class="flex items-center gap-1 mb-2">
-                                    <span class="text-yellow-400 text-sm" th:text="${'★'.repeat(view.review.rating) + '☆'.repeat(5 - view.review.rating)}">★★★★★</span>
-                                    <span class="text-xs text-gray-500 ml-1" th:text="${view.review.rating + '.0'}">5.0</span>
-                                </div>
-                                <p class="text-sm text-gray-700" th:text="${view.review.body}">"후기 내용"</p>
-                                <span class="text-xs text-gray-400 mt-3 block" th:text="${#temporals.format(view.review.createdAt, 'yyyy.MM.dd', new java.util.Locale('ko')) + ' 작성'}">작성일</span>
-                            </div>
-                        </div>
-                        <div th:if="${!view.completed}" class="p-5 opacity-60">
-                            <div class="flex items-start gap-4">
-                                <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
-                                     th:text="${view.caregiverName != null ? #strings.substring(view.caregiverName, 0, 1) : '?'}">이</div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <p class="text-sm font-semibold text-gray-900" th:text="${(view.caregiverName != null ? view.caregiverName : '활동지원사') + ' 활동지원사'}">이준혁 활동지원사</p>
-                                        <span class="px-2 py-0.5 bg-amber-50 text-amber-600 text-xs font-medium rounded-full">활동 예정</span>
-                                    </div>
-                                    <p class="text-xs text-gray-500 mb-1" th:text="${(view.serviceCategory != null ? view.serviceCategory : '') + ' · ' + view.location}">병원 동행 · 서울 서초구</p>
-                                    <p class="text-xs text-gray-400" th:text="${#temporals.format(view.startDatetime, 'yyyy.MM.dd HH:mm', new java.util.Locale('ko')) + ' · 예정'}">예정</p>
-                                </div>
-                            </div>
-                            <div class="mt-4 p-3.5 bg-gray-50 rounded-2xl flex items-center gap-2">
-                                <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <p class="text-xs text-gray-500">활동 완료 후 후기를 작성할 수 있어요.</p>
-                            </div>
-                        </div>
-                    </th:block>
-                </div>
-                <div th:if="${matchingViews == null or matchingViews.isEmpty()}" class="py-12 text-center">
-                    <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                        <svg class="w-6 h-6 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                <!-- 헤더: 건수 + 전체보기 -->
+                <div class="flex items-center justify-between px-5 py-3.5 border-b border-gray-50">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-semibold text-gray-700">내가 쓴 후기</span>
+                        <span class="px-1.5 py-0.5 text-[10px] font-bold bg-indigo-100 text-indigo-600 rounded-full"
+                              th:text="${myReviewCount != null ? myReviewCount : 0}">0</span>
                     </div>
-                    <p class="text-sm text-gray-500 font-medium">완료된 매칭이 없어요</p>
-                    <p class="text-xs text-gray-400 mt-1">매칭이 완료되면 후기를 작성할 수 있어요.</p>
+                    <a th:href="@{/reviews/my}"
+                       class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">
+                        전체보기 →
+                    </a>
+                </div>
+                <!-- 최신 3개 후기 목록 -->
+                <div th:if="${myReviews != null and !myReviews.isEmpty()}" class="divide-y divide-gray-50">
+                    <a th:each="review : ${myReviews}"
+                       th:href="@{/reviews/{id}(id=${review.id})}"
+                       class="block p-5 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 font-bold text-xs flex-shrink-0"
+                                     th:text="${review.target.fullName != null ? #strings.substring(review.target.fullName, 0, 1) : '?'}">박</div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-gray-900 truncate" th:text="${review.target.fullName + ' 활동지원사'}">활동지원사</p>
+                                    <p class="text-xs text-gray-400 truncate"
+                                       th:text="${review.helpRequest.serviceCategory != null ? review.helpRequest.serviceCategory.name : ''} + ' · ' + ${review.helpRequest.sido}">서비스</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-0.5 flex-shrink-0">
+                                <th:block th:each="i : ${#numbers.sequence(1,5)}">
+                                    <span th:text="${i <= review.rating ? '★' : '☆'}"
+                                          th:class="${i <= review.rating ? 'text-yellow-400' : 'text-gray-200'}" class="text-xs"></span>
+                                </th:block>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed line-clamp-2" th:text="${review.body}">후기 내용</p>
+                        <p class="text-[10px] text-gray-400 mt-1.5"
+                           th:text="${#temporals.format(review.createdAt, 'yyyy.MM.dd', new java.util.Locale('ko'))}">날짜</p>
+                    </a>
+                </div>
+                <!-- 빈 상태 -->
+                <div th:if="${myReviews == null or myReviews.isEmpty()}" class="py-10 text-center">
+                    <div class="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-2">
+                        <svg class="w-5 h-5 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
+                    <p class="text-sm text-gray-500 font-medium">아직 작성한 후기가 없어요</p>
+                    <p class="text-xs text-gray-400 mt-1">활동이 완료되면 후기를 작성할 수 있어요</p>
+                </div>
+                <!-- 더 있을 경우 전체보기 버튼 -->
+                <div th:if="${myReviewCount != null and myReviewCount > 3}" class="p-4 border-t border-gray-50">
+                    <a th:href="@{/reviews/my}"
+                       class="block w-full py-2.5 text-xs font-semibold text-indigo-600 bg-indigo-50 rounded-xl text-center hover:bg-indigo-100 transition-colors">
+                        후기 전체보기 (<span th:text="${myReviewCount}">0</span>건)
+                    </a>
                 </div>
             </div>
         </div>
@@ -452,14 +473,14 @@
             <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                 <div class="flex items-center gap-2">
                     <span class="text-base">🛒</span>
-                    <h2 class="text-sm font-bold text-gray-900">내 구매 내역</h2>
+                    <h2 class="text-sm font-bold text-gray-900">구매 내역</h2>
                     <span class="px-2 py-0.5 bg-orange-100 text-orange-600 rounded-full text-xs font-semibold"
                           th:text="${myBuyChats != null ? myBuyChats.size() : 0}">0</span>
                 </div>
                 <a th:href="@{/market/chats}" class="text-xs text-orange-500 hover:text-orange-600 font-semibold">전체 보기 →</a>
             </div>
-            <div th:if="${myBuyChats != null and !myBuyChats.isEmpty()}" class="divide-y divide-gray-50">
-                <div th:each="chat : ${myBuyChats}" class="p-4 flex gap-3 items-center hover:bg-gray-50 transition-colors">
+            <div th:if="${myBuyChats != null and !myBuyChats.isEmpty()}" id="pg-buy-list" class="divide-y divide-gray-50">
+                <div th:each="chat : ${myBuyChats}" class="pg-item p-4 flex gap-3 items-center hover:bg-gray-50 transition-colors">
                     <a th:href="@{/market/chat/{id}(id=${chat.chatId})}" class="flex-shrink-0">
                         <div class="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
                             <img th:if="${chat.postThumbnailUrl != null}" th:src="${chat.postThumbnailUrl}" th:alt="${chat.postTitle}" class="w-full h-full object-cover">
@@ -487,7 +508,7 @@
                         <a th:if="${chat.postStatusLabel == '판매완료' and !chat.hasReview}"
                            th:href="@{/market/review/{chatId}/new(chatId=${chat.chatId})}"
                            class="px-2.5 py-1 text-xs font-semibold text-white bg-orange-500 rounded-lg hover:bg-orange-600 transition-all">
-                            후기 작성
+                            후기
                         </a>
                         <span th:if="${chat.postStatusLabel == '판매완료' and chat.hasReview}"
                               class="px-2.5 py-1 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg">
@@ -500,13 +521,14 @@
                 <p class="text-sm text-gray-400">구매한 상품이 없어요</p>
                 <a th:href="@{/market}" class="inline-block mt-3 text-xs text-orange-500 font-semibold hover:text-orange-600">이음마켓 둘러보기 →</a>
             </div>
+            <div id="pg-buy-nav" class="hidden px-5 py-3 flex items-center justify-center gap-1"></div>
         </div>
 
         <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
             <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                 <div class="flex items-center gap-2">
                     <span class="text-base">🛍️</span>
-                    <h2 class="text-sm font-bold text-gray-900">내 판매 상품</h2>
+                    <h2 class="text-sm font-bold text-gray-900">판매 내역</h2>
                     <span class="px-2 py-0.5 bg-orange-100 text-orange-600 rounded-full text-xs font-semibold"
                           th:text="${myMarketPosts != null ? myMarketPosts.size() : 0}">0</span>
                 </div>
@@ -526,10 +548,10 @@
                         class="mf-btn px-3 py-2.5 text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors whitespace-nowrap">판매 완료</button>
             </div>
             <div id="market-post-list">
-                <div th:if="${myMarketPosts != null and !myMarketPosts.isEmpty()}" class="divide-y divide-gray-50">
+                <div th:if="${myMarketPosts != null and !myMarketPosts.isEmpty()}" id="pg-sell-list" class="divide-y divide-gray-50">
                     <div th:each="post : ${myMarketPosts}"
                          th:attr="data-status=${post.status.name()}"
-                         class="market-post-item p-4 flex gap-4 hover:bg-gray-50 transition-colors">
+                         class="market-post-item pg-sell-item p-4 flex gap-4 hover:bg-gray-50 transition-colors">
                         <a th:href="@{/market/{id}(id=${post.id})}" class="flex-shrink-0">
                             <div class="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
                                 <img th:if="${post.thumbnailUrl != null}" th:src="${post.thumbnailUrl}" th:alt="${post.title}" class="w-full h-full object-cover">
@@ -586,6 +608,7 @@
                     </a>
                 </div>
             </div>
+            <div id="pg-sell-nav" class="hidden px-5 py-3 flex items-center justify-center gap-1"></div>
             <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-between">
                 <a th:href="@{/market/chats}" class="text-xs text-gray-500 hover:text-orange-500 transition-colors flex items-center gap-1">💬 채팅 목록 →</a>
                 <a th:href="@{/market}" class="text-xs text-gray-400 hover:text-gray-600 transition-colors">이음마켓 전체 보기 →</a>
@@ -593,7 +616,7 @@
         </div>
     </div>
 
-</section>
+</section><!-- /tabs section -->
 
 <!-- 탈퇴 확인 모달 -->
 <div id="withdraw-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
@@ -616,6 +639,121 @@
         </form>
     </div>
 </div>
+
+<script>
+// ── 미니 달력 ──
+(function() {
+    const today = new Date();
+    let mYear = today.getFullYear(), mMonth = today.getMonth();
+    let events = [];
+
+    async function init() {
+        try {
+            const res = await fetch('/api/calendar/events');
+            events = await res.json();
+        } catch(e) {}
+        render();
+    }
+
+    // 해당 월의 날짜별 이벤트 맵 생성 (범위 지원)
+    function buildDateMap(year, month) {
+        const map = {};
+        events.forEach(ev => {
+            const start = ev.startDate || ev.date;
+            const end = ev.endDate || start;
+            const isSingle = start === end;
+            let cur = new Date(start + 'T00:00');
+            const endD = new Date(end + 'T00:00');
+            let first = true;
+            while (cur <= endD) {
+                if (cur.getFullYear() === year && cur.getMonth() === month) {
+                    const ds = `${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`;
+                    const isLast = cur.getTime() === endD.getTime();
+                    const pos = isSingle ? 'single' : (first ? 'start' : (isLast ? 'end' : 'mid'));
+                    if (!map[ds]) map[ds] = [];
+                    map[ds].push({...ev, position: pos});
+                }
+                cur.setDate(cur.getDate() + 1);
+                first = false;
+            }
+        });
+        return map;
+    }
+
+    function render() {
+        const y = mYear, m = mMonth;
+        document.getElementById('mini-month-title').textContent = `${y}년 ${m+1}월`;
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+        const firstDay = new Date(y, m, 1).getDay();
+        const daysInMonth = new Date(y, m+1, 0).getDate();
+        const dateMap = buildDateMap(y, m);
+        const grid = document.getElementById('mini-cal-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        for (let i = 0; i < firstDay; i++) {
+            const el = document.createElement('div');
+            el.style.cssText = 'height:46px; position:relative;';
+            grid.appendChild(el);
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const evs = dateMap[dateStr] || [];
+            const dow = (firstDay + d - 1) % 7;
+            const isToday = dateStr === todayStr;
+
+            const cell = document.createElement('div');
+            cell.style.cssText = 'height:46px; position:relative; cursor:pointer;';
+            cell.onclick = () => window.location.href = '/calendar';
+
+            // 이벤트 바 (숫자 원 뒤에 배치)
+            const ev = evs.find(e => e.type === 'matched') || evs[0];
+            if (ev && ev.position !== 'single') {
+                const bar = document.createElement('div');
+                const barBg = ev.type === 'matched' ? 'rgba(249,115,22,0.35)' : 'rgba(255,255,255,0.22)';
+                bar.style.cssText = `position:absolute; top:3px; height:26px; background:${barBg}; z-index:1;`;
+                if (ev.position === 'start') { bar.style.left = '50%'; bar.style.right = '0'; }
+                else if (ev.position === 'end') { bar.style.left = '0'; bar.style.right = '50%'; }
+                else { bar.style.left = '0'; bar.style.right = '0'; }
+                cell.appendChild(bar);
+            }
+
+            // 날짜 숫자 (이벤트 start/end/single이면 컬러 원)
+            const num = document.createElement('span');
+            num.style.cssText = 'position:absolute; top:3px; left:50%; transform:translateX(-50%); width:26px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:12px; font-weight:500; z-index:10;';
+            num.textContent = d;
+            if (isToday) {
+                num.style.background = 'rgba(255,255,255,0.35)';
+                num.style.fontWeight = '700';
+                num.style.color = 'white';
+            } else if (ev && ev.position !== 'mid') {
+                if (ev.type === 'matched') {
+                    num.style.background = '#f97316';
+                    num.style.color = 'white';
+                } else {
+                    num.style.background = 'rgba(255,255,255,0.9)';
+                    num.style.color = '#4f46e5';
+                }
+            } else if (dow === 0) {
+                num.style.color = 'rgba(252,165,165,1)';
+            } else if (dow === 6) {
+                num.style.color = 'rgba(147,197,253,1)';
+            } else {
+                num.style.color = 'white';
+            }
+            cell.appendChild(num);
+
+            grid.appendChild(cell);
+        }
+    }
+
+    window.miniPrev = function() { mMonth--; if(mMonth<0){mMonth=11;mYear--;} render(); };
+    window.miniNext = function() { mMonth++; if(mMonth>11){mMonth=0;mYear++;} render(); };
+
+    document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
 
 <script>
     // 메인 탭 전환 (회원정보 | 매칭게시판 | 이음마켓)
@@ -659,10 +797,9 @@
     }
 
     // 이음마켓 상태 필터
+    var _currentSellFilter = 'all';
     function showMarketFilter(status) {
-        document.querySelectorAll('.market-post-item').forEach(el => {
-            el.style.display = (status === 'all' || el.dataset.status === status) ? '' : 'none';
-        });
+        _currentSellFilter = status;
         document.querySelectorAll('.mf-btn').forEach(btn => {
             btn.classList.remove('text-orange-500', 'border-b-2', 'border-orange-500', 'font-semibold');
             btn.classList.add('text-gray-400', 'font-medium');
@@ -672,6 +809,7 @@
             activeBtn.classList.add('text-orange-500', 'border-b-2', 'border-orange-500', 'font-semibold');
             activeBtn.classList.remove('text-gray-400', 'font-medium');
         }
+        if (window._sellPaginateRender) window._sellPaginateRender(0);
     }
 
     // 별점 설정
@@ -712,6 +850,127 @@
             .catch(() => alert('이미지 업로드에 실패했습니다. 잠시 후 다시 시도해주세요.'));
         this.value = '';
     });
+</script>
+
+<script>
+(function () {
+    var PER_PAGE = 3;
+
+    function initPagination(listId, navId) {
+        var list = document.getElementById(listId);
+        var nav  = document.getElementById(navId);
+        if (!list || !nav) return;
+        var items = Array.from(list.querySelectorAll('.pg-item'));
+        if (items.length <= PER_PAGE) return;
+
+        var page = 0;
+        var total = Math.ceil(items.length / PER_PAGE);
+
+        function render() {
+            items.forEach(function (el, i) {
+                el.style.display = (i >= page * PER_PAGE && i < (page + 1) * PER_PAGE) ? '' : 'none';
+            });
+            nav.innerHTML = '';
+            nav.classList.remove('hidden');
+
+            var prev = document.createElement('button');
+            prev.type = 'button';
+            prev.textContent = '‹';
+            prev.disabled = page === 0;
+            prev.className = 'w-7 h-7 flex items-center justify-center rounded-full text-sm font-bold transition-colors ' +
+                (page === 0 ? 'text-gray-300 cursor-default' : 'text-indigo-500 hover:bg-indigo-50');
+            prev.onclick = function () { if (page > 0) { page--; render(); } };
+            nav.appendChild(prev);
+
+            for (var i = 0; i < total; i++) {
+                (function (idx) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.textContent = idx + 1;
+                    btn.className = 'w-7 h-7 flex items-center justify-center rounded-full text-xs font-semibold transition-colors ' +
+                        (idx === page ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-100');
+                    btn.onclick = function () { page = idx; render(); };
+                    nav.appendChild(btn);
+                })(i);
+            }
+
+            var next = document.createElement('button');
+            next.type = 'button';
+            next.textContent = '›';
+            next.disabled = page === total - 1;
+            next.className = 'w-7 h-7 flex items-center justify-center rounded-full text-sm font-bold transition-colors ' +
+                (page === total - 1 ? 'text-gray-300 cursor-default' : 'text-indigo-500 hover:bg-indigo-50');
+            next.onclick = function () { if (page < total - 1) { page++; render(); } };
+            nav.appendChild(next);
+        }
+
+        render();
+    }
+
+    initPagination('pg-waiting-list',   'pg-waiting-nav');
+    initPagination('pg-matched-list',   'pg-matched-nav');
+    initPagination('pg-completed-list', 'pg-completed-nav');
+    initPagination('pg-expired-list',   'pg-expired-nav');
+    initPagination('pg-buy-list',       'pg-buy-nav');
+
+    // 판매 내역 — 필터 연동 페이지네이션
+    (function () {
+        var list = document.getElementById('pg-sell-list');
+        var nav  = document.getElementById('pg-sell-nav');
+        if (!list || !nav) return;
+        var allItems = Array.from(list.querySelectorAll('.pg-sell-item'));
+
+        function renderSell(page) {
+            var visible = allItems.filter(function (el) {
+                return _currentSellFilter === 'all' || el.dataset.status === _currentSellFilter;
+            });
+            // hide all first
+            allItems.forEach(function (el) { el.style.display = 'none'; });
+            if (visible.length === 0) { nav.classList.add('hidden'); nav.innerHTML = ''; return; }
+
+            var total = Math.ceil(visible.length / PER_PAGE);
+            page = Math.max(0, Math.min(page, total - 1));
+            visible.forEach(function (el, i) {
+                el.style.display = (i >= page * PER_PAGE && i < (page + 1) * PER_PAGE) ? '' : 'none';
+            });
+
+            if (visible.length <= PER_PAGE) { nav.classList.add('hidden'); nav.innerHTML = ''; return; }
+
+            nav.innerHTML = '';
+            nav.classList.remove('hidden');
+
+            var prev = document.createElement('button');
+            prev.type = 'button'; prev.textContent = '‹';
+            prev.disabled = page === 0;
+            prev.className = 'w-7 h-7 flex items-center justify-center rounded-full text-sm font-bold transition-colors ' +
+                (page === 0 ? 'text-gray-300 cursor-default' : 'text-orange-500 hover:bg-orange-50');
+            prev.onclick = function () { renderSell(page - 1); };
+            nav.appendChild(prev);
+
+            for (var i = 0; i < total; i++) {
+                (function (idx) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button'; btn.textContent = idx + 1;
+                    btn.className = 'w-7 h-7 flex items-center justify-center rounded-full text-xs font-semibold transition-colors ' +
+                        (idx === page ? 'bg-orange-500 text-white' : 'text-gray-500 hover:bg-gray-100');
+                    btn.onclick = function () { renderSell(idx); };
+                    nav.appendChild(btn);
+                })(i);
+            }
+
+            var next = document.createElement('button');
+            next.type = 'button'; next.textContent = '›';
+            next.disabled = page === total - 1;
+            next.className = 'w-7 h-7 flex items-center justify-center rounded-full text-sm font-bold transition-colors ' +
+                (page === total - 1 ? 'text-gray-300 cursor-default' : 'text-orange-500 hover:bg-orange-50');
+            next.onclick = function () { renderSell(page + 1); };
+            nav.appendChild(next);
+        }
+
+        window._sellPaginateRender = renderSell;
+        renderSell(0);
+    })();
+})();
 </script>
 </th:block>
 </html>

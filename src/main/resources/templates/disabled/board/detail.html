@@ -192,42 +192,78 @@
         </div>
     </div>
 
-    <!-- 지원자 리스트 + 추천 활동지원사 탭 (OPEN + 본인 게시물만) -->
+    <!-- 지원자 리스트 + 추천 활동지원사 (OPEN + 본인 게시물만) -->
     <div th:if="${request.status.name() == 'OPEN' and (request.requester.userId == currentUserId or isAdmin)}"
-         class="bg-white rounded-2xl border border-indigo-100 mb-4 overflow-hidden">
+         class="space-y-3 mb-4">
 
-        <!-- 탭 헤더 -->
-        <div class="flex border-b border-gray-100">
-            <button id="tab-applicants" onclick="switchTab('applicants')"
-                    class="flex-1 py-3.5 text-sm font-semibold text-indigo-600 border-b-2 border-indigo-600 transition-all tab-btn">
-                지원자 리스트
-                <span class="ml-1 text-xs bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full" th:text="${applicationCount}">0</span>
-            </button>
-            <button th:if="${recommendations != null}"
-                    id="tab-recommend" onclick="switchTab('recommend')"
-                    class="flex-1 py-3.5 text-sm font-semibold text-gray-400 transition-all tab-btn">
-                추천 활동지원사
-                <span class="ml-1 text-xs bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full"
-                      th:text="${#lists.size(recommendations)}">0</span>
-            </button>
+        <!-- 지원자 리스트 섹션 -->
+        <div class="bg-white rounded-2xl border border-indigo-100 overflow-hidden">
+            <div class="flex items-center justify-between px-5 pt-5 pb-4">
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span class="text-sm font-bold text-gray-900">지원자 리스트</span>
+                    <span class="px-2 py-0.5 text-xs font-semibold rounded-full"
+                          th:classappend="${applicationCount > 0} ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-400'"
+                          th:text="${applicationCount} + '명'">0명</span>
+                </div>
+                <a th:href="@{/disabled/board/{id}/applicants(id=${request.id})}"
+                   class="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">
+                    전체보기
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+            <div class="px-5 pb-5">
+                <div th:if="${applicationCount == 0}"
+                     class="flex flex-col items-center gap-2 py-6 text-gray-400">
+                    <svg class="w-8 h-8 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <p class="text-sm">아직 지원자가 없어요.</p>
+                </div>
+                <a th:if="${applicationCount > 0}"
+                   th:href="@{/disabled/board/{id}/applicants(id=${request.id})}"
+                   class="flex items-center justify-between gap-3 p-3.5 rounded-xl border border-indigo-100 bg-indigo-50/40 hover:bg-indigo-50 hover:border-indigo-200 transition-all group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900">
+                                <span th:text="${applicationCount}">0</span>명이 지원했어요
+                            </p>
+                            <p class="text-xs text-gray-500">지원자를 확인하고 매칭을 진행하세요</p>
+                        </div>
+                    </div>
+                    <svg class="w-4 h-4 text-indigo-400 group-hover:text-indigo-600 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
         </div>
 
-        <!-- 지원자 리스트 탭 패널 -->
-        <div id="panel-applicants" class="p-5">
-            <p class="text-xs text-gray-400 mb-3">지원자를 확인하고 매칭을 진행하세요.</p>
-            <a th:href="@{/disabled/board/{id}/applicants(id=${request.id})}"
-               class="flex items-center justify-center gap-1.5 w-full py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100">
-                지원자 리스트 보기
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-        </div>
+        <!-- 추천 활동지원사 섹션 -->
+        <div th:if="${recommendations != null}" class="bg-white rounded-2xl border border-indigo-100 overflow-hidden">
+            <div class="flex items-center justify-between px-5 pt-5 pb-4">
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                    </svg>
+                    <span class="text-sm font-bold text-gray-900">추천 활동지원사</span>
+                    <span class="px-2 py-0.5 text-xs font-semibold rounded-full"
+                          th:classappend="${!#lists.isEmpty(recommendations)} ? 'bg-teal-50 text-teal-600' : 'bg-gray-100 text-gray-400'"
+                          th:text="${#lists.size(recommendations)} + '명'">0명</span>
+                </div>
+                <span class="text-xs text-gray-400">매칭 점수 상위 추천</span>
+            </div>
 
-        <!-- 추천 활동지원사 탭 패널 -->
-        <div id="panel-recommend" class="hidden p-5" th:if="${recommendations != null}">
             <!-- PENDING 초대 대기 안내 -->
             <div th:if="${hasPendingInvitation}"
-                 class="flex items-start gap-3 mb-4 p-3.5 bg-amber-50 border border-amber-200 rounded-xl">
-                <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 class="mx-5 mb-3 flex items-start gap-3 p-3.5 bg-amber-50 border border-amber-200 rounded-xl">
+                <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <div>
@@ -235,45 +271,51 @@
                     <p class="text-xs text-amber-600 mt-0.5">활동지원사의 응답을 기다리는 중입니다. 응답 전까지 다른 초대는 보낼 수 없어요.</p>
                 </div>
             </div>
-            <p class="text-xs text-gray-400 mb-3">활동 상태 ON인 지원사 중 매칭 점수 상위 5명을 추천해드려요.</p>
-            <div th:if="${#lists.isEmpty(recommendations)}"
-                 class="py-8 text-center text-sm text-gray-400">
-                현재 매칭 가능한 활동지원사가 없습니다.
-            </div>
-            <div class="space-y-3" th:if="${!#lists.isEmpty(recommendations)}">
-                <div th:each="rec : ${recommendations}"
-                     class="rec-card flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all cursor-pointer"
-                     th:attr="data-id=${rec.caregiverId},
-                              data-name=${rec.fullName},
-                              data-intro=${rec.introShort != null ? rec.introShort : ''},
-                              data-rating=${rec.avgRating != null ? rec.avgRating : 0},
-                              data-reviews=${rec.totalReviews != null ? rec.totalReviews : 0},
-                              data-cert=${rec.hasCertification != null ? rec.hasCertification : false},
-                              data-score=${rec.score}"
-                     onclick="openProfileModalFromCard(this)">
-                    <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm flex-shrink-0"
-                         th:text="${#strings.substring(rec.fullName, 0, 1)}">박</div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold text-gray-900" th:text="${rec.fullName + ' 활동지원사'}">이름</p>
-                        <p class="text-xs text-gray-400 truncate" th:text="${rec.introShort != null ? rec.introShort : '소개 없음'}">소개</p>
-                    </div>
-                    <div class="flex flex-col items-end gap-1 flex-shrink-0">
-                        <div class="flex items-center gap-1">
-                            <svg class="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                            <span class="text-xs font-medium text-gray-700" th:text="${#numbers.formatDecimal(rec.avgRating != null ? rec.avgRating : 0, 1, 1)}">0.0</span>
+
+            <div class="px-5 pb-5">
+                <div th:if="${#lists.isEmpty(recommendations)}"
+                     class="flex flex-col items-center gap-2 py-6 text-gray-400">
+                    <svg class="w-8 h-8 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                    <p class="text-sm">현재 매칭 가능한 활동지원사가 없습니다.</p>
+                </div>
+                <div class="space-y-2.5" th:if="${!#lists.isEmpty(recommendations)}">
+                    <div th:each="rec : ${recommendations}"
+                         class="rec-card flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-teal-200 hover:bg-teal-50/30 transition-all cursor-pointer"
+                         th:attr="data-id=${rec.caregiverId},
+                                  data-name=${rec.fullName},
+                                  data-intro=${rec.introShort != null ? rec.introShort : ''},
+                                  data-rating=${rec.avgRating != null ? rec.avgRating : 0},
+                                  data-reviews=${rec.totalReviews != null ? rec.totalReviews : 0},
+                                  data-cert=${rec.hasCertification != null ? rec.hasCertification : false},
+                                  data-score=${rec.score}"
+                         onclick="openProfileModalFromCard(this)">
+                        <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 font-bold text-sm flex-shrink-0"
+                             th:text="${#strings.substring(rec.fullName, 0, 1)}">박</div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-gray-900" th:text="${rec.fullName + ' 활동지원사'}">이름</p>
+                            <p class="text-xs text-gray-400 truncate" th:text="${rec.introShort != null ? rec.introShort : '소개 없음'}">소개</p>
                         </div>
-                        <div class="flex items-center gap-1">
-                            <div class="h-1.5 w-16 bg-gray-100 rounded-full overflow-hidden">
-                                <div class="h-full bg-indigo-500 rounded-full"
-                                     th:style="'width:' + ${rec.score > 70 ? 100 : rec.score * 100 / 70} + '%'"></div>
+                        <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
+                            <div class="flex items-center gap-1">
+                                <svg class="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                <span class="text-xs font-medium text-gray-700" th:text="${#numbers.formatDecimal(rec.avgRating != null ? rec.avgRating : 0, 1, 1)}">0.0</span>
                             </div>
-                            <span class="text-xs text-indigo-600 font-medium"
-                                  th:text="${rec.score > 70 ? 100 : rec.score * 100 / 70} + '%'">0%</span>
+                            <div class="flex items-center gap-1">
+                                <div class="h-1.5 w-14 bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-teal-500 rounded-full"
+                                         th:style="'width:' + ${rec.score > 70 ? 100 : rec.score * 100 / 70} + '%'"></div>
+                                </div>
+                                <span class="text-xs text-teal-600 font-medium"
+                                      th:text="${rec.score > 70 ? 100 : rec.score * 100 / 70} + '%'">0%</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
 
     <!-- 지원자 리스트 안내 (비소유자) -->
@@ -353,17 +395,24 @@
         </div>
     </div>
 
-    <!-- COMPLETED: 마이페이지에서 후기 작성 안내 -->
-    <div th:if="${request.status.name() == 'COMPLETED'}"
+    <!-- COMPLETED: 후기 작성 안내 -->
+    <div th:if="${request.status.name() == 'COMPLETED' and request.requester.userId == currentUserId}"
          class="bg-indigo-50 rounded-2xl border border-indigo-100 p-5 mb-4 flex items-center justify-between">
         <div>
             <p class="text-sm font-semibold text-indigo-900">활동이 완료되었습니다</p>
-            <p class="text-xs text-indigo-400 mt-0.5">마이페이지에서 활동지원사에게 후기를 남겨보세요.</p>
+            <p class="text-xs text-indigo-400 mt-0.5"
+               th:text="${hasReview} ? '후기를 이미 작성하셨습니다.' : '활동지원사에게 후기를 남겨보세요.'"></p>
         </div>
-        <a th:href="@{/disabled/mypage}"
+        <a th:if="${!hasReview}"
+           th:href="@{/reviews/requests/{id}/new(id=${request.id})}"
            class="flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-all">
             후기 작성하기
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+        </a>
+        <a th:if="${hasReview}"
+           th:href="@{/reviews/my}"
+           class="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-indigo-200 text-indigo-600 text-sm font-semibold rounded-xl hover:bg-indigo-50 transition-all">
+            내가 쓴 후기 보기 →
         </a>
     </div>
 
@@ -389,26 +438,6 @@
 var REQUEST_ID = /*[[${request.id}]]*/ 0;
 var CSRF_HEADER = 'X-CSRF-TOKEN';
 
-function switchTab(name) {
-    ['applicants', 'recommend'].forEach(function(t) {
-        var btn = document.getElementById('tab-' + t);
-        var panel = document.getElementById('panel-' + t);
-        if (!btn || !panel) return;
-        var active = t === name;
-        btn.classList.toggle('text-indigo-600', active);
-        btn.classList.toggle('border-b-2', active);
-        btn.classList.toggle('border-indigo-600', active);
-        btn.classList.toggle('text-gray-400', !active);
-        var badge = btn.querySelector('span');
-        if (badge) {
-            badge.classList.toggle('bg-indigo-100', active);
-            badge.classList.toggle('text-indigo-600', active);
-            badge.classList.toggle('bg-gray-100', !active);
-            badge.classList.toggle('text-gray-400', !active);
-        }
-        panel.classList.toggle('hidden', !active);
-    });
-}
 
 var currentCaregiverId = null;
 
