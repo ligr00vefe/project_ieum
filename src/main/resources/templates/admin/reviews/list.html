@@ -30,8 +30,9 @@
             </thead>
             <tbody class="divide-y divide-slate-50">
                 <th:block th:each="review : ${reviews}">
-                <tr class="hover:bg-slate-50 transition-colors"
-                    th:classappend="${review.visibility.name() == 'PRIVATE'} ? 'opacity-50' : ''">
+                <tr class="hover:bg-slate-50 transition-colors cursor-pointer"
+                    th:classappend="${review.visibility.name() == 'PRIVATE'} ? 'opacity-50' : ''"
+                    th:onclick="|location.href='@{/admin/reviews/{id}(id=${review.id})}'|">
                     <td class="px-5 py-3.5">
                         <p class="text-slate-700 truncate max-w-xs"
                            th:text="${review.body != null ? review.body : '(내용 없음)'}">내용</p>

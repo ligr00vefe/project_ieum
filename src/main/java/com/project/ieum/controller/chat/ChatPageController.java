@@ -5,6 +5,7 @@ import com.project.ieum.entity.UserRole;
 import com.project.ieum.entity.caregiver.CaregiverPersonalityTag;
 import com.project.ieum.entity.conversation.Conversation;
 import com.project.ieum.entity.conversation.ConversationStatus;
+import com.project.ieum.entity.request.HelpRequestStatus;
 import com.project.ieum.repository.CaregiverPersonalityTagRepository;
 import com.project.ieum.entity.request.InvitationStatus;
 import com.project.ieum.repository.CaregiverInvitationRepository;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -47,7 +49,9 @@ public class ChatPageController {
         Conversation conversation = conversationRepository.findWithParticipantsById(conversationId)
                 .orElseThrow(() -> new IllegalArgumentException("대화방을 찾을 수 없습니다."));
 
-        if (conversation.getStatus() == ConversationStatus.CLOSED) {
+        boolean isAdmin = currentUser.getRole() == UserRole.ADMIN;
+
+        if (!isAdmin && conversation.getStatus() == ConversationStatus.CLOSED) {
             redirectAttributes.addFlashAttribute("errorMessage", "신고 처리로 인해 종료된 채팅방입니다.");
             return "redirect:/chat/conversations";
         }
@@ -62,7 +66,12 @@ public class ChatPageController {
         int matchPercent = 0;
 
         Long partnerId;
-        if (isUser) {
+        if (isAdmin) {
+            partnerName = conversation.getRequester().getFullName() + " / " + conversation.getCaregiver().getFullName();
+            partnerProfileImage = null;
+            partnerSubtitle = "관리자 뷰";
+            partnerId = 0L;
+        } else if (isUser) {
             var caregiver = conversation.getCaregiver();
             partnerName = caregiver.getFullName() + " 활동지원사";
             partnerProfileImage = caregiver.getProfileImageUrl();
@@ -100,12 +109,21 @@ public class ChatPageController {
         boolean hasPendingInvitation = isUser &&
                 caregiverInvitationRepository.existsByHelpRequest_IdAndStatus(requestId, InvitationStatus.PENDING);
 
+        HelpRequestStatus requestStatus = conversation.getApplication().getHelpRequest().getStatus();
+        boolean isAlreadyMatched = requestStatus == HelpRequestStatus.MATCHED
+                || requestStatus == HelpRequestStatus.IN_PROGRESS
+                || requestStatus == HelpRequestStatus.COMPLETED;
+
         model.addAttribute("title", "채팅");
         model.addAttribute("conversationId", conversationId);
+        model.addAttribute("applicationId", conversation.getApplication().getId());
         model.addAttribute("partnerId", partnerId);
+        model.addAttribute("currentUserId", currentUser.getId());
+        model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("isUser", isUser);
         model.addAttribute("isCaregiver", isCaregiver);
         model.addAttribute("hasPendingInvitation", hasPendingInvitation);
+        model.addAttribute("isAlreadyMatched", isAlreadyMatched);
         model.addAttribute("partnerName", partnerName);
         model.addAttribute("partnerProfileImage", partnerProfileImage);
         model.addAttribute("partnerSubtitle", partnerSubtitle);
@@ -113,5 +131,13 @@ public class ChatPageController {
         model.addAttribute("requestId", requestId);
         model.addAttribute("content", "chat/room");
         return "layout/layout";
+    }
+
+    @PostMapping("/conversations/{conversationId}/confirm-match")
+    public String confirmMatch(@PathVariable Long conversationId) {
+        Conversation conversation = conversationRepository.findWithParticipantsById(conversationId)
+                .orElseThrow(() -> new IllegalArgumentException("대화방을 찾을 수 없습니다."));
+        matchingService.accept(conversation.getApplication().getId());
+        return "redirect:/matching/confirmed?conversationId=" + conversationId;
     }
 }
