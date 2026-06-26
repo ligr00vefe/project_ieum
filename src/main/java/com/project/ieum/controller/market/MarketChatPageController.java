@@ -49,15 +49,19 @@ public class MarketChatPageController {
     @GetMapping("/chat/{chatId}")
     public String room(@PathVariable Long chatId, Model model, RedirectAttributes redirectAttributes) {
         User currentUser = currentUserService.getCurrentUser();
-        MarketChat chat = marketChatService.getChatForUser(chatId);
+        boolean isAdmin = currentUser.getRole().name().equals("ADMIN");
 
-        if (chat.getStatus() == ConversationStatus.CLOSED) {
+        MarketChat chat = isAdmin
+                ? marketChatService.getChatById(chatId)
+                : marketChatService.getChatForUser(chatId);
+
+        if (!isAdmin && chat.getStatus() == ConversationStatus.CLOSED) {
             redirectAttributes.addFlashAttribute("errorMessage", "신고 처리로 인해 종료된 채팅방입니다.");
             return "redirect:/market/chats";
         }
 
-        // 상대방 정보 결정 (현재 사용자가 판매자면 상대는 구매자, 반대도 동일)
-        boolean isSeller = chat.getSeller().getId().equals(currentUser.getId());
+        // 상대방 정보 결정 (관리자는 판매자 기준, 일반 사용자는 상대방 기준)
+        boolean isSeller = isAdmin || chat.getSeller().getId().equals(currentUser.getId());
         User opponent = isSeller ? chat.getBuyer() : chat.getSeller();
 
         // 게시글 대표 이미지

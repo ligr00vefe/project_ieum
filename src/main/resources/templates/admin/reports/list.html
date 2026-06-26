@@ -53,8 +53,13 @@
                         <span th:if="${report.marketChatId == null and report.conversationId == null}"
                               class="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-slate-100 text-slate-400">기타</span>
                         <div th:if="${report.marketChatId != null}" class="mt-1">
-                            <a th:href="@{/market/chats/{id}(id=${report.marketChatId})}"
+                            <a th:href="@{/market/chat/{id}(id=${report.marketChatId})}"
+                               target="_blank"
                                class="text-[11px] text-orange-400 hover:text-orange-600 underline">채팅방 보기</a>
+                        </div>
+                        <div th:if="${report.conversationId != null}" class="mt-1">
+                            <a th:href="@{/admin/matching/{id}(id=${report.conversationId})}"
+                               class="text-[11px] text-indigo-400 hover:text-indigo-600 underline">매칭 상세 보기</a>
                         </div>
                     </td>
                     <td class="px-5 py-3.5 text-slate-600 text-xs" th:text="${report.reporter.email}">-</td>
@@ -66,15 +71,9 @@
                             <span th:if="${report.target.status.name() == 'BANNED'}"
                                   class="text-[11px] font-semibold text-red-600">🚫 정지회원</span>
                         </div>
-                        <div class="flex gap-2 mt-1">
-                            <form th:action="@{/admin/users/{id}/status(id=${report.target.id})}" method="post">
-                                <input type="hidden" name="status" value="WARNED">
-                                <button type="submit" class="text-[11px] font-medium text-amber-500 hover:text-amber-700">경고</button>
-                            </form>
-                            <form th:action="@{/admin/users/{id}/status(id=${report.target.id})}" method="post">
-                                <input type="hidden" name="status" value="BANNED">
-                                <button type="submit" class="text-[11px] font-medium text-red-500 hover:text-red-700">정지(BAN)</button>
-                            </form>
+                        <div class="mt-1">
+                            <a th:href="@{/admin/users/{id}(id=${report.target.id})}"
+                               class="text-[11px] font-medium text-slate-400 hover:text-slate-600 underline">회원 관리 →</a>
                         </div>
                     </td>
                     <td class="px-5 py-3.5 text-slate-700 text-xs" th:text="${report.reason.label}">사유</td>
