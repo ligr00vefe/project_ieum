@@ -28,7 +28,12 @@
 @keyframes marquee-down{from{transform:translateY(-50%)}to{transform:translateY(0)}}
 .track-up{animation:marquee-up 28s linear infinite;}
 .track-down{animation:marquee-down 24s linear infinite;}
-.testi-col:hover .testi-track{animation-play-state:paused;}
+
+/* Float wave animation for care photo cards */
+@keyframes float-wave{0%,100%{transform:translateY(0px)}50%{transform:translateY(-18px)}}
+@keyframes float-wave-delay{0%,100%{transform:translateY(-18px)}50%{transform:translateY(0px)}}
+.float-card-1{animation:float-wave 4s ease-in-out infinite;}
+.float-card-2{animation:float-wave-delay 4s ease-in-out infinite;}
 </style>
 
 <!-- ===== HERO ===== -->
@@ -165,11 +170,11 @@
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-4 fade-up delay-3">
-                <div class="rounded-2xl overflow-hidden aspect-[3/4] shadow-2xl">
-                    <img src="/images/main/care01.jpg" alt="케어 현장" class="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-700">
+                <div class="rounded-2xl overflow-hidden aspect-[3/4] shadow-2xl float-card-1">
+                    <img src="/images/main/care01.jpg" alt="케어 현장" class="w-full h-full object-cover object-center">
                 </div>
-                <div class="rounded-2xl overflow-hidden aspect-[3/4] shadow-2xl mt-8">
-                    <img src="/images/main/care02.jpg" alt="케어 현장" class="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-700">
+                <div class="rounded-2xl overflow-hidden aspect-[3/4] shadow-2xl mt-8 float-card-2">
+                    <img src="/images/main/care02.jpg" alt="케어 현장" class="w-full h-full object-cover object-center">
                 </div>
             </div>
         </div>
@@ -196,8 +201,9 @@
 </section>
 
 <!-- ===== STORY ZIGZAG ===== -->
-<section class="relative py-28 lg:py-36 overflow-hidden bg-teal-500">
-    <div class="absolute inset-0 pointer-events-none" style="background-image:radial-gradient(circle,rgba(255,255,255,0.2) 1.5px,transparent 1.5px);background-size:28px 28px;opacity:0.45;"></div>
+<section class="relative py-28 lg:py-36 overflow-hidden" style="background-color:#4f46e5;">
+    <canvas id="storyCanvas" class="absolute inset-0 pointer-events-none" style="width:100%;height:100%;"></canvas>
+    <div class="absolute inset-0 pointer-events-none" style="background-image:radial-gradient(circle,rgba(255,255,255,0.15) 1.5px,transparent 1.5px);background-size:28px 28px;opacity:0.35;"></div>
     <div class="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full blur-[180px] opacity-20 pointer-events-none" style="background:radial-gradient(circle,#fff 0%,transparent 70%)"></div>
     <div class="absolute bottom-10 right-20 w-72 h-72 rounded-full blur-[100px] opacity-10 pointer-events-none" style="background:radial-gradient(circle,#fff 0%,transparent 70%)"></div>
     <!-- Decorative concentric rings -->
@@ -232,8 +238,8 @@
                 <path id="sGlow2" fill="none" stroke="url(#zg)" stroke-width="40" stroke-linecap="round" opacity="0.13" filter="url(#glow)"/>
                 <path id="sLine2" fill="none" stroke="url(#zg)" stroke-width="8"   stroke-linecap="round" filter="url(#glow)"/>
                 <path id="sBg3"   fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
-                <path id="sGlow3" fill="none" stroke="url(#zg)" stroke-width="56" stroke-linecap="round" opacity="0.12" filter="url(#glow)"/>
-                <path id="sLine3" fill="none" stroke="url(#zg)" stroke-width="12"   stroke-linecap="round" filter="url(#glow)"/>
+                <path id="sGlow3" fill="none" stroke="url(#zg)" stroke-width="112" stroke-linecap="round" opacity="0.12" filter="url(#glow)"/>
+                <path id="sLine3" fill="none" stroke="url(#zg)" stroke-width="24"   stroke-linecap="round" filter="url(#glow)"/>
             </svg>
 
             <!-- Step 1 — node 8%, card right -->
@@ -370,7 +376,7 @@
             </div>
 
                         <!-- Right: 2-column CSS marquee infinite scroll -->
-            <div class="flex-1 flex gap-3" style="mask-image:linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);-webkit-mask-image:linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);overflow:hidden;height:520px;">
+            <div class="flex gap-3" style="mask-image:linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);-webkit-mask-image:linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);overflow:hidden;height:520px;width:100%;max-width:580px;">
 
                 <!-- Column 1: scrolls up -->
                 <div class="testi-col">
@@ -521,7 +527,7 @@
         <p class="text-gray-500 text-lg mb-10 leading-relaxed">회원가입은 무료이며 5분이면 완료됩니다.<br>나에게 딱 맞는 케어 파트너를 지금 만나보세요.</p>
         <th:block th:if="${!isAuthenticated}">
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a th:href="@{/register/type-select}" class="inline-flex items-center justify-center gap-2 px-8 py-4 text-white font-semibold rounded-2xl hover:opacity-90 transition-all shadow-lg active:scale-95 bg-teal-500">서비스 이용자로 시작하기<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
+                <a th:href="@{/register/type-select}" class="inline-flex items-center justify-center gap-2 px-8 py-4 text-white font-semibold rounded-2xl hover:opacity-90 transition-all shadow-lg active:scale-95" style="background-color:#4f46e5;">서비스 이용자로 시작하기<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
                 <a th:href="@{/register/type-select}" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-teal-400 text-white font-semibold rounded-2xl hover:bg-teal-300 transition-all shadow-lg shadow-teal-200 active:scale-95">활동지원사로 가입하기<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
             </div>
             <p class="mt-6 text-sm text-gray-400">이미 계정이 있으신가요? <a th:href="@{/login}" class="text-teal-600 font-semibold hover:underline ml-1">로그인</a></p>
@@ -564,6 +570,58 @@
         entries.forEach(function (e) { if (e.isIntersecting) e.target.classList.add('visible'); });
     }, { threshold: 0.12 });
     document.querySelectorAll('.fade-up').forEach(function (el) { obs.observe(el); });
+})();
+
+/* Story canvas bouncing balls */
+(function () {
+    var canvas = document.getElementById('storyCanvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+
+    function resize() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize, { passive: true });
+
+    var balls = [
+        {
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: 60 + Math.random() * 80,
+            vx: (Math.random() * 1.5 + 0.8) * (Math.random() < 0.5 ? 1 : -1),
+            vy: (Math.random() * 1.5 + 0.8) * (Math.random() < 0.5 ? 1 : -1),
+            alpha: 0.06 + Math.random() * 0.10
+        },
+        {
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: 40 + Math.random() * 60,
+            vx: (Math.random() * 1.5 + 0.8) * (Math.random() < 0.5 ? 1 : -1),
+            vy: (Math.random() * 1.5 + 0.8) * (Math.random() < 0.5 ? 1 : -1),
+            alpha: 0.06 + Math.random() * 0.10
+        }
+    ];
+
+    function draw() {
+        var w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        balls.forEach(function (b) {
+            b.x += b.vx;
+            b.y += b.vy;
+            if (b.x - b.r < 0) { b.x = b.r; b.vx = Math.abs(b.vx); }
+            if (b.x + b.r > w) { b.x = w - b.r; b.vx = -Math.abs(b.vx); }
+            if (b.y - b.r < 0) { b.y = b.r; b.vy = Math.abs(b.vy); }
+            if (b.y + b.r > h) { b.y = h - b.r; b.vy = -Math.abs(b.vy); }
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,255,255,' + b.alpha + ')';
+            ctx.fill();
+        });
+        requestAnimationFrame(draw);
+    }
+    draw();
 })();
 
 /* Story zigzag SVG — 3 segments with increasing thickness */
