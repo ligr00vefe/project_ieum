@@ -18,6 +18,7 @@ public class MessageResponse {
     private String attachmentType;
     private Boolean hasRead;
     private Boolean mine;
+    private String senderRole;
     private LocalDateTime sentAt;
 
     public static MessageResponse from(Message message, Long currentUserId) {
@@ -25,12 +26,15 @@ public class MessageResponse {
                 .id(message.getId())
                 .conversationId(message.getConversation().getId())
                 .senderId(message.getSender().getId())
-                .senderName(message.getSender().getEmail())
+                .senderName(message.getSender().getProfile() != null
+                        ? message.getSender().getProfile().getFullName()
+                        : message.getSender().getEmail())
                 .body(message.getBody())
                 .attachmentUrl(message.getAttachmentUrl())
                 .attachmentType(message.getAttachmentType())
                 .hasRead(message.getHasRead())
                 .mine(message.getSender().getId().equals(currentUserId))
+                .senderRole(message.getSender().getRole().name())
                 .sentAt(message.getSentAt())
                 .build();
     }

@@ -197,7 +197,7 @@
 
     <!-- 페이지네이션 -->
     <div th:if="${posts.totalPages > 1}"
-         th:replace="~{fragments/pagination :: pager(
+         th:replace="~{fragments/pagination :: pager-market(
              ${posts.number},
              ${posts.totalPages},
              ${posts.number > 2 ? posts.number - 2 : 0},

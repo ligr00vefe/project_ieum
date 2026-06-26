@@ -193,6 +193,11 @@ public class UserController {
                 }).toList();
         model.addAttribute("myBuyChats", myBuyChatsD);
 
+        // 내가 쓴 후기 최신 3개
+        var myReviews = reviewService.getMyReviews().stream().limit(3).toList();
+        model.addAttribute("myReviews", myReviews);
+        model.addAttribute("myReviewCount", reviewService.countWrittenByUserId(user.getId()));
+
         model.addAttribute("content", "disabled/mypage");
         model.addAttribute("title", "마이페이지");
         return "layout/layout";

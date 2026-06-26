@@ -70,7 +70,8 @@
             </thead>
             <tbody class="divide-y divide-slate-50">
                 <th:block th:each="chat : ${chats.content}">
-                <tr class="hover:bg-slate-50 transition-colors">
+                <tr class="hover:bg-slate-50 transition-colors cursor-pointer"
+                    th:onclick="|location.href='@{/market/chat/{id}(id=${chat.id})}'|">
                     <td class="px-5 py-3.5">
                         <p class="font-medium text-slate-800 truncate max-w-[160px]" th:text="${chat.postTitle}">상품명</p>
                     </td>

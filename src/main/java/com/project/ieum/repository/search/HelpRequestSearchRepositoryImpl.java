@@ -92,7 +92,7 @@ public class HelpRequestSearchRepositoryImpl implements HelpRequestSearchReposit
             // 둘러보기 보드 — 최신순(생성시각 내림차순), 동률은 id로 결정성 보장.
             query.orderBy(request.createdAt.desc(), request.id.desc());
         } else {
-            query.orderBy(request.desiredStartDatetime.asc(), request.id.desc());
+            query.orderBy(request.createdAt.desc(), request.id.desc());
         }
 
         List<HelpRequest> content = query
