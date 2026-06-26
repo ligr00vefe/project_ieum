@@ -77,6 +77,42 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
+    public List<Review> getMyReviews() {
+        User currentUser = currentUserService.getCurrentUser();
+        return reviewRepository.findByAuthorWithFetch(currentUser.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public Review getById(Long reviewId) {
+        return reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new NotFoundException("후기를 찾을 수 없습니다."));
+    }
+
+    public void update(Long reviewId, ReviewForm form) {
+        User currentUser = currentUserService.getCurrentUser();
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new NotFoundException("후기를 찾을 수 없습니다."));
+        if (!review.getAuthor().getUserId().equals(currentUser.getId())) {
+            throw new ForbiddenException("본인의 후기만 수정할 수 있습니다.");
+        }
+        review.edit(form.getRating(), form.getBody());
+        if (form.getVisibility() != null) {
+            review.changeVisibility(form.getVisibility());
+        }
+    }
+
+    public void delete(Long reviewId) {
+        User currentUser = currentUserService.getCurrentUser();
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new NotFoundException("후기를 찾을 수 없습니다."));
+        if (!review.getAuthor().getUserId().equals(currentUser.getId())) {
+            throw new ForbiddenException("본인의 후기만 삭제할 수 있습니다.");
+        }
+        reviewRepository.delete(review);
+        refreshRating(review.getTarget().getUserId());
+    }
+
+    @Transactional(readOnly = true)
     public List<Review> getPublicReviews(Long caregiverUserId) {
         return reviewRepository.findByTargetWithFetch(caregiverUserId, ReviewVisibility.PUBLIC);
     }
