@@ -29,6 +29,7 @@ public class NoticeController {
         model.addAttribute("endPage", Math.min(totalPages - 1, page + 2));
         model.addAttribute("noticePage", noticePage);
         model.addAttribute("title", "공지사항");
+        model.addAttribute("description", "이음 케어 매칭 플랫폼의 공지사항입니다. 서비스 업데이트, 이벤트 등 최신 소식을 확인하세요.");
         model.addAttribute("content", "notices/list");
         return "layout/layout";
     }
@@ -42,6 +43,7 @@ public class NoticeController {
         model.addAttribute("notice", notice);
         model.addAttribute("attachments", noticeService.getAttachments(id));
         model.addAttribute("title", notice.getTitle());
+        model.addAttribute("description", notice.getTitle() + " — 이음 케어 매칭 플랫폼 공지사항입니다.");
         model.addAttribute("content", "notices/detail");
         return "layout/layout";
     }
