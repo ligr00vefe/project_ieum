@@ -69,6 +69,8 @@ public class UserController {
     public String home(Model model) {
         model.addAttribute("recentNotices", noticeService.getRecentPublicNotices());
         model.addAttribute("title", "메인");
+        model.addAttribute("description", "케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼 이음(ieum). 장애인 활동 지원 서비스를 쉽고 안전하게 찾아보세요.");
+        model.addAttribute("jsonLd", true);
         model.addAttribute("content", "home/index");
         return "layout/layout";
     }
@@ -89,6 +91,7 @@ public class UserController {
     public String safeMeeting(Model model) {
         model.addAttribute("content", "guide/safe-meeting");
         model.addAttribute("title", "첫만남 안심가이드");
+        model.addAttribute("description", "이음에서 케어메이트와 첫 만남을 안전하게 준비하는 방법을 안내합니다. 안심 만남 장소, 주의사항 등을 확인하세요.");
         return "layout/layout";
     }
 
@@ -96,6 +99,7 @@ public class UserController {
     public String howToUse(Model model) {
         model.addAttribute("content", "guide/how-to-use");
         model.addAttribute("title", "이용방법");
+        model.addAttribute("description", "이음 케어 매칭 플랫폼 이용방법을 단계별로 안내합니다. 활동지원사 찾기부터 매칭 완료까지 쉽게 따라해보세요.");
         return "layout/layout";
     }
 

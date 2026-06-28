@@ -797,7 +797,7 @@
             const ev = evs.find(e => e.type === 'matched') || evs[0];
             if (ev && ev.position !== 'single') {
                 const bar = document.createElement('div');
-                const barBg = ev.type === 'matched' ? 'rgba(249,115,22,0.35)' : 'rgba(255,255,255,0.22)';
+                const barBg = ev.type === 'matched' ? 'rgba(249,115,22,0.45)' : 'rgba(255,255,255,0.38)';
                 bar.style.cssText = `position:absolute; top:3px; height:26px; background:${barBg}; z-index:1;`;
                 if (ev.position === 'start') { bar.style.left = '50%'; bar.style.right = '0'; }
                 else if (ev.position === 'end') { bar.style.left = '0'; bar.style.right = '50%'; }
@@ -809,11 +809,8 @@
             const num = document.createElement('span');
             num.style.cssText = 'position:absolute; top:3px; left:50%; transform:translateX(-50%); width:26px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:12px; font-weight:500; z-index:10;';
             num.textContent = d;
-            if (isToday) {
-                num.style.background = 'rgba(255,255,255,0.35)';
-                num.style.fontWeight = '700';
-                num.style.color = 'white';
-            } else if (ev && ev.position !== 'mid') {
+            if (ev && ev.position !== 'mid') {
+                // 일정의 시작/끝/단일 — 컬러 원. 오늘이 겹쳐도 원을 유지해 범위가 끊기지 않게 한다.
                 if (ev.type === 'matched') {
                     num.style.background = '#f97316';
                     num.style.color = 'white';
@@ -821,6 +818,17 @@
                     num.style.background = 'rgba(255,255,255,0.9)';
                     num.style.color = '#0d9488';
                 }
+                num.style.fontWeight = '700';
+                if (isToday) {
+                    // 오늘 표시 — 원 크기를 유지하는 내부 링
+                    num.style.boxShadow = ev.type === 'matched'
+                        ? 'inset 0 0 0 2px rgba(255,255,255,0.9)'
+                        : 'inset 0 0 0 2px rgba(13,148,136,0.55)';
+                }
+            } else if (isToday) {
+                num.style.background = 'rgba(255,255,255,0.35)';
+                num.style.fontWeight = '700';
+                num.style.color = 'white';
             } else if (dow === 0) {
                 num.style.color = 'rgba(252,165,165,1)';
             } else if (dow === 6) {

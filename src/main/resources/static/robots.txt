@@ -3,7 +3,6 @@ Allow: /
 Disallow: /admin/
 Disallow: /api/
 Disallow: /chat/
-Disallow: /me
 Disallow: /register/
 Disallow: /password-reset/
 Disallow: /matching/

@@ -39,7 +39,6 @@ public class CaregiverBoardController {
     private final CurrentUserService currentUserService;
     private final TmapPlaceSearchService placeSearchService;
     private final MasterDataService masterDataService;
-    // 지도 위치 선택용 TMap JS SDK appKey(클라이언트 노출). 비어 있으면 지도 버튼을 숨긴다.
     private final String tmapAppKey;
 
     public CaregiverBoardController(HelpRequestService helpRequestService,
@@ -58,7 +57,6 @@ public class CaregiverBoardController {
         this.tmapAppKey = tmapAppKey;
     }
 
-    // 지도 모달의 장소 검색 — 검색어를 좌표로(서버 프록시, CORS 회피). 결과 목록(JSON)을 반환.
     @GetMapping("/poi-search")
     @ResponseBody
     public java.util.List<PlaceResult> poiSearch(@RequestParam String keyword) {
@@ -96,6 +94,7 @@ public class CaregiverBoardController {
         var requestPage = helpRequestService.searchOpenRequests(condition, PageRequest.of(page, 10), lat, lng);
         int totalPages = requestPage.getTotalPages();
         model.addAttribute("title", "매칭 게시판");
+        model.addAttribute("description", "활동지원사를 찾는 장애인의 도움 요청 목록입니다. 지역, 서비스 유형, 날짜로 필터링해 내게 맞는 요청을 찾아보세요.");
         model.addAttribute("requests", requestPage);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
@@ -181,8 +180,10 @@ public class CaregiverBoardController {
     public String detail(@PathVariable Long id, Model model) {
         Long currentUserId = currentUserService.getCurrentUser().getId();
         boolean alreadyApplied = matchingService.hasApplied(id, currentUserId);
-        model.addAttribute("title", "게시물 상세");
-        model.addAttribute("request", helpRequestService.get(id));
+        var helpRequest = helpRequestService.get(id);
+        model.addAttribute("title", helpRequest.getTitle());
+        model.addAttribute("description", helpRequest.getTitle() + " — 이음 케어 매칭 게시판에서 활동지원사를 찾는 요청입니다.");
+        model.addAttribute("request", helpRequest);
         model.addAttribute("applyRequest", new ApplyRequest());
         model.addAttribute("alreadyApplied", alreadyApplied);
         if (alreadyApplied) {
