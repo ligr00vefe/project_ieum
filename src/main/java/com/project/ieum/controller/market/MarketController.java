@@ -73,6 +73,7 @@ public class MarketController {
         int totalPages  = responses.getTotalPages();
 
         model.addAttribute("title", "이음 마켓");
+        model.addAttribute("description", "이음 마켓에서 돌봄·복지 관련 용품을 사고팔거나 나눔하세요. 휠체어, 보조기기 등 다양한 중고 물품을 만나보세요.");
         model.addAttribute("posts", responses);
         model.addAttribute("condition", condition);
         model.addAttribute("paginationUrl", pageUrlBuilder.toString());
@@ -120,6 +121,7 @@ public class MarketController {
         int chatCount = marketChatService.getChatCountByPost(postId);
 
         model.addAttribute("title", post.getTitle());
+        model.addAttribute("description", post.getTitle() + " — 이음 마켓 중고 물품 상세 페이지입니다.");
         model.addAttribute("post", MarketPostResponse.from(post, thumbnail, chatCount));
         model.addAttribute("images", images);   // 슬라이드용 전체 이미지 목록
         model.addAttribute("isSeller", isSeller);

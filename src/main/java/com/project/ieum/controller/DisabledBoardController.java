@@ -77,6 +77,7 @@ public class DisabledBoardController {
         int totalPages = requests.getTotalPages();
 
         model.addAttribute("title", "매칭 게시판");
+        model.addAttribute("description", "장애인 활동 지원 요청 게시판입니다. 필요한 서비스와 일정을 등록하고 나에게 맞는 활동지원사를 찾아보세요.");
         model.addAttribute("requests", requests);
         model.addAttribute("currentUserId", currentUserService.getCurrentUser().getId());
         model.addAttribute("currentPage", page);
@@ -184,7 +185,8 @@ public class DisabledBoardController {
         var currentUser = currentUserService.getCurrentUser();
         Long currentUserId = currentUser.getId();
         HelpRequest request = helpRequestService.get(id);
-        model.addAttribute("title", "게시물 상세");
+        model.addAttribute("title", request.getTitle());
+        model.addAttribute("description", request.getTitle() + " — 이음 매칭 게시판의 활동 지원 요청입니다.");
         model.addAttribute("request", request);
         model.addAttribute("applicationCount", matchingService.countApplicationsForRequest(id));
         model.addAttribute("currentUserId", currentUserId);
