@@ -135,12 +135,15 @@
         <!-- 날짜 그리드 -->
         <div id="mini-cal-grid" class="grid grid-cols-7"></div>
         <!-- 범례 -->
-        <div class="mt-3 pt-3 border-t border-white/20 flex items-center gap-4">
+        <div class="mt-3 pt-3 border-t border-white/20 flex items-center gap-4 flex-wrap">
             <span class="flex items-center gap-1.5 text-[11px] text-white/70">
                 <span class="w-3 h-3 rounded-full bg-white flex-shrink-0"></span>등록/지원
             </span>
             <span class="flex items-center gap-1.5 text-[11px] text-white/70">
                 <span class="w-3 h-3 rounded-full bg-orange-400 flex-shrink-0"></span>매칭완료
+            </span>
+            <span class="flex items-center gap-1.5 text-[11px] text-white/70">
+                <span class="w-3 h-3 rounded-full flex-shrink-0" style="background:#10b981"></span>활동완료
             </span>
         </div>
     </div>
@@ -707,11 +710,13 @@
             cell.style.cssText = 'height:46px; position:relative; cursor:pointer;';
             cell.onclick = () => window.location.href = '/calendar';
 
-            // 이벤트 바 (숫자 원 뒤에 배치)
-            const ev = evs.find(e => e.type === 'matched') || evs[0];
+            // 이벤트 바 (숫자 원 뒤에 배치) — matched > completed > others 우선순위
+            const ev = evs.find(e => e.type === 'matched') || evs.find(e => e.type === 'completed') || evs[0];
             if (ev && ev.position !== 'single') {
                 const bar = document.createElement('div');
-                const barBg = ev.type === 'matched' ? 'rgba(249,115,22,0.45)' : 'rgba(255,255,255,0.38)';
+                const barBg = ev.type === 'matched'   ? 'rgba(249,115,22,0.45)'
+                            : ev.type === 'completed' ? 'rgba(16,185,129,0.35)'
+                            : 'rgba(255,255,255,0.38)';
                 bar.style.cssText = `position:absolute; top:3px; height:26px; background:${barBg}; z-index:1;`;
                 if (ev.position === 'start') { bar.style.left = '50%'; bar.style.right = '0'; }
                 else if (ev.position === 'end') { bar.style.left = '0'; bar.style.right = '50%'; }
@@ -728,6 +733,9 @@
                 if (ev.type === 'matched') {
                     num.style.background = '#f97316';
                     num.style.color = 'white';
+                } else if (ev.type === 'completed') {
+                    num.style.background = '#10b981';
+                    num.style.color = 'white';
                 } else {
                     num.style.background = 'rgba(255,255,255,0.9)';
                     num.style.color = '#4f46e5';
@@ -735,9 +743,9 @@
                 num.style.fontWeight = '700';
                 if (isToday) {
                     // 오늘 표시 — 원 크기를 유지하는 내부 링
-                    num.style.boxShadow = ev.type === 'matched'
-                        ? 'inset 0 0 0 2px rgba(255,255,255,0.9)'
-                        : 'inset 0 0 0 2px rgba(79,70,229,0.55)';
+                    num.style.boxShadow = ev.type === 'matched'   ? 'inset 0 0 0 2px rgba(255,255,255,0.9)'
+                                        : ev.type === 'completed' ? 'inset 0 0 0 2px rgba(255,255,255,0.9)'
+                                        : 'inset 0 0 0 2px rgba(79,70,229,0.55)';
                 }
             } else if (isToday) {
                 num.style.background = 'rgba(255,255,255,0.35)';
