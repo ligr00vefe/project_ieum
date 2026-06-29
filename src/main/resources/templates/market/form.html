@@ -242,6 +242,24 @@ function triggerImageInput(slot) {
     document.getElementById('imageFileInput').click();
 }
 
+const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB
+
+function validateFileSize(file) {
+    if (file.size > MAX_FILE_SIZE) {
+        showSizeError(file.name);
+        return false;
+    }
+    return true;
+}
+
+function showSizeError(fileName) {
+    const toast = document.createElement('div');
+    toast.textContent = `"${fileName}" 파일이 1MB를 초과합니다. 1MB 이하 이미지만 업로드할 수 있습니다.`;
+    toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-red-500 text-white text-sm font-medium px-5 py-3 rounded-xl shadow-lg max-w-sm text-center';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+}
+
 function handleImageSelect(event) {
     const files = Array.from(event.target.files);
     const targetIdx = parseInt(event.target.getAttribute('data-target-idx') ?? '-1');
@@ -249,15 +267,31 @@ function handleImageSelect(event) {
     if (targetIdx >= 0 && targetIdx < MAX_IMAGES) {
         // 특정 슬롯에 직접 삽입 (수정 모드에서 빈 슬롯 클릭 시)
         if (files[0]) {
+            if (!validateFileSize(files[0])) {
+                event.target.value = '';
+                event.target.removeAttribute('data-target-idx');
+                return;
+            }
             selectedFiles[targetIdx] = files[0];
             slotState[targetIdx] = 'new';
             renderNewPreview(targetIdx, files[0]);
         }
     } else {
         // 등록 모드: 빈 슬롯부터 순서대로 채움
+        const validFiles = [];
+        let hasOversized = false;
+        files.forEach(file => {
+            if (file.size > MAX_FILE_SIZE) {
+                hasOversized = true;
+                showSizeError(file.name);
+            } else {
+                validFiles.push(file);
+            }
+        });
+
         const remaining = MAX_IMAGES - slotState.filter(s => s !== null).length;
-        if (files.length > remaining) alert(`이미지는 최대 ${MAX_IMAGES}장까지 등록 가능합니다.`);
-        files.slice(0, remaining).forEach(file => {
+        if (validFiles.length > remaining) alert(`이미지는 최대 ${MAX_IMAGES}장까지 등록 가능합니다.`);
+        validFiles.slice(0, remaining).forEach(file => {
             const emptyIdx = slotState.findIndex((s, i) => i < MAX_IMAGES && !s);
             if (emptyIdx === -1) return;
             selectedFiles[emptyIdx] = file;
