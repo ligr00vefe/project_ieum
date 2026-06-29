@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title != null ? title + ' - 이음' : '이음 Care Match'}">이음 Care Match</title>
+    <title th:text="${ogTitle != null ? ogTitle : (title != null ? title + ' - 이음' : '이음 Care Match')}">이음 Care Match</title>
     <link th:href="@{/css/output.css}" rel="stylesheet">
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">

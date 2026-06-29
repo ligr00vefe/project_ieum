@@ -68,7 +68,8 @@ public class UserController {
     @GetMapping("/")
     public String home(Model model) {
         model.addAttribute("recentNotices", noticeService.getRecentPublicNotices());
-        model.addAttribute("title", "메인");
+        model.addAttribute("title", "이음(ieum) - 장애인 활동 지원 케어 매칭 플랫폼");
+        model.addAttribute("ogTitle", "이음(ieum) - 장애인 활동 지원 케어 매칭 플랫폼");
         model.addAttribute("description", "케어메이트와 활동지원사를 신뢰 기반으로 연결하는 케어 매칭 플랫폼 이음(ieum). 장애인 활동 지원 서비스를 쉽고 안전하게 찾아보세요.");
         model.addAttribute("jsonLd", true);
         model.addAttribute("content", "home/index");
