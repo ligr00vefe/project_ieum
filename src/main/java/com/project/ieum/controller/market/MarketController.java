@@ -39,7 +39,7 @@ public class MarketController {
     @GetMapping
     public String list(
             MarketPostSearchCondition condition,   // 쿼리 파라미터 자동 바인딩 (?keyword=&sido=&categoryId=)
-            @PageableDefault(size = 20) Pageable pageable,
+            @PageableDefault(size = 12) Pageable pageable,
             Model model) {
 
         // 판매/나눔 기본값: 파라미터 없으면 판매(false)만 표시
@@ -241,6 +241,27 @@ public class MarketController {
         marketPostService.cancelReservation(postId);
         redirectAttributes.addFlashAttribute("message", "예약이 취소되었습니다.");
         return "redirect:/market/" + postId;
+    }
+
+    // ── 무한 스크롤용 REST API ──
+    // GET /api/market/posts  (CSRF 비활성화 경로 — SecurityConfig 참고)
+    @GetMapping("/api/posts")
+    @ResponseBody
+    public org.springframework.data.domain.Page<MarketPostResponse> apiList(
+            MarketPostSearchCondition condition,
+            @PageableDefault(size = 3) Pageable pageable) {
+
+        if (condition.getSharing() == null) condition.setSharing(false);
+        Page<MarketPost> posts = marketPostService.search(condition, pageable, null, null);
+        Long currentUserId = null;
+        try { currentUserId = currentUserService.getCurrentUser().getId(); } catch (Exception ignored) {}
+        final Long uid = currentUserId;
+        return posts.map(post -> {
+            List<MarketPostImage> images = marketPostService.getImages(post.getId());
+            String thumbnail = images.isEmpty() ? null : images.get(0).getImageUrl();
+            MarketPostResponse r = MarketPostResponse.from(post, thumbnail);
+            return r;
+        });
     }
 
     // ── 내 게시글 목록 ──

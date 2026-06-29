@@ -53,7 +53,7 @@ public class CalendarController {
                                 .requestId(r.getId())
                                 .title(r.getTitle())
                                 .startDate(sd).endDate(ed).date(sd)
-                                .type(isMatchedRequest(r) ? "matched" : "registered")
+                                .type(requestEventType(r))
                                 .build();
                     })
                     .collect(Collectors.toList());
@@ -67,7 +67,7 @@ public class CalendarController {
                                 .requestId(a.getHelpRequest().getId())
                                 .title(a.getHelpRequest().getTitle())
                                 .startDate(sd).endDate(ed).date(sd)
-                                .type(isMatchedApplication(a) ? "matched" : "applied")
+                                .type(applicationEventType(a))
                                 .build();
                     })
                     .collect(Collectors.toList());
@@ -75,14 +75,19 @@ public class CalendarController {
         return List.of();
     }
 
-    private boolean isMatchedRequest(HelpRequest r) {
-        return r.getStatus() == HelpRequestStatus.MATCHED
-                || r.getStatus() == HelpRequestStatus.IN_PROGRESS
-                || r.getStatus() == HelpRequestStatus.COMPLETED;
+    private String requestEventType(HelpRequest r) {
+        return switch (r.getStatus()) {
+            case COMPLETED -> "completed";
+            case MATCHED, IN_PROGRESS -> "matched";
+            default -> "registered";
+        };
     }
 
-    private boolean isMatchedApplication(HelpRequestApplication a) {
-        return a.getStatus() == ApplicationStatus.ACCEPTED
-                || a.getStatus() == ApplicationStatus.COMPLETED;
+    private String applicationEventType(HelpRequestApplication a) {
+        return switch (a.getStatus()) {
+            case COMPLETED -> "completed";
+            case ACCEPTED -> "matched";
+            default -> "applied";
+        };
     }
 }
