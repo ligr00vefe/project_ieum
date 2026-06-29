@@ -708,6 +708,134 @@
 })();
 </script>
 
+<!-- ── 팝업 영역 ── -->
+<style>
+/* 자동: 내용 높이에 맞게, 뷰포트 70% 초과 시 스크롤 */
+.popup-layout-auto { width: 440px; }
+.popup-layout-auto .popup-content-area { max-height: 70vh; overflow-y: auto; }
+
+/* 고정 너비 레이아웃: 콘텐츠 영역에 max-height 지정 → 내용이 짧으면 팝업 자동 축소, 길면 스크롤 */
+.popup-layout-square   { width: 520px; }
+.popup-layout-square   .popup-content-area { max-height: 520px; overflow-y: auto; }
+
+.popup-layout-portrait { width: 420px; }
+.popup-layout-portrait .popup-content-area { max-height: 680px; overflow-y: auto; }
+
+.popup-layout-landscape{ width: 700px; }
+.popup-layout-landscape .popup-content-area { max-height: 460px; overflow-y: auto; }
+
+/* CKEditor figure/img 기본 마진 제거 */
+.popup-content-area figure.image { margin: 0 !important; }
+.popup-content-area figure.image img { display: block; width: 100%; height: auto; }
+/* 콘텐츠 마지막 요소 하단 마진 제거 */
+.popup-content-area > *:last-child { margin-bottom: 0 !important; }
+
+@media (max-width: 768px) {
+    .popup-layout-auto     { width: calc(100vw - 2rem); }
+    .popup-layout-square   { width: calc(100vw - 2rem); }
+    .popup-layout-square   .popup-content-area { max-height: calc(100vw - 2rem); }
+    .popup-layout-portrait { width: calc(100vw - 2rem); }
+    .popup-layout-portrait .popup-content-area { max-height: 600px; }
+    .popup-layout-landscape{ width: calc(100vw - 2rem); }
+    .popup-layout-landscape .popup-content-area { max-height: 340px; }
+}
+</style>
+<div th:if="${activePopups != null and !#lists.isEmpty(activePopups)}"
+     id="popups-container"
+     class="fixed top-4 left-4 z-50 flex gap-4 items-start flex-wrap pointer-events-none"
+     style="max-width: calc(100vw - 2rem);">
+    <th:block th:each="popup,iterStat : ${activePopups}" th:if="${iterStat.index < 3}">
+        <div th:id="${'popup-' + popup.id}"
+             th:attr="data-popup-id=${popup.id}"
+             th:classappend="${popup.layout == 'SQUARE'} ? 'popup-layout-square' :
+                             (${popup.layout == 'PORTRAIT'} ? 'popup-layout-portrait' :
+                             (${popup.layout == 'LANDSCAPE'} ? 'popup-layout-landscape' : 'popup-layout-auto'))"
+             class="popup-modal relative bg-white shadow-xl border border-slate-100 overflow-hidden flex flex-col pointer-events-auto">
+            <!-- 팝업 내용 -->
+            <div class="p-0 text-sm text-slate-700 ck-content popup-content-area"
+                 th:utext="${popup.content}">내용</div>
+            <!-- 클릭 링크 오버레이: linkUrl 있을 때 콘텐츠 영역 위에만 투명 레이어 -->
+            <a th:if="${popup.linkUrl != null and !#strings.isEmpty(popup.linkUrl)}"
+               th:href="${popup.linkUrl}" target="_blank" rel="noopener"
+               style="position:absolute;top:0;left:0;right:0;height:calc(100% - 52px);z-index:1;"
+               aria-label="팝업 링크 이동"></a>
+            <!-- 팝업 하단 -->
+            <div class="border-t border-slate-100 bg-slate-50 px-4 py-3 flex items-center justify-between gap-3 flex-shrink-0">
+                <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox"
+                           th:id="${'popup-hide-today-' + popup.id}"
+                           class="w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-400 cursor-pointer">
+                    <span class="text-xs font-medium text-slate-500">오늘 하루 보지 않기</span>
+                </label>
+                <button th:attr="onclick='closePopup(' + ${popup.id} + ')'"
+                        class="px-4 py-1.5 text-xs font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-white transition flex-shrink-0">
+                    닫기
+                </button>
+            </div>
+        </div>
+    </th:block>
+</div>
+
+<script>
+(function () {
+    function setCookie(name, value, days) {
+        var date = new Date();
+        date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+        document.cookie = name + '=' + value + ';expires=' + date.toUTCString() + ';path=/';
+    }
+    function getCookie(name) {
+        var nameEQ = name + '=';
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var c = cookies[i].trim();
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length);
+        }
+        return null;
+    }
+    function todayStr() {
+        var d = new Date();
+        return d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2);
+    }
+    function stripTrailingEmpty(contentArea) {
+        var last = contentArea.lastElementChild;
+        while (last) {
+            var tag = last.tagName;
+            var isEmpty = (tag === 'P' || tag === 'BR') &&
+                          last.textContent.replace(/\s/g, '') === '' &&
+                          last.querySelector('img, figure, table, video, iframe') === null;
+            if (!isEmpty) break;
+            var prev = last.previousElementSibling;
+            contentArea.removeChild(last);
+            last = prev;
+        }
+    }
+    function initPopups() {
+        var modals = document.querySelectorAll('.popup-modal[data-popup-id]');
+        modals.forEach(function (el) {
+            var id = el.getAttribute('data-popup-id');
+            if (getCookie('popup_' + id + '_hidden') === todayStr()) {
+                el.style.display = 'none';
+            }
+            var contentArea = el.querySelector('.popup-content-area');
+            if (contentArea) stripTrailingEmpty(contentArea);
+        });
+    }
+    window.closePopup = function (popupId) {
+        var checkbox = document.getElementById('popup-hide-today-' + popupId);
+        if (checkbox && checkbox.checked) {
+            setCookie('popup_' + popupId + '_hidden', todayStr(), 1);
+        }
+        var el = document.getElementById('popup-' + popupId);
+        if (el) el.style.display = 'none';
+    };
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPopups);
+    } else {
+        initPopups();
+    }
+})();
+</script>
+
 
 </th:block>
 </html>
