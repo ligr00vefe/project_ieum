@@ -28,6 +28,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addResourceLocations(toUrl("uploads/notices"));
         registry.addResourceHandler("/uploads/market/**")
                 .addResourceLocations(toUrl("uploads/market"));
+        registry.addResourceHandler("/uploads/popups/**")
+                .addResourceLocations(toUrl("uploads/popups"));
     }
 
     private String toUrl(String relativePath) {

@@ -1,6 +1,7 @@
 package com.project.ieum.controller;
 
 import com.project.ieum.entity.User;
+import com.project.ieum.service.admin.AdminPopupService;
 import com.project.ieum.service.common.CurrentUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 public class GlobalModelAdvice {
 
     private final CurrentUserService currentUserService;
+    private final AdminPopupService adminPopupService;
 
     @ModelAttribute("currentUser")
     public User currentUser() {
@@ -23,6 +25,11 @@ public class GlobalModelAdvice {
         return currentUserService.getCurrentUserOrEmpty()
                 .map(user -> user.getRole().name())
                 .orElse(null);
+    }
+
+    @ModelAttribute("activePopups")
+    public java.util.List<com.project.ieum.entity.popup.Popup> activePopups() {
+        return adminPopupService.getActivePopups();
     }
 
     // 로그인 필요 페이지, 폼 페이지는 검색엔진 색인 제외
