@@ -11,5 +11,5 @@ public class CalendarEventDto {
     private String startDate;  // "yyyy-MM-dd"
     private String endDate;    // "yyyy-MM-dd"
     private String date;       // legacy alias = startDate
-    private String type;       // "registered" | "matched" | "applied"
+    private String type;       // "registered" | "matched" | "applied" | "completed"
 }
