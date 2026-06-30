@@ -51,6 +51,9 @@
                         <div class="flex items-center gap-2">
                             <p class="text-base font-bold text-gray-900" th:text="${appl.caregiver.fullName}">이름</p>
                             <span class="px-2 py-0.5 bg-teal-50 text-teal-600 text-xs font-medium rounded-full">활동지원사</span>
+                            <span th:if="${appl.caregiver.mbtiType != null}"
+                                  class="inline-block text-xs bg-purple-100 text-purple-700 rounded px-2 py-0.5 font-medium"
+                                  th:text="${appl.caregiver.mbtiType}">MBTI</span>
                             <span th:if="${appl.status.name() == 'ACCEPTED'}"
                                   class="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-xs font-medium rounded-full">수락됨</span>
                             <span th:if="${appl.status.name() == 'REJECTED' or appl.status.name() == 'CANCELLED'}"

@@ -221,46 +221,61 @@
                 });
             }
 
+            function csrfHeaders() {
+                var h = {'Content-Type': 'application/json'};
+                if (csrfMeta && csrfHeaderMeta) { h[csrfHeaderMeta.content] = csrfMeta.content; }
+                return h;
+            }
+
+            function updateBadge(count) {
+                var n = count || 0;
+                if (n > 0) { badge.textContent = n > 99 ? '99+' : n; badge.classList.remove('hidden'); }
+                else { badge.classList.add('hidden'); }
+            }
+
             function refreshBadge() {
                 fetch('/api/notifications/unread-count')
                     .then(function (r) { return r.ok ? r.json() : null; })
-                    .then(function (d) {
-                        if (!d) return;
-                        var n = d.unreadCount || 0;
-                        if (n > 0) { badge.textContent = n > 99 ? '99+' : n; badge.classList.remove('hidden'); }
-                        else { badge.classList.add('hidden'); }
-                    }).catch(function () {});
+                    .then(function (d) { if (d) updateBadge(d.unreadCount); })
+                    .catch(function () {});
+            }
+
+            function renderEmpty() {
+                list.innerHTML = '<p class="px-4 py-6 text-center text-xs text-gray-400">새 알림이 없습니다.</p>';
             }
 
             function loadList() {
-                fetch('/api/notifications?page=0&size=10')
+                list.innerHTML = '<p class="px-4 py-6 text-center text-xs text-gray-400">불러오는 중...</p>';
+                fetch('/api/notifications?page=0&size=20')
                     .then(function (r) { return r.ok ? r.json() : null; })
                     .then(function (d) {
-                        if (!d || !d.content || d.content.length === 0) {
-                            list.innerHTML = '<p class="px-4 py-6 text-center text-xs text-gray-400">알림이 없습니다.</p>';
-                            return;
-                        }
-                        list.innerHTML = d.content.map(function (n) {
-                            var unread = n.hasRead ? '' : 'bg-indigo-50/40';
-                            var dot = n.hasRead ? '' : '<span class="w-1.5 h-1.5 bg-indigo-500 rounded-full flex-shrink-0 mt-1"></span>';
+                        // 읽지 않은 알림만 표시
+                        var items = d && d.content ? d.content.filter(function (n) { return !n.hasRead; }) : [];
+                        if (items.length === 0) { renderEmpty(); return; }
+                        list.innerHTML = items.map(function (n) {
                             return '<button type="button" data-notif-id="' + n.id + '" data-notif-url="' + escapeHtml(n.url || '') + '"'
-                                + ' class="w-full text-left px-4 py-3 hover:bg-gray-50 ' + unread + ' flex items-start gap-2">'
-                                + dot
-                                + '<span><p class="text-xs font-semibold text-gray-800">' + escapeHtml(n.title) + '</p>'
-                                + '<p class="text-xs text-gray-500 mt-0.5">' + escapeHtml(n.content) + '</p></span></button>';
+                                + ' class="w-full text-left px-4 py-3 hover:bg-gray-50 bg-indigo-50/40 flex items-start gap-2">'
+                                + '<span class="w-1.5 h-1.5 bg-indigo-500 rounded-full flex-shrink-0 mt-1.5"></span>'
+                                + '<span class="min-w-0">'
+                                + '<p class="text-xs font-semibold text-gray-800">' + escapeHtml(n.title) + '</p>'
+                                + '<p class="text-xs text-gray-500 mt-0.5 break-words">' + escapeHtml(n.content) + '</p>'
+                                + '</span></button>';
                         }).join('');
-                        // 개별 클릭 → 읽음 처리 후 해당 URL로 이동
+                        // 개별 클릭 → 읽음 처리 + 목록에서 즉시 제거 → URL 이동
                         list.querySelectorAll('[data-notif-id]').forEach(function (el) {
                             el.addEventListener('click', function () {
                                 var nid = el.getAttribute('data-notif-id');
                                 var nurl = el.getAttribute('data-notif-url');
-                                var headers = {'Content-Type': 'application/json'};
-                                if (csrfMeta && csrfHeaderMeta) { headers[csrfHeaderMeta.content] = csrfMeta.content; }
-                                fetch('/api/notifications/' + nid + '/read', {method: 'POST', headers: headers})
+                                el.remove();
+                                var remaining = list.querySelectorAll('[data-notif-id]').length;
+                                if (remaining === 0) renderEmpty();
+                                fetch('/api/notifications/' + nid + '/read', {method: 'POST', headers: csrfHeaders()})
+                                    .then(function (r) { return r.ok ? r.json() : null; })
+                                    .then(function (d) { if (d) updateBadge(d.unreadCount); })
                                     .finally(function () { if (nurl) window.location.href = nurl; });
                             });
                         });
-                    }).catch(function () {});
+                    }).catch(function () { renderEmpty(); });
             }
 
             btn.addEventListener('click', function (e) {
@@ -284,15 +299,21 @@
 
             if (readAllBtn) {
                 readAllBtn.addEventListener('click', function () {
-                    var headers = {};
-                    if (csrfMeta && csrfHeaderMeta) { headers[csrfHeaderMeta.content] = csrfMeta.content; }
-                    fetch('/api/notifications/read-all', { method: 'POST', headers: headers })
-                        .then(function () { refreshBadge(); loadList(); }).catch(function () {});
+                    fetch('/api/notifications/read-all', {method: 'POST', headers: csrfHeaders()})
+                        .then(function (r) { return r.ok ? r.json() : null; })
+                        .then(function (d) {
+                            if (d) updateBadge(d.unreadCount);
+                            renderEmpty();
+                        }).catch(function () {});
                 });
             }
 
+            // 1분마다 뱃지 갱신 + 탭 포커스 복귀 시 즉시 갱신
             refreshBadge();
-            setInterval(refreshBadge, 30000);
+            setInterval(refreshBadge, 60000);
+            document.addEventListener('visibilitychange', function () {
+                if (document.visibilityState === 'visible') refreshBadge();
+            });
         })();
     </script>
 </th:block>

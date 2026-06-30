@@ -281,6 +281,72 @@
             </div>
         </div>
 
+        <!-- MBTI -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 class="text-sm font-bold text-gray-900 flex items-center gap-2 mb-2">
+                <span class="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-3.5 h-3.5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                </span>
+                MBTI 성향
+            </h2>
+            <p class="text-xs text-gray-400 mb-4 ml-8">MBTI를 등록하면 성향이 맞는 활동지원사 추천에 반영됩니다.</p>
+
+            <!-- 내 MBTI -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-3">내 MBTI <span class="text-xs text-gray-400 font-normal">(선택)</span></label>
+                <div class="grid grid-cols-4 gap-2">
+                    <div class="relative">
+                        <input type="radio" id="mbti_none" name="mbtiType" value="" th:checked="${editDTO.mbtiType == null}" class="peer sr-only">
+                        <label for="mbti_none"
+                               class="block text-center py-2 px-3 rounded-lg border cursor-pointer text-sm transition-all
+                                      border-gray-200 text-gray-500 hover:border-purple-300
+                                      peer-checked:bg-purple-100 peer-checked:border-purple-400 peer-checked:text-purple-700 peer-checked:font-semibold">선택 안함</label>
+                    </div>
+                    <th:block th:each="mbti : ${mbtiTypes}">
+                        <div class="relative">
+                            <input type="radio" th:id="${'mbti_' + mbti.name()}" name="mbtiType" th:value="${mbti}" th:checked="${editDTO.mbtiType == mbti}" class="peer sr-only">
+                            <label th:for="${'mbti_' + mbti.name()}"
+                                   class="block text-center py-2 px-3 rounded-lg border cursor-pointer text-sm transition-all
+                                          border-gray-200 text-gray-600 hover:border-purple-300
+                                          peer-checked:bg-purple-100 peer-checked:border-purple-400 peer-checked:text-purple-700 peer-checked:font-semibold"
+                                   th:text="${mbti.label}">MBTI</label>
+                        </div>
+                    </th:block>
+                </div>
+            </div>
+
+            <!-- 선호 활동지원사 MBTI -->
+            <div class="mb-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">선호하는 활동지원사 MBTI <span class="text-xs text-gray-400 font-normal">(선택, 최대 4개)</span></label>
+                <p class="text-xs text-gray-400 mb-3">선택하면 해당 MBTI 활동지원사가 추천 매칭률에 추가 반영됩니다.</p>
+                <div class="grid grid-cols-4 gap-2">
+                    <th:block th:each="mbti : ${mbtiTypes}">
+                        <div class="relative">
+                            <input type="checkbox" th:id="${'prefmbti_' + mbti.name()}" name="preferredMbtiTypes" th:value="${mbti}"
+                                   th:checked="${editDTO.preferredMbtiTypes != null and editDTO.preferredMbtiTypes.contains(mbti)}"
+                                   class="peer sr-only" onchange="limitMbtiCheck(this, 4)">
+                            <label th:for="${'prefmbti_' + mbti.name()}"
+                                   class="block text-center py-2 px-3 rounded-lg border cursor-pointer text-sm transition-all
+                                          border-gray-200 text-gray-600 hover:border-indigo-300
+                                          peer-checked:bg-indigo-100 peer-checked:border-indigo-400 peer-checked:text-indigo-700 peer-checked:font-semibold"
+                                   th:text="${mbti.label}">MBTI</label>
+                        </div>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+        <script>
+        function limitMbtiCheck(checkbox, max) {
+            var checked = document.querySelectorAll('input[name="preferredMbtiTypes"]:checked');
+            if (checked.length > max) {
+                checkbox.checked = false;
+                alert('최대 ' + max + '개까지 선택 가능합니다.');
+            }
+        }
+        </script>
+
         <!-- 저장 버튼 -->
         <div class="flex gap-3 pb-4">
             <a th:href="@{/disabled/mypage}"
