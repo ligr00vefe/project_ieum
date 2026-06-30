@@ -44,7 +44,7 @@
                 첫만남 안심가이드
             </h1>
             <p class="text-lg sm:text-xl text-teal-100 leading-relaxed max-w-2xl">
-                이음은 케어메이트와 활동지원사 모두의 안전한 첫 만남을 위해
+                이음은 장애인(케어메이트)과 활동지원사 모두의 안전한 첫 만남을 위해
                 검증된 가이드라인을 제공합니다.<br>
                 처음 만나는 낯선 순간도 안심하고 시작하세요.
             </p>
@@ -74,7 +74,7 @@
 </section>
 
 <!-- ===== 목차 네비게이션 ===== -->
-<section class="bg-white border-b border-gray-100 sticky top-[68px] z-40 shadow-sm">
+<section class="bg-white border-b border-gray-100 sticky z-40 shadow-sm" th:classappend="${isAuthenticated} ? 'top-[calc(4rem+2.75rem)] sm:top-[calc(4.25rem+2.75rem)]' : 'top-16 sm:top-[68px]'">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex gap-1 overflow-x-auto py-3 scrollbar-hide">
             <a href="#public-place" class="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all whitespace-nowrap">공공장소 만남</a>
