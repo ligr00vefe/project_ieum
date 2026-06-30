@@ -7,21 +7,23 @@ import java.time.LocalDateTime;
 public record AdminMarketChatRow(
         Long id,
         String postTitle,
+        boolean sharing,
         String postStatusLabel,
         String postStatusClass,
-        String sellerEmail,
-        String buyerEmail,
+        String registrantEmail,
+        String receiverEmail,
         String chatStatusLabel,
         String chatStatusClass,
         LocalDateTime lastMessageAt,
         LocalDateTime createdAt
 ) {
     public static AdminMarketChatRow from(MarketChat c) {
+        boolean sharing = c.getPost().isSharing();
         String postStatus = c.getPost().getStatus().name();
         String postLabel = switch (postStatus) {
-            case "ACTIVE"   -> "판매중";
+            case "ACTIVE"   -> sharing ? "나눔중"   : "판매중";
             case "RESERVED" -> "예약중";
-            case "SOLD"     -> "판매완료";
+            case "SOLD"     -> sharing ? "나눔완료" : "판매완료";
             case "REMOVED"  -> "삭제됨";
             default         -> postStatus;
         };
@@ -39,6 +41,7 @@ public record AdminMarketChatRow(
         return new AdminMarketChatRow(
                 c.getId(),
                 c.getPost().getTitle(),
+                sharing,
                 postLabel, postCls,
                 c.getSeller() != null ? c.getSeller().getEmail() : "-",
                 c.getBuyer()  != null ? c.getBuyer().getEmail()  : "-",

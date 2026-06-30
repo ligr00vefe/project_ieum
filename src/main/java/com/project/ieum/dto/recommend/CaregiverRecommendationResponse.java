@@ -1,5 +1,6 @@
 package com.project.ieum.dto.recommend;
 
+import com.project.ieum.entity.MbtiType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -16,4 +17,5 @@ public class CaregiverRecommendationResponse {
     private Boolean hasCertification;
     private int score;
     private RecommendationScoreDetail detail;
+    private MbtiType mbtiType;
 }

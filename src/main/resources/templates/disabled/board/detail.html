@@ -289,12 +289,20 @@
                                   data-rating=${rec.avgRating != null ? rec.avgRating : 0},
                                   data-reviews=${rec.totalReviews != null ? rec.totalReviews : 0},
                                   data-cert=${rec.hasCertification != null ? rec.hasCertification : false},
-                                  data-score=${rec.score}"
+                                  data-score=${rec.score},
+                                  data-mbti=${rec.mbtiType != null ? rec.mbtiType : ''},
+                                  data-mbti-score=${rec.detail != null ? rec.detail.mbtiScore : 0},
+                                  data-mbti-enabled=${rec.detail != null ? rec.detail.mbtiEnabled : false}"
                          onclick="openProfileModalFromCard(this)">
                         <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 font-bold text-sm flex-shrink-0"
                              th:text="${#strings.substring(rec.fullName, 0, 1)}">박</div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold text-gray-900" th:text="${rec.fullName + ' 활동지원사'}">이름</p>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <p class="text-sm font-semibold text-gray-900" th:text="${rec.fullName + ' 활동지원사'}">이름</p>
+                                <span th:if="${rec.mbtiType != null}"
+                                      class="inline-block text-xs bg-purple-100 text-purple-700 rounded px-2 py-0.5 font-medium"
+                                      th:text="${rec.mbtiType}">MBTI</span>
+                            </div>
                             <p class="text-xs text-gray-400 truncate" th:text="${rec.introShort != null ? rec.introShort : '소개 없음'}">소개</p>
                         </div>
                         <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
@@ -341,7 +349,10 @@
                         <div class="flex items-center gap-3">
                             <div id="modal-avatar" class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-lg flex-shrink-0">박</div>
                             <div>
-                                <p id="modal-name" class="text-base font-bold text-gray-900">이름</p>
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <p id="modal-name" class="text-base font-bold text-gray-900">이름</p>
+                                    <span id="modal-mbti-badge" class="hidden inline-block text-xs bg-purple-100 text-purple-700 rounded px-2 py-0.5 font-medium"></span>
+                                </div>
                                 <div class="flex items-center gap-1 mt-0.5">
                                     <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                                     <span id="modal-rating" class="text-sm font-medium text-gray-700">0.0</span>
@@ -374,6 +385,12 @@
                             </div>
                             <span id="modal-score-text" class="text-sm font-bold text-indigo-600 w-10 text-right">0%</span>
                         </div>
+                        <ul id="modal-score-detail" class="mt-2.5 space-y-1 hidden">
+                            <li id="modal-mbti-score-item" class="flex justify-between text-sm hidden">
+                                <span>MBTI 궁합</span>
+                                <span id="modal-mbti-score-value" class="font-semibold text-purple-600">0점</span>
+                            </li>
+                        </ul>
                     </div>
 
                     <form id="inviteForm" method="post"
@@ -445,11 +462,12 @@ function openProfileModalFromCard(el) {
     openProfileModal(
         el.dataset.id, el.dataset.name, el.dataset.intro,
         el.dataset.rating, el.dataset.reviews,
-        el.dataset.cert === 'true', el.dataset.score
+        el.dataset.cert === 'true', el.dataset.score,
+        el.dataset.mbti || '', el.dataset.mbtiScore || 0, el.dataset.mbtiEnabled === 'true'
     );
 }
 
-function openProfileModal(caregiverId, name, intro, rating, reviews, hasCert, score) {
+function openProfileModal(caregiverId, name, intro, rating, reviews, hasCert, score, mbti, mbtiScore, mbtiEnabled) {
     currentCaregiverId = caregiverId;
     var pct = Math.min(100, Math.round(score > 70 ? 100 : score * 100 / 70));
     document.getElementById('modal-avatar').textContent = name.charAt(0);
@@ -461,6 +479,27 @@ function openProfileModal(caregiverId, name, intro, rating, reviews, hasCert, sc
     document.getElementById('modal-score-text').textContent = pct + '%';
     var certBadge = document.getElementById('modal-cert-badge');
     certBadge.classList.toggle('hidden', !hasCert);
+
+    // MBTI 배지
+    var mbtiBadge = document.getElementById('modal-mbti-badge');
+    if (mbti) {
+        mbtiBadge.textContent = mbti;
+        mbtiBadge.classList.remove('hidden');
+    } else {
+        mbtiBadge.classList.add('hidden');
+    }
+
+    // MBTI 점수 상세
+    var mbtiScoreItem = document.getElementById('modal-mbti-score-item');
+    var scoreDetail = document.getElementById('modal-score-detail');
+    if (mbtiEnabled) {
+        document.getElementById('modal-mbti-score-value').textContent = mbtiScore + '점';
+        mbtiScoreItem.classList.remove('hidden');
+        scoreDetail.classList.remove('hidden');
+    } else {
+        mbtiScoreItem.classList.add('hidden');
+        scoreDetail.classList.add('hidden');
+    }
 
     var form = document.getElementById('inviteForm');
     form.action = '/disabled/board/' + REQUEST_ID + '/invite/' + caregiverId;

@@ -65,6 +65,7 @@ public class MatchingService {
     private final HelpRequestPersonalityTagRepository helpRequestPersonalityTagRepository;
     private final CaregiverPersonalityTagRepository caregiverPersonalityTagRepository;
     private final CaregiverInvitationRepository invitationRepository;
+    private final ChatAnnouncementRepository chatAnnouncementRepository;
 
     public HelpRequestApplication apply(Long requestId, ApplyRequest applyRequest) {
         User currentUser = requireRole(UserRole.CAREGIVER);
@@ -120,7 +121,7 @@ public class MatchingService {
                 NotificationType.MATCHING,
                 "새 지원자가 있어요",
                 caregiver.getFullName() + " 활동지원사가 도움 요청에 지원했습니다.",
-                "/my/requests/" + requestId + "/applications"
+                "/disabled/board/" + requestId + "/applicants"
         );
         return application;
     }
@@ -185,11 +186,10 @@ public class MatchingService {
         HelpRequest helpRequest = application.getHelpRequest();
         boolean wasAccepted = application.getStatus() == ApplicationStatus.ACCEPTED;
 
-        application.cancel();
-        conversationRepository.findByApplication_Id(applicationId).ifPresent(Conversation::close);
-
-        // 매칭 확정(ACCEPTED) 상태에서 취소 → 케어메이트와 동일하게 게시물 CLOSED 처리
         if (wasAccepted) {
+            // 매칭 확정 상태에서 취소 → 게시물 CLOSED, 이용자에게 알림
+            application.cancel();
+            conversationRepository.findByApplication_Id(applicationId).ifPresent(Conversation::close);
             helpRequest.close();
             notificationService.create(
                     helpRequest.getRequester().getUser(),
@@ -198,6 +198,14 @@ public class MatchingService {
                     application.getCaregiver().getFullName() + " 활동지원사가 '" + helpRequest.getTitle() + "' 매칭을 취소했습니다.",
                     "/disabled/board/" + helpRequest.getId()
             );
+        } else {
+            // PENDING 상태에서 취소 → 지원 전 상태로 완전 복원 (레코드 삭제)
+            conversationRepository.findByApplication_Id(applicationId).ifPresent(conv -> {
+                chatAnnouncementRepository.deleteByConversationId(conv.getId());
+                messageRepository.deleteByConversationId(conv.getId());
+                conversationRepository.delete(conv);
+            });
+            applicationRepository.delete(application);
         }
     }
 
@@ -248,12 +256,14 @@ public class MatchingService {
 
     @Transactional(readOnly = true)
     public int countApplicationsForRequest(Long requestId) {
-        return applicationRepository.findByHelpRequest_IdOrderByCreatedAtDesc(requestId).size();
+        return (int) applicationRepository.countByHelpRequest_IdAndStatusIn(
+                requestId, List.of(ApplicationStatus.PENDING, ApplicationStatus.ACCEPTED, ApplicationStatus.COMPLETED));
     }
 
     @Transactional(readOnly = true)
     public boolean hasApplied(Long requestId, Long userId) {
-        return applicationRepository.existsByHelpRequest_IdAndCaregiver_UserId(requestId, userId);
+        return applicationRepository.existsByHelpRequest_IdAndCaregiver_UserIdAndStatusIn(
+                requestId, userId, List.of(ApplicationStatus.PENDING, ApplicationStatus.ACCEPTED, ApplicationStatus.COMPLETED));
     }
 
     // 현재 사용자가 이 요청에 선정된 도우미인가(매칭~진행~완료 전 구간).

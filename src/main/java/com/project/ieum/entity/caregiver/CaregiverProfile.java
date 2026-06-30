@@ -1,5 +1,6 @@
 package com.project.ieum.entity.caregiver;
 
+import com.project.ieum.entity.MbtiType;
 import com.project.ieum.entity.UserRole;
 import com.project.ieum.entity.profile.Profile;
 import jakarta.persistence.*;
@@ -68,6 +69,11 @@ public class CaregiverProfile extends Profile {
   @Builder.Default
   private Integer totalReviews = 0;
 
+  // MBTI 유형
+  @Enumerated(EnumType.STRING)
+  @Column(name = "mbti_type", length = 8)
+  private MbtiType mbtiType;
+
   public void applyRating(BigDecimal newAvg, int newCount) {
     this.avgRating = newAvg;
     this.totalReviews = newCount;
@@ -101,6 +107,10 @@ public class CaregiverProfile extends Profile {
 
   public void updateProfileImage(String profileImageUrl) {
     this.profileImageUrl = profileImageUrl;
+  }
+
+  public void updateMbti(MbtiType mbti) {
+    this.mbtiType = mbti;
   }
 
   @Override
