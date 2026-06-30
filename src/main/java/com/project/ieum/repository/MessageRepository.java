@@ -36,4 +36,8 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
           and m.hasRead = false
     """)
     int markRead(@Param("conversationId") Long conversationId, @Param("userId") Long userId);
+
+    @Modifying(clearAutomatically = true)
+    @Query("delete from Message m where m.conversation.id = :conversationId")
+    void deleteByConversationId(@Param("conversationId") Long conversationId);
 }
