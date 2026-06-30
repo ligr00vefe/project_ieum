@@ -12,6 +12,8 @@ import java.util.Optional;
 @Repository
 public interface HelpRequestApplicationRepository extends JpaRepository<HelpRequestApplication, Long> {
     boolean existsByHelpRequest_IdAndCaregiver_UserId(Long helpRequestId, Long caregiverId);
+    boolean existsByHelpRequest_IdAndCaregiver_UserIdAndStatusIn(Long helpRequestId, Long caregiverUserId, List<ApplicationStatus> statuses);
+    long countByHelpRequest_IdAndStatusIn(Long helpRequestId, List<ApplicationStatus> statuses);
     Optional<HelpRequestApplication> findByHelpRequest_IdAndCaregiver_UserId(Long helpRequestId, Long caregiverUserId);
 
     List<HelpRequestApplication> findByHelpRequest_IdOrderByCreatedAtDesc(Long helpRequestId);
