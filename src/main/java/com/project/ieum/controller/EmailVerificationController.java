@@ -1,6 +1,7 @@
 package com.project.ieum.controller;
 
 import com.project.ieum.service.EmailVerificationService;
+import com.project.ieum.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,7 @@ import java.util.Map;
 public class EmailVerificationController {
 
     private final EmailVerificationService emailVerificationService;
+    private final UserService userService;
 
     private static final String SESSION_KEY = "emailVerified";
 
@@ -26,20 +28,28 @@ public class EmailVerificationController {
         return !skipDomain.isBlank() && email.toLowerCase().endsWith("@" + skipDomain.toLowerCase());
     }
 
-    /** 인증 코드 발송 — 스킵 도메인이면 즉시 인증 완료 응답 */
+    /** 인증 코드 발송 — 중복 체크 먼저, 스킵 도메인이면 즉시 인증 완료 응답 */
     @PostMapping("/send-code")
     public ResponseEntity<?> sendCode(@RequestBody Map<String, String> body, HttpSession session) {
         String email = body.get("email");
         if (email == null || email.isBlank()) {
             return ResponseEntity.badRequest().body(Map.of("error", "이메일을 입력해 주세요."));
         }
-        if (isSkipEmail(email.trim())) {
-            session.setAttribute(SESSION_KEY, email.trim());
+
+        email = email.trim();
+
+        // 이메일 중복 체크 (메일 발송 전에 먼저 확인)
+        if (userService.existsByEmail(email)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "이미 사용 중인 이메일입니다."));
+        }
+
+        if (isSkipEmail(email)) {
+            session.setAttribute(SESSION_KEY, email);
             session.setAttribute(SESSION_KEY + "At", LocalDateTime.now());
             return ResponseEntity.ok(Map.of("ok", true, "skipped", true));
         }
         try {
-            emailVerificationService.sendVerificationCode(email.trim());
+            emailVerificationService.sendVerificationCode(email);
             return ResponseEntity.ok(Map.of("ok", true));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
