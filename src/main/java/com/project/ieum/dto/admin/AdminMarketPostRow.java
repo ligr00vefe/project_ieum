@@ -11,16 +11,18 @@ public record AdminMarketPostRow(
         String sellerEmail,
         String categoryName,
         BigDecimal price,
+        boolean sharing,
         String statusLabel,
         String statusClass,
         LocalDateTime createdAt
 ) {
     public static AdminMarketPostRow from(MarketPost p) {
+        boolean sharing = p.isSharing();
         String statusName = p.getStatus().name();
         String label = switch (statusName) {
-            case "ACTIVE"   -> "판매중";
+            case "ACTIVE"   -> sharing ? "나눔중"   : "판매중";
             case "RESERVED" -> "예약중";
-            case "SOLD"     -> "판매완료";
+            case "SOLD"     -> sharing ? "나눔완료" : "판매완료";
             case "REMOVED"  -> "삭제됨";
             default         -> statusName;
         };
@@ -37,6 +39,7 @@ public record AdminMarketPostRow(
                 p.getSeller() != null ? p.getSeller().getEmail() : "-",
                 p.getCategory() != null ? p.getCategory().getName() : "-",
                 p.getPrice(),
+                sharing,
                 label, cls,
                 p.getCreatedAt()
         );

@@ -17,6 +17,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -32,6 +34,7 @@ public class AdminMarketController {
     // ── 거래 관리 목록 ─────────────────────────────────────────────
     @GetMapping("/posts")
     public String posts(
+            @RequestParam(required = false) Boolean sharing,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
@@ -46,14 +49,16 @@ public class AdminMarketController {
 
         var pageable = PageRequest.of(page, 20);
         Page<AdminMarketPostRow> posts = marketPostRepository
-                .findAdminPosts(statusEnum, kw, fromDt, toDt, pageable)
+                .findAdminPosts(sharing, statusEnum, kw, fromDt, toDt, pageable)
                 .map(AdminMarketPostRow::from);
 
         model.addAttribute("posts", posts);
+        model.addAttribute("sharing", sharing);
         model.addAttribute("selectedStatus", status);
         model.addAttribute("keyword", keyword);
         model.addAttribute("from", from);
         model.addAttribute("to", to);
+        model.addAttribute("pageBaseUrl", buildPostsBaseUrl(sharing, status, keyword, from, to));
         model.addAttribute("activeMenu", "market-posts");
         model.addAttribute("title", "거래 관리");
         addPageAttrs(model, posts, page);
@@ -99,6 +104,7 @@ public class AdminMarketController {
     // ── 채팅 관리 목록 ─────────────────────────────────────────────
     @GetMapping("/chats")
     public String chats(
+            @RequestParam(required = false) Boolean sharing,
             @RequestParam(required = false) String postStatus,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
@@ -113,14 +119,16 @@ public class AdminMarketController {
 
         var pageable = PageRequest.of(page, 20);
         Page<AdminMarketChatRow> chats = marketChatRepository
-                .findAdminChats(statusEnum, kw, fromDt, toDt, pageable)
+                .findAdminChats(sharing, statusEnum, kw, fromDt, toDt, pageable)
                 .map(AdminMarketChatRow::from);
 
         model.addAttribute("chats", chats);
+        model.addAttribute("sharing", sharing);
         model.addAttribute("selectedStatus", postStatus);
         model.addAttribute("keyword", keyword);
         model.addAttribute("from", from);
         model.addAttribute("to", to);
+        model.addAttribute("pageBaseUrl", buildChatsBaseUrl(sharing, postStatus, keyword, from, to));
         model.addAttribute("activeMenu", "market-chats");
         model.addAttribute("title", "채팅 관리");
         addPageAttrs(model, chats, page);
@@ -143,5 +151,32 @@ public class AdminMarketController {
         model.addAttribute("totalPages", p.getTotalPages());
         model.addAttribute("startPage", Math.max(0, page - 2));
         model.addAttribute("endPage", Math.min(p.getTotalPages() - 1, page + 2));
+    }
+
+    /** 페이지네이션 base URL — page 파라미터만 빼고 모든 필터를 안전하게 인코딩 */
+    private String buildPostsBaseUrl(Boolean sharing, String status, String keyword,
+                                     LocalDate from, LocalDate to) {
+        StringBuilder sb = new StringBuilder("/admin/market/posts?");
+        if (sharing != null)             sb.append("sharing=").append(sharing).append('&');
+        if (status  != null && !status.isBlank())  sb.append("status=").append(enc(status)).append('&');
+        if (keyword != null && !keyword.isBlank()) sb.append("keyword=").append(enc(keyword)).append('&');
+        if (from    != null)             sb.append("from=").append(from).append('&');
+        if (to      != null)             sb.append("to=").append(to).append('&');
+        return sb.toString();
+    }
+
+    private String buildChatsBaseUrl(Boolean sharing, String postStatus, String keyword,
+                                     LocalDate from, LocalDate to) {
+        StringBuilder sb = new StringBuilder("/admin/market/chats?");
+        if (sharing    != null)                       sb.append("sharing=").append(sharing).append('&');
+        if (postStatus != null && !postStatus.isBlank()) sb.append("postStatus=").append(enc(postStatus)).append('&');
+        if (keyword    != null && !keyword.isBlank())    sb.append("keyword=").append(enc(keyword)).append('&');
+        if (from       != null)                       sb.append("from=").append(from).append('&');
+        if (to         != null)                       sb.append("to=").append(to).append('&');
+        return sb.toString();
+    }
+
+    private String enc(String s) {
+        return URLEncoder.encode(s, StandardCharsets.UTF_8);
     }
 }

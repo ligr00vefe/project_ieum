@@ -77,13 +77,14 @@ public interface MarketChatRepository extends JpaRepository<MarketChat, Long> {
     """)
     List<MarketChat> findByPostIdForAdmin(@Param("postId") Long postId);
 
-    // 관리자 채팅 목록 — 상품 상태 필터 + 키워드 + 날짜 범위
+    // 관리자 채팅 목록 — 나눔여부 + 상품 상태 필터 + 키워드 + 날짜 범위
     @Query(value = """
         select c from MarketChat c
         join fetch c.post p
         join fetch c.seller s
         join fetch c.buyer b
-        where (:postStatus is null or p.status = :postStatus)
+        where (:sharing is null or p.sharing = :sharing)
+          and (:postStatus is null or p.status = :postStatus)
           and (:keyword is null
                or lower(p.title) like lower(concat('%', :keyword, '%'))
                or lower(s.email) like lower(concat('%', :keyword, '%'))
@@ -97,7 +98,8 @@ public interface MarketChatRepository extends JpaRepository<MarketChat, Long> {
         join c.post p
         join c.seller s
         join c.buyer b
-        where (:postStatus is null or p.status = :postStatus)
+        where (:sharing is null or p.sharing = :sharing)
+          and (:postStatus is null or p.status = :postStatus)
           and (:keyword is null
                or lower(p.title) like lower(concat('%', :keyword, '%'))
                or lower(s.email) like lower(concat('%', :keyword, '%'))
@@ -106,6 +108,7 @@ public interface MarketChatRepository extends JpaRepository<MarketChat, Long> {
           and (:toDate is null or c.createdAt <= :toDate)
     """)
     Page<MarketChat> findAdminChats(
+            @Param("sharing") Boolean sharing,
             @Param("postStatus") MarketPostStatus postStatus,
             @Param("keyword") String keyword,
             @Param("fromDate") LocalDateTime fromDate,
