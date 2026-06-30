@@ -1,5 +1,6 @@
 package com.project.ieum.entity.user;
 
+import com.project.ieum.entity.MbtiType;
 import com.project.ieum.entity.Region;
 import com.project.ieum.entity.UserRole;
 import com.project.ieum.entity.profile.Profile;
@@ -7,7 +8,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -74,6 +77,17 @@ public class UserProfile extends Profile {
   @Builder.Default
   private Set<UserCommunicationMethod> communicationMethods = new HashSet<>();
 
+  // MBTI 유형
+  @Enumerated(EnumType.STRING)
+  @Column(name = "mbti_type", length = 8)
+  private MbtiType mbtiType;
+
+  // 선호 MBTI 유형 목록
+  @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+  @ToString.Exclude
+  @Builder.Default
+  private List<UserPreferredMbti> preferredMbtis = new ArrayList<>();
+
   public void addDisabilityType(DisabilityType type) {
     disabilityTypes.add(UserDisabilityType.builder().user(this).disabilityType(type).build());
   }
@@ -114,6 +128,22 @@ public class UserProfile extends Profile {
 
   public void updateProfileImage(String profileImageUrl) {
     this.profileImageUrl = profileImageUrl;
+  }
+
+  public void updateMbti(MbtiType mbti) {
+    this.mbtiType = mbti;
+  }
+
+  public void updatePreferredMbtis(Set<MbtiType> types) {
+    this.preferredMbtis.clear();
+    if (types != null) {
+      types.forEach(type -> {
+        UserPreferredMbti upm = new UserPreferredMbti();
+        upm.setUserProfile(this);
+        upm.setMbtiType(type);
+        this.preferredMbtis.add(upm);
+      });
+    }
   }
 
   @Override

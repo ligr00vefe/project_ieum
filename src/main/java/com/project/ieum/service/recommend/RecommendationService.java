@@ -3,11 +3,13 @@ package com.project.ieum.service.recommend;
 import com.project.ieum.dto.recommend.CaregiverRecommendationResponse;
 import com.project.ieum.dto.recommend.RecommendationScoreDetail;
 import com.project.ieum.dto.search.CaregiverSearchCondition;
+import com.project.ieum.entity.MbtiType;
 import com.project.ieum.entity.PersonalityTag;
 import com.project.ieum.entity.caregiver.CaregiverPersonalityTag;
 import com.project.ieum.entity.caregiver.CaregiverProfile;
 import com.project.ieum.entity.request.HelpRequest;
 import com.project.ieum.entity.request.HelpRequestPersonalityTag;
+import com.project.ieum.entity.user.UserPreferredMbti;
 import com.project.ieum.repository.*;
 import com.project.ieum.repository.HelpRequestApplicationRepository;
 import lombok.RequiredArgsConstructor;
@@ -57,9 +59,13 @@ public class RecommendationService {
                 .map(PersonalityTag::getId)
                 .collect(Collectors.toSet());
 
+        Set<MbtiType> preferredMbtis = request.getRequester().getPreferredMbtis().stream()
+                .map(UserPreferredMbti::getMbtiType)
+                .collect(Collectors.toSet());
+
         return candidates.stream()
                 .filter(c -> !appliedCaregiverIds.contains(c.getUserId()))
-                .map(caregiver -> score(request, requestTagIds, caregiver))
+                .map(caregiver -> score(request, requestTagIds, caregiver, preferredMbtis))
                 .sorted(Comparator.comparingInt(CaregiverRecommendationResponse::getScore).reversed())
                 .limit(limit)
                 .toList();
@@ -72,20 +78,33 @@ public class RecommendationService {
                 .stream()
                 .map(t -> t.getTag().getId())
                 .collect(Collectors.toSet());
-        int total = calculateTimeScore(request, caregiver)
+        Set<MbtiType> preferredMbtis = request.getRequester().getPreferredMbtis().stream()
+                .map(UserPreferredMbti::getMbtiType)
+                .collect(Collectors.toSet());
+        int baseScore = calculateTimeScore(request, caregiver)
                 + calculatePersonalityScore(requestTagIds, caregiver)
                 + calculateRatingScore(caregiver.getAvgRating())
                 + (Boolean.TRUE.equals(caregiver.getHasCertification()) ? 5 : 0);
-        return Math.min(100, total * 100 / 70);
+        if (preferredMbtis.isEmpty()) {
+            return Math.min(100, baseScore * 100 / 70);
+        }
+        int mbtiScore = calculateMbtiScore(caregiver.getMbtiType(), preferredMbtis);
+        return Math.min(100, (baseScore + mbtiScore) * 100 / 90);
     }
 
-    private CaregiverRecommendationResponse score(HelpRequest request, Set<Long> requestTagIds, CaregiverProfile caregiver) {
+    private CaregiverRecommendationResponse score(HelpRequest request, Set<Long> requestTagIds, CaregiverProfile caregiver, Set<MbtiType> preferredMbtis) {
         int regionScore = calculateRegionScore(request, caregiver);
         int timeScore = calculateTimeScore(request, caregiver);
         int personalityScore = calculatePersonalityScore(requestTagIds, caregiver);
         int ratingScore = calculateRatingScore(caregiver.getAvgRating());
         int certificationScore = Boolean.TRUE.equals(caregiver.getHasCertification()) ? 5 : 0;
-        int totalScore = regionScore + timeScore + personalityScore + ratingScore + certificationScore;
+        int baseScore = regionScore + timeScore + personalityScore + ratingScore + certificationScore;
+
+        boolean mbtiEnabled = !preferredMbtis.isEmpty();
+        int mbtiScore = mbtiEnabled ? calculateMbtiScore(caregiver.getMbtiType(), preferredMbtis) : 0;
+        int totalScore = mbtiEnabled
+                ? Math.min(100, (baseScore + mbtiScore) * 100 / 90)
+                : Math.min(100, baseScore * 100 / 70);
 
         return CaregiverRecommendationResponse.builder()
                 .caregiverId(caregiver.getUserId())
@@ -95,14 +114,24 @@ public class RecommendationService {
                 .totalReviews(caregiver.getTotalReviews())
                 .hasCertification(caregiver.getHasCertification())
                 .score(totalScore)
+                .mbtiType(caregiver.getMbtiType())
                 .detail(RecommendationScoreDetail.builder()
                         .regionScore(regionScore)
                         .timeScore(timeScore)
                         .personalityScore(personalityScore)
                         .ratingScore(ratingScore)
                         .certificationScore(certificationScore)
+                        .mbtiScore(mbtiScore)
+                        .mbtiEnabled(mbtiEnabled)
                         .build())
                 .build();
+    }
+
+    private int calculateMbtiScore(MbtiType caregiverMbti, Set<MbtiType> preferredMbtis) {
+        if (caregiverMbti == null || preferredMbtis == null || preferredMbtis.isEmpty()) {
+            return 0;
+        }
+        return preferredMbtis.contains(caregiverMbti) ? 20 : 0;
     }
 
     // 서비스권역 정규화(#11) 이후 지역 매칭은 전역 검색으로 전환됨

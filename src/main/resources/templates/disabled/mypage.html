@@ -35,6 +35,9 @@
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 mb-1">
                     <span class="px-2.5 py-0.5 bg-white/20 text-white text-xs font-semibold rounded-full">케어메이트</span>
+                    <span th:if="${userProfile != null and userProfile.mbtiType != null}"
+                          class="px-2 py-0.5 bg-white/20 text-white text-xs font-bold rounded-full tracking-wide"
+                          th:text="${userProfile.mbtiType}">INFP</span>
                 </div>
                 <h1 class="text-xl font-extrabold" th:text="${userName != null ? userName + ' 님' : '홍길동 님'}">홍길동 님</h1>
                 <p class="text-indigo-200 text-sm mt-0.5" th:text="${userEmail != null ? userEmail : 'user@email.com'}">user@email.com</p>
@@ -154,6 +157,19 @@
 
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
 
+    <!-- MBTI 배너 (미등록 시) / 배지 (등록 시) -->
+    <div th:if="${userProfile != null and userProfile.mbtiType == null}" id="mbtiBanner"
+         class="flex items-center justify-between rounded-2xl border border-purple-200 bg-purple-50 px-4 py-3 cursor-pointer"
+         onclick="openMbtiModal()">
+        <div class="flex items-center gap-2">
+            <span class="text-purple-400">✨</span>
+            <p class="text-sm text-purple-700 font-medium">MBTI를 등록하면 나에게 맞는 활동지원사 추천에 성향이 반영됩니다.</p>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="text-xs font-semibold text-purple-600 underline">등록하기</span>
+            <button type="button" onclick="event.stopPropagation(); hideMbtiBanner()" class="text-xs text-gray-400 hover:text-gray-600 ml-1">✕</button>
+        </div>
+    </div>
     <!-- 메인 탭 -->
     <div class="bg-white rounded-2xl border border-gray-200 p-1.5">
         <div class="relative flex gap-1" id="main-tab-track">
@@ -174,6 +190,85 @@
             </button>
         </div>
     </div>
+
+    <!-- MBTI 모달 -->
+    <div id="mbtiModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeMbtiModal()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 z-10">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-base font-bold text-gray-900">MBTI 설정</h3>
+                <button onclick="closeMbtiModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+            </div>
+            <form id="mbtiForm" onsubmit="saveMbti(event)">
+                <!-- 내 MBTI -->
+                <p class="text-xs font-semibold text-gray-500 mb-2">내 MBTI</p>
+                <div class="grid grid-cols-4 gap-1.5 mb-5">
+                    <label class="mbti-chip">
+                        <input type="radio" name="mbtiType" value="" class="peer sr-only"
+                               th:checked="${userProfile == null or userProfile.mbtiType == null}">
+                        <span class="block text-center py-1.5 text-xs rounded-lg border border-gray-200 cursor-pointer peer-checked:bg-purple-600 peer-checked:border-purple-600 peer-checked:text-white text-gray-500 hover:border-purple-300 transition-all">없음</span>
+                    </label>
+                    <label th:each="mbti : ${mbtiTypes}" class="mbti-chip">
+                        <input type="radio" name="mbtiType" th:value="${mbti.name()}" class="peer sr-only"
+                               th:checked="${userProfile != null and userProfile.mbtiType != null and userProfile.mbtiType.name() == mbti.name()}">
+                        <span class="block text-center py-1.5 text-xs rounded-lg border border-gray-200 cursor-pointer peer-checked:bg-purple-600 peer-checked:border-purple-600 peer-checked:text-white text-gray-500 hover:border-purple-300 transition-all"
+                              th:text="${mbti.name()}">INFP</span>
+                    </label>
+                </div>
+                <!-- 선호 MBTI -->
+                <p class="text-xs font-semibold text-gray-500 mb-1">선호하는 활동지원사 MBTI <span class="font-normal text-gray-400">(최대 4개)</span></p>
+                <div class="grid grid-cols-4 gap-1.5 mb-5">
+                    <label th:each="mbti : ${mbtiTypes}" class="mbti-chip">
+                        <input type="checkbox" name="preferredMbtiTypes" th:value="${mbti.name()}" class="peer sr-only"
+                               th:checked="${userProfile != null and userProfile.preferredMbtis != null and #lists.contains(userProfile.preferredMbtis.![mbtiType.name()], mbti.name())}"
+                               onchange="limitCheck(this,4)">
+                        <span class="block text-center py-1.5 text-xs rounded-lg border border-gray-200 cursor-pointer peer-checked:bg-indigo-500 peer-checked:border-indigo-500 peer-checked:text-white text-gray-500 hover:border-indigo-300 transition-all"
+                              th:text="${mbti.name()}">INFJ</span>
+                    </label>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeMbtiModal()"
+                            class="flex-1 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all">취소</button>
+                    <button type="submit"
+                            class="flex-1 py-2.5 text-sm font-semibold text-white bg-purple-600 rounded-xl hover:bg-purple-700 transition-all">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        (function() {
+            if (localStorage.getItem('hideMbtiBanner') === 'true') {
+                var el = document.getElementById('mbtiBanner');
+                if (el) el.style.display = 'none';
+            }
+        })();
+        function hideMbtiBanner() {
+            localStorage.setItem('hideMbtiBanner', 'true');
+            var el = document.getElementById('mbtiBanner');
+            if (el) el.style.display = 'none';
+        }
+        function openMbtiModal() {
+            var m = document.getElementById('mbtiModal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+        function closeMbtiModal() {
+            var m = document.getElementById('mbtiModal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+        function limitCheck(cb, max) {
+            var checked = document.querySelectorAll('input[name="preferredMbtiTypes"]:checked');
+            if (checked.length > max) { cb.checked = false; alert('최대 ' + max + '개까지 선택 가능합니다.'); }
+        }
+        function saveMbti(e) {
+            e.preventDefault();
+            var form = document.getElementById('mbtiForm');
+            var data = new FormData(form);
+            fetch('/api/mypage/mbti', { method: 'POST', body: data })
+                .then(function(r) { if (r.ok) { location.reload(); } else { alert('저장 실패. 다시 시도해주세요.'); } });
+        }
+    </script>
 
     <!-- ───────── 회원정보 탭 ───────── -->
     <div id="main-tab-info" class="main-tab-content space-y-5">
