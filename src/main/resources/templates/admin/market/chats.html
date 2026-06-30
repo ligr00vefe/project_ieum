@@ -13,9 +13,10 @@
 
     <!-- 검색 + 날짜 필터 -->
     <form th:action="@{/admin/market/chats}" method="get" class="flex flex-wrap items-center gap-2 mb-4">
-        <input type="hidden" name="postStatus" th:value="${selectedStatus}"/>
+        <input type="hidden" name="sharing"    th:value="${sharing}"        th:if="${sharing != null}"/>
+        <input type="hidden" name="postStatus" th:value="${selectedStatus}" th:if="${selectedStatus != null}"/>
         <input type="text" name="keyword" th:value="${keyword}"
-               placeholder="상품명, 판매자·구매자 이메일로 검색..."
+               placeholder="상품명, 등록자·구매자 이메일로 검색..."
                class="flex-1 min-w-[220px] px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
         <input type="date" name="from" th:value="${from}"
                class="px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
@@ -32,23 +33,38 @@
         </a>
     </form>
 
-    <!-- 상품 상태별 필터 탭 -->
-    <div class="flex items-center gap-2 mb-4 flex-wrap">
+    <!-- 판매 / 나눔 최상위 탭 -->
+    <div class="flex items-center gap-1 mb-3">
         <a th:href="@{/admin/market/chats(keyword=${keyword}, from=${from}, to=${to}, page=0)}"
-           th:classappend="${selectedStatus == null} ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
-           class="px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors">전체</a>
-        <a th:href="@{/admin/market/chats(postStatus='ACTIVE', keyword=${keyword}, from=${from}, to=${to}, page=0)}"
-           th:classappend="${selectedStatus == 'ACTIVE'} ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
-           class="px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors">판매중 상품</a>
-        <a th:href="@{/admin/market/chats(postStatus='RESERVED', keyword=${keyword}, from=${from}, to=${to}, page=0)}"
-           th:classappend="${selectedStatus == 'RESERVED'} ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
-           class="px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors">예약중 상품</a>
-        <a th:href="@{/admin/market/chats(postStatus='SOLD', keyword=${keyword}, from=${from}, to=${to}, page=0)}"
-           th:classappend="${selectedStatus == 'SOLD'} ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
-           class="px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors">판매완료 상품</a>
-        <a th:href="@{/admin/market/chats(postStatus='REMOVED', keyword=${keyword}, from=${from}, to=${to}, page=0)}"
-           th:classappend="${selectedStatus == 'REMOVED'} ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
-           class="px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors">삭제된 상품</a>
+           th:classappend="${sharing == null} ? 'bg-slate-700 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
+           class="px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors">전체</a>
+        <a th:href="@{/admin/market/chats(sharing=false, keyword=${keyword}, from=${from}, to=${to}, page=0)}"
+           th:classappend="${sharing != null and !sharing} ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
+           class="px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors">판매 상품</a>
+        <a th:href="@{/admin/market/chats(sharing=true, keyword=${keyword}, from=${from}, to=${to}, page=0)}"
+           th:classappend="${sharing != null and sharing} ? 'bg-emerald-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
+           class="px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors">나눔 상품</a>
+    </div>
+
+    <!-- 상품 상태 서브 탭 -->
+    <div class="flex items-center gap-2 mb-4 flex-wrap pl-1">
+        <a th:href="${sharing != null ? '/admin/market/chats?sharing=' + sharing + (keyword != null ? '&keyword=' + keyword : '') + (from != null ? '&from=' + from : '') + (to != null ? '&to=' + to : '') + '&page=0' : '/admin/market/chats?' + (keyword != null ? 'keyword=' + keyword + '&' : '') + (from != null ? 'from=' + from + '&' : '') + (to != null ? 'to=' + to + '&' : '') + 'page=0'}"
+           th:classappend="${selectedStatus == null} ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'"
+           class="px-3 py-1 rounded-lg text-xs transition-colors">전체</a>
+        <a th:href="${sharing != null ? '/admin/market/chats?sharing=' + sharing + '&postStatus=ACTIVE' + (keyword != null ? '&keyword=' + keyword : '') + (from != null ? '&from=' + from : '') + (to != null ? '&to=' + to : '') + '&page=0' : '/admin/market/chats?postStatus=ACTIVE&' + (keyword != null ? 'keyword=' + keyword + '&' : '') + (from != null ? 'from=' + from + '&' : '') + (to != null ? 'to=' + to + '&' : '') + 'page=0'}"
+           th:classappend="${selectedStatus == 'ACTIVE'} ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'"
+           class="px-3 py-1 rounded-lg text-xs transition-colors"
+           th:text="${sharing != null and sharing} ? '나눔중 상품' : '판매중 상품'">판매중 상품</a>
+        <a th:href="${sharing != null ? '/admin/market/chats?sharing=' + sharing + '&postStatus=RESERVED' + (keyword != null ? '&keyword=' + keyword : '') + (from != null ? '&from=' + from : '') + (to != null ? '&to=' + to : '') + '&page=0' : '/admin/market/chats?postStatus=RESERVED&' + (keyword != null ? 'keyword=' + keyword + '&' : '') + (from != null ? 'from=' + from + '&' : '') + (to != null ? 'to=' + to + '&' : '') + 'page=0'}"
+           th:classappend="${selectedStatus == 'RESERVED'} ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'"
+           class="px-3 py-1 rounded-lg text-xs transition-colors">예약중 상품</a>
+        <a th:href="${sharing != null ? '/admin/market/chats?sharing=' + sharing + '&postStatus=SOLD' + (keyword != null ? '&keyword=' + keyword : '') + (from != null ? '&from=' + from : '') + (to != null ? '&to=' + to : '') + '&page=0' : '/admin/market/chats?postStatus=SOLD&' + (keyword != null ? 'keyword=' + keyword + '&' : '') + (from != null ? 'from=' + from + '&' : '') + (to != null ? 'to=' + to + '&' : '') + 'page=0'}"
+           th:classappend="${selectedStatus == 'SOLD'} ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'"
+           class="px-3 py-1 rounded-lg text-xs transition-colors"
+           th:text="${sharing != null and sharing} ? '나눔완료 상품' : '판매완료 상품'">판매완료 상품</a>
+        <a th:href="${sharing != null ? '/admin/market/chats?sharing=' + sharing + '&postStatus=REMOVED' + (keyword != null ? '&keyword=' + keyword : '') + (from != null ? '&from=' + from : '') + (to != null ? '&to=' + to : '') + '&page=0' : '/admin/market/chats?postStatus=REMOVED&' + (keyword != null ? 'keyword=' + keyword + '&' : '') + (from != null ? 'from=' + from + '&' : '') + (to != null ? 'to=' + to + '&' : '') + 'page=0'}"
+           th:classappend="${selectedStatus == 'REMOVED'} ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'"
+           class="px-3 py-1 rounded-lg text-xs transition-colors">삭제된 상품</a>
     </div>
 
     <!-- 플래시 메시지 -->
@@ -60,9 +76,10 @@
             <thead>
                 <tr class="border-b border-slate-100 bg-slate-50">
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">상품명</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">구분</th>
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">상품 상태</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">판매자</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">구매자</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">등록자</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">받는이</th>
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">채팅 상태</th>
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">마지막 메시지</th>
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">시작일</th>
@@ -73,14 +90,20 @@
                 <tr class="hover:bg-slate-50 transition-colors cursor-pointer"
                     th:onclick="|location.href='@{/market/chat/{id}(id=${chat.id})}'|">
                     <td class="px-5 py-3.5">
-                        <p class="font-medium text-slate-800 truncate max-w-[160px]" th:text="${chat.postTitle}">상품명</p>
+                        <p class="font-medium text-slate-800 truncate max-w-[140px]" th:text="${chat.postTitle}">상품명</p>
+                    </td>
+                    <td class="px-5 py-3.5">
+                        <span th:if="${chat.sharing}"
+                              class="px-2 py-0.5 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-600">나눔</span>
+                        <span th:unless="${chat.sharing}"
+                              class="px-2 py-0.5 text-xs font-semibold rounded-full bg-indigo-50 text-indigo-600">판매</span>
                     </td>
                     <td class="px-5 py-3.5">
                         <span th:text="${chat.postStatusLabel}"
                               th:class="'px-2 py-0.5 text-xs font-semibold rounded-full ' + ${chat.postStatusClass}">상태</span>
                     </td>
-                    <td class="px-5 py-3.5 text-slate-500 text-xs" th:text="${chat.sellerEmail}">-</td>
-                    <td class="px-5 py-3.5 text-slate-500 text-xs" th:text="${chat.buyerEmail}">-</td>
+                    <td class="px-5 py-3.5 text-slate-500 text-xs" th:text="${chat.registrantEmail}">-</td>
+                    <td class="px-5 py-3.5 text-slate-500 text-xs" th:text="${chat.receiverEmail}">-</td>
                     <td class="px-5 py-3.5">
                         <span th:text="${chat.chatStatusLabel}"
                               th:class="'px-2 py-0.5 text-xs font-semibold rounded-full ' + ${chat.chatStatusClass}">상태</span>
@@ -95,14 +118,14 @@
                 </tr>
                 </th:block>
                 <tr th:if="${chats.empty}">
-                    <td colspan="7" class="px-5 py-10 text-center text-sm text-slate-400">채팅 내역이 없습니다.</td>
+                    <td colspan="8" class="px-5 py-10 text-center text-sm text-slate-400">채팅 내역이 없습니다.</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-    <!-- 페이지네이션 -->
-    <div th:replace="~{fragments/pagination :: pager(${currentPage}, ${totalPages}, ${startPage}, ${endPage}, '/admin/market/chats?' + (selectedStatus != null ? 'postStatus=' + selectedStatus + '&' : '') + (keyword != null ? 'keyword=' + keyword + '&' : '') + (from != null ? 'from=' + from + '&' : '') + (to != null ? 'to=' + to + '&' : ''))}"></div>
+    <!-- 페이지네이션 — Controller에서 안전하게 만든 pageBaseUrl 사용 -->
+    <div th:replace="~{fragments/pagination :: pager(${currentPage}, ${totalPages}, ${startPage}, ${endPage}, ${pageBaseUrl})}"></div>
 
 </div>
 </th:block>
