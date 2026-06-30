@@ -44,12 +44,13 @@ public interface MarketPostRepository extends JpaRepository<MarketPost, Long>,
             countQuery = "SELECT count(p) FROM MarketPost p")
     Page<MarketPost> findAllPagedWithFetch(Pageable pageable);
 
-    // 관리자 상품 필터 검색 — 상태 + 키워드 + 날짜 범위
+    // 관리자 상품 필터 검색 — 나눔여부 + 상태 + 키워드 + 날짜 범위
     @Query(value = """
         select p from MarketPost p
         join fetch p.seller s
         join fetch p.category c
-        where (:status is null or p.status = :status)
+        where (:sharing is null or p.sharing = :sharing)
+          and (:status is null or p.status = :status)
           and (:keyword is null
                or lower(p.title) like lower(concat('%', :keyword, '%'))
                or lower(s.email) like lower(concat('%', :keyword, '%')))
@@ -60,7 +61,8 @@ public interface MarketPostRepository extends JpaRepository<MarketPost, Long>,
     countQuery = """
         select count(p) from MarketPost p
         join p.seller s
-        where (:status is null or p.status = :status)
+        where (:sharing is null or p.sharing = :sharing)
+          and (:status is null or p.status = :status)
           and (:keyword is null
                or lower(p.title) like lower(concat('%', :keyword, '%'))
                or lower(s.email) like lower(concat('%', :keyword, '%')))
@@ -68,6 +70,7 @@ public interface MarketPostRepository extends JpaRepository<MarketPost, Long>,
           and (:toDate is null or p.createdAt <= :toDate)
     """)
     Page<MarketPost> findAdminPosts(
+            @Param("sharing") Boolean sharing,
             @Param("status") MarketPostStatus status,
             @Param("keyword") String keyword,
             @Param("fromDate") LocalDateTime fromDate,

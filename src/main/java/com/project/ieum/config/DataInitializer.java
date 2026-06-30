@@ -1,6 +1,7 @@
 package com.project.ieum.config;
 
 import com.project.ieum.entity.*;
+import com.project.ieum.entity.MbtiType;
 import com.project.ieum.entity.caregiver.CaregiverAvailability;
 import com.project.ieum.entity.caregiver.CaregiverPersonalityTag;
 import com.project.ieum.entity.caregiver.CaregiverProfile;
@@ -12,12 +13,14 @@ import com.project.ieum.entity.inquiry.InquiryCategory;
 import com.project.ieum.entity.inquiry.InquiryReply;
 import com.project.ieum.entity.market.MarketCategory;
 import com.project.ieum.entity.market.MarketPost;
+import com.project.ieum.entity.market.MarketPostImage;
 import com.project.ieum.entity.market.MarketPostStatus;
 import com.project.ieum.entity.notice.Notice;
 import com.project.ieum.entity.request.*;
 import com.project.ieum.entity.user.*;
 import com.project.ieum.repository.*;
 import com.project.ieum.repository.market.MarketCategoryRepository;
+import com.project.ieum.repository.market.MarketPostImageRepository;
 import com.project.ieum.repository.market.MarketPostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +64,7 @@ public class DataInitializer implements CommandLineRunner {
     private final InquiryReplyRepository inquiryReplyRepository;
     private final MarketCategoryRepository marketCategoryRepository;
     private final MarketPostRepository marketPostRepository;
+    private final MarketPostImageRepository marketPostImageRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -234,9 +238,11 @@ public class DataInitializer implements CommandLineRunner {
                 .gender(Gender.F)
                 .guardianName("박세라 요양사")
                 .guardianPhone("010-5555-5555")
+                .mbtiType(MbtiType.INFP)
                 .build());
 
         profile.updateActivityInfo("집 근처", "큰 소음");
+        profile.updatePreferredMbtis(java.util.Set.of(MbtiType.INFJ, MbtiType.ENFJ, MbtiType.ISFJ));
         userProfileRepository.save(profile);
 
         disabilityTypeRepository.findAllByOrderBySortOrderAsc().stream()
@@ -283,6 +289,7 @@ public class DataInitializer implements CommandLineRunner {
                 .serviceCategories("이동 보조,병원 동행,야간 보호")
                 .introShort("친절하고 성실한 활동지원사입니다.")
                 .introLong("장애인 분들의 일상을 함께하며 최선을 다하겠습니다.")
+                .mbtiType(MbtiType.ISFJ)
                 .build());
 
         List<String> caregiverTagNames = List.of("차분함", "친절함", "세심함", "인내심", "책임감", "적극성");
@@ -303,12 +310,20 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void initDummyDisabledUsers() {
-        record DummyUser(String email, String fullName, Gender gender, LocalDate birth, String phone, String dt, String guardianName, String guardianPhone) {}
+        record DummyUser(String email, String fullName, Gender gender, LocalDate birth, String phone, String dt,
+                         String guardianName, String guardianPhone, MbtiType mbti, java.util.Set<MbtiType> preferredMbtis) {}
         List<DummyUser> users = List.of(
-                new DummyUser("d02@test.com", "박민준", Gender.M, LocalDate.of(1988, 3, 15), "010-1111-1001", "DT001", "김수연 담당 활동지원사", "010-9001-1001"),
-                new DummyUser("d03@test.com", "이수진", Gender.F, LocalDate.of(1995, 7, 22), "010-1111-1002", "DT002", "이지현 (언니)", "010-9001-1002"),
-                new DummyUser("d04@test.com", "최재원", Gender.M, LocalDate.of(1979, 11, 8), "010-1111-1003", "DT007", "최동훈 사회복지사", "010-9001-1003"),
-                new DummyUser("d05@test.com", "김지은", Gender.F, LocalDate.of(1993, 4, 30), "010-1111-1004", "DT001", "정유나 요양보호사", "010-9001-1004")
+                new DummyUser("d02@test.com", "박민준", Gender.M, LocalDate.of(1988, 3, 15), "010-1111-1001", "DT001",
+                        "김수연 담당 활동지원사", "010-9001-1001", MbtiType.ISTJ,
+                        java.util.Set.of(MbtiType.ISTJ, MbtiType.ISFJ, MbtiType.ESTJ)),
+                new DummyUser("d03@test.com", "이수진", Gender.F, LocalDate.of(1995, 7, 22), "010-1111-1002", "DT002",
+                        "이지현 (언니)", "010-9001-1002", MbtiType.ENFP,
+                        java.util.Set.of(MbtiType.ENFP, MbtiType.ENFJ, MbtiType.INFP, MbtiType.INFJ)),
+                new DummyUser("d04@test.com", "최재원", Gender.M, LocalDate.of(1979, 11, 8), "010-1111-1003", "DT007",
+                        "최동훈 사회복지사", "010-9001-1003", null, null),
+                new DummyUser("d05@test.com", "김지은", Gender.F, LocalDate.of(1993, 4, 30), "010-1111-1004", "DT001",
+                        "정유나 요양보호사", "010-9001-1004", MbtiType.ESFJ,
+                        java.util.Set.of(MbtiType.ISFJ, MbtiType.ESFJ))
         );
 
         for (DummyUser du : users) {
@@ -329,7 +344,13 @@ public class DataInitializer implements CommandLineRunner {
                     .gender(du.gender())
                     .guardianName(du.guardianName())
                     .guardianPhone(du.guardianPhone())
+                    .mbtiType(du.mbti())
                     .build());
+
+            if (du.preferredMbtis() != null) {
+                profile.updatePreferredMbtis(du.preferredMbtis());
+                userProfileRepository.save(profile);
+            }
 
             disabilityTypeRepository.findAllByOrderBySortOrderAsc().stream()
                     .filter(t -> t.getCode().equals(du.dt()))
@@ -342,20 +363,20 @@ public class DataInitializer implements CommandLineRunner {
 
     private void initDummyCaregiverUsers() {
         record DummyCaregiver(String email, String fullName, Gender gender, LocalDate birth, String phone,
-                              boolean hasCert, String certType, String exp, String services, String introShort) {}
+                              boolean hasCert, String certType, String exp, String services, String introShort, MbtiType mbti) {}
         List<DummyCaregiver> caregivers = List.of(
                 new DummyCaregiver("c02@test.com", "정현우", Gender.M, LocalDate.of(1985, 6, 10), "010-2222-2001",
                         true, "사회복지사 2급", "3-5년", "이동 보조,병원 동행,외출 지원",
-                        "3년 이상의 활동 경험을 갖춘 활동지원사입니다."),
+                        "3년 이상의 활동 경험을 갖춘 활동지원사입니다.", MbtiType.ISTJ),
                 new DummyCaregiver("c03@test.com", "오세영", Gender.F, LocalDate.of(1991, 9, 25), "010-2222-2002",
                         true, "요양보호사 1급", "1-3년", "병원 동행,가사 도움,약복용 보조",
-                        "따뜻한 마음으로 함께하겠습니다."),
+                        "따뜻한 마음으로 함께하겠습니다.", MbtiType.INFJ),
                 new DummyCaregiver("c04@test.com", "한동민", Gender.M, LocalDate.of(1987, 12, 3), "010-2222-2003",
                         false, null, "1년 미만", "이동 보조,대기 동행",
-                        "성실하게 최선을 다하는 활동지원사입니다."),
+                        "성실하게 최선을 다하는 활동지원사입니다.", null),
                 new DummyCaregiver("c05@test.com", "임수경", Gender.F, LocalDate.of(1993, 2, 17), "010-2222-2004",
                         true, "사회복지사 1급", "5년 이상", "이동 보조,병원 동행,수어 통역,외출 지원",
-                        "5년 이상의 풍부한 경험으로 최고의 서비스를 제공합니다.")
+                        "5년 이상의 풍부한 경험으로 최고의 서비스를 제공합니다.", MbtiType.ENFJ)
         );
 
         List<String> tagNames = List.of("차분함", "친절함", "세심함", "책임감");
@@ -380,6 +401,7 @@ public class DataInitializer implements CommandLineRunner {
                     .experience(dc.exp())
                     .serviceCategories(dc.services())
                     .introShort(dc.introShort())
+                    .mbtiType(dc.mbti())
                     .build());
 
             personalityTagRepository.findAllByOrderByIdAsc().stream()
@@ -1351,6 +1373,85 @@ public class DataInitializer implements CommandLineRunner {
         marketPostRepository.save(reservedPost);
 
         log.info("이음마켓 더미 게시글 초기화 완료 (30건)");
+        initMarketPostImages();
+    }
+
+    private void initMarketPostImages() {
+        // post_id → [display_order, imageUrl] 목록 (실서버 DB 기준 하드코딩)
+        Object[][] data = {
+            {6L,  0, "/uploads/market/1782753608683_6_0.jpg"},
+            {27L, 0, "/uploads/market/1782753671907_27_0.jpg"},
+            {17L, 0, "/uploads/market/1782753698549_17_0.jpg"},
+            {7L,  0, "/uploads/market/1782753755388_7_0.jpg"},
+            {7L,  1, "/uploads/market/1782753755390_7_1.jpg"},
+            {7L,  2, "/uploads/market/1782753755392_7_2.jpg"},
+            {30L, 0, "/uploads/market/1782753852300_30_0.jpg"},
+            {23L, 0, "/uploads/market/1782753949975_23_0.jpg"},
+            {13L, 0, "/uploads/market/1782753981777_13_0.jpg"},
+            {4L,  0, "/uploads/market/1782754026038_4_0.jpg"},
+            {18L, 0, "/uploads/market/1782754112440_18_0.jpg"},
+            {18L, 1, "/uploads/market/1782754112442_18_1.jpg"},
+            {18L, 2, "/uploads/market/1782754112444_18_2.jpg"},
+            {18L, 3, "/uploads/market/1782754112446_18_3.jpg"},
+            {21L, 0, "/uploads/market/1782754308908_21_0.jpg"},
+            {21L, 1, "/uploads/market/1782754308910_21_1.jpg"},
+            {10L, 0, "/uploads/market/1782754619413_10_0.jpg"},
+            {22L, 0, "/uploads/market/1782754699326_22_0.jpg"},
+            {12L, 0, "/uploads/market/1782754828257_12_0.jpg"},
+            {12L, 1, "/uploads/market/1782754828260_12_1.jpg"},
+            {1L,  0, "/uploads/market/1782754864669_1_0.jpg"},
+            {15L, 0, "/uploads/market/1782754893592_15_0.jpg"},
+            {11L, 0, "/uploads/market/1782754904714_11_0.jpg"},
+            {9L,  0, "/uploads/market/1782754986588_9_0.jpg"},
+            {9L,  1, "/uploads/market/1782754986591_9_1.jpg"},
+            {9L,  2, "/uploads/market/1782754986592_9_2.jpg"},
+            {26L, 0, "/uploads/market/1782755015915_26_0.jpg"},
+            {24L, 0, "/uploads/market/1782755070770_24_0.jpg"},
+            {19L, 0, "/uploads/market/1782755123902_19_0.jpg"},
+            {3L,  0, "/uploads/market/1782755166147_3_0.jpg"},
+            {3L,  1, "/uploads/market/1782755166149_3_1.jpg"},
+            {3L,  2, "/uploads/market/1782755166151_3_2.jpg"},
+            {28L, 0, "/uploads/market/1782755297153_28_0.jpg"},
+            // 2026-07-01 추가분
+            {14L, 0, "/uploads/market/1782835015392_14_0.jpg"},
+            {14L, 1, "/uploads/market/1782835015403_14_1.jpg"},
+            {14L, 2, "/uploads/market/1782835015407_14_2.jpg"},
+            {14L, 3, "/uploads/market/1782835015409_14_3.jpg"},
+            {29L, 0, "/uploads/market/1782835160561_29_0.jpg"},
+            {29L, 1, "/uploads/market/1782835160563_29_1.jpg"},
+            {8L,  0, "/uploads/market/1782835454711_8_0.jpg"},
+            {8L,  1, "/uploads/market/1782835454713_8_1.jpg"},
+            {8L,  2, "/uploads/market/1782835454715_8_2.jpg"},
+            {2L,  0, "/uploads/market/1782835828607_2_0.jpg"},
+            {2L,  1, "/uploads/market/1782835828609_2_1.jpg"},
+            {2L,  2, "/uploads/market/1782835828611_2_2.jpg"},
+            {25L, 0, "/uploads/market/1782835841229_25_0.jpg"},
+            {25L, 1, "/uploads/market/1782835841230_25_1.jpg"},
+            {16L, 0, "/uploads/market/1782835861311_16_0.jpg"},
+            {5L,  0, "/uploads/market/1782835898189_5_0.jpg"},
+            {5L,  1, "/uploads/market/1782835898190_5_1.jpg"},
+            {5L,  2, "/uploads/market/1782835898194_5_2.jpg"},
+        };
+        int count = 0;
+        for (Object[] row : data) {
+            Long postId = (Long) row[0];
+            int displayOrder = (int) row[1];
+            String imageUrl = (String) row[2];
+            marketPostRepository.findById(postId).ifPresent(post -> {
+                boolean exists = marketPostImageRepository
+                        .findByPost_IdOrderByDisplayOrderAsc(post.getId())
+                        .stream().anyMatch(img -> img.getImageUrl().equals(imageUrl));
+                if (!exists) {
+                    marketPostImageRepository.save(MarketPostImage.builder()
+                            .post(post)
+                            .imageUrl(imageUrl)
+                            .displayOrder(displayOrder)
+                            .build());
+                }
+            });
+            count++;
+        }
+        log.info("이음마켓 이미지 등록 완료 — {}건 처리", count);
     }
 
     // ─── 헬퍼 메서드 ─────────────────────────────────────────────────────────────
