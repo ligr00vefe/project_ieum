@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -208,6 +209,10 @@ public class UserService {
                 .map(upt -> upt.getTag().getId())
                 .collect(Collectors.toList());
 
+        List<com.project.ieum.entity.MbtiType> preferredMbtiTypes = profile.getPreferredMbtis().stream()
+                .map(com.project.ieum.entity.user.UserPreferredMbti::getMbtiType)
+                .collect(Collectors.toList());
+
         return DisabledEditDTO.builder()
                 .name(profile.getFullName())
                 .phone(user.getPhone())
@@ -221,6 +226,8 @@ public class UserService {
                 .communicationMethodIds(commIds)
                 .personalityTagIds(tagIds)
                 .profileImageUrl(profile.getProfileImageUrl())
+                .mbtiType(profile.getMbtiType())
+                .preferredMbtiTypes(preferredMbtiTypes)
                 .build();
     }
 
@@ -261,6 +268,7 @@ public class UserService {
                 .regionIds(regionIds)
                 .personalityTagIds(tagIds)
                 .profileImageUrl(profile.getProfileImageUrl())
+                .mbtiType(profile.getMbtiType())
                 .build();
     }
 
@@ -315,6 +323,15 @@ public class UserService {
                 userPersonalityTagRepository.save(
                         UserPersonalityTag.builder().user(profile).tag(tag).build());
             }
+        }
+
+        // MBTI 수정
+        profile.updateMbti(dto.getMbtiType());
+        if (dto.getPreferredMbtiTypes() != null) {
+            if (dto.getPreferredMbtiTypes().size() > 4) {
+                throw new IllegalArgumentException("선호 MBTI는 최대 4개까지 선택 가능합니다.");
+            }
+            profile.updatePreferredMbtis(new HashSet<>(dto.getPreferredMbtiTypes()));
         }
 
         userRepository.save(user);
@@ -375,6 +392,9 @@ public class UserService {
                         CaregiverPersonalityTag.builder().caregiver(profile).tag(tag).build());
             }
         }
+
+        // MBTI 수정
+        profile.updateMbti(dto.getMbtiType());
 
         caregiverProfileRepository.save(profile);
         userRepository.save(user);

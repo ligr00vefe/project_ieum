@@ -33,6 +33,9 @@
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 mb-1">
                     <span class="px-2.5 py-0.5 bg-white/20 text-white text-xs font-semibold rounded-full">활동지원사</span>
+                    <span th:if="${caregiverProfile != null and caregiverProfile.mbtiType != null}"
+                          class="px-2 py-0.5 bg-white/20 text-white text-xs font-bold rounded-full tracking-wide"
+                          th:text="${caregiverProfile.mbtiType}">ISFJ</span>
                     <span th:if="${availabilityStatus != null and availabilityStatus.name() == 'AVAILABLE'}"
                           class="px-2.5 py-0.5 bg-green-400/30 text-green-100 text-xs font-semibold rounded-full">활동 가능</span>
                     <span th:if="${availabilityStatus != null and availabilityStatus.name() != 'AVAILABLE'}"
@@ -154,6 +157,82 @@
 </div><!-- /bg-teal-500 -->
 
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
+
+    <!-- MBTI 배너 (미등록 시) / 배지 (등록 시) -->
+    <div th:if="${caregiverProfile != null and caregiverProfile.mbtiType == null}" id="mbtiBanner"
+         class="flex items-center justify-between rounded-2xl border border-teal-200 bg-teal-50 px-4 py-3 cursor-pointer"
+         onclick="openMbtiModal()">
+        <div class="flex items-center gap-2">
+            <span class="text-teal-400">✨</span>
+            <p class="text-sm text-teal-700 font-medium">MBTI를 등록하면 케어메이트와의 성향 궁합이 매칭률에 반영됩니다.</p>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="text-xs font-semibold text-teal-600 underline">등록하기</span>
+            <button type="button" onclick="event.stopPropagation(); hideMbtiBanner()" class="text-xs text-gray-400 hover:text-gray-600 ml-1">✕</button>
+        </div>
+    </div>
+    <!-- MBTI 모달 -->
+    <div id="mbtiModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeMbtiModal()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 z-10">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-base font-bold text-gray-900">MBTI 설정</h3>
+                <button onclick="closeMbtiModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+            </div>
+            <form id="mbtiForm" onsubmit="saveMbti(event)">
+                <p class="text-xs font-semibold text-gray-500 mb-2">내 MBTI</p>
+                <div class="grid grid-cols-4 gap-1.5 mb-5">
+                    <label class="mbti-chip">
+                        <input type="radio" name="mbtiType" value="" class="peer sr-only"
+                               th:checked="${caregiverProfile == null or caregiverProfile.mbtiType == null}">
+                        <span class="block text-center py-1.5 text-xs rounded-lg border border-gray-200 cursor-pointer peer-checked:bg-teal-500 peer-checked:border-teal-500 peer-checked:text-white text-gray-500 hover:border-teal-300 transition-all">없음</span>
+                    </label>
+                    <label th:each="mbti : ${mbtiTypes}" class="mbti-chip">
+                        <input type="radio" name="mbtiType" th:value="${mbti.name()}" class="peer sr-only"
+                               th:checked="${caregiverProfile != null and caregiverProfile.mbtiType != null and caregiverProfile.mbtiType.name() == mbti.name()}">
+                        <span class="block text-center py-1.5 text-xs rounded-lg border border-gray-200 cursor-pointer peer-checked:bg-teal-500 peer-checked:border-teal-500 peer-checked:text-white text-gray-500 hover:border-teal-300 transition-all"
+                              th:text="${mbti.name()}">ISFJ</span>
+                    </label>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeMbtiModal()"
+                            class="flex-1 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all">취소</button>
+                    <button type="submit"
+                            class="flex-1 py-2.5 text-sm font-semibold text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-all">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        (function() {
+            if (localStorage.getItem('hideMbtiBannerCaregiver') === 'true') {
+                var el = document.getElementById('mbtiBanner');
+                if (el) el.style.display = 'none';
+            }
+        })();
+        function hideMbtiBanner() {
+            localStorage.setItem('hideMbtiBannerCaregiver', 'true');
+            var el = document.getElementById('mbtiBanner');
+            if (el) el.style.display = 'none';
+        }
+        function openMbtiModal() {
+            var m = document.getElementById('mbtiModal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+        function closeMbtiModal() {
+            var m = document.getElementById('mbtiModal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+        function saveMbti(e) {
+            e.preventDefault();
+            var form = document.getElementById('mbtiForm');
+            var data = new FormData(form);
+            fetch('/api/mypage/mbti', { method: 'POST', body: data })
+                .then(function(r) { if (r.ok) { location.reload(); } else { alert('저장 실패. 다시 시도해주세요.'); } });
+        }
+    </script>
 
     <!-- 메인 탭 -->
     <div class="bg-white rounded-2xl border border-gray-200 p-1.5">

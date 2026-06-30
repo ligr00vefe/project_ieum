@@ -11,4 +11,8 @@ public class RecommendationScoreDetail {
     private int personalityScore;
     private int ratingScore;
     private int certificationScore;
+    @Builder.Default
+    private int mbtiScore = 0;
+    @Builder.Default
+    private boolean mbtiEnabled = false;
 }

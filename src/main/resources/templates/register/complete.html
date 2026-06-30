@@ -76,6 +76,15 @@
                             <p class="text-xs text-gray-400 mt-0.5">지원자 중 매칭률이 높은 활동지원사를 선택하거나 직접 초대하세요.</p>
                         </div>
                     </li>
+                    <li class="flex items-start gap-3">
+                        <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span class="text-xs font-bold text-purple-600">4</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">MBTI 등록 (선택)</p>
+                            <p class="text-xs text-gray-400 mt-0.5">마이페이지 → 회원정보 수정에서 MBTI를 등록하면 나에게 맞는 활동지원사 추천에 성향이 반영됩니다.</p>
+                        </div>
+                    </li>
                     </th:block>
                     <!-- 활동지원사 전용 -->
                     <th:block th:if="${userType == 'caregiver'}">
@@ -95,6 +104,15 @@
                         <div>
                             <p class="text-sm font-semibold text-gray-800">매칭 게시판에서 지원</p>
                             <p class="text-xs text-gray-400 mt-0.5">조건에 맞는 도움 요청에 지원하거나 케어메이트의 초대를 수락하세요.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span class="text-xs font-bold text-purple-600">4</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">MBTI 등록 (선택)</p>
+                            <p class="text-xs text-gray-400 mt-0.5">마이페이지 → 회원정보 수정에서 MBTI를 등록하면 케어메이트와의 성향 궁합이 매칭률에 반영됩니다.</p>
                         </div>
                     </li>
                     </th:block>
