@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
-    <title th:text="${pageTitle} + ' | 이음'">이음</title>
+    <title th:text="${pageTitle != null and !pageTitle.isEmpty()} ? ${pageTitle} + ' - 이음' : '장애인 케어메이트 - 이음 | 신뢰 기반 케어 매칭 플랫폼'">이음</title>
     <link th:href="@{/css/output.css}" rel="stylesheet">
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
