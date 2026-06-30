@@ -1,6 +1,7 @@
 package com.project.ieum.dto;
 
 import com.project.ieum.entity.Gender;
+import com.project.ieum.entity.MbtiType;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -37,4 +38,8 @@ public class DisabledEditDTO {
     private List<Long> personalityTagIds;
 
     private String profileImageUrl;
+
+    private MbtiType mbtiType;
+
+    private List<MbtiType> preferredMbtiTypes;
 }

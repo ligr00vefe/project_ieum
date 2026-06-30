@@ -3,6 +3,7 @@ package com.project.ieum.controller;
 import com.project.ieum.dto.CaregiverEditDTO;
 import com.project.ieum.dto.DisabledEditDTO;
 import com.project.ieum.entity.ApplicationStatus;
+import com.project.ieum.entity.MbtiType;
 import com.project.ieum.entity.User;
 import com.project.ieum.entity.UserRole;
 import com.project.ieum.entity.caregiver.CaregiverProfile;
@@ -203,6 +204,8 @@ public class UserController {
         model.addAttribute("myReviews", myReviews);
         model.addAttribute("myReviewCount", reviewService.countWrittenByUserId(user.getId()));
 
+        model.addAttribute("userProfile", profile);
+        model.addAttribute("mbtiTypes", MbtiType.values());
         model.addAttribute("content", "disabled/mypage");
         model.addAttribute("title", "마이페이지");
         return "layout/layout";
@@ -281,6 +284,8 @@ public class UserController {
                 }).toList();
         model.addAttribute("myBuyChats", myBuyChats);
 
+        model.addAttribute("caregiverProfile", profile);
+        model.addAttribute("mbtiTypes", MbtiType.values());
         model.addAttribute("content", "caregiver/mypage");
         model.addAttribute("title", "마이페이지");
         return "layout/layout";
@@ -309,6 +314,7 @@ public class UserController {
         model.addAttribute("disabilityTypes", masterDataService.getAllDisabilityTypes());
         model.addAttribute("communicationMethods", masterDataService.getAllCommunicationMethods());
         model.addAttribute("personalityTags", masterDataService.getAllPersonalityTags());
+        model.addAttribute("mbtiTypes", MbtiType.values());
         model.addAttribute("content", "disabled/edit");
         model.addAttribute("title", "회원정보 수정");
         return "layout/layout";
@@ -338,6 +344,7 @@ public class UserController {
         model.addAttribute("userEmail", user.getEmail());
         model.addAttribute("personalityTags", masterDataService.getCaregiverPersonalityTags());
         model.addAttribute("regions", masterDataService.getAllRegions());
+        model.addAttribute("mbtiTypes", MbtiType.values());
         model.addAttribute("content", "caregiver/edit");
         model.addAttribute("title", "회원정보 수정");
         return "layout/layout";
@@ -389,6 +396,35 @@ public class UserController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/mypage/password";
         }
+    }
+
+    // ─── MBTI 빠른 저장 ──────────────────────────────────────────
+
+    @PostMapping("/api/mypage/mbti")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<Void> saveMbti(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(value = "mbtiType", required = false) String mbtiTypeStr,
+            @RequestParam(value = "preferredMbtiTypes", required = false) List<String> preferredMbtiStrs) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        MbtiType mbtiType = (mbtiTypeStr != null && !mbtiTypeStr.isBlank())
+                ? MbtiType.valueOf(mbtiTypeStr) : null;
+        if (user.getRole() == UserRole.CAREGIVER) {
+            CaregiverProfile profile = caregiverProfileRepository.findById(user.getId()).orElseThrow();
+            profile.updateMbti(mbtiType);
+            caregiverProfileRepository.save(profile);
+        } else {
+            UserProfile profile = userProfileRepository.findById(user.getId()).orElseThrow();
+            profile.updateMbti(mbtiType);
+            java.util.Set<MbtiType> preferred = (preferredMbtiStrs != null)
+                    ? preferredMbtiStrs.stream().filter(s -> !s.isBlank()).map(MbtiType::valueOf)
+                        .collect(java.util.stream.Collectors.toSet())
+                    : java.util.Set.of();
+            if (preferred.size() > 4) return org.springframework.http.ResponseEntity.badRequest().build();
+            profile.updatePreferredMbtis(preferred);
+            userProfileRepository.save(profile);
+        }
+        return org.springframework.http.ResponseEntity.ok().build();
     }
 
     // ─── 회원 탈퇴 ────────────────────────────────────────────
