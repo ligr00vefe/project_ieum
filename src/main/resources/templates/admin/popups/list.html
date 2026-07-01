@@ -6,7 +6,7 @@
 
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h2 class="text-xl font-bold text-slate-900">팝업 관리</h2>
+            <h2 class="text-xl font-bold text-ink">팝업 관리</h2>
             <p class="text-sm text-slate-500 mt-0.5">팝업을 작성하고 표시 상태를 관리하세요.</p>
         </div>
         <a th:href="@{/admin/popups/new}"
@@ -22,10 +22,10 @@
          class="mb-4 px-4 py-3 rounded-xl bg-teal-50 border border-teal-200 text-sm text-teal-700"
          th:text="${message}"></div>
 
-    <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+    <div class="bg-surface rounded-2xl border border-line overflow-hidden">
         <table class="w-full text-sm">
             <thead>
-                <tr class="border-b border-slate-100 bg-slate-50">
+                <tr class="border-b border-line bg-surface-alt">
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">팝업명</th>
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">상태</th>
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">만료일</th>
@@ -35,7 +35,7 @@
             </thead>
             <tbody class="divide-y divide-slate-50">
                 <th:block th:each="popup : ${popups}">
-                <tr class="hover:bg-slate-50 transition-colors"
+                <tr class="hover:bg-surface-alt transition-colors"
                     th:classappend="${!popup.enabled} ? 'opacity-60' : ''">
                     <td class="px-5 py-3.5">
                         <a th:href="@{/admin/popups/{id}(id=${popup.id})}"
