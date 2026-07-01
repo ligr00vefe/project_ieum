@@ -85,7 +85,7 @@
             <!-- 채팅 헤더 -->
             <div class="flex-shrink-0 flex items-center gap-3 px-5 py-4 border-b border-slate-100">
                 <a th:href="@{/market/chats}"
-                   class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-all">
+                   class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-surface-alt rounded-lg transition-all">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
@@ -116,7 +116,7 @@
                     <input id="messageInput" type="text"
                            placeholder="메시지를 입력해주세요"
                            onkeydown="handleKeydown(event)"
-                           class="flex-1 text-sm bg-slate-50 border border-slate-200 rounded-full px-5 py-3 focus:outline-none focus:border-orange-300 focus:bg-surface transition-all">
+                           class="flex-1 text-sm bg-surface-alt border border-slate-200 rounded-full px-5 py-3 focus:outline-none focus:border-orange-300 focus:bg-surface transition-all">
                     <button onclick="sendMessage()"
                             class="flex-shrink-0 px-5 py-3 bg-orange-500 text-white text-sm font-bold rounded-full hover:bg-orange-600 transition-all">
                         전송 →
@@ -174,7 +174,7 @@ function buildMessage(msg) {
     return `<div class="flex items-end gap-2">
         <div class="w-8 h-8 rounded-full bg-orange-100 text-orange-500 text-sm font-bold flex items-center justify-center flex-shrink-0">A</div>
         <div class="max-w-[70%]">
-            <div class="bg-slate-50 border border-slate-100 rounded-2xl rounded-bl-md px-4 py-3">
+            <div class="bg-surface-alt border border-slate-100 rounded-2xl rounded-bl-md px-4 py-3">
                 <p class="text-sm text-slate-800">${escaped}</p>
             </div>
             <p class="text-[11px] text-slate-400 mt-1 ml-1">${time}</p>

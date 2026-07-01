@@ -65,7 +65,7 @@
             검색
         </button>
         <a th:href="@{/market(sharing=${condition.sharing})}"
-           class="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-500 hover:bg-slate-50 transition-all">초기화</a>
+           class="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-500 hover:bg-surface-alt transition-all">초기화</a>
     </form>
 
     <!-- 내 상품 섹션 (로그인 사용자 전용, 상단 우선 표시) -->
@@ -101,7 +101,7 @@
                         <span class="absolute top-2 left-2 rounded-lg bg-orange-500 px-2 py-1 text-xs font-bold text-white">내 상품</span>
                         <span th:if="${post.status.name() != 'ACTIVE'}"
                               class="absolute top-2 right-2 rounded-lg px-2 py-1 text-xs font-bold text-white"
-                              th:classappend="${post.status.name() == 'RESERVED'} ? 'bg-amber-500' : 'bg-slate-500'"
+                              th:classappend="${post.status.name() == 'RESERVED'} ? 'bg-amber-500' : 'bg-surface-alt0'"
                               th:text="${post.statusLabel}">예약중</span>
                     </div>
                 </a>
@@ -126,7 +126,7 @@
                     </div>
                 </div>
                 <!-- 빠른 관리 링크 -->
-                <div class="border-t border-slate-100 px-4 py-2 flex items-center gap-3 bg-slate-50">
+                <div class="border-t border-slate-100 px-4 py-2 flex items-center gap-3 bg-surface-alt">
                     <a th:href="@{/market/{id}/edit(id=${post.id})}"
                        class="text-xs text-slate-500 hover:text-orange-500 transition-colors">수정</a>
                     <span class="text-slate-200">|</span>
@@ -163,7 +163,7 @@
                           class="absolute top-2 left-2 rounded-lg bg-teal-500 px-2 py-1 text-xs font-bold text-white">나눔</span>
                     <span th:if="${post.status.name() != 'ACTIVE'}"
                           class="absolute top-2 left-2 rounded-lg px-2 py-1 text-xs font-bold text-white"
-                          th:classappend="${post.status.name() == 'RESERVED'} ? 'bg-amber-500' : 'bg-slate-500'"
+                          th:classappend="${post.status.name() == 'RESERVED'} ? 'bg-amber-500' : 'bg-surface-alt0'"
                           th:text="${post.statusLabel}">예약중</span>
                 </div>
             </a>
@@ -263,7 +263,7 @@
 
         let badge = '';
         if (!statusActive) {
-            const bc = statusReserved ? 'bg-amber-500' : 'bg-slate-500';
+            const bc = statusReserved ? 'bg-amber-500' : 'bg-surface-alt0';
             badge = `<span class="absolute top-2 left-2 rounded-lg ${bc} px-2 py-1 text-xs font-bold text-white">${escHtml(post.statusLabel)}</span>`;
         } else if (post.sharing) {
             badge = `<span class="absolute top-2 left-2 rounded-lg bg-teal-500 px-2 py-1 text-xs font-bold text-white">나눔</span>`;
