@@ -3,7 +3,7 @@
 <th:block th:fragment="content">
 <div class="mx-auto w-full max-w-2xl px-4 py-6 sm:px-6 lg:px-8">
 
-    <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+    <div class="rounded-2xl border border-slate-100 bg-surface p-6 shadow-sm">
         <p class="text-sm font-semibold text-orange-500">이음 마켓</p>
         <h1 class="mt-1 text-2xl font-bold"
             th:text="${postId == null} ? '상품 등록' : '상품 수정'">상품 등록</h1>
@@ -27,14 +27,14 @@
                     <label class="flex-1 cursor-pointer">
                         <input type="radio" name="sharing" value="false" class="sr-only peer"
                                th:checked="${!form.sharing}">
-                        <div class="rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-500 transition-all peer-checked:border-orange-400 peer-checked:bg-orange-50 peer-checked:text-orange-600">
+                        <div class="rounded-xl border-2 border-slate-200 bg-surface px-4 py-3 text-center text-sm font-semibold text-slate-500 transition-all peer-checked:border-orange-400 peer-checked:bg-orange-50 peer-checked:text-orange-600">
                             💰 판매
                         </div>
                     </label>
                     <label class="flex-1 cursor-pointer">
                         <input type="radio" name="sharing" value="true" class="sr-only peer"
                                th:checked="${form.sharing}">
-                        <div class="rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-500 transition-all peer-checked:border-teal-400 peer-checked:bg-teal-50 peer-checked:text-teal-600">
+                        <div class="rounded-xl border-2 border-slate-200 bg-surface px-4 py-3 text-center text-sm font-semibold text-slate-500 transition-all peer-checked:border-teal-400 peer-checked:bg-teal-50 peer-checked:text-teal-600">
                             🤝 나눔 (무료)
                         </div>
                     </label>

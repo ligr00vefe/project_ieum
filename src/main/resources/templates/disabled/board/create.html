@@ -8,16 +8,16 @@
         <ol class="flex items-center gap-2 text-sm text-gray-400 mb-6 list-none p-0 m-0">
             <li><a th:href="@{/disabled/board}" class="hover:text-indigo-600 transition-colors">게시판</a></li>
             <li aria-hidden="true"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></li>
-            <li><span class="text-gray-600 font-medium" aria-current="page">요청 글 작성</span></li>
+            <li><span class="text-ink-muted font-medium" aria-current="page">요청 글 작성</span></li>
         </ol>
     </nav>
 
-    <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+    <div class="bg-surface rounded-3xl border border-line shadow-sm overflow-hidden">
         <div class="h-1 bg-indigo-600"></div>
         <div class="p-7 sm:p-8">
 
             <div class="mb-7">
-                <h1 class="text-xl font-bold text-gray-900" th:text="${editMode} ? '도움 요청 수정' : '도움 요청 작성'">도움 요청 작성</h1>
+                <h1 class="text-xl font-bold text-ink" th:text="${editMode} ? '도움 요청 수정' : '도움 요청 작성'">도움 요청 작성</h1>
                 <p class="text-sm text-gray-500 mt-1">필요한 도움 내용을 자세히 작성해주세요.</p>
             </div>
 
@@ -27,21 +27,21 @@
 
                 <!-- 제목 -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">제목 <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-semibold text-ink-muted mb-2">제목 <span class="text-red-500">*</span></label>
                     <input type="text" th:field="*{title}" placeholder="예: 병원 동행이 필요해요 (외래진료)"
-                           class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all">
+                           class="w-full px-4 py-3 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all">
                     <p th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="mt-1 text-xs text-red-500"></p>
                 </div>
 
                 <!-- 필요한 도움 (서비스 카테고리) -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-3">필요한 도움 <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-semibold text-ink-muted mb-3">필요한 도움 <span class="text-red-500">*</span></label>
                     <div class="flex flex-wrap gap-x-2 gap-y-3">
                         <th:block th:each="cat : ${serviceCategories}">
                         <label class="cursor-pointer">
                             <input type="radio" th:field="*{serviceCategoryId}" th:value="${cat.id}" class="sr-only peer">
                             <span th:text="${cat.name}"
-                                  class="inline-block px-3.5 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:border-indigo-300 transition-all cursor-pointer">서비스</span>
+                                  class="inline-block px-3.5 py-2 text-sm font-medium text-ink-muted bg-surface-muted border border-line-strong rounded-xl peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:border-indigo-300 transition-all cursor-pointer">서비스</span>
                         </label>
                         </th:block>
                     </div>
@@ -53,32 +53,32 @@
                 <input type="hidden" th:field="*{desiredEndDatetime}" id="desiredEndDatetime">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">시작 일시 <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-semibold text-ink-muted mb-2">시작 일시 <span class="text-red-500">*</span></label>
                         <input type="text" id="startPicker" placeholder="날짜와 시작 시간 선택" readonly
-                               class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all bg-white cursor-pointer">
+                               class="w-full px-4 py-3 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all bg-surface cursor-pointer">
                         <p th:if="${#fields.hasErrors('desiredStartDatetime')}" th:errors="*{desiredStartDatetime}" class="mt-1 text-xs text-red-500"></p>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">종료 일시 <span class="text-xs font-normal text-gray-400">(선택)</span></label>
+                        <label class="block text-sm font-semibold text-ink-muted mb-2">종료 일시 <span class="text-xs font-normal text-gray-400">(선택)</span></label>
                         <input type="text" id="endPicker" placeholder="종료 시간 선택 (선택)" readonly
-                               class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all bg-white cursor-pointer">
+                               class="w-full px-4 py-3 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all bg-surface cursor-pointer">
                     </div>
                 </div>
 
                 <!-- 활동 지역 (카카오 주소 검색) -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">활동 지역 <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-semibold text-ink-muted mb-2">활동 지역 <span class="text-red-500">*</span></label>
                     <div class="flex gap-2 mb-2">
                         <input type="text" id="roadAddressDisplay"
                                th:value="*{roadAddress}"
                                placeholder="도로명주소 검색" readonly
-                               class="flex-1 px-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 cursor-pointer focus:outline-none"
+                               class="flex-1 px-4 py-3 text-sm border border-line-strong rounded-xl bg-surface-muted cursor-pointer focus:outline-none"
                                onclick="searchAddress()">
                         <button type="button" onclick="searchAddress()"
                                 class="px-4 py-3 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all">주소 검색</button>
                     </div>
                     <input type="text" th:field="*{addressDetail}" placeholder="상세주소 (건물명, 호수 등)"
-                           class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all mb-1">
+                           class="w-full px-4 py-3 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all mb-1">
                     <input type="hidden" th:field="*{roadAddress}" id="roadAddress">
                     <input type="hidden" th:field="*{sido}" id="sido">
                     <input type="hidden" th:field="*{sigungu}" id="sigungu">
@@ -90,14 +90,14 @@
 
                 <!-- 선호 성향 태그 -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">원하는 활동지원사 성향 <span class="text-xs font-normal text-gray-400">(선택)</span></label>
+                    <label class="block text-sm font-semibold text-ink-muted mb-1">원하는 활동지원사 성향 <span class="text-xs font-normal text-gray-400">(선택)</span></label>
                     <p class="text-xs text-gray-400 mb-3">함께 활동하고 싶은 활동지원사의 성향을 선택해 주세요.</p>
                     <div class="flex flex-wrap gap-2">
                         <th:block th:each="tag : ${personalityTags}">
                         <label class="cursor-pointer">
                             <input type="checkbox" th:field="*{personalityTagIds}" th:value="${tag.id}" class="sr-only peer">
                             <span th:text="${'#' + tag.name}"
-                                  class="inline-block px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl peer-checked:bg-indigo-100 peer-checked:text-indigo-700 peer-checked:border-indigo-200 hover:border-indigo-200 transition-all cursor-pointer">태그</span>
+                                  class="inline-block px-3 py-1.5 text-xs font-medium text-ink-muted bg-surface-muted border border-line-strong rounded-xl peer-checked:bg-indigo-100 peer-checked:text-indigo-700 peer-checked:border-indigo-200 hover:border-indigo-200 transition-all cursor-pointer">태그</span>
                         </label>
                         </th:block>
                     </div>
@@ -105,7 +105,7 @@
 
                 <!-- 출발지 / 도착지 -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">출발지 / 도착지 <span class="text-xs font-normal text-gray-400">(이동 보조 서비스 시 필수)</span></label>
+                    <label class="block text-sm font-semibold text-ink-muted mb-1">출발지 / 도착지 <span class="text-xs font-normal text-gray-400">(이동 보조 서비스 시 필수)</span></label>
                     <p class="text-xs text-gray-400 mb-3">이동 보조가 필요한 경우 출발지와 도착지를 입력해주세요.</p>
                     <div class="space-y-3">
                         <div class="flex gap-2 items-center">
@@ -114,7 +114,7 @@
                                 <input type="text" id="departureAddressDisplay"
                                        th:value="*{departureAddress}"
                                        placeholder="출발지 주소 검색" readonly
-                                       class="flex-1 px-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 cursor-pointer focus:outline-none"
+                                       class="flex-1 px-4 py-3 text-sm border border-line-strong rounded-xl bg-surface-muted cursor-pointer focus:outline-none"
                                        onclick="searchDeparture()">
                                 <button type="button" onclick="searchDeparture()"
                                         class="px-4 py-3 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all whitespace-nowrap">검색</button>
@@ -126,7 +126,7 @@
                                 <input type="text" id="destinationAddressDisplay"
                                        th:value="*{destinationAddress}"
                                        placeholder="도착지 주소 검색" readonly
-                                       class="flex-1 px-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 cursor-pointer focus:outline-none"
+                                       class="flex-1 px-4 py-3 text-sm border border-line-strong rounded-xl bg-surface-muted cursor-pointer focus:outline-none"
                                        onclick="searchDestination()">
                                 <button type="button" onclick="searchDestination()"
                                         class="px-4 py-3 text-sm font-semibold text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-all whitespace-nowrap">검색</button>
@@ -140,10 +140,10 @@
                 <!-- 출발지/도착지 경로 지도 (TMap appKey가 있고 두 주소가 모두 입력된 경우에만 노출) -->
                 <div th:if="${tmapAppKey != null and !tmapAppKey.isEmpty()}"
                      id="routeMapSection" class="hidden">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">경로 미리보기</label>
-                    <div class="rounded-2xl overflow-hidden border border-gray-200 bg-gray-50">
+                    <label class="block text-sm font-semibold text-ink-muted mb-2">경로 미리보기</label>
+                    <div class="rounded-2xl overflow-hidden border border-line-strong bg-surface-muted">
                         <div id="routeMapCanvas" class="w-full" style="height:400px;"></div>
-                        <div id="routeInfo" class="px-4 py-3 text-xs text-gray-500 border-t border-gray-100 flex gap-4">
+                        <div id="routeInfo" class="px-4 py-3 text-xs text-gray-500 border-t border-line flex gap-4">
                             <span id="routeDistance"></span>
                             <span id="routeTime"></span>
                         </div>
@@ -152,21 +152,21 @@
 
                 <!-- 도움 내용 -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">상세 내용</label>
+                    <label class="block text-sm font-semibold text-ink-muted mb-2">상세 내용</label>
                     <textarea th:field="*{body}" rows="5" placeholder="필요한 도움에 대해 자세히 설명해주세요."
-                              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all resize-none"></textarea>
+                              class="w-full px-4 py-3 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all resize-none"></textarea>
                 </div>
 
                 <!-- 특이사항 -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">특이사항 / 주의사항 <span class="text-xs font-normal text-gray-400">(선택)</span></label>
+                    <label class="block text-sm font-semibold text-ink-muted mb-2">특이사항 / 주의사항 <span class="text-xs font-normal text-gray-400">(선택)</span></label>
                     <textarea th:field="*{specialNotes}" rows="3" placeholder="알레르기, 주의사항, 기타 요청 등"
-                              class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all resize-none"></textarea>
+                              class="w-full px-4 py-3 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all resize-none"></textarea>
                 </div>
 
                 <div class="flex gap-3 pt-2">
                     <a th:href="@{/disabled/board}"
-                       class="flex-1 py-3 text-sm font-semibold text-gray-600 bg-gray-100 rounded-xl text-center hover:bg-gray-200 transition-all">
+                       class="flex-1 py-3 text-sm font-semibold text-ink-muted bg-surface-hover rounded-xl text-center hover:bg-gray-200 transition-all">
                         취소
                     </a>
                     <button type="submit"

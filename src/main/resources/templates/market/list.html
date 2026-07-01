@@ -39,7 +39,7 @@
         <!-- sharing 값 유지 -->
         <input type="hidden" name="sharing" th:value="${condition.sharing}">
         <select name="categoryId" id="categorySelect"
-                class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
+                class="rounded-xl border border-slate-200 bg-surface px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
             <option value="">전체 카테고리</option>
             <option th:each="cat : ${categories}"
                     th:value="${cat.id}"
@@ -49,16 +49,16 @@
         <input type="text" name="keyword"
                th:value="${condition.keyword}"
                placeholder="상품명 검색"
-               class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm flex-1 min-w-[140px] focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
+               class="rounded-xl border border-slate-200 bg-surface px-3 py-2 text-sm flex-1 min-w-[140px] focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
         <th:block th:if="${!condition.sharing}">
             <input type="number" name="minPrice"
                    th:value="${condition.minPrice}"
                    placeholder="최소 가격"
-                   class="w-28 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
+                   class="w-28 rounded-xl border border-slate-200 bg-surface px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
             <input type="number" name="maxPrice"
                    th:value="${condition.maxPrice}"
                    placeholder="최대 가격"
-                   class="w-28 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
+                   class="w-28 rounded-xl border border-slate-200 bg-surface px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
         </th:block>
         <button type="submit"
                 class="rounded-xl bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 transition-all">
@@ -83,7 +83,7 @@
         </div>
         <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <article th:each="post : ${myPosts}"
-                     class="group rounded-2xl border-2 border-orange-200 bg-white shadow-sm hover:shadow-md transition-all overflow-hidden">
+                     class="group rounded-2xl border-2 border-orange-200 bg-surface shadow-sm hover:shadow-md transition-all overflow-hidden">
                 <a th:href="@{/market/{id}(id=${post.id})}" class="block">
                     <div class="relative h-48 bg-slate-100 overflow-hidden">
                         <img th:if="${post.thumbnailUrl != null}"
@@ -145,7 +145,7 @@
     <section id="postGrid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <th:block th:each="post : ${posts.content}"
                   th:if="${currentUserId == null or post.sellerId != currentUserId}">
-        <article class="group rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-md transition-all overflow-hidden">
+        <article class="group rounded-2xl border border-slate-100 bg-surface shadow-sm hover:shadow-md transition-all overflow-hidden">
             <a th:href="@{/market/{id}(id=${post.id})}" class="block">
                 <div class="relative h-48 bg-slate-100 overflow-hidden">
                     <img th:if="${post.thumbnailUrl != null}"
@@ -188,12 +188,12 @@
 
     <!-- 빈 결과 -->
     <div th:if="${posts.empty}" id="emptyMessage"
-         class="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-slate-400 mt-4">
+         class="rounded-2xl border border-dashed border-slate-200 bg-surface p-12 text-center text-slate-400 mt-4">
         <p class="text-lg font-semibold mb-1">등록된 상품이 없습니다.</p>
         <p class="text-sm">첫 번째로 상품을 등록해보세요!</p>
     </div>
     <div th:unless="${posts.empty}" id="emptyMessage"
-         class="hidden rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-slate-400 mt-4">
+         class="hidden rounded-2xl border border-dashed border-slate-200 bg-surface p-12 text-center text-slate-400 mt-4">
         <p class="text-lg font-semibold mb-1">등록된 상품이 없습니다.</p>
         <p class="text-sm">첫 번째로 상품을 등록해보세요!</p>
     </div>
@@ -282,7 +282,7 @@
         }
 
         return `
-        <article class="group rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-md transition-all overflow-hidden">
+        <article class="group rounded-2xl border border-slate-100 bg-surface shadow-sm hover:shadow-md transition-all overflow-hidden">
           <a href="/market/${post.id}" class="block">
             <div class="relative h-48 bg-slate-100 overflow-hidden">
               ${imgEl}${badge}
