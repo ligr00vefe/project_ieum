@@ -143,12 +143,12 @@
                       th:action="@{/market/{id}/cancel-reserve(id=${post.id})}" method="post">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <button type="submit"
-                            class="w-full rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+                            class="w-full rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 hover:bg-surface-alt transition-all">
                         예약 취소
                     </button>
                 </form>
                 <a th:href="@{/market/{id}/edit(id=${post.id})}"
-                   class="block w-full rounded-xl border border-slate-200 py-2.5 text-center text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+                   class="block w-full rounded-xl border border-slate-200 py-2.5 text-center text-sm font-semibold text-slate-600 hover:bg-surface-alt transition-all">
                     수정하기
                 </a>
                 <form th:action="@{/market/{id}/remove(id=${post.id})}" method="post"
