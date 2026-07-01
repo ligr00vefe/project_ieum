@@ -178,7 +178,7 @@ public class HelpRequestService {
     }
 
     // (이슈 #8 정본) update()/toForm() 제거: HelpRequest는 write-once.
-    // 도우미가 본 내용/시간/위치가 지원 후 바뀌면 신뢰성이 깨지므로 생성 후 본문 수정을 막는다.
+    // 활동지원사가 본 내용/시간/위치가 지원 후 바뀌면 신뢰성이 깨지므로 생성 후 본문 수정을 막는다.
     // 변경이 필요하면 마감(cancel→CLOSED) 후 새로 작성한다.
 
     // 재게시 — 마감(CLOSED)·완료(COMPLETED)된 본인 요청의 내용을 작성 폼에 프리필한다.
