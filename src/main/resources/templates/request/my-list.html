@@ -16,12 +16,12 @@
             <div class="flex flex-wrap justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-bold"><a th:href="@{/my/requests/{id}(id=${request.id})}" th:text="${request.title}">요청</a></h2>
-                    <p class="mt-1 text-sm text-slate-600" th:text="${request.serviceCategory.nameKo + ' · ' + request.desiredDate}">일시</p>
+                    <p class="mt-1 text-sm text-ink-muted" th:text="${request.serviceCategory.nameKo + ' · ' + request.desiredDate}">일시</p>
                 </div>
                 <span class="rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700" th:text="${request.status}">OPEN</span>
             </div>
         </article>
-        <div th:if="${#lists.isEmpty(requests)}" class="rounded-lg border border-dashed border-indigo-200 bg-surface p-8 text-center text-slate-600">등록된 요청이 없습니다.</div>
+        <div th:if="${#lists.isEmpty(requests)}" class="rounded-lg border border-dashed border-indigo-200 bg-surface p-8 text-center text-ink-muted">등록된 요청이 없습니다.</div>
     </section>
 </div>
 </th:block>

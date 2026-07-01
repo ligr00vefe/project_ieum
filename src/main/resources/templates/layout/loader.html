@@ -12,7 +12,7 @@
         var bar = document.createElement('div');
         bar.id = 'pageLoaderBar';
         bar.style.cssText = 'position:fixed;top:0;left:0;height:4px;width:0;opacity:0;z-index:9999;pointer-events:none;'
-            + 'background:linear-gradient(90deg,#14b8a6,#4f46e5);box-shadow:0 0 10px rgba(20,184,166,.7),0 0 3px rgba(79,70,229,.8);'
+            + 'background:var(--loader-grad);box-shadow:var(--loader-glow);'
             + 'transition:width .2s ease, opacity .15s ease;';
         document.body.appendChild(bar);
 

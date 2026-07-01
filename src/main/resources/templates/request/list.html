@@ -7,7 +7,7 @@
         <div>
             <p class="text-sm font-semibold text-indigo-700">구인 게시판</p>
             <h1 class="mt-1 text-2xl font-bold">매칭 게시판</h1>
-            <p class="mt-2 text-sm text-slate-600">이용자가 올린 도움 요청을 확인하고, 맞는 요청에 지원하세요.</p>
+            <p class="mt-2 text-sm text-ink-muted">이용자가 올린 도움 요청을 확인하고, 맞는 요청에 지원하세요.</p>
         </div>
         <a th:if="${currentRole == 'USER'}" th:href="@{/requests/new}" class="rounded-md bg-indigo-700 px-4 py-3 font-semibold text-white hover:bg-indigo-800">요청 작성</a>
     </div>
@@ -21,14 +21,14 @@
                     <h2 class="text-lg font-bold">
                         <a th:href="@{/requests/{id}(id=${request.id})}" th:text="${request.title}" class="rounded-sm hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600">도움 요청</a>
                     </h2>
-                    <p class="mt-2 text-sm text-slate-600" th:text="${request.serviceCategory.nameKo + ' · ' + request.region.sigungu + ' ' + request.region.dong}">외출 보조</p>
+                    <p class="mt-2 text-sm text-ink-muted" th:text="${request.serviceCategory.nameKo + ' · ' + request.region.sigungu + ' ' + request.region.dong}">외출 보조</p>
                 </div>
                 <span class="rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700" th:text="${request.status}">OPEN</span>
             </div>
-            <p class="mt-3 line-clamp-2 text-sm leading-6 text-slate-700" th:text="${request.body}">내용</p>
-            <p class="mt-3 text-sm text-slate-600" th:text="${request.desiredDate + ' ' + request.desiredStartTime + ' - ' + request.desiredEndTime}">일시</p>
+            <p class="mt-3 line-clamp-2 text-sm leading-6 text-ink-muted" th:text="${request.body}">내용</p>
+            <p class="mt-3 text-sm text-ink-muted" th:text="${request.desiredDate + ' ' + request.desiredStartTime + ' - ' + request.desiredEndTime}">일시</p>
         </article>
-        <div th:if="${requests.empty}" class="rounded-lg border border-dashed border-indigo-200 bg-surface p-8 text-center text-slate-600">
+        <div th:if="${requests.empty}" class="rounded-lg border border-dashed border-indigo-200 bg-surface p-8 text-center text-ink-muted">
             열린 도움 요청이 없습니다.
         </div>
     </section>

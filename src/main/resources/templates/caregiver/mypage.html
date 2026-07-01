@@ -273,18 +273,18 @@
                     수정하기
                 </a>
             </div>
-            <div class="divide-y divide-gray-50">
+            <div class="divide-y divide-line">
                 <div class="flex items-center gap-3 px-5 py-3.5">
                     <span class="text-xs text-gray-400 w-20 flex-shrink-0">이름</span>
-                    <span class="text-sm font-medium text-gray-800" th:text="${userName != null ? userName : '-'}">박이민</span>
+                    <span class="text-sm font-medium text-ink" th:text="${userName != null ? userName : '-'}">박이민</span>
                 </div>
                 <div class="flex items-center gap-3 px-5 py-3.5">
                     <span class="text-xs text-gray-400 w-20 flex-shrink-0">이메일</span>
-                    <span class="text-sm font-medium text-gray-800" th:text="${userEmail != null ? userEmail : '-'}">caregiver@email.com</span>
+                    <span class="text-sm font-medium text-ink" th:text="${userEmail != null ? userEmail : '-'}">caregiver@email.com</span>
                 </div>
                 <div class="flex items-center gap-3 px-5 py-3.5">
                     <span class="text-xs text-gray-400 w-20 flex-shrink-0">연락처</span>
-                    <span class="text-sm font-medium text-gray-800" th:text="${phone != null ? phone : '-'}">-</span>
+                    <span class="text-sm font-medium text-ink" th:text="${phone != null ? phone : '-'}">-</span>
                 </div>
                 <div class="flex items-start gap-3 px-5 py-3.5">
                     <span class="text-xs text-gray-400 w-20 flex-shrink-0 pt-0.5">자격증</span>
@@ -292,10 +292,10 @@
                         <svg class="w-3.5 h-3.5 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
                         </svg>
-                        <span class="text-sm font-medium text-gray-800" th:text="${certificationType}">자격증명</span>
+                        <span class="text-sm font-medium text-ink" th:text="${certificationType}">자격증명</span>
                     </div>
                     <span th:unless="${hasCertification == true and certificationType != null}"
-                          class="text-sm font-medium text-gray-800">없음</span>
+                          class="text-sm font-medium text-ink">없음</span>
                 </div>
                 <div class="flex items-start gap-3 px-5 py-3.5">
                     <span class="text-xs text-gray-400 w-20 flex-shrink-0 pt-0.5">가능 업무</span>
@@ -305,7 +305,7 @@
                               th:text="${cat}">업무</span>
                     </div>
                     <span th:unless="${serviceCategories != null and !serviceCategories.isEmpty()}"
-                          class="text-sm font-medium text-gray-800">-</span>
+                          class="text-sm font-medium text-ink">-</span>
                 </div>
             </div>
         </div>
@@ -319,7 +319,7 @@
                 </svg>
                 <h2 class="text-sm font-bold text-ink">계정 관리</h2>
             </div>
-            <div class="divide-y divide-gray-50">
+            <div class="divide-y divide-line">
                 <!-- 활동 상태 전환 -->
                 <div class="flex items-center justify-between px-5 py-3.5">
                     <div>
@@ -334,6 +334,21 @@
                               th:classappend="${availabilityStatus != null and availabilityStatus.name() == 'AVAILABLE'} ? 'translate-x-6' : 'translate-x-0'"
                               class="absolute top-0.5 left-0.5 w-5 h-5 bg-surface rounded-full shadow-sm transition-transform duration-200"></span>
                     </button>
+                </div>
+                <!-- 화면 테마 (활동 상태 아래) -->
+                <div class="flex items-center justify-between px-5 py-3.5">
+                    <div>
+                        <p class="text-sm text-ink-muted">화면 테마</p>
+                        <p class="text-xs text-gray-400 mt-0.5">밝게/어둡게 또는 시스템 설정을 따릅니다</p>
+                    </div>
+                    <div class="inline-flex rounded-xl border border-line-strong overflow-hidden text-xs font-semibold flex-shrink-0" role="group" aria-label="화면 테마 선택">
+                        <button type="button" data-theme-option="light" aria-pressed="false"
+                                class="px-3 py-1.5 text-ink-muted hover:bg-surface-muted transition-colors">라이트</button>
+                        <button type="button" data-theme-option="dark" aria-pressed="false"
+                                class="px-3 py-1.5 text-ink-muted hover:bg-surface-muted transition-colors border-l border-line-strong">다크</button>
+                        <button type="button" data-theme-option="system" aria-pressed="false"
+                                class="px-3 py-1.5 text-ink-muted hover:bg-surface-muted transition-colors border-l border-line-strong">시스템</button>
+                    </div>
                 </div>
                 <a th:href="@{/mypage/password}"
                    class="flex items-center justify-between px-5 py-3.5 hover:bg-surface-muted transition-colors group">
@@ -406,7 +421,7 @@
                     </button>
                 </div>
                 <div id="tab-pending" class="tab-content">
-                    <div th:if="${pendingApplications != null and !pendingApplications.isEmpty()}" class="divide-y divide-gray-50">
+                    <div th:if="${pendingApplications != null and !pendingApplications.isEmpty()}" class="divide-y divide-line">
                         <div th:each="app : ${pendingApplications}" class="p-5 flex items-start gap-4">
                             <div class="w-9 h-9 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
                                  th:text="${app.helpRequest.requester.fullName != null ? #strings.substring(app.helpRequest.requester.fullName, 0, 1) : '?'}">김</div>
@@ -441,7 +456,7 @@
                          class="py-10 text-center text-sm text-gray-400">대기 중인 신청이 없어요</div>
                 </div>
                 <div id="tab-accepted" class="tab-content hidden">
-                    <div th:if="${acceptedApplications != null and !acceptedApplications.isEmpty()}" class="divide-y divide-gray-50">
+                    <div th:if="${acceptedApplications != null and !acceptedApplications.isEmpty()}" class="divide-y divide-line">
                         <div th:each="app : ${acceptedApplications}" class="p-5 flex items-start gap-4">
                             <div class="w-9 h-9 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
                                  th:text="${app.helpRequest.requester.fullName != null ? #strings.substring(app.helpRequest.requester.fullName, 0, 1) : '?'}">김</div>
@@ -476,7 +491,7 @@
                          class="py-10 text-center text-sm text-gray-400">확정된 신청이 없어요</div>
                 </div>
                 <div id="tab-completed" class="tab-content hidden">
-                    <div th:if="${completedApplications != null and !completedApplications.isEmpty()}" class="divide-y divide-gray-50">
+                    <div th:if="${completedApplications != null and !completedApplications.isEmpty()}" class="divide-y divide-line">
                         <a th:each="app : ${completedApplications}"
                            th:href="@{/caregiver/board/{id}(id=${app.helpRequest.id})}"
                            class="p-5 flex items-start gap-4 hover:bg-surface-muted transition-colors block">
@@ -502,7 +517,7 @@
                          class="py-10 text-center text-sm text-gray-400">완료된 활동이 없어요</div>
                 </div>
                 <div id="tab-cancelled" class="tab-content hidden">
-                    <div th:if="${cancelledApplications != null and !cancelledApplications.isEmpty()}" class="divide-y divide-gray-50">
+                    <div th:if="${cancelledApplications != null and !cancelledApplications.isEmpty()}" class="divide-y divide-line">
                         <a th:each="app : ${cancelledApplications}"
                            th:href="@{/caregiver/board/{id}(id=${app.helpRequest.id})}"
                            class="p-5 flex items-start gap-4 hover:bg-surface-muted transition-colors block">
@@ -538,13 +553,13 @@
                         <span class="text-xs text-gray-400" th:text="'(' + totalReviews + '건)'">(0건)</span>
                     </div>
                 </div>
-                <div th:if="${receivedReviews != null and !receivedReviews.isEmpty()}" class="divide-y divide-gray-50">
+                <div th:if="${receivedReviews != null and !receivedReviews.isEmpty()}" class="divide-y divide-line">
                     <div th:each="review, iter : ${receivedReviews}" th:if="${iter.index < 3}" class="p-5">
                         <div class="flex items-start justify-between gap-3 mb-2">
                             <div class="flex items-center gap-2">
                                 <div class="w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-xs"
                                      th:text="${review.author.fullName != null ? #strings.substring(review.author.fullName, 0, 1) : '?'}">김</div>
-                                <span class="text-sm font-semibold text-gray-800" th:text="${review.author.fullName != null ? review.author.fullName : '익명'}">이름</span>
+                                <span class="text-sm font-semibold text-ink" th:text="${review.author.fullName != null ? review.author.fullName : '익명'}">이름</span>
                                 <span class="text-xs text-gray-400"
                                       th:text="${#temporals.format(review.createdAt, 'yyyy.MM.dd', new java.util.Locale('ko'))}">날짜</span>
                             </div>
@@ -563,18 +578,18 @@
                 <div th:if="${receivedReviews == null or receivedReviews.isEmpty()}"
                      class="py-10 text-center text-sm text-gray-400">아직 받은 후기가 없어요</div>
                 <div th:if="${receivedReviews != null and receivedReviews.size() > 3}"
-                     class="px-5 py-3.5 border-t border-gray-50 text-center">
+                     class="px-5 py-3.5 border-t border-line text-center">
                     <button class="text-xs text-teal-600 font-semibold hover:text-teal-700 transition-colors"
                             onclick="toggleMoreReviews()">후기 더 보기</button>
                 </div>
-                <div id="more-reviews" class="hidden divide-y divide-gray-50"
+                <div id="more-reviews" class="hidden divide-y divide-line"
                      th:if="${receivedReviews != null and receivedReviews.size() > 3}">
                     <div th:each="review, iter : ${receivedReviews}" th:if="${iter.index >= 3}" class="p-5">
                         <div class="flex items-start justify-between gap-3 mb-2">
                             <div class="flex items-center gap-2">
                                 <div class="w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-xs"
                                      th:text="${review.author.fullName != null ? #strings.substring(review.author.fullName, 0, 1) : '?'}">김</div>
-                                <span class="text-sm font-semibold text-gray-800" th:text="${review.author.fullName != null ? review.author.fullName : '익명'}">이름</span>
+                                <span class="text-sm font-semibold text-ink" th:text="${review.author.fullName != null ? review.author.fullName : '익명'}">이름</span>
                                 <span class="text-xs text-gray-400"
                                       th:text="${#temporals.format(review.createdAt, 'yyyy.MM.dd', new java.util.Locale('ko'))}">날짜</span>
                             </div>
@@ -608,7 +623,7 @@
                 </div>
                 <a th:href="@{/market/chats}" class="text-xs text-orange-500 hover:text-orange-600 font-semibold">전체 보기 →</a>
             </div>
-            <div th:if="${myBuyChats != null and !myBuyChats.isEmpty()}" class="divide-y divide-gray-50">
+            <div th:if="${myBuyChats != null and !myBuyChats.isEmpty()}" class="divide-y divide-line">
                 <div th:each="chat : ${myBuyChats}" class="p-4 flex gap-3 items-center hover:bg-surface-muted transition-colors">
                     <!-- 썸네일 -->
                     <a th:href="@{/market/chat/{id}(id=${chat.chatId})}" class="flex-shrink-0">
@@ -628,7 +643,7 @@
                                                 : (${chat.postStatusLabel == '예약중'} ? 'bg-amber-100 text-amber-700'
                                                 : 'bg-green-100 text-green-700')">판매중</span>
                         </div>
-                        <p class="text-sm font-semibold text-gray-800 truncate" th:text="${chat.postTitle}">상품명</p>
+                        <p class="text-sm font-semibold text-ink truncate" th:text="${chat.postTitle}">상품명</p>
                         <p class="text-xs text-gray-400 mt-0.5" th:text="'판매자: ' + ${chat.opponentEmail}">판매자</p>
                     </div>
                     <!-- 액션 버튼 -->
@@ -693,7 +708,7 @@
 
             <!-- 상품 목록 -->
             <div id="market-post-list">
-                <div th:if="${myMarketPosts != null and !myMarketPosts.isEmpty()}" class="divide-y divide-gray-50">
+                <div th:if="${myMarketPosts != null and !myMarketPosts.isEmpty()}" class="divide-y divide-line">
                     <div th:each="post : ${myMarketPosts}"
                          th:attr="data-status=${post.status.name()}"
                          class="market-post-item p-4 flex gap-4 hover:bg-surface-muted transition-colors">

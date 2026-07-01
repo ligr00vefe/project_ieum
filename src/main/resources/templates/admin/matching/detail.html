@@ -6,14 +6,14 @@
 
     <div class="flex items-center gap-3 mb-6">
         <a th:href="@{/admin/matching}"
-           class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+           class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-ink-muted transition-colors">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
             매칭 목록
         </a>
         <span class="text-slate-300">/</span>
-        <span class="text-sm font-medium text-slate-700" th:text="${request.title}">제목</span>
+        <span class="text-sm font-medium text-ink-muted" th:text="${request.title}">제목</span>
     </div>
 
     <div th:if="${message}"
@@ -36,25 +36,25 @@
                 <dl class="space-y-3 text-sm">
                     <div class="flex gap-4">
                         <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">요청자</dt>
-                        <dd class="text-slate-800" th:text="${request.requester != null ? request.requester.fullName : '-'}">-</dd>
+                        <dd class="text-ink" th:text="${request.requester != null ? request.requester.fullName : '-'}">-</dd>
                     </div>
                     <div class="flex gap-4">
                         <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">서비스 분류</dt>
-                        <dd class="text-slate-800" th:text="${request.serviceCategory != null ? request.serviceCategory.name : '-'}">-</dd>
+                        <dd class="text-ink" th:text="${request.serviceCategory != null ? request.serviceCategory.name : '-'}">-</dd>
                     </div>
                     <div class="flex gap-4">
                         <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">희망 시작</dt>
-                        <dd class="text-slate-800"
+                        <dd class="text-ink"
                             th:text="${request.desiredStartDatetime != null ? #temporals.format(request.desiredStartDatetime, 'yyyy.MM.dd HH:mm') : '-'}">-</dd>
                     </div>
                     <div class="flex gap-4" th:if="${request.desiredEndDatetime != null}">
                         <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">희망 종료</dt>
-                        <dd class="text-slate-800"
+                        <dd class="text-ink"
                             th:text="${#temporals.format(request.desiredEndDatetime, 'yyyy.MM.dd HH:mm')}">-</dd>
                     </div>
                     <div class="flex gap-4">
                         <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">주소</dt>
-                        <dd class="text-slate-800"
+                        <dd class="text-ink"
                             th:text="${(request.roadAddress ?: '') + (request.addressDetail != null ? ' ' + request.addressDetail : '')}">-</dd>
                     </div>
                     <div class="flex gap-4">
@@ -64,15 +64,15 @@
                     </div>
                     <div class="flex gap-4" th:if="${request.specialNotes != null and !#strings.isEmpty(request.specialNotes)}">
                         <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">특이사항</dt>
-                        <dd class="text-slate-800" th:text="${request.specialNotes}">-</dd>
+                        <dd class="text-ink" th:text="${request.specialNotes}">-</dd>
                     </div>
                     <div class="flex gap-4" th:if="${request.body != null and !#strings.isEmpty(request.body)}">
                         <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">내용</dt>
-                        <dd class="text-slate-700 whitespace-pre-line" th:text="${request.body}">-</dd>
+                        <dd class="text-ink-muted whitespace-pre-line" th:text="${request.body}">-</dd>
                     </div>
                     <div class="flex gap-4">
                         <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">등록일</dt>
-                        <dd class="text-slate-800"
+                        <dd class="text-ink"
                             th:text="${request.createdAt != null ? #temporals.format(request.createdAt, 'yyyy.MM.dd HH:mm') : '-'}">-</dd>
                     </div>
                 </dl>
@@ -82,7 +82,7 @@
         <!-- 관리 액션 -->
         <div class="space-y-4">
             <div class="bg-surface rounded-2xl border border-line p-5">
-                <h3 class="text-sm font-semibold text-slate-700 mb-4">관리 액션</h3>
+                <h3 class="text-sm font-semibold text-ink-muted mb-4">관리 액션</h3>
                 <form th:action="@{/admin/matching/{id}/close(id=${request.id})}" method="post"
                       th:if="${request.status != null and request.status.name() != 'COMPLETED' and request.status.name() != 'CLOSED'}">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>

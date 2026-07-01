@@ -85,12 +85,12 @@
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">시작일</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-50">
+            <tbody class="divide-y divide-line">
                 <th:block th:each="chat : ${chats.content}">
                 <tr class="hover:bg-surface-alt transition-colors cursor-pointer"
                     th:onclick="|location.href='@{/market/chat/{id}(id=${chat.id})}'|">
                     <td class="px-5 py-3.5">
-                        <p class="font-medium text-slate-800 truncate max-w-[140px]" th:text="${chat.postTitle}">상품명</p>
+                        <p class="font-medium text-ink truncate max-w-[140px]" th:text="${chat.postTitle}">상품명</p>
                     </td>
                     <td class="px-5 py-3.5">
                         <span th:if="${chat.sharing}"

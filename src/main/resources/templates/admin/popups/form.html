@@ -6,14 +6,14 @@
 <!-- 뒤로가기 -->
 <div class="flex items-center gap-3 mb-5">
     <a th:href="@{/admin/popups}"
-       class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+       class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-ink-muted transition-colors">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
         팝업 목록
     </a>
     <span class="text-slate-300">/</span>
-    <span class="text-sm font-medium text-slate-700"
+    <span class="text-sm font-medium text-ink-muted"
           th:text="${popupId != null ? '수정' : '새 팝업 작성'}">작성</span>
 </div>
 
@@ -76,7 +76,7 @@
         <p class="text-[11px] text-slate-400 mb-3">입력하면 팝업 이미지 클릭 시 해당 URL로 이동합니다.</p>
         <input type="url" th:field="*{linkUrl}"
                placeholder="https://example.com"
-               class="w-full text-sm text-slate-700 placeholder-slate-300 bg-surface-alt border border-line-strong rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent">
+               class="w-full text-sm text-ink-muted placeholder-slate-300 bg-surface-alt border border-line-strong rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent">
     </div>
 
     <!-- 레이아웃 선택 -->

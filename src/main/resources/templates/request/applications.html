@@ -10,8 +10,8 @@
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-bold" th:text="${application.caregiver.fullName}">활동지원사</h2>
-                    <p class="mt-1 text-sm text-slate-600" th:text="${application.caregiver.introShort ?: '소개가 아직 없습니다.'}">소개</p>
-                    <p class="mt-1 text-sm text-slate-600" th:text="${'평점 ' + application.caregiver.avgRating + ' · 후기 ' + application.caregiver.totalReviews + '개'}">평점</p>
+                    <p class="mt-1 text-sm text-ink-muted" th:text="${application.caregiver.introShort ?: '소개가 아직 없습니다.'}">소개</p>
+                    <p class="mt-1 text-sm text-ink-muted" th:text="${'평점 ' + application.caregiver.avgRating + ' · 후기 ' + application.caregiver.totalReviews + '개'}">평점</p>
                 </div>
                 <span class="rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700" th:text="${application.status}">PENDING</span>
             </div>
@@ -22,7 +22,7 @@
                 </form>
             </div>
         </article>
-        <div th:if="${#lists.isEmpty(applications)}" class="rounded-lg border border-dashed border-indigo-200 bg-surface p-8 text-center text-slate-600">아직 지원자가 없습니다.</div>
+        <div th:if="${#lists.isEmpty(applications)}" class="rounded-lg border border-dashed border-indigo-200 bg-surface p-8 text-center text-ink-muted">아직 지원자가 없습니다.</div>
     </section>
 </div>
 </th:block>

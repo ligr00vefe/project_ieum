@@ -7,14 +7,14 @@
 <div class="flex items-center justify-between mb-5">
     <div class="flex items-center gap-3">
         <a th:href="@{/admin/notices}"
-           class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+           class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-ink-muted transition-colors">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
             공지사항 목록
         </a>
         <span class="text-slate-300">/</span>
-        <span class="text-sm font-medium text-slate-700">상세</span>
+        <span class="text-sm font-medium text-ink-muted">상세</span>
     </div>
 
     <!-- 수정 / 삭제 버튼 -->
@@ -69,7 +69,7 @@
 
 <!-- 본문 -->
 <div class="bg-surface rounded-2xl border border-line p-6 mb-4">
-    <div class="ck-content prose max-w-none text-sm text-slate-800 leading-relaxed"
+    <div class="ck-content prose max-w-none text-sm text-ink leading-relaxed"
          th:utext="${notice.body}"></div>
 </div>
 
@@ -87,7 +87,7 @@
             </svg>
             <div class="min-w-0 flex-1">
                 <a th:href="${att.storedPath}" th:text="${att.originalName}" download
-                   class="text-xs font-medium text-slate-700 group-hover:text-indigo-600 truncate block transition-colors">파일명</a>
+                   class="text-xs font-medium text-ink-muted group-hover:text-indigo-600 truncate block transition-colors">파일명</a>
                 <p class="text-[10px] text-slate-400"
                    th:text="${att.fileSize != null ? (att.fileSize / 1024) + ' KB' : ''}"></p>
             </div>
