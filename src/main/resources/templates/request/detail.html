@@ -12,18 +12,18 @@
         </dl>
         <div class="mt-6">
             <h2 class="font-bold">도움 내용</h2>
-            <p class="mt-2 whitespace-pre-line leading-7 text-slate-700" th:text="${request.body}">내용</p>
+            <p class="mt-2 whitespace-pre-line leading-7 text-ink-muted" th:text="${request.body}">내용</p>
         </div>
         <div class="mt-6">
             <h2 class="font-bold">주의사항</h2>
-            <p class="mt-2 whitespace-pre-line leading-7 text-slate-700" th:text="${request.specialNotes ?: '등록된 주의사항이 없습니다.'}">주의사항</p>
+            <p class="mt-2 whitespace-pre-line leading-7 text-ink-muted" th:text="${request.specialNotes ?: '등록된 주의사항이 없습니다.'}">주의사항</p>
         </div>
     </section>
 
     <aside class="space-y-5">
         <section th:if="${currentRole == 'CAREGIVER'}" class="rounded-lg border border-indigo-100 bg-surface p-5 shadow-sm">
             <h2 class="text-lg font-bold">지원하기</h2>
-            <p class="mt-2 text-sm text-slate-600">지원 즉시 대화방이 열립니다. 궁금한 점을 첫 메시지로 남겨보세요.</p>
+            <p class="mt-2 text-sm text-ink-muted">지원 즉시 대화방이 열립니다. 궁금한 점을 첫 메시지로 남겨보세요.</p>
             <form th:action="@{/requests/{id}/apply(id=${request.id})}" method="post" th:object="${applyRequest}" class="mt-4 space-y-3">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <label for="firstMessage" class="block text-sm font-semibold">첫 메시지</label>
@@ -40,9 +40,9 @@
                         <strong th:text="${caregiver.fullName}">이름</strong>
                         <span class="rounded-full bg-indigo-700 px-3 py-1 text-sm font-semibold text-white" th:text="${caregiver.score + '%'}">95%</span>
                     </div>
-                    <p class="mt-1 text-sm text-slate-600" th:text="${caregiver.introShort ?: '소개가 아직 없습니다.'}">소개</p>
+                    <p class="mt-1 text-sm text-ink-muted" th:text="${caregiver.introShort ?: '소개가 아직 없습니다.'}">소개</p>
                 </article>
-                <p th:if="${#lists.isEmpty(recommendations)}" class="text-sm text-slate-600">추천 후보가 아직 없습니다.</p>
+                <p th:if="${#lists.isEmpty(recommendations)}" class="text-sm text-ink-muted">추천 후보가 아직 없습니다.</p>
             </div>
         </section>
     </aside>

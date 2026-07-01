@@ -42,37 +42,18 @@
                     </a>
                 </nav>
 
-                <!-- 글자 크게 보기 -->
-                <div class="hidden md:block relative group flex-shrink-0">
-                    <button type="button" id="fontScaleBtn" data-font-scale-toggle aria-label="글자 크게 보기"
-                            class="p-2 text-gray-500 hover:text-ink-muted hover:bg-surface-hover rounded-lg transition-colors">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <!-- Auth Buttons -->
+                <div class="hidden md:flex items-center gap-2.5">
+                    <!-- 글자 크게 보기 (알림 벨 왼쪽) — 모든 사용자에게 노출 -->
+                    <button type="button" id="fontScaleBtn" data-font-scale-toggle aria-label="글자 크게 보기 (150%)"
+                            class="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-ink-muted border border-line-strong rounded-xl hover:bg-surface-muted transition-all">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a7 7 0 100 14 7 7 0 000-14z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35"/>
                         </svg>
+                        <span data-font-scale-label>크게 보기</span>
                     </button>
-                    <span aria-hidden="true"
-                          class="pointer-events-none absolute left-1/2 -translate-x-1/2 mt-2 w-max px-2.5 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                        글자 크게 보기
-                    </span>
-                </div>
 
-                <!-- 테마 변경 (라이트/다크/시스템) -->
-                <div class="hidden md:block relative group flex-shrink-0">
-                    <button type="button" id="themeToggleBtn" data-theme-toggle aria-label="테마 변경"
-                            class="p-2 text-gray-500 hover:text-ink-muted hover:bg-surface-hover rounded-lg transition-colors">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-                        </svg>
-                    </button>
-                    <span aria-hidden="true"
-                          class="pointer-events-none absolute left-1/2 -translate-x-1/2 mt-2 w-max px-2.5 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                        테마 변경
-                    </span>
-                </div>
-
-                <!-- Auth Buttons -->
-                <div class="hidden md:flex items-center gap-2.5">
                     <!-- 비로그인 상태 -->
                     <th:block th:if="${!isAuthenticated}">
                         <a th:href="@{/login}"
@@ -118,7 +99,7 @@
                                     <span class="text-sm font-bold text-ink">알림</span>
                                     <button type="button" id="notifReadAll" class="text-xs text-indigo-500 hover:text-indigo-700">모두 읽음</button>
                                 </div>
-                                <div id="notifList" class="divide-y divide-gray-50">
+                                <div id="notifList" class="divide-y divide-line">
                                     <p class="px-4 py-6 text-center text-xs text-gray-400">불러오는 중...</p>
                                 </div>
                             </div>
@@ -163,20 +144,13 @@
              role="dialog"
              aria-label="모바일 메뉴">
             <div class="max-w-7xl mx-auto px-4 py-4 space-y-1">
-                <button type="button" id="fontScaleBtnMobile" data-font-scale-toggle aria-label="글자 크게 보기"
+                <button type="button" id="fontScaleBtnMobile" data-font-scale-toggle aria-label="글자 크게 보기 (150%)"
                         class="flex items-center gap-2.5 w-full px-4 py-3 text-sm font-medium text-ink-muted hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">
                     <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a7 7 0 100 14 7 7 0 000-14z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35"/>
                     </svg>
-                    글자 크게 보기
-                </button>
-                <button type="button" id="themeToggleBtnMobile" data-theme-toggle aria-label="테마 변경"
-                        class="flex items-center gap-2.5 w-full px-4 py-3 text-sm font-medium text-ink-muted hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">
-                    <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-                    </svg>
-                    테마 변경
+                    <span data-font-scale-label>크게 보기</span>
                 </button>
                 <a th:href="@{/board}"        class="flex items-center px-4 py-3 text-sm font-medium text-ink-muted hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">이음매칭</a>
                 <a th:href="@{/how-to-use}"   class="flex items-center px-4 py-3 text-sm font-medium text-ink-muted hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">이용방법</a>

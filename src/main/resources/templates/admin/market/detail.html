@@ -7,14 +7,14 @@
     <!-- 브레드크럼 -->
     <div class="flex items-center gap-3 mb-6">
         <a th:href="@{/admin/market/posts}"
-           class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+           class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-ink-muted transition-colors">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
             거래 관리
         </a>
         <span class="text-slate-300">/</span>
-        <span class="text-sm font-medium text-slate-700" th:text="${post.title}">상품명</span>
+        <span class="text-sm font-medium text-ink-muted" th:text="${post.title}">상품명</span>
     </div>
 
     <!-- 플래시 메시지 -->
@@ -28,7 +28,7 @@
 
             <!-- 상품 정보 -->
             <div class="bg-surface rounded-2xl border border-line p-5">
-                <h3 class="text-sm font-semibold text-slate-700 mb-4">상품 정보</h3>
+                <h3 class="text-sm font-semibold text-ink-muted mb-4">상품 정보</h3>
 
                 <!-- 이미지 -->
                 <div th:if="${!#lists.isEmpty(images)}" class="flex gap-2 mb-5 overflow-x-auto pb-1">
@@ -45,24 +45,24 @@
                 <dl class="space-y-3">
                     <div class="flex gap-4">
                         <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">상품명</dt>
-                        <dd class="text-sm text-slate-800 font-medium" th:text="${post.title}">-</dd>
+                        <dd class="text-sm text-ink font-medium" th:text="${post.title}">-</dd>
                     </div>
                     <div class="flex gap-4">
                         <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">카테고리</dt>
-                        <dd class="text-sm text-slate-800" th:text="${post.category?.name ?: '-'}">-</dd>
+                        <dd class="text-sm text-ink" th:text="${post.category?.name ?: '-'}">-</dd>
                     </div>
                     <div class="flex gap-4">
                         <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">가격</dt>
-                        <dd class="text-sm text-slate-800 font-semibold"
+                        <dd class="text-sm text-ink font-semibold"
                             th:text="${#numbers.formatInteger(post.price, 1, 'COMMA') + '원'}">-</dd>
                     </div>
                     <div class="flex gap-4">
                         <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">판매자</dt>
-                        <dd class="text-sm text-slate-800" th:text="${post.seller?.email ?: '-'}">-</dd>
+                        <dd class="text-sm text-ink" th:text="${post.seller?.email ?: '-'}">-</dd>
                     </div>
                     <div class="flex gap-4">
                         <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">거래 지역</dt>
-                        <dd class="text-sm text-slate-800"
+                        <dd class="text-sm text-ink"
                             th:text="${post.sido + ' ' + post.sigungu}">-</dd>
                     </div>
                     <div class="flex gap-4">
@@ -84,16 +84,16 @@
             <!-- 채팅 목록 -->
             <div class="bg-surface rounded-2xl border border-line overflow-hidden">
                 <div class="px-5 py-4 border-b border-slate-50 flex items-center justify-between">
-                    <h3 class="text-sm font-semibold text-slate-700">채팅 목록</h3>
+                    <h3 class="text-sm font-semibold text-ink-muted">채팅 목록</h3>
                     <span class="text-xs text-slate-400"
                           th:text="${#lists.size(chats) + '건'}">0건</span>
                 </div>
-                <div class="divide-y divide-slate-50">
+                <div class="divide-y divide-line">
                     <th:block th:each="chat : ${chats}">
                     <a th:href="@{/market/chat/{id}(id=${chat.id})}"
                        class="flex items-center justify-between px-5 py-3.5 hover:bg-surface-alt transition-colors">
                         <div class="min-w-0 flex-1">
-                            <p class="text-sm text-slate-700 font-medium truncate"
+                            <p class="text-sm text-ink-muted font-medium truncate"
                                th:text="${chat.buyer?.email ?: '-'}">구매자 이메일</p>
                             <p class="text-xs text-slate-400 mt-0.5"
                                th:text="${chat.lastMessageAt != null ? #temporals.format(chat.lastMessageAt, 'MM.dd HH:mm') + ' 마지막 메시지' : '메시지 없음'}">-</p>
@@ -120,7 +120,7 @@
 
             <!-- 현재 상태 -->
             <div class="bg-surface rounded-2xl border border-line p-5">
-                <h3 class="text-sm font-semibold text-slate-700 mb-3">상품 상태</h3>
+                <h3 class="text-sm font-semibold text-ink-muted mb-3">상품 상태</h3>
                 <span th:text="${post.status.name() == 'ACTIVE' ? '판매중' :
                                  post.status.name() == 'RESERVED' ? '예약중' :
                                  post.status.name() == 'SOLD' ? '판매완료' : '삭제됨'}"
@@ -130,7 +130,7 @@
 
             <!-- 관리 액션 -->
             <div class="bg-surface rounded-2xl border border-line p-5">
-                <h3 class="text-sm font-semibold text-slate-700 mb-3">관리</h3>
+                <h3 class="text-sm font-semibold text-ink-muted mb-3">관리</h3>
                 <div class="space-y-2">
 
                     <!-- 삭제 처리 (ACTIVE, RESERVED 상태에서만) -->

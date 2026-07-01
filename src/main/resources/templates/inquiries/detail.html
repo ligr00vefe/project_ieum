@@ -75,7 +75,7 @@
             <!-- 제목 -->
             <h1 class="text-xl font-bold text-ink mb-3" th:text="${inquiry.title}">제목</h1>
             <!-- 작성자/날짜 -->
-            <div class="flex items-center gap-4 text-xs text-gray-400 pb-5 border-b border-gray-50">
+            <div class="flex items-center gap-4 text-xs text-gray-400 pb-5 border-b border-line">
                 <span th:text="${inquiry.author?.email ?: '-'}">작성자</span>
                 <span th:text="${#temporals.format(inquiry.createdAt, 'yyyy.MM.dd HH:mm')}">날짜</span>
             </div>
@@ -118,7 +118,7 @@
     <div th:if="${isAdmin}" class="bg-surface rounded-3xl border border-line shadow-sm p-6 space-y-5">
 
         <!-- 상태 토글 -->
-        <div class="flex items-center justify-between pb-5 border-b border-gray-50">
+        <div class="flex items-center justify-between pb-5 border-b border-line">
             <div class="flex items-center gap-3">
                 <span class="text-sm font-bold text-ink">답변 상태</span>
                 <span th:text="${inquiry.status.name() == 'PENDING' ? '미답변' : '답변완료'}"

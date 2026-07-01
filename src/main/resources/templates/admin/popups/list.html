@@ -33,13 +33,13 @@
                     <th class="px-5 py-3"></th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-50">
+            <tbody class="divide-y divide-line">
                 <th:block th:each="popup : ${popups}">
                 <tr class="hover:bg-surface-alt transition-colors"
                     th:classappend="${!popup.enabled} ? 'opacity-60' : ''">
                     <td class="px-5 py-3.5">
                         <a th:href="@{/admin/popups/{id}(id=${popup.id})}"
-                           class="font-medium text-slate-800 hover:text-indigo-600 transition-colors"
+                           class="font-medium text-ink hover:text-indigo-600 transition-colors"
                            th:text="${popup.name}">팝업명</a>
                     </td>
                     <td class="px-5 py-3.5">
@@ -59,7 +59,7 @@
                             <form th:action="@{/admin/popups/{id}/toggle(id=${popup.id})}" method="post" class="inline">
                                 <button type="submit"
                                         th:text="${popup.enabled ? '비활성화' : '활성화'}"
-                                        class="text-xs font-medium text-slate-400 hover:text-slate-700 transition-colors">활성화</button>
+                                        class="text-xs font-medium text-slate-400 hover:text-ink-muted transition-colors">활성화</button>
                             </form>
                             <a th:href="@{/admin/popups/{id}/edit(id=${popup.id})}"
                                class="text-xs font-medium text-indigo-500 hover:text-indigo-700">수정</a>

@@ -76,7 +76,7 @@
             <h1 class="text-xl font-bold text-ink mb-3" th:text="${notice.title}">제목</h1>
 
             <!-- 날짜 -->
-            <div class="flex items-center gap-4 text-xs text-gray-400 pb-5 border-b border-gray-50">
+            <div class="flex items-center gap-4 text-xs text-gray-400 pb-5 border-b border-line">
                 <span th:text="${#temporals.format(notice.createdAt, 'yyyy.MM.dd HH:mm')}">날짜</span>
                 <span th:if="${notice.updatedAt != null and notice.updatedAt != notice.createdAt}"
                       th:text="'수정: ' + ${#temporals.format(notice.updatedAt, 'yyyy.MM.dd HH:mm')}">수정일</span>

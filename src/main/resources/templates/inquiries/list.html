@@ -116,7 +116,7 @@
                         <span th:if="${inquiry.author.id == currentUserId}"
                               class="px-1.5 py-0.5 bg-indigo-100 text-indigo-600 text-[10px] font-bold rounded-md">내 글</span>
                     </div>
-                    <p class="text-sm font-semibold text-gray-800 truncate group-hover:text-indigo-600 transition-colors"
+                    <p class="text-sm font-semibold text-ink truncate group-hover:text-indigo-600 transition-colors"
                        th:text="${inquiry.title}">제목</p>
                     <p class="text-xs text-gray-400 mt-0.5" th:text="${inquiry.author?.email ?: '-'}">작성자</p>
                 </div>

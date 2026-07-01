@@ -287,22 +287,22 @@
                     수정하기
                 </a>
             </div>
-            <div class="divide-y divide-gray-50">
+            <div class="divide-y divide-line">
                 <div class="flex items-center gap-3 px-5 py-3.5">
                     <span class="text-xs text-gray-400 w-20 flex-shrink-0">이름</span>
-                    <span class="text-sm font-medium text-gray-800" th:text="${userName != null ? userName : '-'}">홍길동</span>
+                    <span class="text-sm font-medium text-ink" th:text="${userName != null ? userName : '-'}">홍길동</span>
                 </div>
                 <div class="flex items-center gap-3 px-5 py-3.5">
                     <span class="text-xs text-gray-400 w-20 flex-shrink-0">이메일</span>
-                    <span class="text-sm font-medium text-gray-800" th:text="${userEmail != null ? userEmail : '-'}">user@email.com</span>
+                    <span class="text-sm font-medium text-ink" th:text="${userEmail != null ? userEmail : '-'}">user@email.com</span>
                 </div>
                 <div class="flex items-center gap-3 px-5 py-3.5">
                     <span class="text-xs text-gray-400 w-20 flex-shrink-0">연락처</span>
-                    <span class="text-sm font-medium text-gray-800" th:text="${phone != null ? phone : '-'}">-</span>
+                    <span class="text-sm font-medium text-ink" th:text="${phone != null ? phone : '-'}">-</span>
                 </div>
                 <div class="flex items-center gap-3 px-5 py-3.5">
                     <span class="text-xs text-gray-400 w-20 flex-shrink-0">지역</span>
-                    <span class="text-sm font-medium text-gray-800" th:text="${region != null ? region : '-'}">-</span>
+                    <span class="text-sm font-medium text-ink" th:text="${region != null ? region : '-'}">-</span>
                 </div>
                 <div class="flex items-start gap-3 px-5 py-3.5">
                     <span class="text-xs text-gray-400 w-20 flex-shrink-0 pt-0.5">장애 유형</span>
@@ -312,7 +312,7 @@
                               th:text="${dt}">지체장애</span>
                     </div>
                     <span th:unless="${disabilityTypes != null and !disabilityTypes.isEmpty()}"
-                          class="text-sm font-medium text-gray-800">-</span>
+                          class="text-sm font-medium text-ink">-</span>
                 </div>
                 <div class="flex items-start gap-3 px-5 py-3.5">
                     <span class="text-xs text-gray-400 w-20 flex-shrink-0 pt-0.5">의사소통</span>
@@ -322,7 +322,7 @@
                               th:text="${cm}">수어</span>
                     </div>
                     <span th:unless="${communicationMethods != null and !communicationMethods.isEmpty()}"
-                          class="text-sm font-medium text-gray-800">-</span>
+                          class="text-sm font-medium text-ink">-</span>
                 </div>
             </div>
         </div>
@@ -336,7 +336,22 @@
                 </svg>
                 <h2 class="text-sm font-bold text-ink">계정 관리</h2>
             </div>
-            <div class="divide-y divide-gray-50">
+            <div class="divide-y divide-line">
+                <!-- 화면 테마 -->
+                <div class="flex items-center justify-between px-5 py-3.5">
+                    <div>
+                        <p class="text-sm text-ink-muted">화면 테마</p>
+                        <p class="text-xs text-gray-400 mt-0.5">밝게/어둡게 또는 시스템 설정을 따릅니다</p>
+                    </div>
+                    <div class="inline-flex rounded-xl border border-line-strong overflow-hidden text-xs font-semibold flex-shrink-0" role="group" aria-label="화면 테마 선택">
+                        <button type="button" data-theme-option="light" aria-pressed="false"
+                                class="px-3 py-1.5 text-ink-muted hover:bg-surface-muted transition-colors">라이트</button>
+                        <button type="button" data-theme-option="dark" aria-pressed="false"
+                                class="px-3 py-1.5 text-ink-muted hover:bg-surface-muted transition-colors border-l border-line-strong">다크</button>
+                        <button type="button" data-theme-option="system" aria-pressed="false"
+                                class="px-3 py-1.5 text-ink-muted hover:bg-surface-muted transition-colors border-l border-line-strong">시스템</button>
+                    </div>
+                </div>
                 <a th:href="@{/mypage/password}"
                    class="flex items-center justify-between px-5 py-3.5 hover:bg-surface-muted transition-colors group">
                     <span class="text-sm text-ink-muted">비밀번호 변경</span>
@@ -408,7 +423,7 @@
                     </button>
                 </div>
                 <div id="rtab-waiting" class="rtab-content">
-                    <div th:if="${waitingRequests != null and !waitingRequests.isEmpty()}" id="pg-waiting-list" class="divide-y divide-gray-50">
+                    <div th:if="${waitingRequests != null and !waitingRequests.isEmpty()}" id="pg-waiting-list" class="divide-y divide-line">
                         <a th:each="req : ${waitingRequests}" th:href="@{/disabled/board/{id}(id=${req.id})}"
                            class="pg-item block p-5 hover:bg-surface-muted transition-colors">
                             <div class="flex items-start gap-3">
@@ -431,7 +446,7 @@
                     <div id="pg-waiting-nav" class="hidden px-5 py-3 flex items-center justify-center gap-1"></div>
                 </div>
                 <div id="rtab-matched" class="rtab-content hidden">
-                    <div th:if="${matchedRequests != null and !matchedRequests.isEmpty()}" id="pg-matched-list" class="divide-y divide-gray-50">
+                    <div th:if="${matchedRequests != null and !matchedRequests.isEmpty()}" id="pg-matched-list" class="divide-y divide-line">
                         <a th:each="req : ${matchedRequests}" th:href="@{/disabled/board/{id}(id=${req.id})}"
                            class="pg-item block p-5 hover:bg-surface-muted transition-colors">
                             <div class="flex items-start gap-3">
@@ -456,7 +471,7 @@
                     <div id="pg-matched-nav" class="hidden px-5 py-3 flex items-center justify-center gap-1"></div>
                 </div>
                 <div id="rtab-completed" class="rtab-content hidden">
-                    <div th:if="${completedRequestsList != null and !completedRequestsList.isEmpty()}" id="pg-completed-list" class="divide-y divide-gray-50">
+                    <div th:if="${completedRequestsList != null and !completedRequestsList.isEmpty()}" id="pg-completed-list" class="divide-y divide-line">
                         <a th:each="req : ${completedRequestsList}" th:href="@{/disabled/board/{id}(id=${req.id})}"
                            class="pg-item block p-5 hover:bg-surface-muted transition-colors">
                             <div class="flex items-start gap-3">
@@ -479,7 +494,7 @@
                     <div id="pg-completed-nav" class="hidden px-5 py-3 flex items-center justify-center gap-1"></div>
                 </div>
                 <div id="rtab-expired" class="rtab-content hidden">
-                    <div th:if="${expiredRequests != null and !expiredRequests.isEmpty()}" id="pg-expired-list" class="divide-y divide-gray-50">
+                    <div th:if="${expiredRequests != null and !expiredRequests.isEmpty()}" id="pg-expired-list" class="divide-y divide-line">
                         <a th:each="req : ${expiredRequests}" th:href="@{/disabled/board/{id}(id=${req.id})}"
                            class="pg-item block p-5 hover:bg-surface-muted transition-colors opacity-70">
                             <div class="flex items-start gap-3">
@@ -506,7 +521,7 @@
             <!-- ── 내가 쓴 후기 서브탭 ── -->
             <div id="msub-reviews" class="msub-content hidden">
                 <!-- 헤더: 건수 + 전체보기 -->
-                <div class="flex items-center justify-between px-5 py-3.5 border-b border-gray-50">
+                <div class="flex items-center justify-between px-5 py-3.5 border-b border-line">
                     <div class="flex items-center gap-1.5">
                         <span class="text-xs font-semibold text-ink-muted">내가 쓴 후기</span>
                         <span class="px-1.5 py-0.5 text-[10px] font-bold bg-indigo-100 text-indigo-600 rounded-full"
@@ -518,7 +533,7 @@
                     </a>
                 </div>
                 <!-- 최신 3개 후기 목록 -->
-                <div th:if="${myReviews != null and !myReviews.isEmpty()}" class="divide-y divide-gray-50">
+                <div th:if="${myReviews != null and !myReviews.isEmpty()}" class="divide-y divide-line">
                     <a th:each="review : ${myReviews}"
                        th:href="@{/reviews/{id}(id=${review.id})}"
                        class="block p-5 hover:bg-surface-muted transition-colors">
@@ -553,7 +568,7 @@
                     <p class="text-xs text-gray-400 mt-1">활동이 완료되면 후기를 작성할 수 있어요</p>
                 </div>
                 <!-- 더 있을 경우 전체보기 버튼 -->
-                <div th:if="${myReviewCount != null and myReviewCount > 3}" class="p-4 border-t border-gray-50">
+                <div th:if="${myReviewCount != null and myReviewCount > 3}" class="p-4 border-t border-line">
                     <a th:href="@{/reviews/my}"
                        class="block w-full py-2.5 text-xs font-semibold text-indigo-600 bg-indigo-50 rounded-xl text-center hover:bg-indigo-100 transition-colors">
                         후기 전체보기 (<span th:text="${myReviewCount}">0</span>건)
@@ -577,7 +592,7 @@
                 </div>
                 <a th:href="@{/market/chats}" class="text-xs text-orange-500 hover:text-orange-600 font-semibold">전체 보기 →</a>
             </div>
-            <div th:if="${myBuyChats != null and !myBuyChats.isEmpty()}" id="pg-buy-list" class="divide-y divide-gray-50">
+            <div th:if="${myBuyChats != null and !myBuyChats.isEmpty()}" id="pg-buy-list" class="divide-y divide-line">
                 <div th:each="chat : ${myBuyChats}" class="pg-item p-4 flex gap-3 items-center hover:bg-surface-muted transition-colors">
                     <a th:href="@{/market/chat/{id}(id=${chat.chatId})}" class="flex-shrink-0">
                         <div class="w-14 h-14 rounded-xl overflow-hidden bg-surface-hover flex items-center justify-center">
@@ -595,7 +610,7 @@
                                                 : (${chat.postStatusLabel == '예약중'} ? 'bg-amber-100 text-amber-700'
                                                 : 'bg-green-100 text-green-700')">판매중</span>
                         </div>
-                        <p class="text-sm font-semibold text-gray-800 truncate" th:text="${chat.postTitle}">상품명</p>
+                        <p class="text-sm font-semibold text-ink truncate" th:text="${chat.postTitle}">상품명</p>
                         <p class="text-xs text-gray-400 mt-0.5" th:text="'판매자: ' + ${chat.opponentEmail}">판매자</p>
                     </div>
                     <div class="flex-shrink-0 flex flex-col gap-1.5 items-end">
@@ -646,7 +661,7 @@
                         class="mf-btn px-3 py-2.5 text-xs font-medium text-gray-400 hover:text-ink-muted transition-colors whitespace-nowrap">판매 완료</button>
             </div>
             <div id="market-post-list">
-                <div th:if="${myMarketPosts != null and !myMarketPosts.isEmpty()}" id="pg-sell-list" class="divide-y divide-gray-50">
+                <div th:if="${myMarketPosts != null and !myMarketPosts.isEmpty()}" id="pg-sell-list" class="divide-y divide-line">
                     <div th:each="post : ${myMarketPosts}"
                          th:attr="data-status=${post.status.name()}"
                          class="market-post-item pg-sell-item p-4 flex gap-4 hover:bg-surface-muted transition-colors">

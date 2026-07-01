@@ -168,7 +168,7 @@
             <div th:if="${isAdmin}" class="flex-shrink-0 mx-5 mt-3">
                 <div class="flex gap-2">
                     <input id="announcementInput" type="text" placeholder="공지사항 입력 (관리자 전용)"
-                           class="flex-1 text-xs text-gray-800 placeholder-gray-400 bg-surface-alt border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-slate-400 transition-all"/>
+                           class="flex-1 text-xs text-ink placeholder-gray-400 bg-surface-alt border border-line-strong rounded-xl px-3 py-2 focus:outline-none focus:border-slate-400 transition-all"/>
                     <button onclick="postAnnouncement()" class="flex-shrink-0 px-3 py-2 bg-slate-700 text-white text-xs font-semibold rounded-xl hover:bg-slate-800 transition-all whitespace-nowrap">공지 등록</button>
                 </div>
             </div>
@@ -201,7 +201,7 @@
                 <div class="flex items-center gap-3">
                     <input id="messageInput" type="text" placeholder="메시지를 입력해주세요"
                            onkeydown="handleKeydown(event)"
-                           class="flex-1 text-sm text-gray-800 placeholder-gray-400 bg-surface-muted border border-line-strong rounded-full px-5 py-3 focus:outline-none focus:border-indigo-300 focus:bg-surface transition-all"/>
+                           class="flex-1 text-sm text-ink placeholder-gray-400 bg-surface-muted border border-line-strong rounded-full px-5 py-3 focus:outline-none focus:border-indigo-300 focus:bg-surface transition-all"/>
                     <button onclick="sendMessage()"
                             class="flex-shrink-0 px-5 py-3 bg-indigo-600 text-white text-sm font-bold rounded-full hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100 whitespace-nowrap">
                         전송 →
@@ -281,7 +281,7 @@
                                 </svg>
                             </th:block>
                         </div>
-                        <span class="text-sm font-bold text-gray-800"
+                        <span class="text-sm font-bold text-ink"
                               th:text="${caregiverAvgRating != null ? #numbers.formatDecimal(caregiverAvgRating, 1, 1) : '0.0'}">0.0</span>
                         <span class="text-xs text-gray-400"
                               th:text="'(' + ${caregiverTotalReviews ?: 0} + '건)'">0건</span>
@@ -402,7 +402,7 @@
             <div>
                 <label for="reportReason" class="block text-sm font-semibold text-ink-muted mb-2">신고 사유</label>
                 <select id="reportReason" name="reason" required
-                        class="w-full text-sm text-gray-800 bg-surface-muted border border-line-strong rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-300 focus:bg-surface transition-all">
+                        class="w-full text-sm text-ink bg-surface-muted border border-line-strong rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-300 focus:bg-surface transition-all">
                     <option value="ABUSE">욕설/폭언</option>
                     <option value="FRAUD">사기/금전 요구</option>
                     <option value="NO_SHOW">약속 불이행(노쇼)</option>
@@ -417,7 +417,7 @@
                 </label>
                 <textarea id="reportDetail" name="detail" rows="4" maxlength="1000"
                           placeholder="구체적인 상황을 적어주시면 검토에 도움이 됩니다."
-                          class="w-full text-sm text-gray-800 bg-surface-muted border border-line-strong rounded-xl px-4 py-3 resize-none focus:outline-none focus:border-indigo-300 focus:bg-surface transition-all"></textarea>
+                          class="w-full text-sm text-ink bg-surface-muted border border-line-strong rounded-xl px-4 py-3 resize-none focus:outline-none focus:border-indigo-300 focus:bg-surface transition-all"></textarea>
             </div>
 
             <p class="text-xs text-gray-400 leading-relaxed">
@@ -618,7 +618,7 @@ function buildMessage(msg) {
                         <span class="text-[10px] text-gray-400 font-medium">${msg.senderName || ''}</span>
                     </div>
                     <div class="bg-surface-muted border border-line rounded-2xl rounded-bl-md px-4 py-3">
-                        <p class="text-sm text-gray-800">${escaped}</p>
+                        <p class="text-sm text-ink">${escaped}</p>
                     </div>
                     <p class="text-[11px] text-gray-400 mt-1 ml-1">${time}</p>
                 </div>
@@ -631,7 +631,7 @@ function buildMessage(msg) {
             ${avatarHtml}
             <div class="max-w-[70%]">
                 <div class="bg-surface-muted border border-line rounded-2xl rounded-bl-md px-4 py-3">
-                    <p class="text-sm text-gray-800">${escaped}</p>
+                    <p class="text-sm text-ink">${escaped}</p>
                 </div>
                 <p class="text-[11px] text-gray-400 mt-1 ml-1">${time}</p>
             </div>

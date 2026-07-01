@@ -6,7 +6,7 @@
     <section class="rounded-lg border border-indigo-100 bg-surface p-6">
         <p class="text-sm font-semibold text-indigo-700">서비스 완료</p>
         <h1 class="mt-1 text-2xl font-bold">후기 작성</h1>
-        <p class="mt-2 text-sm text-slate-600" th:text="${request.title}">요청명</p>
+        <p class="mt-2 text-sm text-ink-muted" th:text="${request.title}">요청명</p>
         <form th:action="@{/reviews/requests/{id}(id=${request.id})}" method="post" th:object="${form}" class="mt-6 space-y-5">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <div>

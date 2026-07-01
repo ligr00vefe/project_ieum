@@ -21,14 +21,14 @@
          class="mb-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-800"></div>
 
     <!-- 판매 / 나눔 탭 -->
-    <div class="mb-5 flex gap-1 border-b border-slate-200">
+    <div class="mb-5 flex gap-1 border-b border-line-strong">
         <a th:href="@{/market(sharing=false)}"
-           th:classappend="${!condition.sharing} ? 'border-b-2 border-orange-500 text-orange-600 font-bold' : 'text-slate-500 hover:text-slate-800'"
+           th:classappend="${!condition.sharing} ? 'border-b-2 border-orange-500 text-orange-600 font-bold' : 'text-slate-500 hover:text-ink'"
            class="flex items-center gap-1.5 px-5 py-2.5 text-sm transition-colors -mb-px">
             💰 판매
         </a>
         <a th:href="@{/market(sharing=true)}"
-           th:classappend="${condition.sharing} ? 'border-b-2 border-teal-500 text-teal-600 font-bold' : 'text-slate-500 hover:text-slate-800'"
+           th:classappend="${condition.sharing} ? 'border-b-2 border-teal-500 text-teal-600 font-bold' : 'text-slate-500 hover:text-ink'"
            class="flex items-center gap-1.5 px-5 py-2.5 text-sm transition-colors -mb-px">
             🤝 나눔
         </a>
@@ -39,7 +39,7 @@
         <!-- sharing 값 유지 -->
         <input type="hidden" name="sharing" th:value="${condition.sharing}">
         <select name="categoryId" id="categorySelect"
-                class="rounded-xl border border-slate-200 bg-surface px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
+                class="rounded-xl border border-line-strong bg-surface px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
             <option value="">전체 카테고리</option>
             <option th:each="cat : ${categories}"
                     th:value="${cat.id}"
@@ -49,23 +49,23 @@
         <input type="text" name="keyword"
                th:value="${condition.keyword}"
                placeholder="상품명 검색"
-               class="rounded-xl border border-slate-200 bg-surface px-3 py-2 text-sm flex-1 min-w-[140px] focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
+               class="rounded-xl border border-line-strong bg-surface px-3 py-2 text-sm flex-1 min-w-[140px] focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
         <th:block th:if="${!condition.sharing}">
             <input type="number" name="minPrice"
                    th:value="${condition.minPrice}"
                    placeholder="최소 가격"
-                   class="w-28 rounded-xl border border-slate-200 bg-surface px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
+                   class="w-28 rounded-xl border border-line-strong bg-surface px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
             <input type="number" name="maxPrice"
                    th:value="${condition.maxPrice}"
                    placeholder="최대 가격"
-                   class="w-28 rounded-xl border border-slate-200 bg-surface px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
+                   class="w-28 rounded-xl border border-line-strong bg-surface px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
         </th:block>
         <button type="submit"
                 class="rounded-xl bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 transition-all">
             검색
         </button>
         <a th:href="@{/market(sharing=${condition.sharing})}"
-           class="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-500 hover:bg-surface-alt transition-all">초기화</a>
+           class="rounded-xl border border-line-strong px-4 py-2 text-sm text-slate-500 hover:bg-surface-alt transition-all">초기화</a>
     </form>
 
     <!-- 내 상품 섹션 (로그인 사용자 전용, 상단 우선 표시) -->
@@ -107,7 +107,7 @@
                 </a>
                 <div class="p-4">
                     <p class="text-xs text-slate-400 mb-1" th:text="${post.categoryName}">전자기기</p>
-                    <h2 class="font-bold text-slate-900 truncate">
+                    <h2 class="font-bold text-ink truncate">
                         <a th:href="@{/market/{id}(id=${post.id})}"
                            th:text="${post.title}"
                            class="hover:text-orange-500 transition-colors">상품명</a>
@@ -126,7 +126,7 @@
                     </div>
                 </div>
                 <!-- 빠른 관리 링크 -->
-                <div class="border-t border-slate-100 px-4 py-2 flex items-center gap-3 bg-surface-alt">
+                <div class="border-t border-line px-4 py-2 flex items-center gap-3 bg-surface-alt">
                     <a th:href="@{/market/{id}/edit(id=${post.id})}"
                        class="text-xs text-slate-500 hover:text-orange-500 transition-colors">수정</a>
                     <span class="text-slate-200">|</span>
@@ -135,7 +135,7 @@
                 </div>
             </article>
         </section>
-        <div class="mt-6 border-t border-slate-100"></div>
+        <div class="mt-6 border-t border-line"></div>
     </div>
 
     <!-- 전체 상품 목록 그리드 -->
@@ -145,7 +145,7 @@
     <section id="postGrid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <th:block th:each="post : ${posts.content}"
                   th:if="${currentUserId == null or post.sellerId != currentUserId}">
-        <article class="group rounded-2xl border border-slate-100 bg-surface shadow-sm hover:shadow-md transition-all overflow-hidden">
+        <article class="group rounded-2xl border border-line bg-surface shadow-sm hover:shadow-md transition-all overflow-hidden">
             <a th:href="@{/market/{id}(id=${post.id})}" class="block">
                 <div class="relative h-48 bg-slate-100 overflow-hidden">
                     <img th:if="${post.thumbnailUrl != null}"
@@ -169,7 +169,7 @@
             </a>
             <div class="p-4">
                 <p class="text-xs text-slate-400 mb-1" th:text="${post.categoryName}">카테고리</p>
-                <h2 class="font-bold text-slate-900 truncate">
+                <h2 class="font-bold text-ink truncate">
                     <a th:href="@{/market/{id}(id=${post.id})}"
                        th:text="${post.title}"
                        class="hover:text-orange-500 transition-colors">상품명</a>
@@ -188,12 +188,12 @@
 
     <!-- 빈 결과 -->
     <div th:if="${posts.empty}" id="emptyMessage"
-         class="rounded-2xl border border-dashed border-slate-200 bg-surface p-12 text-center text-slate-400 mt-4">
+         class="rounded-2xl border border-dashed border-line-strong bg-surface p-12 text-center text-slate-400 mt-4">
         <p class="text-lg font-semibold mb-1">등록된 상품이 없습니다.</p>
         <p class="text-sm">첫 번째로 상품을 등록해보세요!</p>
     </div>
     <div th:unless="${posts.empty}" id="emptyMessage"
-         class="hidden rounded-2xl border border-dashed border-slate-200 bg-surface p-12 text-center text-slate-400 mt-4">
+         class="hidden rounded-2xl border border-dashed border-line-strong bg-surface p-12 text-center text-slate-400 mt-4">
         <p class="text-lg font-semibold mb-1">등록된 상품이 없습니다.</p>
         <p class="text-sm">첫 번째로 상품을 등록해보세요!</p>
     </div>
@@ -282,7 +282,7 @@
         }
 
         return `
-        <article class="group rounded-2xl border border-slate-100 bg-surface shadow-sm hover:shadow-md transition-all overflow-hidden">
+        <article class="group rounded-2xl border border-line bg-surface shadow-sm hover:shadow-md transition-all overflow-hidden">
           <a href="/market/${post.id}" class="block">
             <div class="relative h-48 bg-slate-100 overflow-hidden">
               ${imgEl}${badge}
@@ -290,7 +290,7 @@
           </a>
           <div class="p-4">
             <p class="text-xs text-slate-400 mb-1">${escHtml(post.categoryName)}</p>
-            <h2 class="font-bold text-slate-900 truncate">
+            <h2 class="font-bold text-ink truncate">
               <a href="/market/${post.id}" class="hover:text-orange-500 transition-colors">${escHtml(post.title)}</a>
             </h2>
             ${price}
