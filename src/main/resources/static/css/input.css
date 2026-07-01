@@ -1,3 +1,32 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 글자 크게 보기 — <html data-font-scale="..."> 값에 따라 root font-size를 조정한다.
+   Tailwind 유틸리티는 rem 기반이라 이 값만 바꾸면 대부분의 텍스트/여백이 함께 스케일된다. */
+:root[data-font-scale="md"] { font-size: 112.5%; }
+:root[data-font-scale="lg"] { font-size: 125%; }
+
+/* 라이트/다크 공용 시맨틱 색상 토큰 — <html data-theme="..."> 값에 따라 전환된다.
+   템플릿에서는 bg-white/text-gray-900 대신 bg-surface/text-ink 등을 사용해
+   dark: variant 없이 테마 전환이 되도록 한다. */
+:root {
+  --color-surface: 255 255 255;       /* bg-white */
+  --color-surface-alt: 248 250 252;   /* bg-slate-50 */
+  --color-surface-muted: 249 250 251; /* bg-gray-50 */
+  --color-surface-hover: 243 244 246; /* hover:bg-gray-100 */
+  --color-ink: 17 24 39;              /* text-gray-900 */
+  --color-ink-muted: 75 85 99;        /* text-gray-600/700 */
+  --color-line: 243 244 246;          /* border-gray-100 */
+  --color-line-strong: 229 231 235;   /* border-gray-200 */
+}
+:root[data-theme="dark"] {
+  --color-surface: 17 24 39;          /* gray-900 */
+  --color-surface-alt: 2 6 23;        /* slate-950 */
+  --color-surface-muted: 31 41 55;    /* gray-800 */
+  --color-surface-hover: 55 65 81;    /* gray-700 */
+  --color-ink: 243 244 246;           /* gray-100 */
+  --color-ink-muted: 156 163 175;     /* gray-400 */
+  --color-line: 31 41 55;             /* gray-800 */
+  --color-line-strong: 55 65 81;      /* gray-700 */
+}
