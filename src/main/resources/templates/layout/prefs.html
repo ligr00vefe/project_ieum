@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+    사용자 환경설정(글자 크기/테마) 초기 적용 스크립트
+    - layout/layout.html의 head에서 output.css 링크 직후 include 되어, 첫 페인트 전에
+      <html>에 data-font-scale/data-theme를 반영해 깜빡임(FOUC)을 방지한다.
+    - 실제 토글 UI 로직(버튼 클릭, 순환, 저장)은 static/js/prefs.js가 담당한다.
+-->
+<th:block th:fragment="prefs">
+<script>
+(function () {
+    var DEFAULT_PREFS = { fontScale: 'base', theme: 'system' };
+    var prefs = DEFAULT_PREFS;
+    try {
+        var raw = localStorage.getItem('ieum:prefs');
+        if (raw) prefs = Object.assign({}, DEFAULT_PREFS, JSON.parse(raw));
+    } catch (e) {}
+
+    document.documentElement.setAttribute('data-font-scale', prefs.fontScale);
+
+    var resolvedTheme = prefs.theme;
+    if (resolvedTheme === 'system') {
+        try {
+            resolvedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        } catch (e) {
+            resolvedTheme = 'light';
+        }
+    }
+    document.documentElement.setAttribute('data-theme', resolvedTheme);
+})();
+</script>
+</th:block>
+</html>
