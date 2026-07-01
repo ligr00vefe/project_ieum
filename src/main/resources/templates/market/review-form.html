@@ -3,7 +3,7 @@
 <th:block th:fragment="content">
 <div class="mx-auto w-full max-w-lg px-4 py-6 sm:px-6 lg:px-8">
 
-    <div class="rounded-2xl border border-slate-100 bg-surface p-6 shadow-sm">
+    <div class="rounded-2xl border border-line bg-surface p-6 shadow-sm">
         <p class="text-sm font-semibold text-orange-500">거래 완료</p>
         <h1 class="mt-1 text-2xl font-bold">거래 후기 작성</h1>
 
@@ -21,7 +21,7 @@
                 </svg>
             </div>
             <div>
-                <p class="text-sm font-bold text-slate-800" th:text="${post.title}">상품명</p>
+                <p class="text-sm font-bold text-ink" th:text="${post.title}">상품명</p>
                 <p class="text-xs text-slate-400"
                    th:text="${#numbers.formatInteger(post.price, 1, 'COMMA') + '원'}">10,000원</p>
             </div>
@@ -61,7 +61,7 @@
                 </label>
                 <textarea id="body" th:field="*{body}" rows="5"
                           placeholder="판매자와의 거래는 어떠셨나요? 솔직한 후기를 남겨주세요."
-                          class="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200 resize-none"></textarea>
+                          class="w-full rounded-xl border border-line-strong px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200 resize-none"></textarea>
             </div>
 
             <!-- 공개 여부 -->

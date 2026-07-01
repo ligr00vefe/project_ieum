@@ -6,14 +6,14 @@
 <!-- 뒤로가기 -->
 <div class="flex items-center gap-3 mb-5">
     <a th:href="@{/admin/notices}"
-       class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+       class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-ink-muted transition-colors">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
         공지사항 목록
     </a>
     <span class="text-slate-300">/</span>
-    <span class="text-sm font-medium text-slate-700"
+    <span class="text-sm font-medium text-ink-muted"
           th:text="${noticeId != null ? '수정' : '새 공지 작성'}">작성</span>
 </div>
 
@@ -72,7 +72,7 @@
                               d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
                     </svg>
                     <div class="min-w-0">
-                        <p class="text-xs font-medium text-slate-700 truncate" th:text="${att.originalName}">파일명</p>
+                        <p class="text-xs font-medium text-ink-muted truncate" th:text="${att.originalName}">파일명</p>
                         <p class="text-[10px] text-slate-400"
                            th:text="${att.fileSize != null ? (att.fileSize / 1024) + ' KB' : ''}"></p>
                     </div>
@@ -218,7 +218,7 @@
                               d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
                     </svg>
                     <div class="min-w-0">
-                        <p class="text-xs font-medium text-slate-700 truncate">${esc(file.name)}</p>
+                        <p class="text-xs font-medium text-ink-muted truncate">${esc(file.name)}</p>
                         <p class="text-[10px] text-slate-400">${kb} KB</p>
                     </div>
                 </div>

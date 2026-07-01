@@ -511,7 +511,7 @@
         <div th:if="${recentNotices != null and !#lists.isEmpty(recentNotices)}" class="rounded-2xl border border-line-strong overflow-hidden bg-surface">
             <th:block th:each="notice, iter : ${recentNotices}">
                 <a th:href="@{/notices/{id}(id=${notice.id})}" th:classappend="${!iter.last} ? 'border-b border-line-strong'" class="flex items-center gap-4 px-5 py-4 hover:bg-teal-50/50 transition-colors group">
-                    <div class="flex-1 min-w-0"><div class="flex items-center gap-2"><span th:if="${notice.isPinned}" class="px-2 py-0.5 bg-amber-50 text-amber-600 text-[10px] font-bold rounded-md border border-amber-200">고정</span><p class="text-sm font-semibold text-gray-800 truncate group-hover:text-teal-700 transition-colors" th:text="${notice.title}">공지 제목</p></div></div>
+                    <div class="flex-1 min-w-0"><div class="flex items-center gap-2"><span th:if="${notice.isPinned}" class="px-2 py-0.5 bg-amber-50 text-amber-600 text-[10px] font-bold rounded-md border border-amber-200">고정</span><p class="text-sm font-semibold text-ink truncate group-hover:text-teal-700 transition-colors" th:text="${notice.title}">공지 제목</p></div></div>
                     <span class="flex-shrink-0 text-xs text-gray-400 whitespace-nowrap" th:text="${#temporals.format(notice.createdAt, 'yyyy.MM.dd')}">날짜</span>
                     <svg class="w-4 h-4 text-gray-300 group-hover:text-teal-500 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </a>
@@ -769,9 +769,9 @@
              th:classappend="${popup.layout == 'SQUARE'} ? 'popup-layout-square' :
                              (${popup.layout == 'PORTRAIT'} ? 'popup-layout-portrait' :
                              (${popup.layout == 'LANDSCAPE'} ? 'popup-layout-landscape' : 'popup-layout-auto'))"
-             class="popup-modal relative bg-surface shadow-xl border border-slate-100 overflow-hidden flex flex-col pointer-events-auto">
+             class="popup-modal relative bg-surface shadow-xl border border-line overflow-hidden flex flex-col pointer-events-auto">
             <!-- 팝업 내용 -->
-            <div class="p-0 text-sm text-slate-700 ck-content popup-content-area"
+            <div class="p-0 text-sm text-ink-muted ck-content popup-content-area"
                  th:utext="${popup.content}">내용</div>
             <!-- 클릭 링크 오버레이: linkUrl 있을 때 콘텐츠 영역 위에만 투명 레이어 -->
             <a th:if="${popup.linkUrl != null and !#strings.isEmpty(popup.linkUrl)}"
@@ -779,7 +779,7 @@
                style="position:absolute;top:0;left:0;right:0;height:calc(100% - 52px);z-index:1;"
                aria-label="팝업 링크 이동"></a>
             <!-- 팝업 하단 -->
-            <div class="border-t border-slate-100 bg-surface-alt px-4 py-3 flex items-center justify-between gap-3 flex-shrink-0">
+            <div class="border-t border-line bg-surface-alt px-4 py-3 flex items-center justify-between gap-3 flex-shrink-0">
                 <label class="flex items-center gap-2 cursor-pointer select-none">
                     <input type="checkbox"
                            th:id="${'popup-hide-today-' + popup.id}"
@@ -787,7 +787,7 @@
                     <span class="text-xs font-medium text-slate-500">오늘 하루 보지 않기</span>
                 </label>
                 <button th:attr="onclick='closePopup(' + ${popup.id} + ')'"
-                        class="px-4 py-1.5 text-xs font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-surface transition flex-shrink-0">
+                        class="px-4 py-1.5 text-xs font-medium text-ink-muted border border-line-strong rounded-lg hover:bg-surface transition flex-shrink-0">
                     닫기
                 </button>
             </div>
