@@ -10,7 +10,7 @@
             <li aria-hidden="true"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></li>
             <li><a th:href="@{/disabled/board/{id}(id=${request.id})}" class="hover:text-indigo-600 transition-colors">게시물 상세</a></li>
             <li aria-hidden="true"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></li>
-            <li><span class="text-gray-600 font-medium" aria-current="page">지원자 리스트</span></li>
+            <li><span class="text-ink-muted font-medium" aria-current="page">지원자 리스트</span></li>
         </ol>
     </nav>
 
@@ -18,7 +18,7 @@
 
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-xl font-bold text-gray-900">지원자 리스트</h1>
+            <h1 class="text-xl font-bold text-ink">지원자 리스트</h1>
             <p class="text-sm text-gray-500 mt-1">
                 <span th:text="${request.title}">제목</span> ·
                 <span class="text-indigo-600 font-semibold" th:text="${#lists.size(applications) + '명 지원'}">0명 지원</span>
@@ -31,7 +31,7 @@
 
         <th:block th:each="appl, stat : ${applications}">
         <div th:classappend="${appl.status.name() != 'PENDING' ? ' opacity-75' : (stat.index == 0 ? ' border-2 border-indigo-200 shadow-sm' : '')}"
-             class="bg-white rounded-2xl border border-gray-100 p-5">
+             class="bg-surface rounded-2xl border border-line p-5">
             <div class="flex items-start gap-4">
                 <div class="relative flex-shrink-0">
                     <div class="relative w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 font-bold text-lg shadow-sm"
@@ -49,7 +49,7 @@
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between mb-1.5">
                         <div class="flex items-center gap-2">
-                            <p class="text-base font-bold text-gray-900" th:text="${appl.caregiver.fullName}">이름</p>
+                            <p class="text-base font-bold text-ink" th:text="${appl.caregiver.fullName}">이름</p>
                             <span class="px-2 py-0.5 bg-teal-50 text-teal-600 text-xs font-medium rounded-full">활동지원사</span>
                             <span th:if="${appl.caregiver.mbtiType != null}"
                                   class="inline-block text-xs bg-purple-100 text-purple-700 rounded px-2 py-0.5 font-medium"
@@ -57,7 +57,7 @@
                             <span th:if="${appl.status.name() == 'ACCEPTED'}"
                                   class="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-xs font-medium rounded-full">수락됨</span>
                             <span th:if="${appl.status.name() == 'REJECTED' or appl.status.name() == 'CANCELLED'}"
-                                  class="px-2 py-0.5 bg-gray-100 text-gray-400 text-xs font-medium rounded-full">거절됨</span>
+                                  class="px-2 py-0.5 bg-surface-hover text-gray-400 text-xs font-medium rounded-full">거절됨</span>
                         </div>
                         <!-- Match% 배지 + 호버 툴팁 -->
                         <div class="relative flex-shrink-0 match-badge-wrap"
@@ -69,13 +69,13 @@
                                 <span class="text-base font-bold leading-none" th:text="${matchPercentMap[appl.id] ?: 0} + '%'">0%</span>
                             </div>
                             <!-- 호버 툴팁 -->
-                            <div class="match-tooltip hidden absolute right-0 top-full mt-2 z-50 w-56 bg-white border border-gray-100 rounded-2xl shadow-xl p-4">
+                            <div class="match-tooltip hidden absolute right-0 top-full mt-2 z-50 w-56 bg-surface border border-line rounded-2xl shadow-xl p-4">
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">케어메이트 선호 성향</p>
                                 <div th:if="${matchTagDetailMap != null and matchTagDetailMap[appl.id] != null and !#lists.isEmpty(matchTagDetailMap[appl.id])}"
                                      class="flex flex-wrap gap-1.5">
                                     <span th:each="tag : ${matchTagDetailMap[appl.id]}"
                                           th:text="${tag.name}"
-                                          th:classappend="${tag.matched} ? ' bg-indigo-100 text-indigo-700 ring-1 ring-indigo-300' : ' bg-gray-100 text-gray-400'"
+                                          th:classappend="${tag.matched} ? ' bg-indigo-100 text-indigo-700 ring-1 ring-indigo-300' : ' bg-surface-hover text-gray-400'"
                                           class="px-2 py-1 text-xs font-semibold rounded-lg transition-colors">태그</span>
                                 </div>
                                 <p th:if="${matchTagDetailMap == null or matchTagDetailMap[appl.id] == null or #lists.isEmpty(matchTagDetailMap[appl.id])}"
@@ -87,12 +87,12 @@
                        class="text-xs text-gray-400 mb-2.5" th:text="${appl.caregiver.introShort}">소개</p>
                     <div class="flex flex-wrap gap-1.5 mb-3">
                         <span th:if="${appl.caregiver.hasCertification}"
-                              class="px-2 py-1 bg-gray-50 text-gray-500 text-xs rounded-lg">자격증 보유</span>
+                              class="px-2 py-1 bg-surface-muted text-gray-500 text-xs rounded-lg">자격증 보유</span>
                         <span th:if="${appl.caregiver.certificationType}"
-                              class="px-2 py-1 bg-gray-50 text-gray-500 text-xs rounded-lg"
+                              class="px-2 py-1 bg-surface-muted text-gray-500 text-xs rounded-lg"
                               th:text="${appl.caregiver.certificationType}">자격증</span>
                         <span th:if="${appl.caregiver.experience}"
-                              class="px-2 py-1 bg-gray-50 text-gray-500 text-xs rounded-lg"
+                              class="px-2 py-1 bg-surface-muted text-gray-500 text-xs rounded-lg"
                               th:text="'경력 ' + ${appl.caregiver.experience}">경력</span>
                     </div>
                     <div th:if="${appl.status.name() == 'PENDING'}" class="flex gap-2 mt-3">
@@ -125,7 +125,7 @@
         </div>
         </th:block>
 
-        <div th:if="${#lists.isEmpty(applications)}" class="rounded-lg border border-dashed border-indigo-200 bg-white p-8 text-center text-slate-600">
+        <div th:if="${#lists.isEmpty(applications)}" class="rounded-lg border border-dashed border-indigo-200 bg-surface p-8 text-center text-slate-600">
             아직 지원자가 없습니다.
         </div>
 

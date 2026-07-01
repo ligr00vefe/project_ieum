@@ -19,12 +19,12 @@
 
             <!-- Header text -->
             <div class="text-center mb-8">
-                <h1 class="text-2xl font-extrabold text-gray-900 mb-2">다시 만나서 반가워요</h1>
+                <h1 class="text-2xl font-extrabold text-ink mb-2">다시 만나서 반가워요</h1>
                 <p class="text-sm text-gray-500">이음 계정으로 로그인하세요</p>
             </div>
 
             <!-- Card -->
-            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+            <div class="bg-surface rounded-3xl shadow-sm border border-line p-8">
 
                 <!-- Error message -->
                 <div th:if="${param.error}"
@@ -57,7 +57,7 @@
 
                     <!-- Email -->
                     <div class="space-y-1.5">
-                        <label for="username" class="block text-sm font-semibold text-gray-700">
+                        <label for="username" class="block text-sm font-semibold text-ink-muted">
                             이메일
                         </label>
                         <div class="relative">
@@ -71,7 +71,7 @@
                                    name="email"
                                    autocomplete="email"
                                    placeholder="example@email.com"
-                                   class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                   class="w-full pl-10 pr-4 py-3 border border-line-strong rounded-xl text-sm text-ink placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                                    required>
                         </div>
                     </div>
@@ -79,7 +79,7 @@
                     <!-- Password -->
                     <div class="space-y-1.5">
                         <div class="flex items-center justify-between">
-                            <label for="password" class="block text-sm font-semibold text-gray-700">
+                            <label for="password" class="block text-sm font-semibold text-ink-muted">
                                 비밀번호
                             </label>
                             <a th:href="@{/password/forgot}" class="text-xs text-indigo-600 hover:text-indigo-700 font-medium hover:underline">
@@ -97,11 +97,11 @@
                                    name="password"
                                    autocomplete="current-password"
                                    placeholder="비밀번호를 입력하세요"
-                                   class="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                   class="w-full pl-10 pr-10 py-3 border border-line-strong rounded-xl text-sm text-ink placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                                    required>
                             <button type="button"
                                     onclick="togglePassword()"
-                                    class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                                    class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-ink-muted transition-colors"
                                     aria-label="비밀번호 표시/숨기기">
                                 <svg id="eye-icon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -116,7 +116,7 @@
                         <input type="checkbox"
                                name="remember-me"
                                class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
-                        <span class="text-sm text-gray-600 group-hover:text-gray-800 transition-colors">로그인 상태 유지</span>
+                        <span class="text-sm text-ink-muted group-hover:text-gray-800 transition-colors">로그인 상태 유지</span>
                     </label>
 
                     <!-- Submit -->
