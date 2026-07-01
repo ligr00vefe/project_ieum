@@ -77,7 +77,8 @@ public class MarketChatPageController {
         model.addAttribute("opponentId", opponent.getId());
         model.addAttribute("sellerConfirmed", chat.isSellerConfirmed());
 
-        return "market/chat-room";  // templates/market/chat-room.html
+        model.addAttribute("content", "market/chat-room");
+        return "layout/layout";
     }
 
     // ── 내 채팅 목록 ──
@@ -101,6 +102,7 @@ public class MarketChatPageController {
         model.addAttribute("title", "마켓 채팅");
         model.addAttribute("chats", chatSummaries);
         model.addAttribute("currentUserId", currentUser.getId());
-        return "market/chat-list";  // templates/market/chat-list.html
+        model.addAttribute("content", "market/chat-list");
+        return "layout/layout";
     }
 }
