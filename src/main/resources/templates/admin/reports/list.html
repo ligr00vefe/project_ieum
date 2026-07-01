@@ -6,7 +6,7 @@
 
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h2 class="text-xl font-bold text-slate-900">신고 관리</h2>
+            <h2 class="text-xl font-bold text-ink">신고 관리</h2>
             <p class="text-sm text-slate-500 mt-0.5">접수된 신고를 검토하고 처리 상태를 변경하거나 대상을 정지할 수 있습니다.</p>
         </div>
     </div>
@@ -18,20 +18,20 @@
     <!-- 탭 필터 -->
     <div class="flex gap-1 mb-4 bg-slate-100 p-1 rounded-xl w-fit">
         <a th:href="@{/admin/reports(type='all')}"
-           th:classappend="${activeType == 'all'} ? ' bg-white shadow-sm text-slate-900 font-semibold' : ' text-slate-500 hover:text-slate-700'"
+           th:classappend="${activeType == 'all'} ? ' bg-surface shadow-sm text-ink font-semibold' : ' text-slate-500 hover:text-slate-700'"
            class="px-4 py-1.5 rounded-lg text-sm transition-all">전체</a>
         <a th:href="@{/admin/reports(type='matching')}"
-           th:classappend="${activeType == 'matching'} ? ' bg-white shadow-sm text-slate-900 font-semibold' : ' text-slate-500 hover:text-slate-700'"
+           th:classappend="${activeType == 'matching'} ? ' bg-surface shadow-sm text-ink font-semibold' : ' text-slate-500 hover:text-slate-700'"
            class="px-4 py-1.5 rounded-lg text-sm transition-all">매칭 게시판</a>
         <a th:href="@{/admin/reports(type='market')}"
-           th:classappend="${activeType == 'market'} ? ' bg-white shadow-sm text-slate-900 font-semibold' : ' text-slate-500 hover:text-slate-700'"
+           th:classappend="${activeType == 'market'} ? ' bg-surface shadow-sm text-ink font-semibold' : ' text-slate-500 hover:text-slate-700'"
            class="px-4 py-1.5 rounded-lg text-sm transition-all">이음마켓</a>
     </div>
 
-    <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+    <div class="bg-surface rounded-2xl border border-line overflow-hidden">
         <table class="w-full text-sm">
             <thead>
-                <tr class="border-b border-slate-100 bg-slate-50">
+                <tr class="border-b border-line bg-surface-alt">
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">구분</th>
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">신고자</th>
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">대상</th>
@@ -44,7 +44,7 @@
             </thead>
             <tbody class="divide-y divide-slate-50">
                 <th:block th:each="report : ${reports}">
-                <tr class="hover:bg-slate-50 transition-colors align-top">
+                <tr class="hover:bg-surface-alt transition-colors align-top">
                     <td class="px-5 py-3.5">
                         <span th:if="${report.marketChatId != null}"
                               class="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-orange-50 text-orange-600">마켓</span>
@@ -62,9 +62,9 @@
                                class="text-[11px] text-indigo-400 hover:text-indigo-600 underline">매칭 상세 보기</a>
                         </div>
                     </td>
-                    <td class="px-5 py-3.5 text-slate-600 text-xs" th:text="${report.reporter.email}">-</td>
+                    <td class="px-5 py-3.5 text-ink-muted text-xs" th:text="${report.reporter.email}">-</td>
                     <td class="px-5 py-3.5">
-                        <div class="text-slate-600 text-xs" th:text="${report.target.email}">-</div>
+                        <div class="text-ink-muted text-xs" th:text="${report.target.email}">-</div>
                         <div class="mt-0.5">
                             <span th:if="${report.target.status.name() == 'WARNED'}"
                                   class="text-[11px] font-semibold text-amber-600">⚠ 경고회원</span>
@@ -73,12 +73,12 @@
                         </div>
                         <div class="mt-1">
                             <a th:href="@{/admin/users/{id}(id=${report.target.id})}"
-                               class="text-[11px] font-medium text-slate-400 hover:text-slate-600 underline">회원 관리 →</a>
+                               class="text-[11px] font-medium text-slate-400 hover:text-ink-muted underline">회원 관리 →</a>
                         </div>
                     </td>
                     <td class="px-5 py-3.5 text-slate-700 text-xs" th:text="${report.reason.label}">사유</td>
                     <td class="px-5 py-3.5">
-                        <p class="text-slate-600 text-xs truncate max-w-xs" th:text="${report.detail != null ? report.detail : '-'}">상세</p>
+                        <p class="text-ink-muted text-xs truncate max-w-xs" th:text="${report.detail != null ? report.detail : '-'}">상세</p>
                     </td>
                     <td class="px-5 py-3.5">
                         <span th:text="${report.status.label}"
@@ -91,7 +91,7 @@
                         <form th:action="@{/admin/reports/{id}/status(id=${report.id})}" method="post" class="flex items-center gap-1">
                             <label class="sr-only" th:for="'status-' + ${report.id}">신고 상태 변경</label>
                             <select name="status" th:id="'status-' + ${report.id}"
-                                    class="px-2 py-1 text-xs border border-slate-200 rounded-lg bg-white">
+                                    class="px-2 py-1 text-xs border border-line-strong rounded-lg bg-surface">
                                 <option th:each="st : ${reportStatuses}" th:value="${st}"
                                         th:text="${st.label}" th:selected="${st == report.status}">상태</option>
                             </select>
