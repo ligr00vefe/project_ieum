@@ -22,8 +22,8 @@
     </div>
 
     <!-- 활동 일정 카드 -->
-    <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-4">
-        <h2 class="text-base font-bold text-gray-900 flex items-center gap-2 mb-5">
+    <div class="bg-surface rounded-3xl border border-line shadow-sm p-6 mb-4">
+        <h2 class="text-base font-bold text-ink flex items-center gap-2 mb-5">
             <svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
@@ -32,42 +32,42 @@
 
         <div class="space-y-3 text-sm">
             <!-- 날짜 -->
-            <div class="flex items-start gap-3 text-gray-600">
+            <div class="flex items-start gap-3 text-ink-muted">
                 <svg class="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
                 <span>
-                    <span class="font-semibold text-gray-900">날짜</span>
+                    <span class="font-semibold text-ink">날짜</span>
                     <span class="ml-1.5" th:text="'· ' + ${dateDisplay}">· 날짜</span>
                 </span>
             </div>
             <!-- 시간 -->
-            <div class="flex items-start gap-3 text-gray-600">
+            <div class="flex items-start gap-3 text-ink-muted">
                 <svg class="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <span>
-                    <span class="font-semibold text-gray-900">시간</span>
+                    <span class="font-semibold text-ink">시간</span>
                     <span class="ml-1.5" th:text="'· ' + ${timeDisplay}">· 시간</span>
                 </span>
             </div>
             <!-- 장소 -->
-            <div th:if="${location != null}" class="flex items-start gap-3 text-gray-600">
+            <div th:if="${location != null}" class="flex items-start gap-3 text-ink-muted">
                 <svg class="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                 </svg>
                 <span>
-                    <span class="font-semibold text-gray-900">장소</span>
+                    <span class="font-semibold text-ink">장소</span>
                     <span class="ml-1.5" th:text="'· ' + ${location}">· 장소</span>
                 </span>
             </div>
             <!-- 내용 -->
-            <div th:if="${requestTitle != null}" class="flex items-start gap-3 text-gray-600">
+            <div th:if="${requestTitle != null}" class="flex items-start gap-3 text-ink-muted">
                 <svg class="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 <span>
-                    <span class="font-semibold text-gray-900">내용</span>
+                    <span class="font-semibold text-ink">내용</span>
                     <span class="ml-1.5" th:text="'· ' + ${requestTitle}">· 내용</span>
                 </span>
             </div>
@@ -79,7 +79,7 @@
                  th:classappend="${isCaregiver} ? 'bg-indigo-100 text-indigo-600' : 'bg-teal-100 text-teal-600'"
                  th:text="${partnerInitial}">?</div>
             <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-gray-900" th:text="${partnerName}">파트너</p>
+                <p class="text-sm font-semibold text-ink" th:text="${partnerName}">파트너</p>
                 <p th:if="${partnerSubtitle != null}" class="text-xs text-gray-400" th:text="${partnerSubtitle}"></p>
             </div>
         </div>
@@ -114,7 +114,7 @@
     <!-- 하단 버튼 -->
     <div class="flex gap-3">
         <a th:href="${isCaregiver} ? @{/caregiver/board} : @{/disabled/board}"
-           class="flex-1 py-3 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl text-center hover:bg-gray-50 transition-all">
+           class="flex-1 py-3 text-sm font-semibold text-ink-muted bg-surface border border-line-strong rounded-xl text-center hover:bg-surface-muted transition-all">
             게시판으로
         </a>
         <a th:href="${conversationId != null} ? @{/chat/conversations/{id}(id=${conversationId})} : @{/chat/conversations}"

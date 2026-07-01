@@ -10,14 +10,14 @@
           - 'badge'         : 오른쪽에 userType 뱃지 (step1~4)
           - 'none'          : 오른쪽 없음 (complete 페이지)
 -->
-<div th:fragment="header(mode)" class="bg-white border-b border-gray-100 px-4 py-3.5">
+<div th:fragment="header(mode)" class="bg-surface border-b border-line px-4 py-3.5">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
 
         <!-- 로고 -->
         <a th:href="@{/}" class="flex items-center gap-2.5 group">
             <img th:src="@{/images/logo/logo.png}" alt="이음 로고" class="h-9 w-auto">
             <div class="leading-tight">
-                <div class="text-[14px] font-bold text-gray-900">이음</div>
+                <div class="text-[14px] font-bold text-ink">이음</div>
                 <div class="text-[9px] text-gray-400 font-medium tracking-wide -mt-0.5">Care Match</div>
             </div>
         </a>

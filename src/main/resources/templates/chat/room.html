@@ -7,7 +7,7 @@
 
         <!-- 왼쪽: 프로필 카드 (케어메이트 뷰) -->
         <th:block th:if="${isUser}">
-        <div class="chat-profile-sidebar w-72 flex-shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col items-center text-center">
+        <div class="chat-profile-sidebar w-72 flex-shrink-0 bg-surface rounded-2xl border border-line shadow-sm p-6 flex flex-col items-center text-center">
             <!-- 아바타 -->
             <div class="relative w-28 h-28 rounded-2xl mb-3 flex-shrink-0 shadow-sm bg-teal-500 flex items-center justify-center text-white text-4xl font-black"
                  th:text="${partnerName != null ? partnerName.substring(0,1) : '?'}">박
@@ -19,7 +19,7 @@
             </div>
 
             <!-- 이름 / 직함 -->
-            <p class="text-lg font-bold text-gray-900" th:text="${partnerName}">박서연 활동지원사</p>
+            <p class="text-lg font-bold text-ink" th:text="${partnerName}">박서연 활동지원사</p>
             <p class="text-sm text-gray-400 mt-0.5 mb-4" th:text="${partnerSubtitle}">활동지원사</p>
 
             <!-- 매칭률 뱃지 -->
@@ -34,16 +34,16 @@
             <div class="w-full text-left mb-5">
                 <p class="text-xs font-semibold text-gray-400 mb-2">자격 · 검증</p>
                 <ul class="space-y-1.5">
-                    <li th:if="${caregiverHasCert}" class="text-sm text-gray-700">
+                    <li th:if="${caregiverHasCert}" class="text-sm text-ink-muted">
                         📋 <span th:text="${caregiverCertType ?: '자격증 보유'}">자격증</span>
                     </li>
                     <li th:unless="${caregiverHasCert}" class="text-sm text-gray-400">
                         🚫 자격증 없음
                     </li>
-                    <li th:if="${caregiverExperience}" class="text-sm text-gray-700">
+                    <li th:if="${caregiverExperience}" class="text-sm text-ink-muted">
                         💼 <span th:text="'경력 ' + ${caregiverExperience}">경력</span>
                     </li>
-                    <li class="text-sm text-gray-700">
+                    <li class="text-sm text-ink-muted">
                         ⭐ 후기
                         <span th:text="${#numbers.formatDecimal(caregiverAvgRating, 1, 1) + ' (' + caregiverTotalReviews + '건)'}">0.0 (0건)</span>
                     </li>
@@ -85,12 +85,12 @@
         </th:block>
 
         <!-- 오른쪽: 채팅 영역 -->
-        <div class="flex-1 flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="flex-1 flex flex-col bg-surface rounded-2xl border border-line shadow-sm overflow-hidden">
 
             <!-- 채팅 헤더 -->
-            <div class="flex-shrink-0 flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+            <div class="flex-shrink-0 flex items-center gap-3 px-5 py-4 border-b border-line">
                 <a th:href="${isCaregiver} ? @{/caregiver/board/{id}(id=${requestId})} : @{/disabled/board/{id}(id=${requestId})}"
-                   class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all flex-shrink-0">
+                   class="p-1.5 text-gray-400 hover:text-ink-muted hover:bg-surface-muted rounded-lg transition-all flex-shrink-0">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 </a>
 
@@ -104,7 +104,7 @@
                          style="transform:translateZ(0);">
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-bold text-gray-900" th:text="${partnerName}">박서연 활동지원사</p>
+                    <p class="text-sm font-bold text-ink" th:text="${partnerName}">박서연 활동지원사</p>
                     <div class="flex items-center gap-1.5 mt-0.5">
                         <span id="presenceDot" class="w-2 h-2 bg-gray-300 rounded-full flex-shrink-0"></span>
                         <span id="presenceText" class="text-xs text-gray-400 font-medium">오프라인</span>
@@ -123,7 +123,7 @@
 
                 <!-- 신고 버튼 -->
                 <button type="button" onclick="showReportModal()"
-                        class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-400 border border-gray-200 rounded-xl hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all flex-shrink-0">
+                        class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-400 border border-line-strong rounded-xl hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all flex-shrink-0">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                     신고
                 </button>
@@ -141,7 +141,7 @@
                 <div id="announcementOpen" class="flex gap-3 px-4 py-3 bg-indigo-50 border border-indigo-100 rounded-xl text-xs">
                     <div class="flex-1 min-w-0">
                         <p class="font-bold text-indigo-700 mb-1">📢 공지</p>
-                        <p id="announcementBody" class="text-gray-700 leading-relaxed whitespace-pre-wrap"></p>
+                        <p id="announcementBody" class="text-ink-muted leading-relaxed whitespace-pre-wrap"></p>
                     </div>
                     <button onclick="collapseAnnouncement()"
                             class="flex-shrink-0 self-start w-6 h-6 flex items-center justify-center text-indigo-400 hover:text-indigo-600 hover:bg-indigo-100 rounded-lg transition-all"
@@ -184,7 +184,7 @@
             <!-- 채팅 메시지 영역 -->
             <div class="relative flex-1 flex flex-col overflow-hidden">
                 <!-- 이전 메시지 로딩 표시 (무한 스크롤) -->
-                <div id="topLoader" class="hidden absolute top-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-3 py-1.5 bg-white/90 border border-gray-100 rounded-full shadow-sm">
+                <div id="topLoader" class="hidden absolute top-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-3 py-1.5 bg-white/90 border border-line rounded-full shadow-sm">
                     <div class="w-3.5 h-3.5 border-2 border-indigo-300 border-t-indigo-600 rounded-full animate-spin"></div>
                     <span class="text-xs text-gray-400 font-medium">이전 메시지 불러오는 중</span>
                 </div>
@@ -197,11 +197,11 @@
             </div>
 
             <!-- 메시지 입력창 -->
-            <div class="flex-shrink-0 px-5 py-4 border-t border-gray-100">
+            <div class="flex-shrink-0 px-5 py-4 border-t border-line">
                 <div class="flex items-center gap-3">
                     <input id="messageInput" type="text" placeholder="메시지를 입력해주세요"
                            onkeydown="handleKeydown(event)"
-                           class="flex-1 text-sm text-gray-800 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-full px-5 py-3 focus:outline-none focus:border-indigo-300 focus:bg-white transition-all"/>
+                           class="flex-1 text-sm text-gray-800 placeholder-gray-400 bg-surface-muted border border-line-strong rounded-full px-5 py-3 focus:outline-none focus:border-indigo-300 focus:bg-surface transition-all"/>
                     <button onclick="sendMessage()"
                             class="flex-shrink-0 px-5 py-3 bg-indigo-600 text-white text-sm font-bold rounded-full hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-100 whitespace-nowrap">
                         전송 →
@@ -216,19 +216,19 @@
 <!-- 매칭 확정 모달 (케어메이트 뷰) -->
 <div id="matchConfirmModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="hideMatchConfirmModal()"></div>
-    <div class="relative bg-white rounded-3xl shadow-2xl p-7 w-full max-w-sm text-center z-10">
+    <div class="relative bg-surface rounded-3xl shadow-2xl p-7 w-full max-w-sm text-center z-10">
         <div class="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
             <svg class="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
             </svg>
         </div>
-        <h2 class="text-lg font-bold text-gray-900 mb-2">매칭을 확정하시겠어요?</h2>
+        <h2 class="text-lg font-bold text-ink mb-2">매칭을 확정하시겠어요?</h2>
         <p class="text-sm text-gray-500 leading-relaxed mb-6">
             ✔ 활동지원사에게 매칭 확정 알림이 발송됩니다.
         </p>
         <div class="flex gap-3">
             <button type="button" onclick="hideMatchConfirmModal()"
-                    class="flex-1 py-3 text-sm font-semibold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all">
+                    class="flex-1 py-3 text-sm font-semibold text-ink-muted bg-surface-hover rounded-xl hover:bg-gray-200 transition-all">
                 취소
             </button>
             <form th:action="@{/chat/conversations/{id}/confirm-match(id=${conversationId})}"
@@ -246,12 +246,12 @@
 <!-- 프로필 상세 모달 (케어메이트 뷰) -->
 <div th:if="${isUser}" id="profileModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="hideProfileModal()"></div>
-    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg z-10 flex flex-col" style="max-height:85vh;">
+    <div class="relative bg-surface rounded-3xl shadow-2xl w-full max-w-lg z-10 flex flex-col" style="max-height:85vh;">
 
         <!-- 모달 헤더 -->
-        <div class="flex-shrink-0 flex items-center justify-between px-7 pt-7 pb-5 border-b border-gray-100">
-            <h2 class="text-lg font-bold text-gray-900">활동지원사 프로필</h2>
-            <button onclick="hideProfileModal()" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all">
+        <div class="flex-shrink-0 flex items-center justify-between px-7 pt-7 pb-5 border-b border-line">
+            <h2 class="text-lg font-bold text-ink">활동지원사 프로필</h2>
+            <button onclick="hideProfileModal()" class="p-2 text-gray-400 hover:text-ink-muted hover:bg-surface-hover rounded-xl transition-all">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
@@ -269,7 +269,7 @@
                          onerror="this.remove()">
                 </div>
                 <div>
-                    <p class="text-lg font-bold text-gray-900" th:text="${partnerName}">박서연 활동지원사</p>
+                    <p class="text-lg font-bold text-ink" th:text="${partnerName}">박서연 활동지원사</p>
                     <p class="text-sm text-gray-500 mt-0.5" th:text="${partnerSubtitle}">활동지원사</p>
                     <!-- 별점 -->
                     <div class="flex items-center gap-1.5 mt-2">
@@ -292,27 +292,27 @@
             <!-- 한 줄 소개 -->
             <div th:if="${caregiverIntroShort}">
                 <p class="text-xs font-semibold text-gray-400 mb-1.5">한 줄 소개</p>
-                <p class="text-sm text-gray-700" th:text="${caregiverIntroShort}">소개</p>
+                <p class="text-sm text-ink-muted" th:text="${caregiverIntroShort}">소개</p>
             </div>
 
             <!-- 상세 소개 -->
             <div th:if="${caregiverIntroLong}">
                 <p class="text-xs font-semibold text-gray-400 mb-1.5">상세 소개</p>
-                <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-line" th:text="${caregiverIntroLong}">상세 소개</p>
+                <p class="text-sm text-ink-muted leading-relaxed whitespace-pre-line" th:text="${caregiverIntroLong}">상세 소개</p>
             </div>
 
             <!-- 자격·경력 -->
-            <div class="bg-gray-50 rounded-2xl p-4 space-y-2">
+            <div class="bg-surface-muted rounded-2xl p-4 space-y-2">
                 <p class="text-xs font-semibold text-gray-400 mb-2">자격 · 경력</p>
-                <div th:if="${caregiverHasCert}" class="flex items-center gap-2 text-sm text-gray-700">
+                <div th:if="${caregiverHasCert}" class="flex items-center gap-2 text-sm text-ink-muted">
                     <span class="text-base">📋</span>
                     <span th:text="${caregiverCertType ?: '자격증 보유'}">자격증</span>
                 </div>
-                <div th:if="${caregiverExperience}" class="flex items-start gap-2 text-sm text-gray-700">
+                <div th:if="${caregiverExperience}" class="flex items-start gap-2 text-sm text-ink-muted">
                     <span class="text-base flex-shrink-0">💼</span>
                     <span th:text="'경력 ' + ${caregiverExperience}">경력</span>
                 </div>
-                <div th:if="${caregiverServiceCategories}" class="flex items-start gap-2 text-sm text-gray-700">
+                <div th:if="${caregiverServiceCategories}" class="flex items-start gap-2 text-sm text-ink-muted">
                     <span class="text-base flex-shrink-0">🛠</span>
                     <span th:text="${caregiverServiceCategories}">서비스</span>
                 </div>
@@ -333,11 +333,11 @@
                 <div class="flex items-center justify-between mb-3">
                     <p class="text-xs font-semibold text-gray-400">
                         후기
-                        <span class="text-gray-600 font-bold ml-1"
+                        <span class="text-ink-muted font-bold ml-1"
                               th:text="${caregiverTotalReviews ?: 0}">0</span>건
                     </p>
                     <select id="reviewSort" onchange="sortReviews(this.value)"
-                            class="text-xs text-gray-500 border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-indigo-300">
+                            class="text-xs text-gray-500 border border-line-strong rounded-lg px-2 py-1 bg-surface focus:outline-none focus:border-indigo-300">
                         <option value="recent">최신순</option>
                         <option value="high">별점 높은 순</option>
                         <option value="low">별점 낮은 순</option>
@@ -348,7 +348,7 @@
                      id="reviewList" class="space-y-3">
                     <div th:each="rv : ${caregiverReviews}"
                          th:attr="data-rating=${rv.rating ?: 0}, data-date=${rv.createdAt}"
-                         class="review-item bg-gray-50 rounded-2xl p-4">
+                         class="review-item bg-surface-muted rounded-2xl p-4">
                         <div class="flex items-center justify-between mb-2">
                             <div class="flex">
                                 <th:block th:each="i : ${#numbers.sequence(1,5)}">
@@ -361,7 +361,7 @@
                             <span class="text-xs text-gray-400"
                                   th:text="${#temporals.format(rv.createdAt, 'yyyy.MM.dd')}">날짜</span>
                         </div>
-                        <p class="text-sm text-gray-700 leading-relaxed" th:text="${rv.body}">후기 내용</p>
+                        <p class="text-sm text-ink-muted leading-relaxed" th:text="${rv.body}">후기 내용</p>
                         <p class="text-xs text-gray-400 mt-1.5"
                            th:text="${rv.author.fullName != null ? rv.author.fullName.substring(0,1) + '○○ 님' : '익명'}">홍○○ 님</p>
                     </div>
@@ -380,15 +380,15 @@
 <div id="reportModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
      role="dialog" aria-modal="true" aria-labelledby="reportModalTitle">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="hideReportModal()"></div>
-    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md z-10 flex flex-col" style="max-height:85vh;">
+    <div class="relative bg-surface rounded-3xl shadow-2xl w-full max-w-md z-10 flex flex-col" style="max-height:85vh;">
 
         <!-- 모달 헤더 -->
-        <div class="flex-shrink-0 flex items-center justify-between px-7 pt-7 pb-4 border-b border-gray-100">
-            <h2 id="reportModalTitle" class="text-lg font-bold text-gray-900">
+        <div class="flex-shrink-0 flex items-center justify-between px-7 pt-7 pb-4 border-b border-line">
+            <h2 id="reportModalTitle" class="text-lg font-bold text-ink">
                 <span th:text="${partnerName}">상대방</span> 님 신고
             </h2>
             <button type="button" onclick="hideReportModal()" aria-label="닫기"
-                    class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all">
+                    class="p-2 text-gray-400 hover:text-ink-muted hover:bg-surface-hover rounded-xl transition-all">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
@@ -400,9 +400,9 @@
             <input type="hidden" name="conversationId" th:value="${conversationId}"/>
 
             <div>
-                <label for="reportReason" class="block text-sm font-semibold text-gray-700 mb-2">신고 사유</label>
+                <label for="reportReason" class="block text-sm font-semibold text-ink-muted mb-2">신고 사유</label>
                 <select id="reportReason" name="reason" required
-                        class="w-full text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-300 focus:bg-white transition-all">
+                        class="w-full text-sm text-gray-800 bg-surface-muted border border-line-strong rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-300 focus:bg-surface transition-all">
                     <option value="ABUSE">욕설/폭언</option>
                     <option value="FRAUD">사기/금전 요구</option>
                     <option value="NO_SHOW">약속 불이행(노쇼)</option>
@@ -412,12 +412,12 @@
             </div>
 
             <div>
-                <label for="reportDetail" class="block text-sm font-semibold text-gray-700 mb-2">
+                <label for="reportDetail" class="block text-sm font-semibold text-ink-muted mb-2">
                     상세 내용 <span class="font-normal text-gray-400">(선택)</span>
                 </label>
                 <textarea id="reportDetail" name="detail" rows="4" maxlength="1000"
                           placeholder="구체적인 상황을 적어주시면 검토에 도움이 됩니다."
-                          class="w-full text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 resize-none focus:outline-none focus:border-indigo-300 focus:bg-white transition-all"></textarea>
+                          class="w-full text-sm text-gray-800 bg-surface-muted border border-line-strong rounded-xl px-4 py-3 resize-none focus:outline-none focus:border-indigo-300 focus:bg-surface transition-all"></textarea>
             </div>
 
             <p class="text-xs text-gray-400 leading-relaxed">
@@ -426,7 +426,7 @@
 
             <div class="flex gap-3 pt-1">
                 <button type="button" onclick="hideReportModal()"
-                        class="flex-1 py-3 text-sm font-semibold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all">
+                        class="flex-1 py-3 text-sm font-semibold text-ink-muted bg-surface-hover rounded-xl hover:bg-gray-200 transition-all">
                     취소
                 </button>
                 <button type="submit"
@@ -617,7 +617,7 @@ function buildMessage(msg) {
                         <span class="px-1.5 py-0.5 text-[10px] font-semibold rounded-md ${roleCls}">${roleLabel}</span>
                         <span class="text-[10px] text-gray-400 font-medium">${msg.senderName || ''}</span>
                     </div>
-                    <div class="bg-gray-50 border border-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
+                    <div class="bg-surface-muted border border-line rounded-2xl rounded-bl-md px-4 py-3">
                         <p class="text-sm text-gray-800">${escaped}</p>
                     </div>
                     <p class="text-[11px] text-gray-400 mt-1 ml-1">${time}</p>
@@ -630,7 +630,7 @@ function buildMessage(msg) {
         return `<div class="flex items-end gap-2.5">
             ${avatarHtml}
             <div class="max-w-[70%]">
-                <div class="bg-gray-50 border border-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
+                <div class="bg-surface-muted border border-line rounded-2xl rounded-bl-md px-4 py-3">
                     <p class="text-sm text-gray-800">${escaped}</p>
                 </div>
                 <p class="text-[11px] text-gray-400 mt-1 ml-1">${time}</p>
@@ -641,9 +641,9 @@ function buildMessage(msg) {
 
 function buildDateDivider(label) {
     return `<div class="flex items-center gap-3 my-2">
-        <div class="flex-1 h-px bg-gray-100"></div>
+        <div class="flex-1 h-px bg-surface-hover"></div>
         <span class="text-xs text-gray-400 font-medium flex-shrink-0">${label}</span>
-        <div class="flex-1 h-px bg-gray-100"></div>
+        <div class="flex-1 h-px bg-surface-hover"></div>
     </div>`;
 }
 
