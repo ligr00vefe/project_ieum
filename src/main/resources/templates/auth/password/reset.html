@@ -5,14 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>새 비밀번호 설정 - 이음 Care Match</title>
     <link th:href="@{/css/output.css}" rel="stylesheet">
+    <th:block th:replace="~{layout/prefs :: prefs}"></th:block>
     <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon.png">
 </head>
-<body class="min-h-screen bg-slate-50 flex flex-col">
+<body class="min-h-screen bg-surface-alt flex flex-col">
 
-    <div class="bg-white border-b border-gray-100 px-4 py-3.5">
+    <div class="bg-surface border-b border-line px-4 py-3.5">
         <div class="max-w-7xl mx-auto flex items-center">
             <a th:href="@{/}" class="flex items-center gap-2.5 group">
                 <div class="w-8 h-8 bg-teal-500 rounded-xl flex items-center justify-center group-hover:bg-teal-600 transition-colors">
@@ -21,7 +22,7 @@
                     </svg>
                 </div>
                 <div class="leading-tight">
-                    <div class="text-[14px] font-bold text-gray-900">이음</div>
+                    <div class="text-[14px] font-bold text-ink">이음</div>
                     <div class="text-[9px] text-gray-400 font-medium tracking-wide -mt-0.5">Care Match</div>
                 </div>
             </a>
@@ -38,11 +39,11 @@
                               d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                     </svg>
                 </div>
-                <h1 class="text-2xl font-extrabold text-gray-900 mb-2">새 비밀번호 설정</h1>
+                <h1 class="text-2xl font-extrabold text-ink mb-2">새 비밀번호 설정</h1>
                 <p class="text-sm text-gray-500">8자 이상의 새 비밀번호를 입력해 주세요.</p>
             </div>
 
-            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+            <div class="bg-surface rounded-3xl shadow-sm border border-line p-8">
 
                 <div th:if="${errorMessage}"
                      class="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-xl mb-6">
@@ -65,7 +66,7 @@
                     <input type="hidden" name="token" th:value="${token}"/>
 
                     <div class="space-y-1.5">
-                        <label for="newPassword" class="block text-sm font-semibold text-gray-700">새 비밀번호</label>
+                        <label for="newPassword" class="block text-sm font-semibold text-ink-muted">새 비밀번호</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                 <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -78,13 +79,13 @@
                                    autocomplete="new-password"
                                    placeholder="새 비밀번호 (8자 이상)"
                                    minlength="8"
-                                   class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                   class="w-full pl-10 pr-4 py-3 border border-line-strong rounded-xl text-sm text-ink placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                                    required>
                         </div>
                     </div>
 
                     <div class="space-y-1.5">
-                        <label for="confirmPassword" class="block text-sm font-semibold text-gray-700">비밀번호 확인</label>
+                        <label for="confirmPassword" class="block text-sm font-semibold text-ink-muted">비밀번호 확인</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                 <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -97,7 +98,7 @@
                                    autocomplete="new-password"
                                    placeholder="비밀번호를 다시 입력하세요"
                                    minlength="8"
-                                   class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                   class="w-full pl-10 pr-4 py-3 border border-line-strong rounded-xl text-sm text-ink placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                                    required>
                         </div>
                     </div>

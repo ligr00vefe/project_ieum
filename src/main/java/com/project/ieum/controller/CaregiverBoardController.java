@@ -240,7 +240,7 @@ public class CaregiverBoardController {
         return "redirect:/caregiver/board/" + requestId;
     }
 
-    // 활동 시작/종료 양측 확인 — 도우미(선정된 활동지원사) 측.
+    // 활동 시작/종료 양측 확인 — 활동지원사(선정된 활동지원사) 측.
     @PostMapping("/{id}/confirm-start")
     public String confirmStart(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         matchingService.confirmStart(id);

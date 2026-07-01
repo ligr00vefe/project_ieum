@@ -6,7 +6,7 @@
 
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h2 class="text-xl font-bold text-slate-900">공지사항</h2>
+            <h2 class="text-xl font-bold text-ink">공지사항</h2>
             <p class="text-sm text-slate-500 mt-0.5">공지사항을 등록하고 관리하세요.</p>
         </div>
         <a th:href="@{/admin/notices/new}"
@@ -22,10 +22,10 @@
          class="mb-4 px-4 py-3 rounded-xl bg-teal-50 border border-teal-200 text-sm text-teal-700"
          th:text="${message}"></div>
 
-    <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+    <div class="bg-surface rounded-2xl border border-line overflow-hidden">
         <table class="w-full text-sm">
             <thead>
-                <tr class="border-b border-slate-100 bg-slate-50">
+                <tr class="border-b border-line bg-surface-alt">
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide w-8"></th>
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">제목</th>
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">작성자</th>
@@ -34,9 +34,9 @@
                     <th class="px-5 py-3"></th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-50">
+            <tbody class="divide-y divide-line">
                 <th:block th:each="notice : ${notices}">
-                <tr class="hover:bg-slate-50 transition-colors"
+                <tr class="hover:bg-surface-alt transition-colors"
                     th:classappend="${!notice.isPublic} ? 'opacity-60' : ''">
                     <td class="px-5 py-3.5 text-center">
                         <svg th:if="${notice.isPinned}" class="w-3.5 h-3.5 text-amber-400 mx-auto" fill="currentColor" viewBox="0 0 20 20">
@@ -45,7 +45,7 @@
                     </td>
                     <td class="px-5 py-3.5">
                         <a th:href="@{/admin/notices/{id}(id=${notice.id})}"
-                           class="font-medium text-slate-800 hover:text-indigo-600 truncate max-w-sm block transition-colors"
+                           class="font-medium text-ink hover:text-indigo-600 truncate max-w-sm block transition-colors"
                            th:text="${notice.title}">제목</a>
                     </td>
                     <td class="px-5 py-3.5 text-slate-500 text-xs"
@@ -62,12 +62,12 @@
                             <form th:action="@{/admin/notices/{id}/pin(id=${notice.id})}" method="post" class="inline">
                                 <button type="submit"
                                         th:text="${notice.isPinned ? '고정해제' : '고정'}"
-                                        class="text-xs font-medium text-slate-400 hover:text-slate-700 transition-colors">고정</button>
+                                        class="text-xs font-medium text-slate-400 hover:text-ink-muted transition-colors">고정</button>
                             </form>
                             <form th:action="@{/admin/notices/{id}/visibility(id=${notice.id})}" method="post" class="inline">
                                 <button type="submit"
                                         th:text="${notice.isPublic ? '비공개' : '공개'}"
-                                        class="text-xs font-medium text-slate-400 hover:text-slate-700 transition-colors">비공개</button>
+                                        class="text-xs font-medium text-slate-400 hover:text-ink-muted transition-colors">비공개</button>
                             </form>
                             <a th:href="@{/admin/notices/{id}/edit(id=${notice.id})}"
                                class="text-xs font-medium text-indigo-500 hover:text-indigo-700">수정</a>
