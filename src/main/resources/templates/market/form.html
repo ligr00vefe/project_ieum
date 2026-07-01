@@ -48,7 +48,7 @@
                 </label>
                 <div id="imagePreviewGrid" class="grid grid-cols-5 gap-2 mb-3">
                     <div th:each="i : ${#numbers.sequence(0,4)}"
-                         class="image-slot relative aspect-square rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-slate-300 overflow-hidden cursor-pointer hover:border-orange-300 transition-colors"
+                         class="image-slot relative aspect-square rounded-xl border-2 border-dashed border-slate-200 bg-surface-alt flex items-center justify-center text-slate-300 overflow-hidden cursor-pointer hover:border-orange-300 transition-colors"
                          th:attr="data-index=${i}"
                          onclick="triggerImageInput(this)">
                         <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -140,7 +140,7 @@
             <!-- 버튼 -->
             <div class="flex justify-end gap-3 pt-2">
                 <a th:href="${postId == null} ? @{/market} : @{/market/{id}(id=${postId})}"
-                   class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+                   class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-surface-alt transition-all">
                     취소
                 </a>
                 <button type="submit"
