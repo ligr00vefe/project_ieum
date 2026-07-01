@@ -1,10 +1,7 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout/base :: head('이음마켓')}"></head>
-<body class="min-h-screen bg-[#f6f7ff] text-slate-900">
-<div th:replace="~{layout/header :: header}"></div>
-
-<main class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="content">
+<div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 
     <!-- 페이지 헤더 -->
     <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
@@ -41,7 +38,7 @@
     <form th:action="@{/market}" method="get" class="mb-6 flex flex-wrap gap-2">
         <!-- sharing 값 유지 -->
         <input type="hidden" name="sharing" th:value="${condition.sharing}">
-        <select name="categoryId"
+        <select name="categoryId" id="categorySelect"
                 class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-300">
             <option value="">전체 카테고리</option>
             <option th:each="cat : ${categories}"
@@ -190,8 +187,13 @@
     </section>
 
     <!-- 빈 결과 -->
-    <div th:if="${posts.empty}"
+    <div th:if="${posts.empty}" id="emptyMessage"
          class="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-slate-400 mt-4">
+        <p class="text-lg font-semibold mb-1">등록된 상품이 없습니다.</p>
+        <p class="text-sm">첫 번째로 상품을 등록해보세요!</p>
+    </div>
+    <div th:unless="${posts.empty}" id="emptyMessage"
+         class="hidden rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-slate-400 mt-4">
         <p class="text-lg font-semibold mb-1">등록된 상품이 없습니다.</p>
         <p class="text-sm">첫 번째로 상품을 등록해보세요!</p>
     </div>
@@ -208,7 +210,10 @@
         <p id="endMessage" class="hidden text-xs text-slate-300">마지막 상품입니다</p>
     </div>
 
-</main>
+</div>
+
+<!-- Axios — 데이터 조회(무한스크롤/카테고리 필터) HTTP 클라이언트 -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script th:inline="javascript">
 (function () {
@@ -224,10 +229,12 @@
     let isLoading  = false;
     let isLast     = INITIAL_LAST;
 
-    const grid     = document.getElementById('postGrid');
-    const spinner  = document.getElementById('loadingSpinner');
-    const endMsg   = document.getElementById('endMessage');
-    const sentinel = document.getElementById('infiniteScrollSentinel');
+    const grid          = document.getElementById('postGrid');
+    const spinner       = document.getElementById('loadingSpinner');
+    const endMsg        = document.getElementById('endMessage');
+    const sentinel      = document.getElementById('infiniteScrollSentinel');
+    const emptyMessage  = document.getElementById('emptyMessage');
+    const categorySelect = document.getElementById('categorySelect');
 
     if (isLast) {
         endMsg.classList.remove('hidden');
@@ -307,9 +314,7 @@
 
         try {
             searchParams.set('page', nextPage);
-            const res  = await fetch(`/market/api/posts?${searchParams.toString()}`);
-            if (!res.ok) throw new Error('fetch failed');
-            const data = await res.json();
+            const { data } = await axios.get('/market/api/posts', { params: Object.fromEntries(searchParams) });
 
             data.content.forEach(post => {
                 const html = buildCard(post);
@@ -337,7 +342,49 @@
     }, { rootMargin: '200px' });   // 하단 200px 전에 미리 트리거
 
     if (!isLast) observer.observe(sentinel);
+
+    // ── 카테고리 변경 시 즉시 재조회 ─────────────────────────────────────────
+    async function reloadByCategory() {
+        if (isLoading) return;
+        isLoading = true;
+        spinner.classList.remove('hidden');
+        endMsg.classList.add('hidden');
+        emptyMessage.classList.add('hidden');
+        observer.disconnect();
+
+        searchParams.set('categoryId', categorySelect.value);
+        searchParams.set('page', '0');
+
+        try {
+            const { data } = await axios.get('/market/api/posts', { params: Object.fromEntries(searchParams) });
+
+            grid.innerHTML = '';
+            data.content.forEach(post => {
+                const html = buildCard(post);
+                if (html) grid.insertAdjacentHTML('beforeend', html);
+            });
+
+            isLast   = data.last;
+            nextPage = 1;
+
+            if (data.content.length === 0) {
+                emptyMessage.classList.remove('hidden');
+            }
+            if (isLast) {
+                endMsg.classList.remove('hidden');
+            } else {
+                observer.observe(sentinel);
+            }
+        } catch (e) {
+            console.error('카테고리 필터 재조회 실패', e);
+        } finally {
+            isLoading = false;
+            spinner.classList.add('hidden');
+        }
+    }
+
+    categorySelect.addEventListener('change', reloadByCategory);
 })();
 </script>
-</body>
+</th:block>
 </html>
