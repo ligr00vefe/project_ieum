@@ -21,13 +21,9 @@
 @keyframes node-glow{0%,100%{box-shadow:0 0 0 0 rgba(94,234,212,.75)}50%{box-shadow:0 0 0 22px rgba(94,234,212,0)}}
 .s-node.on > div { animation: node-glow 2.2s ease-in-out infinite; }
 
-/* Testimonials: CSS marquee infinite scroll */
+/* Testimonials: GSAP-driven infinite scroll (marquee) — 트랙 이동은 스크립트에서 gsap.fromTo로 처리 */
 .testi-col{flex:1;overflow:hidden;position:relative;}
 .testi-track{display:flex;flex-direction:column;gap:16px;will-change:transform;}
-@keyframes marquee-up{from{transform:translateY(0)}to{transform:translateY(-50%)}}
-@keyframes marquee-down{from{transform:translateY(-50%)}to{transform:translateY(0)}}
-.track-up{animation:marquee-up 28s linear infinite;}
-.track-down{animation:marquee-down 24s linear infinite;}
 
 /* Float wave animation for care photo cards */
 @keyframes float-wave{0%,100%{transform:translateY(0px)}50%{transform:translateY(-18px)}}
@@ -72,10 +68,9 @@
                     </a>
                 </th:block>
                 <th:block th:if="${isCaregiver}">
-                    <a th:href="@{/requests/list}" class="inline-flex items-center justify-center gap-2 px-7 py-4 bg-teal-500 text-white font-bold text-[15px] rounded-2xl hover:bg-teal-400 active:scale-95 transition-all shadow-2xl shadow-teal-900/40">
-                        매칭게시판<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                    <a th:href="@{/board}" class="inline-flex items-center justify-center gap-2 px-7 py-4 bg-teal-500 text-white font-bold text-[15px] rounded-2xl hover:bg-teal-400 active:scale-95 transition-all shadow-2xl shadow-teal-900/40">
+                        매칭 현황보기<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
                     </a>
-                    <a th:href="@{/matching}" class="inline-flex items-center justify-center px-7 py-4 border border-white/30 text-white font-semibold text-[15px] rounded-2xl hover:bg-white/15 active:scale-95 transition-all backdrop-blur-sm">매칭 현황 보기</a>
                 </th:block>
             </div>
             <div class="flex items-center gap-4 sm:gap-8 pt-6 sm:pt-8 border-t border-white/20">
@@ -543,7 +538,7 @@
 <section class="py-20 lg:py-28 bg-white">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center fade-up">
         <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-7" style="background:linear-gradient(135deg,#ccfbf1,#99f6e4);">
-            <svg class="w-8 h-8 text-teal-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/></svg>
+            <img src="/images/favicon/android-chrome-192x192.png" alt="이음" class="w-9 h-9 object-contain">
         </div>
         <h2 class="font-banner text-3xl sm:text-4xl text-gray-900 mb-4 leading-[1.2]">지금 이음으로 시작하세요</h2>
         <p class="text-gray-500 text-lg mb-10 leading-relaxed">회원가입은 무료이며 5분이면 완료됩니다.<br>나에게 딱 맞는 케어 파트너를 지금 만나보세요.</p>
@@ -566,6 +561,10 @@
         </th:block>
     </div>
 </section>
+
+<!-- GSAP + ScrollTrigger — 스토리 라인 모션 / 테스티모니얼 마퀴에 사용 -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 
 <script>
 /* Stat counter */
@@ -639,15 +638,35 @@
 })();
 
 
-/* Story zigzag SVG — 3 segments with increasing thickness */
+/* Story zigzag SVG — GSAP ScrollTrigger 기반 (3 segments with increasing thickness) */
 (function () {
     var container = document.getElementById('storyContainer');
     var svg       = document.getElementById('storySvg');
     var nodes     = Array.from(document.querySelectorAll('.s-node'));
     var cards     = Array.from(document.querySelectorAll('.s-card'));
-    if (!container || !nodes.length) return;
+    if (!container || !nodes.length || typeof gsap === 'undefined') return;
+
+    gsap.registerPlugin(ScrollTrigger);
 
     var segments = [];
+    var trigger  = null;
+
+    function applyProgress(progress) {
+        if (!segments.length) return;
+        var n = segments.length;
+        segments.forEach(function (seg, i) {
+            var segP = Math.max(0, Math.min(1, (progress - i / n) / (1 / n)));
+            var offset = seg.len * (1 - segP);
+            if (seg.lineEl) seg.lineEl.style.strokeDashoffset = offset;
+            if (seg.glowEl) seg.glowEl.style.strokeDashoffset = offset;
+        });
+        nodes.forEach(function (node, i) {
+            if (progress > (i / nodes.length) * 0.75) {
+                node.classList.add('on');
+                if (cards[i]) cards[i].classList.add('on');
+            }
+        });
+    }
 
     function buildPath() {
         var cRect = container.getBoundingClientRect();
@@ -676,35 +695,35 @@
             if (glowEl) { glowEl.style.strokeDasharray = len; glowEl.style.strokeDashoffset = len; }
             segments.push({ lineEl: lineEl, glowEl: glowEl, len: len });
         }
-        onScroll();
-    }
 
-    function onScroll() {
-        if (!segments.length) return;
-        var cRect = container.getBoundingClientRect();
-        var vh = window.innerHeight;
-        var progress = Math.max(0, Math.min(1, (vh - cRect.top) / (cRect.height + vh * 0.3)));
-        var n = segments.length;
-        segments.forEach(function(seg, i) {
-            var segP = Math.max(0, Math.min(1, (progress - i / n) / (1 / n)));
-            var offset = seg.len * (1 - segP);
-            if (seg.lineEl) seg.lineEl.style.strokeDashoffset = offset;
-            if (seg.glowEl) seg.glowEl.style.strokeDashoffset = offset;
+        // 기존 window scroll 핸들러의 progress 공식과 동일하게 start/end 픽셀 범위를 맞춘다
+        // progress = (vh - top) / (H + vh*0.3)  ⇔  start: 'top bottom', end: start + (H + vh*0.3)
+        if (trigger) trigger.kill();
+        trigger = ScrollTrigger.create({
+            trigger: container,
+            start: 'top bottom',
+            end: '+=' + (H + window.innerHeight * 0.3),
+            scrub: true,
+            onUpdate: function (self) { applyProgress(self.progress); }
         });
-        nodes.forEach(function (node, i) {
-            if (progress > (i / nodes.length) * 0.75) {
-                node.classList.add('on');
-                if (cards[i]) cards[i].classList.add('on');
-            }
-        });
+        applyProgress(trigger.progress);
     }
 
     function init() { setTimeout(buildPath, 80); }
     if (document.readyState === 'complete') init();
     else window.addEventListener('load', init);
 
-    window.addEventListener('resize', buildPath, { passive: true });
-    window.addEventListener('scroll', onScroll,  { passive: true });
+    window.addEventListener('resize', function () {
+        buildPath();
+        ScrollTrigger.refresh();
+    }, { passive: true });
+})();
+
+/* 테스티모니얼 — GSAP 무한 마퀴 (기존 CSS keyframes와 동일한 방향·속도) */
+(function () {
+    if (typeof gsap === 'undefined') return;
+    gsap.to('.track-up', { yPercent: -50, duration: 28, ease: 'none', repeat: -1 });
+    gsap.fromTo('.track-down', { yPercent: -50 }, { yPercent: 0, duration: 24, ease: 'none', repeat: -1 });
 })();
 </script>
 

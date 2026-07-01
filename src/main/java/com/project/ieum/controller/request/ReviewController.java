@@ -24,7 +24,8 @@ public class ReviewController {
         model.addAttribute("title", "후기 작성");
         model.addAttribute("request", helpRequestService.get(requestId));
         model.addAttribute("form", new ReviewForm());
-        return "review/form";
+        model.addAttribute("content", "review/form");
+        return "layout/layout";
     }
 
     @PostMapping("/requests/{requestId}")
@@ -37,7 +38,8 @@ public class ReviewController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("title", "후기 작성");
             model.addAttribute("request", helpRequestService.get(requestId));
-            return "review/form";
+            model.addAttribute("content", "review/form");
+            return "layout/layout";
         }
         reviewService.create(requestId, form);
         redirectAttributes.addFlashAttribute("message", "후기가 등록되었습니다.");

@@ -53,6 +53,8 @@
     </script>
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <!-- 전역 페이지 전환 로더 (롤백: 이 줄만 삭제) -->
+    <th:block th:replace="~{layout/loader :: loader}"></th:block>
     <!-- TMap JS SDK — 공식 권장대로 head에 정적 로드. 정적 <script>는 파싱 중 실행되어
          SDK 내부의 document.write가 정상 동작한다(동적 삽입 시 차단·미정의 위험).
          tmapAppKey를 model에 담은 페이지에서만 로드. -->

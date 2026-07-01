@@ -45,7 +45,6 @@ public class SecurityConfig {
                         "/api/auth/email/**",
                         "/how-to-use",
                         "/safe-meeting",
-                        "/contact",
                         "/css/**",
                         "/js/**",
                         "/images/**",

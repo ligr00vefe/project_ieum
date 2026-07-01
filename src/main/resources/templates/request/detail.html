@@ -1,10 +1,8 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout/base :: head('도움 요청 상세')}"></head>
-<body class="min-h-screen bg-[#f6f7ff] text-slate-900">
-<div th:replace="~{layout/header :: header}"></div>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="content">
 <div th:replace="~{layout/nav :: nav}"></div>
-<main class="mx-auto grid w-full max-w-6xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
+<div class="mx-auto grid w-full max-w-6xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
     <section class="rounded-lg border border-indigo-100 bg-white p-6 shadow-sm">
         <p class="text-sm font-semibold text-indigo-700" th:text="${request.serviceCategory.nameKo}">외출 보조</p>
         <h1 class="mt-2 text-2xl font-bold" th:text="${request.title}">도움 요청</h1>
@@ -48,7 +46,6 @@
             </div>
         </section>
     </aside>
-</main>
-<div th:replace="~{layout/footer :: footer}"></div>
-</body>
+</div>
+</th:block>
 </html>
