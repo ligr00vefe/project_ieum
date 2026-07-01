@@ -3,7 +3,7 @@
 <th:block th:fragment="content">
 <div class="mx-auto w-full max-w-2xl px-4 py-6 sm:px-6 lg:px-8">
 
-    <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+    <div class="rounded-2xl border border-line bg-surface p-6 shadow-sm">
         <p class="text-sm font-semibold text-orange-500">이음 마켓</p>
         <h1 class="mt-1 text-2xl font-bold"
             th:text="${postId == null} ? '상품 등록' : '상품 수정'">상품 등록</h1>
@@ -27,14 +27,14 @@
                     <label class="flex-1 cursor-pointer">
                         <input type="radio" name="sharing" value="false" class="sr-only peer"
                                th:checked="${!form.sharing}">
-                        <div class="rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-500 transition-all peer-checked:border-orange-400 peer-checked:bg-orange-50 peer-checked:text-orange-600">
+                        <div class="rounded-xl border-2 border-line-strong bg-surface px-4 py-3 text-center text-sm font-semibold text-slate-500 transition-all peer-checked:border-orange-400 peer-checked:bg-orange-50 peer-checked:text-orange-600">
                             💰 판매
                         </div>
                     </label>
                     <label class="flex-1 cursor-pointer">
                         <input type="radio" name="sharing" value="true" class="sr-only peer"
                                th:checked="${form.sharing}">
-                        <div class="rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-500 transition-all peer-checked:border-teal-400 peer-checked:bg-teal-50 peer-checked:text-teal-600">
+                        <div class="rounded-xl border-2 border-line-strong bg-surface px-4 py-3 text-center text-sm font-semibold text-slate-500 transition-all peer-checked:border-teal-400 peer-checked:bg-teal-50 peer-checked:text-teal-600">
                             🤝 나눔 (무료)
                         </div>
                     </label>
@@ -48,7 +48,7 @@
                 </label>
                 <div id="imagePreviewGrid" class="grid grid-cols-5 gap-2 mb-3">
                     <div th:each="i : ${#numbers.sequence(0,4)}"
-                         class="image-slot relative aspect-square rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-slate-300 overflow-hidden cursor-pointer hover:border-orange-300 transition-colors"
+                         class="image-slot relative aspect-square rounded-xl border-2 border-dashed border-line-strong bg-surface-alt flex items-center justify-center text-slate-300 overflow-hidden cursor-pointer hover:border-orange-300 transition-colors"
                          th:attr="data-index=${i}"
                          onclick="triggerImageInput(this)">
                         <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -71,7 +71,7 @@
                 <label for="title" class="mb-1 block text-sm font-semibold">상품명</label>
                 <input id="title" th:field="*{title}" type="text"
                        placeholder="상품명을 입력해주세요"
-                       class="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
+                       class="w-full rounded-xl border border-line-strong px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
                 <p th:if="${#fields.hasErrors('title')}" th:errors="*{title}"
                    class="mt-1 text-sm text-red-600"></p>
             </div>
@@ -81,7 +81,7 @@
                 <div>
                     <label for="categoryId" class="mb-1 block text-sm font-semibold">카테고리</label>
                     <select id="categoryId" th:field="*{categoryId}" required
-                            class="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
+                            class="w-full rounded-xl border border-line-strong px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
                         <option value="">선택해주세요</option>
                         <option th:each="cat : ${categories}"
                                 th:value="${cat.id}"
@@ -93,7 +93,7 @@
                 <div id="priceField">
                     <label for="price" class="mb-1 block text-sm font-semibold">판매가격 (원)</label>
                     <input id="price" th:field="*{price}" type="number" placeholder="0" min="0"
-                           class="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
+                           class="w-full rounded-xl border border-line-strong px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
                     <p th:if="${#fields.hasErrors('price')}" th:errors="*{price}"
                        class="mt-1 text-sm text-red-600"></p>
                 </div>
@@ -110,7 +110,7 @@
                 </label>
                 <textarea id="description" th:field="*{description}" rows="5"
                           placeholder="상품 상태, 구매 시기, 사용감 등을 자세히 설명해주세요."
-                          class="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200 resize-none"></textarea>
+                          class="w-full rounded-xl border border-line-strong px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200 resize-none"></textarea>
                 <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}"
                    class="mt-1 text-sm text-red-600"></p>
             </div>
@@ -119,7 +119,7 @@
             <div>
                 <label class="mb-1 block text-sm font-semibold">만남 장소</label>
                 <button type="button" onclick="openAddressSearch()"
-                        class="w-full rounded-xl border-2 border-dashed border-slate-200 px-3 py-3 text-sm text-slate-500 hover:border-orange-300 hover:text-orange-500 transition-all text-left">
+                        class="w-full rounded-xl border-2 border-dashed border-line-strong px-3 py-3 text-sm text-slate-500 hover:border-orange-300 hover:text-orange-500 transition-all text-left">
                     <span id="addressDisplayText"
                           th:text="${form.roadAddress != null and !form.roadAddress.isEmpty()} ? ${form.roadAddress} : '📍 클릭해서 주소 검색'">
                         📍 클릭해서 주소 검색
@@ -134,13 +134,13 @@
                    class="mt-1 text-sm text-red-600"></p>
                 <input id="addressDetail" th:field="*{addressDetail}" type="text"
                        placeholder="상세 장소 입력 (예: 2번 출구 앞, 편의점 앞)"
-                       class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
+                       class="mt-2 w-full rounded-xl border border-line-strong px-3 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200">
             </div>
 
             <!-- 버튼 -->
             <div class="flex justify-end gap-3 pt-2">
                 <a th:href="${postId == null} ? @{/market} : @{/market/{id}(id=${postId})}"
-                   class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+                   class="rounded-xl border border-line-strong px-5 py-2.5 text-sm font-semibold text-ink-muted hover:bg-surface-alt transition-all">
                     취소
                 </a>
                 <button type="submit"

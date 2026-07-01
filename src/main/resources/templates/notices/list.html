@@ -23,10 +23,10 @@
     </div>
 
     <!-- 목록 -->
-    <div class="rounded-2xl border border-gray-200 overflow-hidden bg-white">
+    <div class="rounded-2xl border border-line-strong overflow-hidden bg-surface">
         <th:block th:each="notice, iter : ${notices}">
             <a th:href="@{/notices/{id}(id=${notice.id})}"
-               th:classappend="${!iter.last} ? 'border-b border-gray-200'"
+               th:classappend="${!iter.last} ? 'border-b border-line-strong'"
                class="flex items-center gap-4 px-5 py-4 hover:bg-indigo-50/50 transition-colors group">
 
                 <!-- 번호 -->
@@ -42,7 +42,7 @@
                         <span th:if="${notice.isPinned}"
                               class="px-2 py-0.5 bg-amber-50 text-amber-600 text-[11px] font-bold rounded-md">상단 고정</span>
                     </div>
-                    <p class="text-sm font-semibold text-gray-800 truncate group-hover:text-indigo-600 transition-colors"
+                    <p class="text-sm font-semibold text-ink truncate group-hover:text-indigo-600 transition-colors"
                        th:text="${notice.title}">제목</p>
                 </div>
 

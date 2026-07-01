@@ -6,7 +6,7 @@
 
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h2 class="text-xl font-bold text-slate-900">리뷰 관리</h2>
+            <h2 class="text-xl font-bold text-ink">리뷰 관리</h2>
             <p class="text-sm text-slate-500 mt-0.5">부적절한 리뷰를 숨김 처리할 수 있습니다.</p>
         </div>
     </div>
@@ -15,10 +15,10 @@
          class="mb-4 px-4 py-3 rounded-xl bg-teal-50 border border-teal-200 text-sm text-teal-700"
          th:text="${message}"></div>
 
-    <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+    <div class="bg-surface rounded-2xl border border-line overflow-hidden">
         <table class="w-full text-sm">
             <thead>
-                <tr class="border-b border-slate-100 bg-slate-50">
+                <tr class="border-b border-line bg-surface-alt">
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">내용</th>
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">작성자</th>
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">대상 지원사</th>
@@ -28,25 +28,25 @@
                     <th class="px-5 py-3"></th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-50">
+            <tbody class="divide-y divide-line">
                 <th:block th:each="review : ${reviews}">
-                <tr class="hover:bg-slate-50 transition-colors cursor-pointer"
+                <tr class="hover:bg-surface-alt transition-colors cursor-pointer"
                     th:classappend="${review.visibility.name() == 'PRIVATE'} ? 'opacity-50' : ''"
                     th:onclick="|location.href='@{/admin/reviews/{id}(id=${review.id})}'|">
                     <td class="px-5 py-3.5">
-                        <p class="text-slate-700 truncate max-w-xs"
+                        <p class="text-ink-muted truncate max-w-xs"
                            th:text="${review.body != null ? review.body : '(내용 없음)'}">내용</p>
                     </td>
-                    <td class="px-5 py-3.5 text-slate-600 text-xs"
+                    <td class="px-5 py-3.5 text-ink-muted text-xs"
                         th:text="${review.author?.fullName ?: '-'}">-</td>
-                    <td class="px-5 py-3.5 text-slate-600 text-xs"
+                    <td class="px-5 py-3.5 text-ink-muted text-xs"
                         th:text="${review.target?.fullName ?: '-'}">-</td>
                     <td class="px-5 py-3.5">
                         <div class="flex items-center gap-0.5">
                             <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                             </svg>
-                            <span class="text-sm font-semibold text-slate-700" th:text="${review.rating}">5</span>
+                            <span class="text-sm font-semibold text-ink-muted" th:text="${review.rating}">5</span>
                         </div>
                     </td>
                     <td class="px-5 py-3.5">
