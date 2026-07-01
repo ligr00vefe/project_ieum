@@ -44,7 +44,7 @@ public class HelpRequestApplication extends BasicEntity {
   private ApplicationStatus status;
 
   // ── 활동 양측 확인(핸드셰이크) 플래그 ──
-  // 선정된(ACCEPTED) 지원에 한해 의미를 가진다. 이용자·도우미가 각자 시작/종료를 확인하고,
+  // 선정된(ACCEPTED) 지원에 한해 의미를 가진다. 이용자·활동지원사가 각자 시작/종료를 확인하고,
   // 양측이 모두 확인되면 서비스가 HelpRequest를 전이한다(MATCHED→IN_PROGRESS, IN_PROGRESS→COMPLETED).
   @Column(name = "requester_start_confirmed", nullable = false)
   @Builder.Default

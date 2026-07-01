@@ -7,7 +7,7 @@
     <!-- 헤더 -->
     <div class="flex items-center justify-between mb-5">
         <div>
-            <h1 class="text-lg font-bold text-gray-900">내가 쓴 후기</h1>
+            <h1 class="text-lg font-bold text-ink">내가 쓴 후기</h1>
             <p class="text-xs text-gray-400 mt-0.5" th:text="${reviews != null ? reviews.size() : 0} + '건'">0건</p>
         </div>
         <a th:href="@{/disabled/mypage}"
@@ -20,19 +20,19 @@
     <div th:if="${reviews != null and !reviews.isEmpty()}" class="space-y-3">
         <a th:each="review : ${reviews}"
            th:href="@{/reviews/{id}(id=${review.id})}"
-           class="block bg-white rounded-2xl border border-gray-100 p-5 hover:border-indigo-200 hover:shadow-sm transition-all">
+           class="block bg-surface rounded-2xl border border-line p-5 hover:border-indigo-200 hover:shadow-sm transition-all">
             <div class="flex items-start justify-between gap-3 mb-3">
                 <div class="flex items-center gap-2.5">
                     <div class="w-9 h-9 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 font-bold text-sm flex-shrink-0"
                          th:text="${review.target.fullName != null ? #strings.substring(review.target.fullName, 0, 1) : '?'}">박</div>
                     <div>
-                        <p class="text-sm font-semibold text-gray-900" th:text="${review.target.fullName + ' 활동지원사'}">활동지원사</p>
+                        <p class="text-sm font-semibold text-ink" th:text="${review.target.fullName + ' 활동지원사'}">활동지원사</p>
                         <p class="text-xs text-gray-400"
                            th:text="${review.helpRequest.serviceCategory != null ? review.helpRequest.serviceCategory.name : ''} + ' · ' + ${review.helpRequest.sido} + ' ' + ${review.helpRequest.sigungu}">서비스 · 지역</p>
                     </div>
                 </div>
                 <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full flex-shrink-0"
-                      th:classappend="${review.visibility.name() == 'PUBLIC'} ? 'bg-indigo-50 text-indigo-500' : 'bg-gray-100 text-gray-400'"
+                      th:classappend="${review.visibility.name() == 'PUBLIC'} ? 'bg-indigo-50 text-indigo-500' : 'bg-surface-hover text-gray-400'"
                       th:text="${review.visibility.name() == 'PUBLIC'} ? '공개' : '비공개'">공개</span>
             </div>
             <div class="flex items-center gap-1 mb-2">
@@ -42,7 +42,7 @@
                 </th:block>
                 <span class="text-xs text-gray-500 ml-1" th:text="${review.rating} + '.0'">5.0</span>
             </div>
-            <p class="text-sm text-gray-700 leading-relaxed line-clamp-2" th:text="${review.body}">후기 내용</p>
+            <p class="text-sm text-ink-muted leading-relaxed line-clamp-2" th:text="${review.body}">후기 내용</p>
             <p class="text-xs text-gray-400 mt-2"
                th:text="${#temporals.format(review.createdAt, 'yyyy.MM.dd', new java.util.Locale('ko'))}">날짜</p>
         </a>

@@ -5,14 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>메일 발송 완료 - 이음 Care Match</title>
     <link th:href="@{/css/output.css}" rel="stylesheet">
+    <th:block th:replace="~{layout/prefs :: prefs}"></th:block>
     <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon.png">
 </head>
-<body class="min-h-screen bg-slate-50 flex flex-col">
+<body class="min-h-screen bg-surface-alt flex flex-col">
 
-    <div class="bg-white border-b border-gray-100 px-4 py-3.5">
+    <div class="bg-surface border-b border-line px-4 py-3.5">
         <div class="max-w-7xl mx-auto flex items-center">
             <a th:href="@{/}" class="flex items-center gap-2.5 group">
                 <div class="w-8 h-8 bg-teal-500 rounded-xl flex items-center justify-center group-hover:bg-teal-600 transition-colors">
@@ -21,7 +22,7 @@
                     </svg>
                 </div>
                 <div class="leading-tight">
-                    <div class="text-[14px] font-bold text-gray-900">이음</div>
+                    <div class="text-[14px] font-bold text-ink">이음</div>
                     <div class="text-[9px] text-gray-400 font-medium tracking-wide -mt-0.5">Care Match</div>
                 </div>
             </a>
@@ -37,16 +38,16 @@
                 </svg>
             </div>
 
-            <h1 class="text-2xl font-extrabold text-gray-900 mb-3">임시 비밀번호를 발송했습니다</h1>
+            <h1 class="text-2xl font-extrabold text-ink mb-3">임시 비밀번호를 발송했습니다</h1>
             <p class="text-sm text-gray-500 leading-relaxed mb-8">
                 입력하신 이메일 주소로 임시 비밀번호를 보냈습니다.<br>
-                임시 비밀번호로 로그인 후 <strong class="text-gray-700">비밀번호를 반드시 변경</strong>해 주세요.<br>
+                임시 비밀번호로 로그인 후 <strong class="text-ink-muted">비밀번호를 반드시 변경</strong>해 주세요.<br>
                 메일이 오지 않는다면 스팸 폴더를 확인해 주세요.
             </p>
 
             <div class="space-y-3">
                 <a th:href="@{/password/forgot}"
-                   class="block w-full py-3.5 border border-gray-200 text-sm font-semibold text-gray-700 rounded-xl hover:bg-gray-50 transition-all">
+                   class="block w-full py-3.5 border border-line-strong text-sm font-semibold text-ink-muted rounded-xl hover:bg-surface-muted transition-all">
                     다시 보내기
                 </a>
                 <a th:href="@{/login}"

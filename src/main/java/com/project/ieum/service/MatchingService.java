@@ -79,7 +79,7 @@ public class MatchingService {
         if (applicationRepository.existsByHelpRequest_IdAndCaregiver_UserId(requestId, currentUser.getId())) {
             throw new IllegalStateException("이미 지원한 요청입니다.");
         }
-        // (#22) 정지(BAN)된 사용자 보호 — 정지된 도우미는 지원 불가, 정지된 요청자의 글에도 지원 불가.
+        // (#22) 정지(BAN)된 사용자 보호 — 정지된 활동지원사는 지원 불가, 정지된 요청자의 글에도 지원 불가.
         // (중복지원 체크 뒤에 둔다 — 정상 지원 경로에서만 requester.getUser() 접근, 불필요한 lazy 로딩/NPE 회피)
         if (currentUser.getStatus() == UserStatus.BANNED) {
             throw new ForbiddenException("정지된 계정은 지원할 수 없습니다.");
@@ -209,7 +209,7 @@ public class MatchingService {
         }
     }
 
-    // 활동 시작 확인(핸드셰이크): 이용자·도우미가 각자 호출. 양측이 모두 확인하면 MATCHED→IN_PROGRESS.
+    // 활동 시작 확인(핸드셰이크): 이용자·활동지원사가 각자 호출. 양측이 모두 확인하면 MATCHED→IN_PROGRESS.
     public void confirmStart(Long requestId) {
         User currentUser = currentUserService.getCurrentUser();
         HelpRequest helpRequest = getRequest(requestId);
@@ -266,7 +266,7 @@ public class MatchingService {
                 requestId, userId, List.of(ApplicationStatus.PENDING, ApplicationStatus.ACCEPTED, ApplicationStatus.COMPLETED));
     }
 
-    // 현재 사용자가 이 요청에 선정된 도우미인가(매칭~진행~완료 전 구간).
+    // 현재 사용자가 이 요청에 선정된 활동지원사인가(매칭~진행~완료 전 구간).
     // 핸드셰이크 뷰는 MATCHED/IN_PROGRESS에서만 visible이라 COMPLETED 식별에 쓸 수 없어 별도 판별이 필요하다.
     @Transactional(readOnly = true)
     public boolean isSelectedCaregiver(Long requestId, Long userId) {
@@ -563,7 +563,7 @@ public class MatchingService {
                 matched.endConfirmedBy(party), matched.endConfirmedBy(other), matched.bothEndConfirmed());
     }
 
-    // 상세 페이지(이용자 측)에서 선정된 도우미·대화방을 보여주기 위한 파생 뷰.
+    // 상세 페이지(이용자 측)에서 선정된 활동지원사·대화방을 보여주기 위한 파생 뷰.
     // ACCEPTED 지원이 없으면(아직 미선정·이미 종료) Optional.empty.
     @Transactional(readOnly = true)
     public java.util.Optional<MatchedPartyView> getMatchedParty(Long requestId) {
@@ -631,7 +631,7 @@ public class MatchingService {
                 });
     }
 
-    // 현재 사용자를 매칭의 확인 주체(이용자/도우미)로 해석. 둘 다 아니면 거부.
+    // 현재 사용자를 매칭의 확인 주체(이용자/활동지원사)로 해석. 둘 다 아니면 거부.
     private ConfirmParty resolveParty(HelpRequest helpRequest, HelpRequestApplication matched, Long userId) {
         if (helpRequest.getRequester().getUserId().equals(userId)) {
             return ConfirmParty.REQUESTER;

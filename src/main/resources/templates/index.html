@@ -161,13 +161,13 @@
         <a th:href="@{/}" class="flex items-center gap-2 text-teal-700 font-black text-2xl tracking-tight">
             <span style="color:var(--teal-main)">이음</span>
         </a>
-        <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+        <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-ink-muted">
             <a th:href="@{/caregiver/board}" class="hover:text-teal-600 transition">매칭 게시판</a>
             <a th:href="@{/market}" class="hover:text-teal-600 transition">이음마켓</a>
             <a th:href="@{/register}" class="hover:text-teal-600 transition">가입하기</a>
         </nav>
         <div class="flex items-center gap-3">
-            <a th:href="@{/login}" class="text-sm font-semibold text-slate-600 hover:text-teal-600 transition">로그인</a>
+            <a th:href="@{/login}" class="text-sm font-semibold text-ink-muted hover:text-teal-600 transition">로그인</a>
             <a th:href="@{/register}" class="btn-primary text-sm" style="padding:0.6rem 1.4rem;">가입하기</a>
         </div>
     </div>
@@ -180,7 +180,7 @@
             <!-- 텍스트 -->
             <div>
                 <span class="badge-pill mb-4">✦ 케어메이트 × 활동지원사 매칭 플랫폼</span>
-                <h1 class="text-3xl md:text-5xl font-black text-slate-900 leading-tight mt-4 mb-6">
+                <h1 class="text-3xl md:text-5xl font-black text-ink leading-tight mt-4 mb-6">
                     케어메이트와<br>활동지원사를<br>
                     <span style="color:var(--teal-main)">잇는 매칭 서비스</span>
                 </h1>
@@ -208,24 +208,24 @@
     <div class="max-w-7xl mx-auto">
         <div class="text-center mb-12">
             <span class="section-badge">이음이 특별한 이유</span>
-            <h2 class="text-2xl md:text-4xl font-black text-slate-900 mt-2">
+            <h2 class="text-2xl md:text-4xl font-black text-ink mt-2">
                 신뢰로 연결하는 <span style="color:var(--teal-main)">케어 매칭</span>
             </h2>
         </div>
         <div class="grid md:grid-cols-3 gap-6">
             <div class="feature-card p-8">
                 <div class="feature-icon mb-5" style="background:#e6faf8;">🤝</div>
-                <h3 class="text-lg font-bold text-slate-800 mb-2">신뢰 기반 매칭</h3>
+                <h3 class="text-lg font-bold text-ink mb-2">신뢰 기반 매칭</h3>
                 <p class="text-slate-500 text-sm leading-relaxed">검증된 활동지원사와 케어메이트를 연결해 안심하고 이용할 수 있는 매칭 서비스를 제공합니다.</p>
             </div>
             <div class="feature-card p-8" style="border-top: 4px solid var(--teal-main);">
                 <div class="feature-icon mb-5" style="background:#fef3c7;">💬</div>
-                <h3 class="text-lg font-bold text-slate-800 mb-2">실시간 소통</h3>
+                <h3 class="text-lg font-bold text-ink mb-2">실시간 소통</h3>
                 <p class="text-slate-500 text-sm leading-relaxed">채팅으로 조건을 협의하고, 매칭 확정까지 한 곳에서 모든 과정을 투명하게 진행할 수 있습니다.</p>
             </div>
             <div class="feature-card p-8">
                 <div class="feature-icon mb-5" style="background:#ede9fe;">⭐</div>
-                <h3 class="text-lg font-bold text-slate-800 mb-2">리뷰 & 평점</h3>
+                <h3 class="text-lg font-bold text-ink mb-2">리뷰 & 평점</h3>
                 <p class="text-slate-500 text-sm leading-relaxed">활동 후 리뷰와 평점을 남겨 더 나은 서비스를 만들어 가는 케어 커뮤니티입니다.</p>
             </div>
         </div>
@@ -233,11 +233,11 @@
 </section>
 
 <!-- ── 케어 서비스 이미지 섹션 ── -->
-<section class="py-16 px-4 bg-white">
+<section class="py-16 px-4 bg-surface">
     <div class="max-w-7xl mx-auto">
         <div class="text-center mb-12">
             <span class="section-badge">이음의 돌봄</span>
-            <h2 class="text-2xl md:text-4xl font-black text-slate-900 mt-2">
+            <h2 class="text-2xl md:text-4xl font-black text-ink mt-2">
                 다양한 <span style="color:var(--teal-main)">케어 서비스</span>
             </h2>
             <p class="text-slate-500 mt-3 text-base">일상 활동 지원부터 전문 케어까지, 이음이 함께합니다.</p>
@@ -247,7 +247,7 @@
                 <img th:src="@{/images/main/care01.jpg}" alt="이동 지원 서비스">
                 <div class="p-6">
                     <span class="section-badge" style="font-size:0.75rem;">이동 지원</span>
-                    <h3 class="font-bold text-slate-800 mt-2 mb-1">안전한 이동을 함께</h3>
+                    <h3 class="font-bold text-ink mt-2 mb-1">안전한 이동을 함께</h3>
                     <p class="text-slate-500 text-sm">병원, 외출, 사회 참여 활동까지 함께합니다.</p>
                 </div>
             </div>
@@ -255,7 +255,7 @@
                 <img th:src="@{/images/main/care02.jpg}" alt="교육 지원 서비스">
                 <div class="p-6">
                     <span class="section-badge" style="font-size:0.75rem; background:#fef3c7; color:#92400e; border-color:#fcd34d;">교육 지원</span>
-                    <h3 class="font-bold text-slate-800 mt-2 mb-1">배움의 기회를 함께</h3>
+                    <h3 class="font-bold text-ink mt-2 mb-1">배움의 기회를 함께</h3>
                     <p class="text-slate-500 text-sm">학습 보조와 사회 적응 활동을 지원합니다.</p>
                 </div>
             </div>
@@ -263,7 +263,7 @@
                 <img th:src="@{/images/main/care03.jpg}" alt="일상 돌봄 서비스">
                 <div class="p-6">
                     <span class="section-badge" style="font-size:0.75rem; background:#ede9fe; color:#5b21b6; border-color:#c4b5fd;">일상 돌봄</span>
-                    <h3 class="font-bold text-slate-800 mt-2 mb-1">일상의 따뜻한 동반자</h3>
+                    <h3 class="font-bold text-ink mt-2 mb-1">일상의 따뜻한 동반자</h3>
                     <p class="text-slate-500 text-sm">식사, 위생, 가사 등 일상 전반을 지원합니다.</p>
                 </div>
             </div>
@@ -276,7 +276,7 @@
     <div class="max-w-5xl mx-auto">
         <div class="text-center mb-12">
             <span class="section-badge">이용 방법</span>
-            <h2 class="text-2xl md:text-4xl font-black text-slate-900 mt-2">
+            <h2 class="text-2xl md:text-4xl font-black text-ink mt-2">
                 <span style="color:var(--teal-main)">3단계</span>로 간단하게
             </h2>
         </div>
@@ -285,17 +285,17 @@
             <div class="hidden md:block absolute top-10 left-1/3 right-1/3 h-0.5" style="background: linear-gradient(90deg, var(--teal-light), var(--teal-main));"></div>
             <div class="feature-card p-8 text-center">
                 <div class="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-black mx-auto mb-5" style="background:var(--teal-main);">1</div>
-                <h3 class="font-bold text-slate-800 mb-2">회원가입</h3>
+                <h3 class="font-bold text-ink mb-2">회원가입</h3>
                 <p class="text-slate-500 text-sm">케어메이트 또는 활동지원사로 가입하고 프로필을 완성하세요.</p>
             </div>
             <div class="feature-card p-8 text-center" style="border-top: 4px solid var(--teal-main);">
                 <div class="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-black mx-auto mb-5" style="background:var(--teal-main);">2</div>
-                <h3 class="font-bold text-slate-800 mb-2">요청 & 매칭</h3>
+                <h3 class="font-bold text-ink mb-2">요청 & 매칭</h3>
                 <p class="text-slate-500 text-sm">도움 요청 글을 작성하거나 게시판을 탐색해 원하는 매칭을 찾으세요.</p>
             </div>
             <div class="feature-card p-8 text-center">
                 <div class="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-black mx-auto mb-5" style="background:var(--teal-main);">3</div>
-                <h3 class="font-bold text-slate-800 mb-2">활동 시작</h3>
+                <h3 class="font-bold text-ink mb-2">활동 시작</h3>
                 <p class="text-slate-500 text-sm">채팅으로 소통하고 매칭이 확정되면 활동을 시작하세요.</p>
             </div>
         </div>
@@ -313,11 +313,11 @@
             케어메이트와 활동지원사를 신뢰 기반으로 연결하는<br>이음과 함께하세요.
         </p>
         <div class="flex flex-wrap justify-center gap-4">
-            <a th:href="@{/register}" class="inline-flex items-center gap-2 bg-white font-bold rounded-full px-8 py-4 text-base transition hover:bg-teal-50" style="color:var(--teal-main);">
+            <a th:href="@{/register}" class="inline-flex items-center gap-2 bg-surface font-bold rounded-full px-8 py-4 text-base transition hover:bg-teal-50" style="color:var(--teal-main);">
                 무료로 가입하기
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
             </a>
-            <a th:href="@{/caregiver/board}" class="inline-flex items-center gap-2 border-2 border-white text-white font-bold rounded-full px-8 py-4 text-base transition hover:bg-white hover:text-teal-600">
+            <a th:href="@{/caregiver/board}" class="inline-flex items-center gap-2 border-2 border-white text-white font-bold rounded-full px-8 py-4 text-base transition hover:bg-surface hover:text-teal-600">
                 게시판 둘러보기
             </a>
         </div>

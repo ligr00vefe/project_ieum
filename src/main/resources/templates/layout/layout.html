@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${ogTitle != null ? ogTitle : (title != null ? title + ' - 이음' : '이음 Care Match')}">이음 Care Match</title>
     <link th:href="@{/css/output.css}" rel="stylesheet">
+    <!-- 사용자 환경설정(글자 크기/테마) 초기 적용 — FOUC 방지를 위해 CSS 직후, body 렌더 전에 위치 -->
+    <th:block th:replace="~{layout/prefs :: prefs}"></th:block>
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
@@ -61,7 +63,7 @@
     <script th:if="${loadTmapSdk == true and tmapAppKey != null and !tmapAppKey.isEmpty()}"
             th:src="@{https://apis.openapi.sk.com/tmap/jsv2(version=1,appKey=${tmapAppKey})}"></script>
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col">
+<body class="bg-surface-alt min-h-screen flex flex-col">
 
     <!-- 스킵 내비게이션 -->
     <a href="#main-content"
@@ -86,6 +88,9 @@
         .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0 }
         .focus\:not-sr-only:focus { position:static;width:auto;height:auto;padding:inherit;margin:inherit;overflow:visible;clip:auto;white-space:normal }
     </style>
+
+    <!-- 사용자 환경설정(글자 크기/테마) 토글 인터랙션 -->
+    <script th:src="@{/js/prefs.js}"></script>
 
 </body>
 </html>
