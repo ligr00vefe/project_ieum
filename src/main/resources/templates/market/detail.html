@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout/base :: head('상품 상세 - 이음마켓')}"></head>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="content">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
 <style>
 /* 라이트박스 열릴 때 배경 어둡게 */
@@ -9,10 +9,7 @@
 /* 메인 슬라이드 이미지에 커서 포인터 */
 .slide-link { display:block; width:100%; height:100%; cursor:zoom-in; }
 </style>
-<body class="min-h-screen bg-[#f6f7ff] text-slate-900">
-<div th:replace="~{layout/header :: header}"></div>
-
-<main class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+<div class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
 
     <div th:if="${message}" th:text="${message}"
          class="mb-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-800"></div>
@@ -203,7 +200,7 @@
            th:text="${post.description}">상품 설명</p>
     </div>
 
-</main>
+</div>
 
 <script th:inline="javascript">
 const TOTAL_SLIDES = /*[[${images.size()}]]*/ 0;
@@ -278,5 +275,5 @@ function nextSlide() { goToSlide((currentSlide + 1) % TOTAL_SLIDES); }
     });
 })();
 </script>
-</body>
+</th:block>
 </html>

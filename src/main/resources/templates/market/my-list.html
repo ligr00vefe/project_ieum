@@ -1,10 +1,7 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout/base :: head('내 판매 목록 - 이음마켓')}"></head>
-<body class="min-h-screen bg-[#f6f7ff] text-slate-900">
-<div th:replace="~{layout/header :: header}"></div>
-
-<main class="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="content">
+<div class="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
 
     <div class="mb-5 flex items-center justify-between">
         <div>
@@ -63,6 +60,6 @@
             <a th:href="@{/market/new}" class="text-sm text-orange-500 hover:underline">첫 상품을 등록해보세요 →</a>
         </div>
     </section>
-</main>
-</body>
+</div>
+</th:block>
 </html>

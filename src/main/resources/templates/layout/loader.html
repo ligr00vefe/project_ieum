@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+    전역 페이지 전환 로더 (상단 진행 바)
+    - layout/layout.html의 head에서 이 fragment를 include하므로 모든 페이지에 자동 적용됨
+    - 롤백 방법: layout/layout.html에서 이 fragment를 include하는 한 줄만 삭제하면 됨
+-->
+<th:block th:fragment="loader">
+<script>
+(function () {
+    function init() {
+        var bar = document.createElement('div');
+        bar.id = 'pageLoaderBar';
+        bar.style.cssText = 'position:fixed;top:0;left:0;height:4px;width:0;opacity:0;z-index:9999;pointer-events:none;'
+            + 'background:linear-gradient(90deg,#14b8a6,#4f46e5);box-shadow:0 0 10px rgba(20,184,166,.7),0 0 3px rgba(79,70,229,.8);'
+            + 'transition:width .2s ease, opacity .15s ease;';
+        document.body.appendChild(bar);
+
+        function showBar() {
+            bar.style.transition = 'width .2s ease, opacity .15s ease';
+            bar.style.opacity = '1';
+            bar.style.width = '30%';
+            requestAnimationFrame(function () {
+                bar.style.transition = 'width 4s cubic-bezier(.1,.6,.2,1), opacity .2s ease';
+                bar.style.width = '88%';
+            });
+        }
+
+        function hideBar() {
+            bar.style.transition = 'width .2s ease, opacity .2s ease';
+            bar.style.opacity = '0';
+            bar.style.width = '0';
+        }
+
+        document.addEventListener('click', function (e) {
+            var a = e.target.closest('a[href]');
+            if (!a) return;
+            if (a.target === '_blank' || a.hasAttribute('download')) return;
+            if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            var href = a.getAttribute('href');
+            if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+            if (a.origin !== window.location.origin) return;
+            showBar();
+        }, true);
+
+        document.addEventListener('submit', function (e) {
+            var form = e.target;
+            if (form.target === '_blank' || form.hasAttribute('data-no-loader')) return;
+            showBar();
+        }, true);
+
+        // bfcache로 뒤로가기 시 로더가 남아있지 않도록 초기화
+        window.addEventListener('pageshow', function (e) {
+            if (e.persisted) hideBar();
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+</script>
+</th:block>
+</html>
