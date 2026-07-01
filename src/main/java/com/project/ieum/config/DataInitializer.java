@@ -682,16 +682,16 @@ public class DataInitializer implements CommandLineRunner {
 
         // IN_PROGRESS 요청 2개 (양측 시작확인 완료 → 진행 중). 종료확인 핸드셰이크를 양방향으로 테스트.
         // 희망종료를 미래로 두어 autoCompleteOverdueActivities(희망종료+30분)에 의해 자동 완료되지 않게 한다.
-        // 두 건 모두 이용자 d01 / 도우미 c01 조합이라, 테스트 계정 한 쌍으로 양쪽 마지막 확인을 모두 시연할 수 있다.
+        // 두 건 모두 이용자 d01 / 활동지원사 c01 조합이라, 테스트 계정 한 쌍으로 양쪽 마지막 확인을 모두 시연할 수 있다.
 
-        // (1) 이용자가 먼저 종료확인 완료 → c01(도우미)로 로그인해 마지막 종료확인 시 COMPLETED 전이
+        // (1) 이용자가 먼저 종료확인 완료 → c01(활동지원사)로 로그인해 마지막 종료확인 시 COMPLETED 전이
         HelpRequest inProgressReq1 = helpRequestRepository.save(buildRequest(d01, scMap.get("SC001"),
-                "강남 도서관 외출 동행 (진행 중)", "도서관 왕복 이동 보조 중입니다. 도우미가 종료확인을 누르면 활동이 완료됩니다.",
+                "강남 도서관 외출 동행 (진행 중)", "도서관 왕복 이동 보조 중입니다. 활동지원사가 종료확인을 누르면 활동이 완료됩니다.",
                 LocalDateTime.of(2026, 7, 10, 9, 0), LocalDateTime.of(2026, 7, 10, 18, 0),
                 "서울 강남구 테헤란로 7길 22", null, "서울특별시", "강남구", "역삼동", "06232",
                 new BigDecimal("37.500636"), new BigDecimal("127.036503"),
                 "서울 강남구 테헤란로 2", "서울 강남구 테헤란로7길 22",
-                "이용자 종료확인 완료, 도우미 종료확인 대기", HelpRequestStatus.IN_PROGRESS));
+                "이용자 종료확인 완료, 활동지원사 종료확인 대기", HelpRequestStatus.IN_PROGRESS));
 
         HelpRequestApplication inProgressApp1 = helpRequestApplicationRepository.save(HelpRequestApplication.builder()
                 .helpRequest(inProgressReq1).caregiver(c01).status(ApplicationStatus.ACCEPTED)
@@ -709,14 +709,14 @@ public class DataInitializer implements CommandLineRunner {
                 .hasRead(false).sentAt(LocalDateTime.now())
                 .build());
 
-        // (2) 도우미가 먼저 종료확인 완료 → d01(이용자)로 로그인해 마지막 종료확인 시 COMPLETED 전이
+        // (2) 활동지원사가 먼저 종료확인 완료 → d01(이용자)로 로그인해 마지막 종료확인 시 COMPLETED 전이
         HelpRequest inProgressReq2 = helpRequestRepository.save(buildRequest(d01, scMap.get("SC002"),
                 "정형외과 진료 동행 (진행 중)", "진료 동행 중입니다. 이용자가 종료확인을 누르면 활동이 완료됩니다.",
                 LocalDateTime.of(2026, 7, 14, 10, 0), LocalDateTime.of(2026, 7, 14, 17, 0),
                 "서울 강남구 봉은사로 114", null, "서울특별시", "강남구", "삼성동", "06120",
                 new BigDecimal("37.513200"), new BigDecimal("127.062800"),
                 "서울 강남구 봉은사로 417", "서울 강남구 봉은사로 114",
-                "도우미 종료확인 완료, 이용자 종료확인 대기", HelpRequestStatus.IN_PROGRESS));
+                "활동지원사 종료확인 완료, 이용자 종료확인 대기", HelpRequestStatus.IN_PROGRESS));
 
         HelpRequestApplication inProgressApp2 = helpRequestApplicationRepository.save(HelpRequestApplication.builder()
                 .helpRequest(inProgressReq2).caregiver(c01).status(ApplicationStatus.ACCEPTED)
