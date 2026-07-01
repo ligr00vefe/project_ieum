@@ -228,7 +228,7 @@ class MatchingServiceTest {
         @Test
         @DisplayName("양측이 시작 확인하면 IN_PROGRESS로 전이된다")
         void confirmStart_bothParties_transitionsToInProgress() {
-            loginAsCaregiver(2L); // 도우미가 두 번째로 확인
+            loginAsCaregiver(2L); // 활동지원사가 두 번째로 확인
             HelpRequest helpRequest = helpRequest(10L, userProfile(1L), HelpRequestStatus.MATCHED);
             HelpRequestApplication matched = application(5L, helpRequest, caregiver(2L), ApplicationStatus.ACCEPTED)
                     .toBuilder().requesterStartConfirmed(true).build();

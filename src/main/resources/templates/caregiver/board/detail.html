@@ -102,7 +102,7 @@
         </div>
     </div>
 
-    <!-- 지원하기 (선정된 도우미에게는 아래 활동 관리/완료 패널로 대체) -->
+    <!-- 지원하기 (선정된 활동지원사에게는 아래 활동 관리/완료 패널로 대체) -->
     <div id="applySection" th:unless="${selectedCaregiver}">
         <!-- 매칭 완료 -->
         <div th:if="${request.status.name() != 'OPEN'}"
@@ -122,7 +122,7 @@
         </form>
     </div>
 
-    <!-- 활동 시작/종료 양측 확인 (선정된 도우미만 노출) -->
+    <!-- 활동 시작/종료 양측 확인 (선정된 활동지원사만 노출) -->
     <div th:if="${handshake != null and handshake.visible()}"
          class="mt-3 bg-white rounded-2xl border border-indigo-100 p-5">
         <div class="flex items-center gap-2 mb-2">
@@ -133,8 +133,8 @@
         </div>
         <p class="text-xs text-gray-500 mb-3"
            th:text="${handshake.phase() == 'START'}
-              ? '이용자와 도우미가 모두 확인하면 진행 중으로 전환됩니다.'
-              : '이용자와 도우미가 모두 확인하면 활동이 완료됩니다.'">안내</p>
+              ? '이용자와 활동지원사가 모두 확인하면 진행 중으로 전환됩니다.'
+              : '이용자와 활동지원사가 모두 확인하면 활동이 완료됩니다.'">안내</p>
         <div class="flex items-center gap-2 mb-3 text-xs">
             <span th:classappend="${handshake.myConfirmed()} ? 'bg-teal-50 text-teal-600' : 'bg-amber-50 text-amber-600'"
                   class="px-2 py-1 rounded-lg font-medium"
@@ -169,7 +169,7 @@
         </div>
     </div>
 
-    <!-- 활동 완료 (선정된 도우미에게만, COMPLETED) -->
+    <!-- 활동 완료 (선정된 활동지원사에게만, COMPLETED) -->
     <div th:if="${selectedCaregiver and request.status.name() == 'COMPLETED'}"
          class="mt-3 bg-indigo-50 border border-indigo-100 rounded-2xl p-5">
         <div class="flex items-center gap-3 mb-3">
@@ -209,7 +209,7 @@
         </div>
     </div>
 
-    <!-- 이미 지원한 경우 항상 노출 (선정된 도우미에게는 위 활동 관리/완료 패널로 대체) -->
+    <!-- 이미 지원한 경우 항상 노출 (선정된 활동지원사에게는 위 활동 관리/완료 패널로 대체) -->
     <div th:if="${alreadyApplied and !selectedCaregiver}"
          class="mt-3 bg-teal-50 border border-teal-100 rounded-2xl p-5">
         <div class="flex items-center gap-3 mb-3">
