@@ -29,13 +29,15 @@ public class HelpRequestController {
     public String list(@PageableDefault(size = 20) Pageable pageable, Model model) {
         model.addAttribute("title", "매칭 게시판");
         model.addAttribute("requests", helpRequestService.getOpenRequests(pageable));
-        return "request/list";
+        model.addAttribute("content", "request/list");
+        return "layout/layout";
     }
 
     @GetMapping("/requests/new")
     public String createForm(Model model) {
         prepareForm(model, new HelpRequestForm(), "도움 요청 작성");
-        return "request/form";
+        model.addAttribute("content", "request/form");
+        return "layout/layout";
     }
 
     @PostMapping("/requests")
@@ -46,7 +48,8 @@ public class HelpRequestController {
             RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             prepareForm(model, form, "도움 요청 작성");
-            return "request/form";
+            model.addAttribute("content", "request/form");
+            return "layout/layout";
         }
         var helpRequest = helpRequestService.create(form);
         redirectAttributes.addFlashAttribute("message", "도움 요청이 등록되었습니다.");
@@ -59,7 +62,8 @@ public class HelpRequestController {
         model.addAttribute("request", helpRequestService.get(requestId));
         model.addAttribute("applyRequest", new ApplyRequest());
         model.addAttribute("recommendations", recommendationService.recommendCaregivers(requestId, 5));
-        return "request/detail";
+        model.addAttribute("content", "request/detail");
+        return "layout/layout";
     }
 
     @PostMapping("/requests/{requestId}/apply")
@@ -81,18 +85,20 @@ public class HelpRequestController {
     public String myRequests(Model model) {
         model.addAttribute("title", "내 요청");
         model.addAttribute("requests", helpRequestService.getMyRequests());
-        return "request/my-list";
+        model.addAttribute("content", "request/my-list");
+        return "layout/layout";
     }
 
     @GetMapping("/my/requests/{requestId}")
     public String myRequestDetail(@PathVariable Long requestId, Model model) {
         model.addAttribute("title", "내 요청 상세");
         model.addAttribute("request", helpRequestService.get(requestId));
-        return "request/my-detail";
+        model.addAttribute("content", "request/my-detail");
+        return "layout/layout";
     }
 
     // (이슈 #8 정본) 본문 수정(/edit GET·POST) 엔드포인트는 제거함.
-    // HelpRequest는 write-once — 도우미가 본 내용/시간/위치가 지원 후 바뀌면 신뢰성이 깨지므로
+    // HelpRequest는 write-once — 활동지원사가 본 내용/시간/위치가 지원 후 바뀌면 신뢰성이 깨지므로
     // 생성 후 본문 수정을 막는다. 변경이 필요하면 취소(cancel→CLOSED) 후 새로 작성한다.
 
     @PostMapping("/my/requests/{requestId}/cancel")
@@ -115,7 +121,8 @@ public class HelpRequestController {
         model.addAttribute("title", "지원자 리스트");
         model.addAttribute("request", helpRequestService.get(requestId));
         model.addAttribute("applications", matchingService.getApplicationsForRequest(requestId));
-        return "request/applications";
+        model.addAttribute("content", "request/applications");
+        return "layout/layout";
     }
 
     @PostMapping("/applications/{applicationId}/accept")

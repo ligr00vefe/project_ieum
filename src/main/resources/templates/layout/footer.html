@@ -9,10 +9,8 @@
                 <!-- Brand -->
                 <div class="sm:col-span-2 lg:col-span-1">
                     <a th:href="@{/}" class="flex items-center gap-2.5 mb-5 group w-fit">
-                        <div class="w-9 h-9 bg-teal-500 rounded-xl flex items-center justify-center group-hover:bg-teal-400 transition-colors">
-                            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                <path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/>
-                            </svg>
+                        <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-sm grayscale">
+                            <img src="/images/logo/logo.png" alt="이음 로고" class="w-8 h-8 object-contain grayscale">
                         </div>
                         <div class="leading-tight">
                             <div class="text-base font-bold text-white">이음</div>
@@ -52,7 +50,7 @@
                     <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-5">서비스</h3>
                     <ul class="space-y-3">
                         <li><a th:href="@{/how-to-use}" class="text-sm text-gray-400 hover:text-white transition-colors">이용방법</a></li>
-                        <li><a th:href="@{/board}" class="text-sm text-gray-400 hover:text-white transition-colors">매칭 게시판</a></li>
+                        <li><a th:href="@{/board}" class="text-sm text-gray-400 hover:text-white transition-colors">이음매칭</a></li>
                         <li><a th:href="@{/safe-meeting}" class="text-sm text-gray-400 hover:text-white transition-colors">첫만남 안심가이드</a></li>
                         <li><a th:href="@{/market}" class="text-sm text-gray-400 hover:text-white transition-colors">이음마켓</a></li>
                         <li><a th:href="@{/register/type-select}" class="text-sm text-gray-400 hover:text-white transition-colors">회원가입</a></li>
@@ -64,7 +62,7 @@
                     <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-5">고객 지원</h3>
                     <ul class="space-y-3">
                         <li><a th:href="@{/notices}" class="text-sm text-gray-400 hover:text-white transition-colors">공지사항</a></li>
-                        <li><a th:href="@{/contact}" class="text-sm text-gray-400 hover:text-white transition-colors">문의</a></li>
+                        <li><a th:href="@{/inquiries}" class="text-sm text-gray-400 hover:text-white transition-colors">문의</a></li>
                     </ul>
                 </div>
 

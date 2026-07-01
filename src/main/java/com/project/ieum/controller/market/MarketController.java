@@ -97,7 +97,8 @@ public class MarketController {
         }
         model.addAttribute("myPosts", myPosts);
 
-        return "market/list";  // templates/market/list.html
+        model.addAttribute("content", "market/list");
+        return "layout/layout";
     }
 
     // ── 게시글 상세 ──
@@ -126,7 +127,8 @@ public class MarketController {
         model.addAttribute("images", images);   // 슬라이드용 전체 이미지 목록
         model.addAttribute("isSeller", isSeller);
         model.addAttribute("currentUser", currentUser);
-        return "market/detail";  // templates/market/detail.html
+        model.addAttribute("content", "market/detail");
+        return "layout/layout";
     }
 
     // ── 게시글 등록 폼 ──
@@ -136,7 +138,8 @@ public class MarketController {
         model.addAttribute("title", "상품 등록");
         model.addAttribute("form", new MarketPostForm());
         model.addAttribute("categories", marketPostService.getAllCategories());
-        return "market/form";  // templates/market/form.html
+        model.addAttribute("content", "market/form");
+        return "layout/layout";
     }
 
     // ── 게시글 등록 처리 ──
@@ -152,7 +155,8 @@ public class MarketController {
             // 검증 실패 시 폼 다시 표시 — 카테고리 목록도 다시 넘겨줘야 함
             model.addAttribute("title", "상품 등록");
             model.addAttribute("categories", marketPostService.getAllCategories());
-            return "market/form";
+            model.addAttribute("content", "market/form");
+            return "layout/layout";
         }
 
         MarketPost post = marketPostService.create(form);
@@ -191,7 +195,8 @@ public class MarketController {
         model.addAttribute("postId", postId);
         model.addAttribute("existingImages", existingImages);
         model.addAttribute("categories", marketPostService.getAllCategories());
-        return "market/form";
+        model.addAttribute("content", "market/form");
+        return "layout/layout";
     }
 
     // ── 게시글 수정 처리 ──
@@ -208,7 +213,8 @@ public class MarketController {
             model.addAttribute("title", "상품 수정");
             model.addAttribute("postId", postId);
             model.addAttribute("categories", marketPostService.getAllCategories());
-            return "market/form";
+            model.addAttribute("content", "market/form");
+            return "layout/layout";
         }
 
         marketPostService.update(postId, form);
@@ -278,6 +284,7 @@ public class MarketController {
                 })
                 .toList();
         model.addAttribute("posts", responses);
-        return "market/my-list";  // templates/market/my-list.html
+        model.addAttribute("content", "market/my-list");
+        return "layout/layout";
     }
 }

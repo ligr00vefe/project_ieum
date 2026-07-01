@@ -1,10 +1,7 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout/base :: head('채팅 - 이음마켓')}"></head>
-<body class="min-h-screen bg-[#f6f7ff] text-slate-900">
-<div th:replace="~{layout/header :: header}"></div>
-
-<main class="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="content">
+<div class="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
     <div class="flex gap-5" style="height: calc(100vh - 160px); min-height: 600px;">
 
         <!-- 왼쪽: 거래 상품 정보 패널 -->
@@ -101,6 +98,11 @@
                 </div>
             </div>
 
+            <!-- 안전 안내 배너 -->
+            <div class="flex-shrink-0 mx-5 mt-4 px-4 py-3 bg-amber-50 border border-amber-100 rounded-xl text-center">
+                <p class="text-xs text-amber-700 font-medium">법적인 문제 발생 시 근거 자료로 제출될 수 있습니다. 예의를 지켜 대화해주세요.</p>
+            </div>
+
             <!-- 메시지 영역 -->
             <div id="chatMessages" class="flex-1 overflow-y-auto space-y-4 px-5 py-4">
                 <div id="loadingSpinner" class="flex justify-center py-8">
@@ -123,7 +125,7 @@
             </div>
         </div>
     </div>
-</main>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
@@ -310,5 +312,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     setInterval(async () => { await loadMessages(); await markRead(); }, 5000);
 });
 </script>
-</body>
+</th:block>
 </html>

@@ -47,7 +47,8 @@ public class MarketReviewController {
         model.addAttribute("post", chat.getPost());
         model.addAttribute("thumbnailUrl", thumbnailUrl);
         model.addAttribute("form", new MarketReviewForm());
-        return "market/review-form";  // templates/market/review-form.html
+        model.addAttribute("content", "market/review-form");
+        return "layout/layout";
     }
 
     // ── 후기 작성 처리 ──
@@ -65,7 +66,8 @@ public class MarketReviewController {
             model.addAttribute("title", "거래 후기 작성");
             model.addAttribute("chat", chat);
             model.addAttribute("post", chat.getPost());
-            return "market/review-form";
+            model.addAttribute("content", "market/review-form");
+            return "layout/layout";
         }
 
         marketReviewService.create(chatId, form);
