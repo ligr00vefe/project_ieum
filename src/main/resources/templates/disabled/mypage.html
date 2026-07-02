@@ -839,8 +839,9 @@
             const num = document.createElement('span');
             num.style.cssText = 'position:absolute; top:3px; left:50%; transform:translateX(-50%); width:26px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:12px; font-weight:500; z-index:10;';
             num.textContent = d;
-            if (ev && ev.position !== 'mid') {
-                // 일정의 시작/끝/단일 — 컬러 원. 오늘이 겹쳐도 원을 유지해 범위가 끊기지 않게 한다.
+            if (ev && (ev.position !== 'mid' || ev.type === 'matched' || ev.type === 'completed')) {
+                // 일정의 시작/끝/단일 — 컬러 원. 매칭/완료는 범위 중간(mid)이어도 범례와 일치하도록 색을 유지.
+                // 오늘이 겹쳐도 원을 유지해 범위가 끊기지 않게 한다.
                 if (ev.type === 'matched') {
                     num.style.background = '#f97316';
                     num.style.color = 'white';
