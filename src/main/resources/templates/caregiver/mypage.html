@@ -944,9 +944,11 @@
 
             // 오늘 표시 — 셀 배경 하이라이트(반투명 흰색). 그라데이션 헤더 위에서도 잘 보이고,
             // 마커(숫자 원)와 다른 채널(셀 배경)이라 매칭/완료 원과 겹치지 않는다.
+            // inset 대신 고정 정사각형(36px)으로 중앙 배치 — 셀 너비가 높이(46px)보다 넓어
+            // inset을 쓰면 가로로 퍼진 직사각형이 되므로 크기를 고정한다.
             if (isToday) {
                 const todayHi = document.createElement('span');
-                todayHi.style.cssText = 'position:absolute; inset:2px; border-radius:7px; background:rgba(255,255,255,0.20); z-index:0;';
+                todayHi.style.cssText = 'position:absolute; top:3px; left:50%; transform:translateX(-50%); width:36px; height:36px; border-radius:9px; background:rgba(255,255,255,0.20); z-index:0;';
                 cell.appendChild(todayHi);
             }
 
