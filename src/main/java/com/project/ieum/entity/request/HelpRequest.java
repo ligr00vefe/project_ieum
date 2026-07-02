@@ -133,6 +133,20 @@ public class HelpRequest extends BasicEntity {
   // 관리자 강제 종료 전용 — 수명주기 가드를 우회하는 모더레이션 경로(일반 흐름에서 쓰지 말 것).
   public void forceCloseByAdmin() { this.status = HelpRequestStatus.CLOSED; }
 
+  // 관리자 정보 수정 전용 — OPEN 상태 가드를 우회하는 모더레이션 경로(일반 흐름에서 쓰지 말 것).
+  // 주소(roadAddress)·좌표는 지오코딩 재계산이 필요하므로 여기서 다루지 않는다.
+  public void updateByAdmin(String title, String body,
+                            LocalDateTime desiredStartDatetime, LocalDateTime desiredEndDatetime,
+                            String departureAddress, String destinationAddress, String specialNotes) {
+    this.title = title;
+    this.body = body;
+    this.desiredStartDatetime = desiredStartDatetime;
+    this.desiredEndDatetime = desiredEndDatetime;
+    this.departureAddress = departureAddress;
+    this.destinationAddress = destinationAddress;
+    this.specialNotes = specialNotes;
+  }
+
   private void requireStatus(HelpRequestStatus expected, String message) {
     if (this.status != expected) {
       throw new IllegalStateException(message);

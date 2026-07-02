@@ -53,6 +53,7 @@
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-b border-line bg-surface-alt">
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">이름</th>
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">이메일</th>
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">역할</th>
                     <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">상태</th>
@@ -64,7 +65,8 @@
                 <th:block th:each="user : ${users}">
                 <tr class="hover:bg-surface-alt transition-colors cursor-pointer"
                     th:onclick="|location.href='@{/admin/users/{id}(id=${user.id})}'|">
-                    <td class="px-5 py-3.5 font-medium text-ink" th:text="${user.email}">이메일</td>
+                    <td class="px-5 py-3.5 font-medium text-ink" th:text="${user.fullName ?: '-'}">이름</td>
+                    <td class="px-5 py-3.5 text-ink-muted" th:text="${user.email}">이메일</td>
                     <td class="px-5 py-3.5">
                         <span th:text="${user.roleLabel}"
                               th:class="'px-2 py-0.5 text-xs font-semibold rounded-full ' + ${user.roleClass}">역할</span>
@@ -80,7 +82,7 @@
                 </tr>
                 </th:block>
                 <tr th:if="${#lists.isEmpty(users)}">
-                    <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-400">회원이 없습니다.</td>
+                    <td colspan="6" class="px-5 py-10 text-center text-sm text-slate-400">회원이 없습니다.</td>
                 </tr>
             </tbody>
         </table>
