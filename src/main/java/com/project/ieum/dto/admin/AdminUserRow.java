@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public record AdminUserRow(
         Long id,
         String email,
+        String fullName,
         String roleLabel,
         String roleClass,
         String statusLabel,
@@ -42,7 +43,9 @@ public record AdminUserRow(
             default -> "bg-slate-100 text-slate-500";
         };
 
-        return new AdminUserRow(u.getId(), u.getEmail(),
+        String fullName = u.getProfile() != null ? u.getProfile().getFullName() : null;
+
+        return new AdminUserRow(u.getId(), u.getEmail(), fullName,
                 roleLabel, roleClass, statusLabel, statusClass,
                 u.getCreatedAt(), u.getLastLoginAt());
     }
