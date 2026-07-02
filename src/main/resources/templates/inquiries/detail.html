@@ -17,6 +17,11 @@
     .ck-content img { max-width: 100%; height: auto; border-radius: 0.75rem; }
     .ck-content a { color: #4f46e5; text-decoration: underline; }
     .ck-editor__editable { min-height: 220px; }
+
+    /* 다크모드 — 본문 색상이 어두워 안 보이는 문제 보정 (공지 상세와 동일) */
+    :root[data-theme="dark"] .ck-content { color: #e2e8f0; }
+    :root[data-theme="dark"] .ck-content blockquote { border-left-color: #4338ca; color: #a5b4fc; }
+    :root[data-theme="dark"] .ck-content a { color: #a5b4fc; }
 </style>
 
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -86,7 +91,7 @@
 
     <!-- 관리자 답변 표시 -->
     <div th:if="${inquiry.reply != null}"
-         class="bg-indigo-50 rounded-3xl border border-indigo-100 p-6 mb-4">
+         class="bg-indigo-50 dark:bg-indigo-900/30 rounded-3xl border border-indigo-100 dark:border-indigo-800 p-6 mb-4">
         <div class="flex items-center gap-2 mb-4">
             <div class="w-7 h-7 bg-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
                 <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -94,7 +99,7 @@
                           d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
                 </svg>
             </div>
-            <span class="text-sm font-bold text-indigo-700">관리자 답변</span>
+            <span class="text-sm font-bold text-indigo-700 dark:text-indigo-300">관리자 답변</span>
             <span class="text-xs text-indigo-400 ml-auto"
                   th:text="${#temporals.format(inquiry.reply.createdAt, 'yyyy.MM.dd HH:mm')}">날짜</span>
         </div>
