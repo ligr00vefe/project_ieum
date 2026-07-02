@@ -20,6 +20,15 @@
     .ck-content table td, .ck-content table th { border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; font-size: 0.8rem; }
     .ck-content table th { background: #f9fafb; font-weight: 600; }
     .ck-content pre { background: #f8fafc; border-radius: 0.5rem; padding: 1rem; overflow-x: auto; font-size: 0.8rem; }
+
+    /* 다크모드 — 본문 색상이 어두워 안 보이는 문제 보정 */
+    :root[data-theme="dark"] .ck-content { color: #e2e8f0; }
+    :root[data-theme="dark"] .ck-content blockquote { border-left-color: #4338ca; color: #a5b4fc; }
+    :root[data-theme="dark"] .ck-content a { color: #a5b4fc; }
+    :root[data-theme="dark"] .ck-content table td,
+    :root[data-theme="dark"] .ck-content table th { border-color: #475569; }
+    :root[data-theme="dark"] .ck-content table th { background: #334155; }
+    :root[data-theme="dark"] .ck-content pre { background: #0f172a; }
 </style>
 
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

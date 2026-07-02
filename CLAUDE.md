@@ -75,7 +75,9 @@ Controller → Service → Repository → Entity
 
 ### 지오코딩
 
-`GeocodingService` 인터페이스 구현체: `KakaoGeocodingService` (카카오 주소 API).  
+`GeocodingService` 인터페이스 구현체: `TmapGeocodingService` (TMap 주소 → 좌표 변환).  
+장소 검색은 별도 클래스 `TmapPlaceSearchService`가 담당.  
+API 키는 `tmap.app-key` 설정(환경변수)으로 주입되며 HTTP 헤더로 전달 (Kakao 지도는 제거됨).  
 지도 마커 아이콘은 `static/images/kakaomap/` 하위에 위치.
 
 ### CSS
