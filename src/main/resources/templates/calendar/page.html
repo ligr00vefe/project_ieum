@@ -46,7 +46,8 @@
             <div class="px-5 py-3 border-t border-line flex items-center gap-4">
                 <div class="flex items-center gap-3">
                     <span class="flex items-center gap-1.5 text-xs text-gray-500">
-                        <span class="w-3 h-3 rounded-full bg-surface border-2 border-gray-300 flex-shrink-0"></span>
+                        <span class="w-3 h-3 rounded-full bg-surface border-2 flex-shrink-0"
+                              th:style="'border-color:' + (${userRole == 'USER'} ? '#6366f1' : '#14b8a6')"></span>
                         <span th:text="${userRole == 'USER'} ? '등록 일정' : '지원 중'">등록 일정</span>
                     </span>
                     <span class="flex items-center gap-1.5 text-xs text-gray-500">
