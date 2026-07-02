@@ -3,7 +3,8 @@
       th:replace="~{layout/layout :: layout(~{::content})}">
 <th:block th:fragment="content">
 <!-- 알림 메시지 -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+<div th:if="${successMessage != null or errorMessage != null or message != null}"
+     class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
     <div th:if="${successMessage}" th:text="${successMessage}"
          class="mb-2 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"></div>
     <div th:if="${errorMessage}" th:text="${errorMessage}"
@@ -17,8 +18,8 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 <div class="flex flex-col lg:flex-row gap-8 items-start">
 
-    <!-- 프로필 요약 -->
-    <div class="flex-1 text-white relative">
+    <!-- 프로필 요약 (w-full: 세로 배치에서 items-start로 폭이 줄어 구분선이 잘리는 것 방지) -->
+    <div class="flex-1 w-full text-white relative">
         <div class="relative flex items-top gap-5">
             <!-- 아바타 -->
             <div class="w-20 h-20 rounded-full overflow-hidden flex-shrink-0 bg-white/20 shadow-md">
@@ -110,8 +111,8 @@
         </div>
     </div>
 
-    <!-- 미니 달력 (투명 배경, 흰색 스타일) -->
-    <div class="lg:w-72 flex-shrink-0 w-full">
+    <!-- 미니 달력 (투명 배경, 흰색 스타일) — 세로 배치에서는 위 통계와 경계선으로 구분 -->
+    <div class="lg:w-72 flex-shrink-0 w-full border-t border-white/20 pt-6 lg:border-t-0 lg:pt-0">
         <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
                 <svg class="w-4 h-4 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -140,13 +141,16 @@
         <!-- 범례 -->
         <div class="mt-3 pt-3 border-t border-white/20 flex items-center gap-4 flex-wrap">
             <span class="flex items-center gap-1.5 text-[11px] text-white/70">
-                <span class="w-3 h-3 rounded-full bg-surface flex-shrink-0"></span>등록/지원
+                <span class="w-3 h-3 rounded-full flex-shrink-0" style="border:2px solid rgba(255,255,255,0.9)"></span>등록/지원
             </span>
             <span class="flex items-center gap-1.5 text-[11px] text-white/70">
-                <span class="w-3 h-3 rounded-full bg-orange-400 flex-shrink-0"></span>매칭완료
+                <span class="w-3 h-3 rounded-full flex-shrink-0" style="background:#d946ef;box-shadow:0 0 0 1.5px rgba(255,255,255,0.9)"></span>매칭완료
             </span>
             <span class="flex items-center gap-1.5 text-[11px] text-white/70">
-                <span class="w-3 h-3 rounded-full flex-shrink-0" style="background:#10b981"></span>활동완료
+                <span class="w-3 h-3 rounded-full flex-shrink-0" style="background:#f97316;box-shadow:0 0 0 1.5px rgba(255,255,255,0.9)"></span>활동완료
+            </span>
+            <span class="flex items-center gap-1.5 text-[11px] text-white/70">
+                <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:rgba(255,255,255,0.95)"></span>오늘
             </span>
         </div>
     </div>
@@ -824,8 +828,8 @@
             const ev = evs.find(e => e.type === 'matched') || evs.find(e => e.type === 'completed') || evs[0];
             if (ev && ev.position !== 'single') {
                 const bar = document.createElement('div');
-                const barBg = ev.type === 'matched'   ? 'rgba(249,115,22,0.45)'
-                            : ev.type === 'completed' ? 'rgba(16,185,129,0.35)'
+                const barBg = ev.type === 'matched'   ? 'rgba(217,70,239,0.45)'
+                            : ev.type === 'completed' ? 'rgba(249,115,22,0.35)'
                             : 'rgba(255,255,255,0.38)';
                 bar.style.cssText = `position:absolute; top:3px; height:26px; background:${barBg}; z-index:1;`;
                 if (ev.position === 'start') { bar.style.left = '50%'; bar.style.right = '0'; }
@@ -838,27 +842,24 @@
             const num = document.createElement('span');
             num.style.cssText = 'position:absolute; top:3px; left:50%; transform:translateX(-50%); width:26px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:12px; font-weight:500; z-index:10;';
             num.textContent = d;
-            if (ev && ev.position !== 'mid') {
-                // 일정의 시작/끝/단일 — 컬러 원. 오늘이 겹쳐도 원을 유지해 범위가 끊기지 않게 한다.
+            // 마커 규칙(달력 상세와 동일): 미완료(등록)=테두리만 있는 빈 원, 매칭/완료=색 채운 원.
+            // 매칭/완료는 범위 중간(mid)이어도 색을 유지해 범례와 일치시킨다.
+            if (ev && (ev.position !== 'mid' || ev.type === 'matched' || ev.type === 'completed')) {
                 if (ev.type === 'matched') {
+                    num.style.background = '#d946ef';
+                    num.style.color = 'white';
+                    num.style.boxShadow = '0 0 0 2px rgba(255,255,255,0.9)';
+                } else if (ev.type === 'completed') {
                     num.style.background = '#f97316';
                     num.style.color = 'white';
-                } else if (ev.type === 'completed') {
-                    num.style.background = '#10b981';
-                    num.style.color = 'white';
+                    num.style.boxShadow = '0 0 0 2px rgba(255,255,255,0.9)';
                 } else {
-                    num.style.background = 'rgba(255,255,255,0.9)';
-                    num.style.color = '#4f46e5';
+                    num.style.background = 'transparent';
+                    num.style.color = 'white';
+                    num.style.border = '2px solid rgba(255,255,255,0.9)';
                 }
                 num.style.fontWeight = '700';
-                if (isToday) {
-                    // 오늘 표시 — 원 크기를 유지하는 내부 링
-                    num.style.boxShadow = ev.type === 'matched'   ? 'inset 0 0 0 2px rgba(255,255,255,0.9)'
-                                        : ev.type === 'completed' ? 'inset 0 0 0 2px rgba(255,255,255,0.9)'
-                                        : 'inset 0 0 0 2px rgba(79,70,229,0.55)';
-                }
             } else if (isToday) {
-                num.style.background = 'rgba(255,255,255,0.35)';
                 num.style.fontWeight = '700';
                 num.style.color = 'white';
             } else if (dow === 0) {
@@ -869,6 +870,13 @@
                 num.style.color = 'white';
             }
             cell.appendChild(num);
+
+            // 오늘 표시 — 숫자 아래 점. 마커(원)와 표시 채널을 분리해 완료/매칭과 겹치지 않는다.
+            if (isToday) {
+                const todayDot = document.createElement('span');
+                todayDot.style.cssText = 'position:absolute; bottom:3px; left:50%; transform:translateX(-50%); width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,0.95); z-index:10;';
+                cell.appendChild(todayDot);
+            }
 
             grid.appendChild(cell);
         }
