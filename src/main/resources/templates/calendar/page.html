@@ -147,8 +147,8 @@ function renderCalendar() {
 
         const cell = document.createElement('div');
         cell.style.cssText = 'min-height:76px; position:relative; border-bottom:1px solid var(--cal-line); border-right:1px solid var(--cal-line); cursor:pointer;';
-        if (isSelected) cell.style.background = '#eef2ff';
-        cell.onmouseenter = () => { if (!isSelected) cell.style.background = '#f9fafb'; };
+        if (isSelected) cell.style.background = 'rgb(var(--color-surface-hover))';
+        cell.onmouseenter = () => { if (!isSelected) cell.style.background = 'rgb(var(--color-surface-muted))'; };
         cell.onmouseleave = () => { if (!isSelected) cell.style.background = ''; };
 
         // 이벤트 바 (날짜 숫자 뒤에 배치, 숫자원과 동일한 높이)
@@ -176,10 +176,8 @@ function renderCalendar() {
         numEl.style.cssText = 'position:absolute; top:10px; left:50%; transform:translateX(-50%); width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:13px; font-weight:600; z-index:10;';
         numEl.textContent = d;
 
-        if (isToday) {
-            numEl.style.background = USER_ROLE === 'USER' ? '#4f46e5' : '#0d9488';
-            numEl.style.color = 'white';
-        } else if (markerEv) {
+        if (markerEv) {
+            // 이벤트 색상이 최우선 — 오늘 날짜와 겹쳐도 매칭/완료 상태가 가려지지 않도록 링으로만 구분한다.
             if (markerEv.type === 'matched') {
                 numEl.style.background = '#f97316';
                 numEl.style.color = 'white';
@@ -193,12 +191,21 @@ function renderCalendar() {
                 numEl.style.color = tc;
                 numEl.style.border = `2px solid ${bc}`;
             }
+            if (isToday) {
+                const todayRing = USER_ROLE === 'USER' ? 'rgba(79,70,229,0.6)' : 'rgba(13,148,136,0.6)';
+                numEl.style.boxShadow = (markerEv.type === 'matched' || markerEv.type === 'completed')
+                    ? 'inset 0 0 0 2px rgba(255,255,255,0.9)'
+                    : `inset 0 0 0 2px ${todayRing}`;
+            }
+        } else if (isToday) {
+            numEl.style.background = USER_ROLE === 'USER' ? '#4f46e5' : '#0d9488';
+            numEl.style.color = 'white';
         } else if (dow === 0) {
             numEl.style.color = '#f87171';
         } else if (dow === 6) {
             numEl.style.color = '#60a5fa';
         } else {
-            numEl.style.color = '#374151';
+            numEl.style.color = 'rgb(var(--color-ink))';
         }
         cell.appendChild(numEl);
 
