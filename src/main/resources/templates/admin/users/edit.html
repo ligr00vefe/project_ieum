@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+<div th:attr="data-page-title='회원 정보 수정'">
+
+    <div class="flex items-center gap-3 mb-6">
+        <a th:href="@{/admin/users/{id}(id=${user.id})}"
+           class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-ink-muted transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            회원 상세
+        </a>
+        <span class="text-slate-300">/</span>
+        <span class="text-sm font-medium text-ink-muted">정보 수정</span>
+    </div>
+
+    <div th:if="${error}"
+         class="mb-4 px-4 py-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-600"
+         th:text="${error}"></div>
+
+    <div class="max-w-2xl space-y-4">
+
+        <!-- ══════════ 이용자(USER) 수정 폼 ══════════ -->
+        <form th:if="${user.role.name() == 'USER'}"
+              th:action="@{/admin/users/{id}/edit/disabled(id=${user.id})}" method="post"
+              th:object="${editDTO}" class="space-y-4">
+
+            <!-- 기본 정보 -->
+            <div class="bg-surface rounded-2xl border border-line p-5 space-y-4">
+                <h3 class="text-sm font-semibold text-ink-muted">기본 정보</h3>
+
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1.5">이메일</label>
+                    <input type="text" th:value="${user.email}" disabled
+                           class="w-full px-4 py-2 text-sm border border-line rounded-xl bg-surface-alt text-slate-400 cursor-not-allowed"/>
+                    <p class="mt-1 text-[11px] text-slate-400">이메일은 로그인 식별자로 수정할 수 없습니다.</p>
+                </div>
+
+                <div>
+                    <label for="d-name" class="block text-xs text-slate-400 mb-1.5">이름 <span class="text-red-500">*</span></label>
+                    <input type="text" id="d-name" th:field="*{name}" required maxlength="80"
+                           class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
+                </div>
+
+                <div>
+                    <label for="d-phone" class="block text-xs text-slate-400 mb-1.5">전화번호</label>
+                    <input type="tel" id="d-phone" th:field="*{phone}" maxlength="20" placeholder="예: 010-1234-5678"
+                           class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="d-birth" class="block text-xs text-slate-400 mb-1.5">생년월일</label>
+                        <input type="date" id="d-birth" th:field="*{birthDate}"
+                               class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
+                    </div>
+                    <div>
+                        <label for="d-gender" class="block text-xs text-slate-400 mb-1.5">성별</label>
+                        <select id="d-gender" th:field="*{gender}"
+                                class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                            <option value="">선택 안 함</option>
+                            <option value="M">남성</option>
+                            <option value="F">여성</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="d-gname" class="block text-xs text-slate-400 mb-1.5">보호자 이름</label>
+                        <input type="text" id="d-gname" th:field="*{guardianName}" maxlength="80"
+                               class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
+                    </div>
+                    <div>
+                        <label for="d-gphone" class="block text-xs text-slate-400 mb-1.5">보호자 연락처</label>
+                        <input type="tel" id="d-gphone" th:field="*{guardianPhone}" maxlength="20"
+                               class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 상세 정보 -->
+            <div class="bg-surface rounded-2xl border border-line p-5 space-y-4">
+                <h3 class="text-sm font-semibold text-ink-muted">상세 정보</h3>
+
+                <div>
+                    <label class="block text-xs text-slate-400 mb-2">장애 유형</label>
+                    <div class="flex flex-wrap gap-2">
+                        <label th:each="type : ${disabilityTypes}"
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs border border-line-strong rounded-lg cursor-pointer hover:bg-surface-alt">
+                            <input type="checkbox" th:field="*{disabilityTypeIds}" th:value="${type.id}" class="accent-indigo-600">
+                            <span th:text="${type.name}">유형</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs text-slate-400 mb-2">의사소통 방식</label>
+                    <div class="flex flex-wrap gap-2">
+                        <label th:each="method : ${communicationMethods}"
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs border border-line-strong rounded-lg cursor-pointer hover:bg-surface-alt">
+                            <input type="checkbox" th:field="*{communicationMethodIds}" th:value="${method.id}" class="accent-indigo-600">
+                            <span th:text="${method.name}">방식</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="d-mobility" class="block text-xs text-slate-400 mb-1.5">활동 범위</label>
+                    <textarea id="d-mobility" th:field="*{activityRange}" rows="2"
+                              class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"></textarea>
+                </div>
+
+                <div>
+                    <label for="d-avoid" class="block text-xs text-slate-400 mb-1.5">피해야 할 상황</label>
+                    <textarea id="d-avoid" th:field="*{avoidSituations}" rows="2"
+                              class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"></textarea>
+                </div>
+            </div>
+
+            <!-- 성향 정보 -->
+            <div class="bg-surface rounded-2xl border border-line p-5 space-y-4">
+                <h3 class="text-sm font-semibold text-ink-muted">성향 정보</h3>
+
+                <div>
+                    <label class="block text-xs text-slate-400 mb-2">성향 태그</label>
+                    <div class="flex flex-wrap gap-2">
+                        <label th:each="tag : ${personalityTags}"
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs border border-line-strong rounded-lg cursor-pointer hover:bg-surface-alt">
+                            <input type="checkbox" th:field="*{personalityTagIds}" th:value="${tag.id}" class="accent-indigo-600">
+                            <span th:text="${tag.name}">태그</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="d-mbti" class="block text-xs text-slate-400 mb-1.5">MBTI</label>
+                    <select id="d-mbti" th:field="*{mbtiType}"
+                            class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                        <option value="">선택 안 함</option>
+                        <option th:each="mbti : ${mbtiTypes}" th:value="${mbti}" th:text="${mbti.label}">MBTI</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs text-slate-400 mb-2">선호 활동지원사 MBTI <span class="text-[11px] text-slate-400">(최대 4개)</span></label>
+                    <div class="flex flex-wrap gap-2">
+                        <label th:each="mbti : ${mbtiTypes}"
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs border border-line-strong rounded-lg cursor-pointer hover:bg-surface-alt">
+                            <input type="checkbox" th:field="*{preferredMbtiTypes}" th:value="${mbti}" class="accent-indigo-600">
+                            <span th:text="${mbti.label}">MBTI</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button type="submit"
+                        class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors">저장</button>
+                <a th:href="@{/admin/users/{id}(id=${user.id})}"
+                   class="px-4 py-2 text-sm font-semibold text-slate-500 border border-line-strong rounded-xl hover:bg-surface-alt transition-colors">취소</a>
+            </div>
+        </form>
+
+        <!-- ══════════ 활동지원사(CAREGIVER) 수정 폼 ══════════ -->
+        <form th:if="${user.role.name() == 'CAREGIVER'}"
+              th:action="@{/admin/users/{id}/edit/caregiver(id=${user.id})}" method="post"
+              th:object="${editDTO}" class="space-y-4">
+
+            <!-- 기본 정보 -->
+            <div class="bg-surface rounded-2xl border border-line p-5 space-y-4">
+                <h3 class="text-sm font-semibold text-ink-muted">기본 정보</h3>
+
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1.5">이메일</label>
+                    <input type="text" th:value="${user.email}" disabled
+                           class="w-full px-4 py-2 text-sm border border-line rounded-xl bg-surface-alt text-slate-400 cursor-not-allowed"/>
+                    <p class="mt-1 text-[11px] text-slate-400">이메일은 로그인 식별자로 수정할 수 없습니다.</p>
+                </div>
+
+                <div>
+                    <label for="c-name" class="block text-xs text-slate-400 mb-1.5">이름 <span class="text-red-500">*</span></label>
+                    <input type="text" id="c-name" th:field="*{name}" required maxlength="80"
+                           class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
+                </div>
+
+                <div>
+                    <label for="c-phone" class="block text-xs text-slate-400 mb-1.5">전화번호</label>
+                    <input type="tel" id="c-phone" th:field="*{phone}" maxlength="20" placeholder="예: 010-1234-5678"
+                           class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="c-birth" class="block text-xs text-slate-400 mb-1.5">생년월일</label>
+                        <input type="date" id="c-birth" th:field="*{birthDate}"
+                               class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
+                    </div>
+                    <div>
+                        <label for="c-gender" class="block text-xs text-slate-400 mb-1.5">성별</label>
+                        <select id="c-gender" th:field="*{gender}"
+                                class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                            <option value="">선택 안 함</option>
+                            <option value="M">남성</option>
+                            <option value="F">여성</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 상세 정보 -->
+            <div class="bg-surface rounded-2xl border border-line p-5 space-y-4">
+                <h3 class="text-sm font-semibold text-ink-muted">상세 정보</h3>
+
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="c-hascert" th:field="*{hasCertification}" class="accent-indigo-600">
+                    <label for="c-hascert" class="text-sm text-ink-muted">자격증 보유</label>
+                </div>
+
+                <div>
+                    <label for="c-certtype" class="block text-xs text-slate-400 mb-1.5">자격증 종류</label>
+                    <input type="text" id="c-certtype" th:field="*{certificationType}" maxlength="100"
+                           class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
+                </div>
+
+                <div>
+                    <label class="block text-xs text-slate-400 mb-2">가능 업무</label>
+                    <div class="flex flex-wrap gap-2">
+                        <label th:each="cat : ${serviceCategories}"
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs border border-line-strong rounded-lg cursor-pointer hover:bg-surface-alt">
+                            <input type="checkbox" th:field="*{serviceCategories}" th:value="${cat.name}" class="accent-indigo-600">
+                            <span th:text="${cat.name}">업무</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="c-exp" class="block text-xs text-slate-400 mb-1.5">경력</label>
+                    <textarea id="c-exp" th:field="*{experience}" rows="3"
+                              class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"></textarea>
+                </div>
+
+                <div>
+                    <label for="c-introshort" class="block text-xs text-slate-400 mb-1.5">한 줄 소개</label>
+                    <input type="text" id="c-introshort" th:field="*{introShort}" maxlength="120"
+                           class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
+                </div>
+
+                <div>
+                    <label for="c-introlong" class="block text-xs text-slate-400 mb-1.5">상세 소개</label>
+                    <textarea id="c-introlong" th:field="*{introLong}" rows="3"
+                              class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"></textarea>
+                </div>
+            </div>
+
+            <!-- 성향 정보 -->
+            <div class="bg-surface rounded-2xl border border-line p-5 space-y-4">
+                <h3 class="text-sm font-semibold text-ink-muted">성향 정보</h3>
+
+                <div>
+                    <label class="block text-xs text-slate-400 mb-2">성향 태그</label>
+                    <div class="flex flex-wrap gap-2">
+                        <label th:each="tag : ${personalityTags}"
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs border border-line-strong rounded-lg cursor-pointer hover:bg-surface-alt">
+                            <input type="checkbox" th:field="*{personalityTagIds}" th:value="${tag.id}" class="accent-indigo-600">
+                            <span th:text="${tag.name}">태그</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="c-mbti" class="block text-xs text-slate-400 mb-1.5">MBTI</label>
+                    <select id="c-mbti" th:field="*{mbtiType}"
+                            class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                        <option value="">선택 안 함</option>
+                        <option th:each="mbti : ${mbtiTypes}" th:value="${mbti}" th:text="${mbti.label}">MBTI</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button type="submit"
+                        class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors">저장</button>
+                <a th:href="@{/admin/users/{id}(id=${user.id})}"
+                   class="px-4 py-2 text-sm font-semibold text-slate-500 border border-line-strong rounded-xl hover:bg-surface-alt transition-colors">취소</a>
+            </div>
+        </form>
+
+        <!-- ══════════ 관리자(ADMIN) 등 프로필 없는 계정 ══════════ -->
+        <form th:if="${user.role.name() != 'USER' and user.role.name() != 'CAREGIVER'}"
+              th:action="@{/admin/users/{id}/edit/basic(id=${user.id})}" method="post"
+              class="bg-surface rounded-2xl border border-line p-5 space-y-4">
+            <h3 class="text-sm font-semibold text-ink-muted">기본 정보</h3>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1.5">이메일</label>
+                <input type="text" th:value="${user.email}" disabled
+                       class="w-full px-4 py-2 text-sm border border-line rounded-xl bg-surface-alt text-slate-400 cursor-not-allowed"/>
+            </div>
+            <div>
+                <label for="a-phone" class="block text-xs text-slate-400 mb-1.5">전화번호</label>
+                <input type="tel" id="a-phone" name="phone" th:value="${user.phone}" maxlength="20"
+                       class="w-full px-4 py-2 text-sm border border-line-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"/>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="submit"
+                        class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors">저장</button>
+                <a th:href="@{/admin/users/{id}(id=${user.id})}"
+                   class="px-4 py-2 text-sm font-semibold text-slate-500 border border-line-strong rounded-xl hover:bg-surface-alt transition-colors">취소</a>
+            </div>
+        </form>
+
+    </div>
+
+</div>
+</th:block>
+</html>

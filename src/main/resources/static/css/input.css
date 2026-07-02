@@ -84,3 +84,37 @@
    라이트에서는 의도된 muted 색이지만 어두운 배경에서는 대비가 부족해 한 단계 밝게 올린다. */
 :root[data-theme="dark"] .text-gray-500,
 :root[data-theme="dark"] .text-slate-500 { color: rgb(148 163 184); }
+
+/* 다크모드 파스텔 배지/버튼 보정 — bg-*-50 연한 배경 + *-600/700 진한 글자 조합은
+   어두운 배경에서 대비가 무너진다(예: 관리자 회원 상세 '활성화' 버튼).
+   배경은 어두운 틴트로, 글자는 300 계열 밝은 색으로 전환한다. */
+:root[data-theme="dark"] .bg-teal-50    { background-color: rgb(19 78 74 / .4); }   /* teal-900 틴트 */
+:root[data-theme="dark"] .bg-amber-50   { background-color: rgb(120 53 15 / .35); } /* amber-900 틴트 */
+:root[data-theme="dark"] .bg-red-50     { background-color: rgb(127 29 29 / .35); } /* red-900 틴트 */
+:root[data-theme="dark"] .bg-indigo-50  { background-color: rgb(49 46 129 / .45); } /* indigo-900 틴트 */
+:root[data-theme="dark"] .bg-emerald-50 { background-color: rgb(6 78 59 / .4); }    /* emerald-900 틴트 */
+:root[data-theme="dark"] .bg-slate-100,
+:root[data-theme="dark"] .bg-indigo-100 { background-color: rgb(51 65 85 / .6); }   /* slate-700 틴트 */
+
+:root[data-theme="dark"] .text-teal-600,
+:root[data-theme="dark"] .text-teal-700   { color: rgb(94 234 212); }  /* teal-300 */
+:root[data-theme="dark"] .text-amber-600,
+:root[data-theme="dark"] .text-amber-700  { color: rgb(252 211 77); }  /* amber-300 */
+:root[data-theme="dark"] .text-red-500,
+:root[data-theme="dark"] .text-red-600    { color: rgb(252 165 165); } /* red-300 */
+:root[data-theme="dark"] .text-indigo-600,
+:root[data-theme="dark"] .text-indigo-700 { color: rgb(165 180 252); } /* indigo-300 */
+:root[data-theme="dark"] .text-emerald-600 { color: rgb(110 231 183); } /* emerald-300 */
+
+:root[data-theme="dark"] .border-teal-200   { border-color: rgb(17 94 89); }  /* teal-800 */
+:root[data-theme="dark"] .border-amber-200  { border-color: rgb(146 64 14); } /* amber-800 */
+:root[data-theme="dark"] .border-red-100    { border-color: rgb(153 27 27); } /* red-800 */
+:root[data-theme="dark"] .border-indigo-100,
+:root[data-theme="dark"] .border-indigo-200 { border-color: rgb(55 48 163); } /* indigo-800 */
+
+:root[data-theme="dark"] .hover\:bg-teal-50:hover   { background-color: rgb(19 78 74 / .6); }
+:root[data-theme="dark"] .hover\:bg-amber-50:hover  { background-color: rgb(120 53 15 / .55); }
+:root[data-theme="dark"] .hover\:bg-red-50:hover    { background-color: rgb(127 29 29 / .55); }
+:root[data-theme="dark"] .hover\:bg-indigo-50:hover { background-color: rgb(49 46 129 / .6); }
+:root[data-theme="dark"] .hover\:text-indigo-700:hover { color: rgb(199 210 254); } /* indigo-200 */
+:root[data-theme="dark"] .hover\:text-red-600:hover     { color: rgb(254 202 202); } /* red-200 */
