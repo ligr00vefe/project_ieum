@@ -6,6 +6,23 @@
    Tailwind 유틸리티는 rem 기반이라 이 값만 바꾸면 대부분의 텍스트/여백이 함께 스케일된다. */
 :root[data-font-scale="lg"] { font-size: 150%; }
 
+/* 크게 보기 상태의 헤더 — 데스크톱 내비(md:flex, 768px)가 150% 확대된 콘텐츠 폭(약 1265px)을
+   못 버티고 태블릿 폭에서 줄바꿈되므로, md~xl 구간(768~1279px)에서는 모바일 메뉴를 유지한다.
+   ID 선택자라 Tailwind의 .md\:flex/.md\:hidden 클래스 선택자보다 우선순위가 자연히 높다. */
+@media (min-width: 768px) and (max-width: 1279.98px) {
+  :root[data-font-scale="lg"] #desktop-nav,
+  :root[data-font-scale="lg"] #desktop-auth {
+    display: none;
+  }
+  :root[data-font-scale="lg"] #mobile-menu-btn {
+    display: inline-block;
+  }
+  /* 패널 자체도 md:hidden으로 항상 강제 숨김되어 있어, JS가 hidden 클래스를 뗀 열림 상태만 별도로 풀어준다. */
+  :root[data-font-scale="lg"] #mobile-menu:not(.hidden) {
+    display: block;
+  }
+}
+
 /* 라이트/다크 공용 시맨틱 색상 토큰 — <html data-theme="..."> 값에 따라 전환된다.
    템플릿에서는 bg-white/text-gray-900 대신 bg-surface/text-ink 등을 사용해
    dark: variant 없이 테마 전환이 되도록 한다. */

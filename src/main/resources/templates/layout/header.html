@@ -9,13 +9,13 @@
                 <a th:href="@{/}" class="flex items-end gap-2.5 group flex-shrink-0">
                     <img src="/images/logo/logo.png" alt="이음 로고" class="w-11 h-11 object-contain">
                     <div class="leading-tight">
-                        <div class="text-[15px] font-bold text-ink group-hover:text-teal-600 transition-colors">이음</div>
-                        <div class="text-[10px] text-gray-400 font-medium tracking-wide -mt-0.5">Care Match</div>
+                        <div class="text-base font-bold text-ink group-hover:text-teal-600 transition-colors">이음</div>
+                        <div class="text-xs text-gray-400 font-medium tracking-wide -mt-0.5">Care Match</div>
                     </div>
                 </a>
 
                 <!-- Desktop Navigation -->
-                <nav class="hidden md:flex items-center gap-1" aria-label="주요 메뉴">
+                <nav id="desktop-nav" class="hidden md:flex items-center gap-1" aria-label="주요 메뉴">
                     <a th:href="@{/board}"
                        th:classappend="${currentUri.startsWith('/board') or currentUri.startsWith('/disabled/board') or currentUri.startsWith('/caregiver/board')} ? 'text-indigo-600 bg-indigo-50' : 'text-ink-muted hover:text-ink hover:bg-surface-muted'"
                        th:attr="aria-current=${(currentUri.startsWith('/board') or currentUri.startsWith('/disabled/board') or currentUri.startsWith('/caregiver/board')) ? 'page' : null}"
@@ -43,7 +43,7 @@
                 </nav>
 
                 <!-- Auth Buttons -->
-                <div class="hidden md:flex items-center gap-2.5">
+                <div id="desktop-auth" class="hidden md:flex items-center gap-2.5">
                     <!-- 글자 크게 보기 (알림 벨 왼쪽) — 모든 사용자에게 노출 -->
                     <button type="button" id="fontScaleBtn" data-font-scale-toggle aria-label="글자 크게 보기 (150%)"
                             class="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-ink-muted border border-line-strong rounded-xl hover:bg-surface-muted transition-all">
