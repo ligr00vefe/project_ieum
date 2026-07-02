@@ -14,11 +14,22 @@
         </a>
         <span class="text-slate-300">/</span>
         <span class="text-sm font-medium text-ink-muted" th:text="${user.email}">이메일</span>
+        <a th:href="@{/admin/users/{id}/edit(id=${user.id})}"
+           class="ml-auto flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+            정보 수정
+        </a>
     </div>
 
     <div th:if="${message}"
          class="mb-4 px-4 py-3 rounded-xl bg-teal-50 border border-teal-200 text-sm text-teal-700"
          th:text="${message}"></div>
+    <div th:if="${error}"
+         class="mb-4 px-4 py-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-600"
+         th:text="${error}"></div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
@@ -28,12 +39,26 @@
                 <h3 class="text-sm font-semibold text-ink-muted mb-4">기본 정보</h3>
                 <dl class="space-y-3">
                     <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">이름</dt>
+                        <dd class="text-sm text-ink font-medium" th:text="${profile != null ? profile.fullName : '-'}">-</dd>
+                    </div>
+                    <div class="flex gap-4">
                         <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">이메일</dt>
                         <dd class="text-sm text-ink font-medium" th:text="${user.email}">-</dd>
                     </div>
                     <div class="flex gap-4">
                         <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">전화번호</dt>
                         <dd class="text-sm text-ink" th:text="${user.phone ?: '-'}">-</dd>
+                    </div>
+                    <div class="flex gap-4" th:if="${profile != null}">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">생년월일</dt>
+                        <dd class="text-sm text-ink"
+                            th:text="${profile.birthDate != null ? #temporals.format(profile.birthDate, 'yyyy.MM.dd') : '-'}">-</dd>
+                    </div>
+                    <div class="flex gap-4" th:if="${profile != null}">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">성별</dt>
+                        <dd class="text-sm text-ink"
+                            th:text="${profile.gender == null ? '-' : (profile.gender.name() == 'M' ? '남성' : '여성')}">-</dd>
                     </div>
                     <div class="flex gap-4">
                         <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">역할</dt>
@@ -54,6 +79,155 @@
                             th:text="${user.lastLoginAt != null ? #temporals.format(user.lastLoginAt, 'yyyy.MM.dd HH:mm') : '-'}">-</dd>
                     </div>
                 </dl>
+            </div>
+
+            <!-- 이용자 프로필 상세 -->
+            <div th:if="${userProfile != null}" class="bg-surface rounded-2xl border border-line p-5">
+                <h3 class="text-sm font-semibold text-ink-muted mb-4">이용자 프로필</h3>
+                <dl class="space-y-3">
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">보호자</dt>
+                        <dd class="text-sm text-ink">
+                            <span th:text="${userProfile.guardianName ?: '-'}">-</span>
+                            <span th:if="${userProfile.guardianPhone != null}" class="text-ink-muted"
+                                  th:text="'(' + ${userProfile.guardianPhone} + ')'"></span>
+                        </dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">지역</dt>
+                        <dd class="text-sm text-ink"
+                            th:text="${userProfile.region != null
+                                       ? userProfile.region.sido + ' ' + userProfile.region.sigungu + (userProfile.region.dong != null ? ' ' + userProfile.region.dong : '')
+                                       : '-'}">-</dd>
+                    </div>
+                    <div class="flex gap-4" th:if="${userProfile.addressDetail != null}">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">상세주소</dt>
+                        <dd class="text-sm text-ink" th:text="${userProfile.addressDetail}">-</dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">장애 유형</dt>
+                        <dd class="text-sm">
+                            <span th:if="${#lists.isEmpty(userProfile.disabilityTypes)}" class="text-ink">-</span>
+                            <span th:each="dt : ${userProfile.disabilityTypes}"
+                                  th:text="${dt.disabilityType.name}"
+                                  class="inline-block mr-1 mb-1 px-2 py-0.5 text-xs font-medium rounded-full bg-indigo-50 text-indigo-600">유형</span>
+                        </dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">의사소통</dt>
+                        <dd class="text-sm">
+                            <span th:if="${#lists.isEmpty(userProfile.communicationMethods)}" class="text-ink">-</span>
+                            <span th:each="cm : ${userProfile.communicationMethods}"
+                                  th:text="${cm.communicationMethod.name}"
+                                  class="inline-block mr-1 mb-1 px-2 py-0.5 text-xs font-medium rounded-full bg-teal-50 text-teal-600">방식</span>
+                        </dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">이동 보조</dt>
+                        <dd class="text-sm text-ink" th:text="${userProfile.mobilityAid ?: '-'}">-</dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">MBTI</dt>
+                        <dd class="text-sm text-ink" th:text="${userProfile.mbtiType != null ? userProfile.mbtiType.name() : '-'}">-</dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">선호 MBTI</dt>
+                        <dd class="text-sm">
+                            <span th:if="${#lists.isEmpty(userProfile.preferredMbtis)}" class="text-ink">-</span>
+                            <span th:each="pm : ${userProfile.preferredMbtis}"
+                                  th:text="${pm.mbtiType.name()}"
+                                  class="inline-block mr-1 mb-1 px-2 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-ink-muted">MBTI</span>
+                        </dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">성향 태그</dt>
+                        <dd class="text-sm">
+                            <span th:if="${userPersonalityTags == null or #lists.isEmpty(userPersonalityTags)}" class="text-ink">-</span>
+                            <span th:each="tag : ${userPersonalityTags}"
+                                  th:text="${tag.name}"
+                                  class="inline-block mr-1 mb-1 px-2 py-0.5 text-xs font-medium rounded-full bg-amber-50 text-amber-600">태그</span>
+                        </dd>
+                    </div>
+                    <div class="flex gap-4" th:if="${userProfile.activityRange != null and !#strings.isEmpty(userProfile.activityRange)}">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">활동 범위</dt>
+                        <dd class="text-sm text-ink whitespace-pre-line" th:text="${userProfile.activityRange}">-</dd>
+                    </div>
+                    <div class="flex gap-4" th:if="${userProfile.avoidSituations != null and !#strings.isEmpty(userProfile.avoidSituations)}">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">피해야 할 상황</dt>
+                        <dd class="text-sm text-ink whitespace-pre-line" th:text="${userProfile.avoidSituations}">-</dd>
+                    </div>
+                    <div class="flex gap-4" th:if="${userProfile.lifestyleNote != null and !#strings.isEmpty(userProfile.lifestyleNote)}">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">생활 메모</dt>
+                        <dd class="text-sm text-ink whitespace-pre-line" th:text="${userProfile.lifestyleNote}">-</dd>
+                    </div>
+                    <div class="flex gap-4" th:if="${userProfile.introText != null and !#strings.isEmpty(userProfile.introText)}">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">자기소개</dt>
+                        <dd class="text-sm text-ink-muted whitespace-pre-line" th:text="${userProfile.introText}">-</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <!-- 활동지원사 프로필 상세 -->
+            <div th:if="${caregiverProfile != null}" class="bg-surface rounded-2xl border border-line p-5">
+                <h3 class="text-sm font-semibold text-ink-muted mb-4">활동지원사 프로필</h3>
+                <dl class="space-y-3">
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">활동 상태</dt>
+                        <dd>
+                            <span th:with="st=${caregiverProfile.availabilityStatus.name()}"
+                                  th:text="${st == 'AVAILABLE' ? '활동 가능' : st == 'BUSY' ? '활동 중' : '오프라인'}"
+                                  th:classappend="${caregiverProfile.availabilityStatus.name() == 'AVAILABLE' ? 'bg-teal-50 text-teal-600' : (caregiverProfile.availabilityStatus.name() == 'BUSY' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-500')}"
+                                  class="px-2 py-0.5 text-xs font-semibold rounded-full">상태</span>
+                        </dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">자격증</dt>
+                        <dd class="text-sm text-ink"
+                            th:text="${caregiverProfile.hasCertification ? (caregiverProfile.certificationType ?: '보유') : '미보유'}">-</dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">평점</dt>
+                        <dd class="text-sm text-ink">
+                            <span class="font-semibold" th:text="${caregiverProfile.avgRating}">0</span>
+                            <span class="text-ink-muted" th:text="'(리뷰 ' + ${caregiverProfile.totalReviews} + '건)'"></span>
+                        </dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">가능 업무</dt>
+                        <dd class="text-sm text-ink" th:text="${caregiverProfile.serviceCategories ?: '-'}">-</dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">MBTI</dt>
+                        <dd class="text-sm text-ink" th:text="${caregiverProfile.mbtiType != null ? caregiverProfile.mbtiType.name() : '-'}">-</dd>
+                    </div>
+                    <div class="flex gap-4">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">성향 태그</dt>
+                        <dd class="text-sm">
+                            <span th:if="${caregiverPersonalityTags == null or #lists.isEmpty(caregiverPersonalityTags)}" class="text-ink">-</span>
+                            <span th:each="tag : ${caregiverPersonalityTags}"
+                                  th:text="${tag.name}"
+                                  class="inline-block mr-1 mb-1 px-2 py-0.5 text-xs font-medium rounded-full bg-amber-50 text-amber-600">태그</span>
+                        </dd>
+                    </div>
+                    <div class="flex gap-4" th:if="${caregiverProfile.experience != null and !#strings.isEmpty(caregiverProfile.experience)}">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">경력</dt>
+                        <dd class="text-sm text-ink whitespace-pre-line" th:text="${caregiverProfile.experience}">-</dd>
+                    </div>
+                    <div class="flex gap-4" th:if="${caregiverProfile.introShort != null and !#strings.isEmpty(caregiverProfile.introShort)}">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">한 줄 소개</dt>
+                        <dd class="text-sm text-ink" th:text="${caregiverProfile.introShort}">-</dd>
+                    </div>
+                    <div class="flex gap-4" th:if="${caregiverProfile.introLong != null and !#strings.isEmpty(caregiverProfile.introLong)}">
+                        <dt class="w-24 text-xs text-slate-400 flex-shrink-0 pt-0.5">상세 소개</dt>
+                        <dd class="text-sm text-ink-muted whitespace-pre-line" th:text="${caregiverProfile.introLong}">-</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <!-- 프로필 미등록 안내 (관리자 계정 제외) -->
+            <div th:if="${profile == null and user.role.name() != 'ADMIN'}"
+                 class="bg-surface rounded-2xl border border-line p-5 text-center text-sm text-slate-400">
+                등록된 프로필이 없습니다.
             </div>
 
             <!-- 요청 내역 -->
