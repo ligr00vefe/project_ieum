@@ -16,6 +16,7 @@ import com.project.ieum.entity.market.MarketPost;
 import com.project.ieum.entity.market.MarketPostImage;
 import com.project.ieum.entity.market.MarketPostStatus;
 import com.project.ieum.entity.notice.Notice;
+import com.project.ieum.entity.popup.Popup;
 import com.project.ieum.entity.request.*;
 import com.project.ieum.entity.user.*;
 import com.project.ieum.repository.*;
@@ -66,6 +67,7 @@ public class DataInitializer implements CommandLineRunner {
     private final MarketPostRepository marketPostRepository;
     private final MarketPostImageRepository marketPostImageRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PopupRepository popupRepository;
 
     @Override
     public void run(String... args) {
@@ -101,6 +103,10 @@ public class DataInitializer implements CommandLineRunner {
         }
         if (marketPostRepository.count() == 0) {
             initDummyMarketPosts();
+        }
+
+        if (popupRepository.count() == 0) {
+            initializePopups();
         }
     }
 
@@ -1452,6 +1458,24 @@ public class DataInitializer implements CommandLineRunner {
             count++;
         }
         log.info("이음마켓 이미지 등록 완료 — {}건 처리", count);
+    }
+
+    // ─── popup 더미 데이터 ───────────────────────────────────────────────────────
+    private void initializePopups() {
+        // 리포지토리를 통해 데이터베이스에 저장
+        popupRepository.save(Popup.builder()
+                .name("오픈 이벤트")
+                .content("<figure class=\"image\">\n" +
+                        "  <img style=\"aspect-ratio:1024/1536;\" src=\"/uploads/popups/editor/d99c40da-c6a0-41dc-b0b4-0ddde0673b17.jpg\" width=\"1024\" height=\"1536\">\n" +
+                        " </figure>")
+                .linkUrl("https://ieumcare.shop/register/type-select")
+                .layout("PORTRAIT")
+                .duration("MONTH_1")
+                .enabled(true)
+                .expiresAt(LocalDateTime.of(2026, 7, 31, 2, 17, 11, 177081))
+                .build());
+
+        log.info("더미 팝업 초기화 완료 총 1건");
     }
 
     // ─── 헬퍼 메서드 ─────────────────────────────────────────────────────────────
