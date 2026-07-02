@@ -46,15 +46,17 @@
             <div class="px-5 py-3 border-t border-line flex items-center gap-4">
                 <div class="flex items-center gap-3">
                     <span class="flex items-center gap-1.5 text-xs text-gray-500">
-                        <span class="w-3 h-3 rounded-full bg-surface border-2 flex-shrink-0"
-                              th:style="'border-color:' + (${userRole == 'USER'} ? '#6366f1' : '#14b8a6')"></span>
+                        <span id="legendSupporting" class="w-3 h-3 rounded-full border-2 flex-shrink-0"></span>
                         <span th:text="${userRole == 'USER'} ? '등록 일정' : '지원 중'">등록 일정</span>
                     </span>
                     <span class="flex items-center gap-1.5 text-xs text-gray-500">
-                        <span class="w-3 h-3 rounded-full bg-orange-400 flex-shrink-0"></span>매칭 확정
+                        <span id="legendMatched" class="w-3 h-3 rounded-full flex-shrink-0"></span>매칭 확정
                     </span>
                     <span class="flex items-center gap-1.5 text-xs text-gray-500">
-                        <span class="w-3 h-3 rounded-full bg-emerald-500 flex-shrink-0"></span>활동 완료
+                        <span id="legendCompleted" class="w-3 h-3 rounded-full flex-shrink-0"></span>활동 완료
+                    </span>
+                    <span class="flex items-center gap-1.5 text-xs text-gray-500">
+                        <span id="legendToday" class="w-1.5 h-1.5 rounded-full flex-shrink-0"></span>오늘
                     </span>
                 </div>
                 <span th:if="${userRole == 'USER'}" class="ml-auto text-xs text-gray-400">빈 날짜 클릭 → 일정 등록</span>
@@ -78,6 +80,21 @@
 
 <script th:inline="javascript">
 const USER_ROLE = /*[[${userRole}]]*/ 'USER';
+
+// 다크모드에서는 채도를 유지하되 한 단계 밝은 색상으로 바꿔 어두운 배경에서도 가시성을 유지한다.
+const IS_DARK = document.documentElement.getAttribute('data-theme') === 'dark';
+const ROLE_COLOR = USER_ROLE === 'USER' ? (IS_DARK ? '#818cf8' : '#6366f1') : (IS_DARK ? '#2dd4bf' : '#14b8a6');
+const MATCHED_COLOR = IS_DARK ? '#e879f9' : '#d946ef';
+const COMPLETED_COLOR = IS_DARK ? '#fb923c' : '#f97316';
+const SUPPORT_BORDER = 'rgb(var(--color-ink))';
+
+function initLegend() {
+    const supporting = document.getElementById('legendSupporting');
+    supporting.style.borderColor = SUPPORT_BORDER;
+    document.getElementById('legendMatched').style.background = MATCHED_COLOR;
+    document.getElementById('legendCompleted').style.background = COMPLETED_COLOR;
+    document.getElementById('legendToday').style.background = ROLE_COLOR;
+}
 
 let currentYear, currentMonth;
 let allEvents = [];
@@ -157,9 +174,9 @@ function renderCalendar() {
             const bar = document.createElement('div');
             bar.style.cssText = `position:absolute; top:10px; height:34px; z-index:1;`;
             bar.style.background = primaryEv.type === 'matched'
-                ? 'rgba(249,115,22,0.18)'
+                ? (IS_DARK ? 'rgba(232,121,249,0.22)' : 'rgba(217,70,239,0.18)')
                 : primaryEv.type === 'completed'
-                    ? 'rgba(16,185,129,0.18)'
+                    ? (IS_DARK ? 'rgba(251,146,60,0.22)' : 'rgba(249,115,22,0.18)')
                     : (USER_ROLE === 'USER' ? 'rgba(99,102,241,0.12)' : 'rgba(20,184,166,0.12)');
             if (primaryEv.position === 'start') { bar.style.left = '50%'; bar.style.right = '0'; }
             else if (primaryEv.position === 'end') { bar.style.left = '0'; bar.style.right = '50%'; }
@@ -176,30 +193,23 @@ function renderCalendar() {
         numEl.style.cssText = 'position:absolute; top:10px; left:50%; transform:translateX(-50%); width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:13px; font-weight:600; z-index:10;';
         numEl.textContent = d;
 
+        // 마커 규칙(마이페이지 미니달력과 동일): 미완료(등록/지원중)=테두리만 있는 빈 원, 매칭/완료=색 채운 원.
+        // 채운 원(매칭/완료)은 서로 다른 색상이며, 역할색(오늘 표시)과도 겹치지 않는 색을 쓴다.
         if (markerEv) {
-            // 이벤트 색상이 최우선 — 오늘 날짜와 겹쳐도 매칭/완료 상태가 가려지지 않도록 링으로만 구분한다.
             if (markerEv.type === 'matched') {
-                numEl.style.background = '#f97316';
+                numEl.style.background = MATCHED_COLOR;
                 numEl.style.color = 'white';
             } else if (markerEv.type === 'completed') {
-                numEl.style.background = '#10b981';
+                numEl.style.background = COMPLETED_COLOR;
                 numEl.style.color = 'white';
             } else {
-                const bc = USER_ROLE === 'USER' ? '#6366f1' : '#14b8a6';
-                const tc = USER_ROLE === 'USER' ? '#4f46e5' : '#0d9488';
-                numEl.style.background = 'white';
-                numEl.style.color = tc;
-                numEl.style.border = `2px solid ${bc}`;
-            }
-            if (isToday) {
-                const todayRing = USER_ROLE === 'USER' ? 'rgba(79,70,229,0.6)' : 'rgba(13,148,136,0.6)';
-                numEl.style.boxShadow = (markerEv.type === 'matched' || markerEv.type === 'completed')
-                    ? 'inset 0 0 0 2px rgba(255,255,255,0.9)'
-                    : `inset 0 0 0 2px ${todayRing}`;
+                numEl.style.background = 'transparent';
+                numEl.style.color = 'rgb(var(--color-ink))';
+                numEl.style.border = `2px solid ${SUPPORT_BORDER}`;
             }
         } else if (isToday) {
-            numEl.style.background = USER_ROLE === 'USER' ? '#4f46e5' : '#0d9488';
-            numEl.style.color = 'white';
+            numEl.style.fontWeight = '800';
+            numEl.style.color = ROLE_COLOR;
         } else if (dow === 0) {
             numEl.style.color = '#f87171';
         } else if (dow === 6) {
@@ -208,6 +218,13 @@ function renderCalendar() {
             numEl.style.color = 'rgb(var(--color-ink))';
         }
         cell.appendChild(numEl);
+
+        // 오늘 표시 — 숫자 아래 점. 마커(원)와 표시 채널을 분리해 완료/매칭과 겹치지 않는다.
+        if (isToday) {
+            const todayDot = document.createElement('span');
+            todayDot.style.cssText = `position:absolute; top:48px; left:50%; transform:translateX(-50%); width:6px; height:6px; border-radius:50%; background:${ROLE_COLOR}; z-index:10;`;
+            cell.appendChild(todayDot);
+        }
 
         const rawEvs = allEvents.filter(ev => {
             const s = ev.startDate || ev.date;
@@ -264,8 +281,8 @@ function showEventPanel(dateStr, events) {
         const typeLabel = ev.type === 'matched' ? '매칭 확정'
                         : ev.type === 'completed' ? '활동 완료'
                         : ev.type === 'registered' ? '등록 일정' : '지원 중';
-        const typeBadge = ev.type === 'matched' ? 'bg-orange-50 text-orange-600'
-                        : ev.type === 'completed' ? 'bg-emerald-50 text-emerald-600'
+        const typeBadge = ev.type === 'matched' ? 'bg-fuchsia-50 text-fuchsia-600'
+                        : ev.type === 'completed' ? 'bg-orange-50 text-orange-600'
                         : 'bg-surface-hover text-ink-muted';
         const url = USER_ROLE === 'USER' ? `/disabled/board/${ev.requestId}` : `/caregiver/board/${ev.requestId}`;
         const accentColor = USER_ROLE === 'USER' ? 'text-indigo-500' : 'text-teal-500';
@@ -319,6 +336,7 @@ function nextMonth() {
 document.addEventListener('DOMContentLoaded', () => {
     currentYear = today.getFullYear();
     currentMonth = today.getMonth();
+    initLegend();
     loadEvents();
 });
 </script>
