@@ -16,6 +16,7 @@ import com.project.ieum.entity.market.MarketPost;
 import com.project.ieum.entity.market.MarketPostImage;
 import com.project.ieum.entity.market.MarketPostStatus;
 import com.project.ieum.entity.notice.Notice;
+import com.project.ieum.entity.popup.Popup;
 import com.project.ieum.entity.request.*;
 import com.project.ieum.entity.user.*;
 import com.project.ieum.repository.*;
@@ -66,6 +67,7 @@ public class DataInitializer implements CommandLineRunner {
     private final MarketPostRepository marketPostRepository;
     private final MarketPostImageRepository marketPostImageRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PopupRepository popupRepository;
 
     @Override
     public void run(String... args) {
@@ -101,6 +103,10 @@ public class DataInitializer implements CommandLineRunner {
         }
         if (marketPostRepository.count() == 0) {
             initDummyMarketPosts();
+        }
+
+        if (popupRepository.count() == 0) {
+            initializePopups();
         }
     }
 
@@ -197,7 +203,7 @@ public class DataInitializer implements CommandLineRunner {
         if (!userRepository.existsByEmail(adminEmail)) {
             userRepository.save(User.builder()
                     .email(adminEmail)
-                    .passwordHash(passwordEncoder.encode("1"))
+                    .passwordHash(passwordEncoder.encode("test123$"))
                     .phone(null)
                     .role(UserRole.ADMIN)
                     .status(UserStatus.ACTIVE)
@@ -225,7 +231,7 @@ public class DataInitializer implements CommandLineRunner {
 
         User user = userRepository.save(User.builder()
                 .email(email)
-                .passwordHash(passwordEncoder.encode("1"))
+                .passwordHash(passwordEncoder.encode("test123$"))
                 .phone("010-2222-2222")
                 .role(UserRole.USER)
                 .status(UserStatus.ACTIVE)
@@ -272,7 +278,7 @@ public class DataInitializer implements CommandLineRunner {
 
         User user = userRepository.save(User.builder()
                 .email(email)
-                .passwordHash(passwordEncoder.encode("1"))
+                .passwordHash(passwordEncoder.encode("test123$"))
                 .phone("010-3333-3333")
                 .role(UserRole.CAREGIVER)
                 .status(UserStatus.ACTIVE)
@@ -331,7 +337,7 @@ public class DataInitializer implements CommandLineRunner {
 
             User user = userRepository.save(User.builder()
                     .email(du.email())
-                    .passwordHash(passwordEncoder.encode("1"))
+                    .passwordHash(passwordEncoder.encode("test123$"))
                     .phone(du.phone())
                     .role(UserRole.USER)
                     .status(UserStatus.ACTIVE)
@@ -385,7 +391,7 @@ public class DataInitializer implements CommandLineRunner {
 
             User user = userRepository.save(User.builder()
                     .email(dc.email())
-                    .passwordHash(passwordEncoder.encode("1"))
+                    .passwordHash(passwordEncoder.encode("test123$"))
                     .phone(dc.phone())
                     .role(UserRole.CAREGIVER)
                     .status(UserStatus.ACTIVE)
@@ -1379,58 +1385,58 @@ public class DataInitializer implements CommandLineRunner {
     private void initMarketPostImages() {
         // post_id → [display_order, imageUrl] 목록 (실서버 DB 기준 하드코딩)
         Object[][] data = {
-            {6L,  0, "/uploads/market/1782753608683_6_0.jpg"},
-            {27L, 0, "/uploads/market/1782753671907_27_0.jpg"},
-            {17L, 0, "/uploads/market/1782753698549_17_0.jpg"},
-            {7L,  0, "/uploads/market/1782753755388_7_0.jpg"},
-            {7L,  1, "/uploads/market/1782753755390_7_1.jpg"},
-            {7L,  2, "/uploads/market/1782753755392_7_2.jpg"},
-            {30L, 0, "/uploads/market/1782753852300_30_0.jpg"},
-            {23L, 0, "/uploads/market/1782753949975_23_0.jpg"},
-            {13L, 0, "/uploads/market/1782753981777_13_0.jpg"},
-            {4L,  0, "/uploads/market/1782754026038_4_0.jpg"},
-            {18L, 0, "/uploads/market/1782754112440_18_0.jpg"},
-            {18L, 1, "/uploads/market/1782754112442_18_1.jpg"},
-            {18L, 2, "/uploads/market/1782754112444_18_2.jpg"},
-            {18L, 3, "/uploads/market/1782754112446_18_3.jpg"},
-            {21L, 0, "/uploads/market/1782754308908_21_0.jpg"},
-            {21L, 1, "/uploads/market/1782754308910_21_1.jpg"},
-            {10L, 0, "/uploads/market/1782754619413_10_0.jpg"},
-            {22L, 0, "/uploads/market/1782754699326_22_0.jpg"},
-            {12L, 0, "/uploads/market/1782754828257_12_0.jpg"},
-            {12L, 1, "/uploads/market/1782754828260_12_1.jpg"},
-            {1L,  0, "/uploads/market/1782754864669_1_0.jpg"},
-            {15L, 0, "/uploads/market/1782754893592_15_0.jpg"},
-            {11L, 0, "/uploads/market/1782754904714_11_0.jpg"},
-            {9L,  0, "/uploads/market/1782754986588_9_0.jpg"},
-            {9L,  1, "/uploads/market/1782754986591_9_1.jpg"},
-            {9L,  2, "/uploads/market/1782754986592_9_2.jpg"},
-            {26L, 0, "/uploads/market/1782755015915_26_0.jpg"},
-            {24L, 0, "/uploads/market/1782755070770_24_0.jpg"},
-            {19L, 0, "/uploads/market/1782755123902_19_0.jpg"},
-            {3L,  0, "/uploads/market/1782755166147_3_0.jpg"},
-            {3L,  1, "/uploads/market/1782755166149_3_1.jpg"},
-            {3L,  2, "/uploads/market/1782755166151_3_2.jpg"},
-            {28L, 0, "/uploads/market/1782755297153_28_0.jpg"},
-            // 2026-07-01 추가분
-            {14L, 0, "/uploads/market/1782835015392_14_0.jpg"},
-            {14L, 1, "/uploads/market/1782835015403_14_1.jpg"},
-            {14L, 2, "/uploads/market/1782835015407_14_2.jpg"},
-            {14L, 3, "/uploads/market/1782835015409_14_3.jpg"},
-            {29L, 0, "/uploads/market/1782835160561_29_0.jpg"},
-            {29L, 1, "/uploads/market/1782835160563_29_1.jpg"},
-            {8L,  0, "/uploads/market/1782835454711_8_0.jpg"},
-            {8L,  1, "/uploads/market/1782835454713_8_1.jpg"},
-            {8L,  2, "/uploads/market/1782835454715_8_2.jpg"},
-            {2L,  0, "/uploads/market/1782835828607_2_0.jpg"},
-            {2L,  1, "/uploads/market/1782835828609_2_1.jpg"},
-            {2L,  2, "/uploads/market/1782835828611_2_2.jpg"},
-            {25L, 0, "/uploads/market/1782835841229_25_0.jpg"},
-            {25L, 1, "/uploads/market/1782835841230_25_1.jpg"},
-            {16L, 0, "/uploads/market/1782835861311_16_0.jpg"},
-            {5L,  0, "/uploads/market/1782835898189_5_0.jpg"},
-            {5L,  1, "/uploads/market/1782835898190_5_1.jpg"},
-            {5L,  2, "/uploads/market/1782835898194_5_2.jpg"},
+                {6L,  0, "/uploads/market/1782753608683_6_0.jpg"},
+                {27L, 0, "/uploads/market/1782753671907_27_0.jpg"},
+                {17L, 0, "/uploads/market/1782753698549_17_0.jpg"},
+                {7L,  0, "/uploads/market/1782753755388_7_0.jpg"},
+                {7L,  1, "/uploads/market/1782753755390_7_1.jpg"},
+                {7L,  2, "/uploads/market/1782753755392_7_2.jpg"},
+                {30L, 0, "/uploads/market/1782753852300_30_0.jpg"},
+                {23L, 0, "/uploads/market/1782753949975_23_0.jpg"},
+                {13L, 0, "/uploads/market/1782753981777_13_0.jpg"},
+                {4L,  0, "/uploads/market/1782754026038_4_0.jpg"},
+                {18L, 0, "/uploads/market/1782754112440_18_0.jpg"},
+                {18L, 1, "/uploads/market/1782754112442_18_1.jpg"},
+                {18L, 2, "/uploads/market/1782754112444_18_2.jpg"},
+                {18L, 3, "/uploads/market/1782754112446_18_3.jpg"},
+                {21L, 0, "/uploads/market/1782754308908_21_0.jpg"},
+                {21L, 1, "/uploads/market/1782754308910_21_1.jpg"},
+                {10L, 0, "/uploads/market/1782754619413_10_0.jpg"},
+                {22L, 0, "/uploads/market/1782754699326_22_0.jpg"},
+                {12L, 0, "/uploads/market/1782754828257_12_0.jpg"},
+                {12L, 1, "/uploads/market/1782754828260_12_1.jpg"},
+                {1L,  0, "/uploads/market/1782754864669_1_0.jpg"},
+                {15L, 0, "/uploads/market/1782754893592_15_0.jpg"},
+                {11L, 0, "/uploads/market/1782754904714_11_0.jpg"},
+                {9L,  0, "/uploads/market/1782754986588_9_0.jpg"},
+                {9L,  1, "/uploads/market/1782754986591_9_1.jpg"},
+                {9L,  2, "/uploads/market/1782754986592_9_2.jpg"},
+                {26L, 0, "/uploads/market/1782755015915_26_0.jpg"},
+                {24L, 0, "/uploads/market/1782755070770_24_0.jpg"},
+                {19L, 0, "/uploads/market/1782755123902_19_0.jpg"},
+                {3L,  0, "/uploads/market/1782755166147_3_0.jpg"},
+                {3L,  1, "/uploads/market/1782755166149_3_1.jpg"},
+                {3L,  2, "/uploads/market/1782755166151_3_2.jpg"},
+                {28L, 0, "/uploads/market/1782755297153_28_0.jpg"},
+                // 2026-07-01 추가분
+                {14L, 0, "/uploads/market/1782835015392_14_0.jpg"},
+                {14L, 1, "/uploads/market/1782835015403_14_1.jpg"},
+                {14L, 2, "/uploads/market/1782835015407_14_2.jpg"},
+                {14L, 3, "/uploads/market/1782835015409_14_3.jpg"},
+                {29L, 0, "/uploads/market/1782835160561_29_0.jpg"},
+                {29L, 1, "/uploads/market/1782835160563_29_1.jpg"},
+                {8L,  0, "/uploads/market/1782835454711_8_0.jpg"},
+                {8L,  1, "/uploads/market/1782835454713_8_1.jpg"},
+                {8L,  2, "/uploads/market/1782835454715_8_2.jpg"},
+                {2L,  0, "/uploads/market/1782835828607_2_0.jpg"},
+                {2L,  1, "/uploads/market/1782835828609_2_1.jpg"},
+                {2L,  2, "/uploads/market/1782835828611_2_2.jpg"},
+                {25L, 0, "/uploads/market/1782835841229_25_0.jpg"},
+                {25L, 1, "/uploads/market/1782835841230_25_1.jpg"},
+                {16L, 0, "/uploads/market/1782835861311_16_0.jpg"},
+                {5L,  0, "/uploads/market/1782835898189_5_0.jpg"},
+                {5L,  1, "/uploads/market/1782835898190_5_1.jpg"},
+                {5L,  2, "/uploads/market/1782835898194_5_2.jpg"},
         };
         int count = 0;
         for (Object[] row : data) {
@@ -1452,6 +1458,24 @@ public class DataInitializer implements CommandLineRunner {
             count++;
         }
         log.info("이음마켓 이미지 등록 완료 — {}건 처리", count);
+    }
+
+    // ─── popup 더미 데이터 ───────────────────────────────────────────────────────
+    private void initializePopups() {
+        // 리포지토리를 통해 데이터베이스에 저장
+        popupRepository.save(Popup.builder()
+                .name("오픈 이벤트")
+                .content("<figure class=\"image\">\n" +
+                        "  <img style=\"aspect-ratio:1024/1536;\" src=\"/uploads/popups/editor/d99c40da-c6a0-41dc-b0b4-0ddde0673b17.jpg\" width=\"1024\" height=\"1536\">\n" +
+                        " </figure>")
+                .linkUrl("https://ieumcare.shop/register/type-select")
+                .layout("PORTRAIT")
+                .duration("MONTH_1")
+                .enabled(true)
+                .expiresAt(LocalDateTime.of(2026, 7, 31, 2, 17, 11, 177081))
+                .build());
+
+        log.info("더미 팝업 초기화 완료 총 1건");
     }
 
     // ─── 헬퍼 메서드 ─────────────────────────────────────────────────────────────
