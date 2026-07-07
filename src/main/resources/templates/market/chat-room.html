@@ -127,28 +127,32 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 <script th:inline="javascript">
 const CHAT_ID     = /*[[${chatId}]]*/ 0;
 const OPPONENT_ID = /*[[${opponentId}]]*/ 0;
 
-let stompClient = null;
+let eventSource = null;
+let sseDisconnected = false;
 const renderedMessageIds = new Set();
 let lastRenderedDate = null;
 
-function connectStomp() {
-    const socket = new SockJS('/ws');
-    stompClient = Stomp.over(socket);
-    stompClient.debug = null;
-    stompClient.connect({}, () => {
-        stompClient.subscribe('/topic/market/' + CHAT_ID, msg => {
-            const received = JSON.parse(msg.body);
-            received.mine = String(received.senderId) !== String(OPPONENT_ID);
-            appendMessage(received);
-            markRead();
-        });
-    }, () => setTimeout(connectStomp, 3000));
+// 실시간 수신 — SSE 구독 (끊기면 EventSource가 자동 재연결)
+function connectSse() {
+    eventSource = new EventSource(`/api/market/chat/${CHAT_ID}/stream`);
+    eventSource.addEventListener('message', e => {
+        const received = JSON.parse(e.data);
+        received.mine = String(received.senderId) !== String(OPPONENT_ID);
+        appendMessage(received);
+        markRead();
+    });
+    eventSource.onopen = () => {
+        // 재연결 성공 시 끊긴 동안 누락된 메시지를 다시 불러온다
+        if (sseDisconnected) {
+            sseDisconnected = false;
+            loadMessages().then(markRead);
+        }
+    };
+    eventSource.onerror = () => { sseDisconnected = true; };
 }
 
 function fmt(dateStr) {
@@ -308,8 +312,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('loadingSpinner')?.remove();
     await loadMessages();
     await markRead();
-    connectStomp();
-    setInterval(async () => { await loadMessages(); await markRead(); }, 5000);
+    connectSse();
+    // 탭 포커스 복귀 시 한 번 동기화 (백그라운드 중 누락 보정) — 주기 폴링은 제거됨
+    document.addEventListener('visibilitychange', async () => {
+        if (document.visibilityState === 'visible') { await loadMessages(); await markRead(); }
+    });
 });
 </script>
 </th:block>
