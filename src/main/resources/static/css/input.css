@@ -23,6 +23,10 @@
   }
 }
 
+/* 로그인 카드 컨테이너 — 원래대로에서는 420px가 알맞지만 크게 보기(150%)에서는 비좁아
+   32rem(root 150% 기준 실측 768px)으로 넓힌다. ID 선택자라 .max-w-\[420px\]보다 우선한다. */
+:root[data-font-scale="lg"] #login-container { max-width: 32rem; }
+
 /* 라이트/다크 공용 시맨틱 색상 토큰 — <html data-theme="..."> 값에 따라 전환된다.
    템플릿에서는 bg-white/text-gray-900 대신 bg-surface/text-ink 등을 사용해
    dark: variant 없이 테마 전환이 되도록 한다. */

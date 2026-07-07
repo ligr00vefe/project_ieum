@@ -75,10 +75,10 @@
         if (select && select.value !== theme) select.value = theme;
 
         // 순환 토글 버튼(data-theme-toggle)의 아이콘을 "다음에 전환될 모드"로 표시한다.
-        // 순환 순서 light→dark→system이므로: 라이트=달, 다크=모니터, 시스템=태양.
+        // 순환 순서 system→dark→light이므로: 시스템=달, 다크=해, 라이트=모니터.
         // (버튼을 누르면 그 아이콘이 가리키는 모드로 바뀐다)
         var THEME_LABELS = { light: '라이트 모드', dark: '다크 모드', system: '시스템 설정 따름' };
-        var CYCLE = ['light', 'dark', 'system'];
+        var CYCLE = ['system', 'dark', 'light'];
         var next = CYCLE[(CYCLE.indexOf(theme) + 1) % CYCLE.length];
         document.querySelectorAll('[data-theme-toggle]').forEach(function (btn) {
             btn.querySelectorAll('[data-theme-icon]').forEach(function (icon) {
@@ -109,8 +109,8 @@
             });
         });
 
-        // 테마 순환 토글(아이콘 버튼, 예: 관리자 상단바) — light → dark → system
-        var THEME_CYCLE = ['light', 'dark', 'system'];
+        // 테마 순환 토글(아이콘 버튼, 예: 관리자 상단바) — system → dark → light
+        var THEME_CYCLE = ['system', 'dark', 'light'];
         document.querySelectorAll('[data-theme-toggle]').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 var cur = currentThemeSelection();
