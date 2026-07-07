@@ -170,7 +170,7 @@
                                 <input type="password"
                                        id="password"
                                        th:field="*{password}"
-                                       placeholder="비밀번호를 입력해주세요"
+                                       placeholder="영문·숫자·특수문자 포함 8자 이상"
                                        autocomplete="new-password"
                                        class="w-full px-4 py-3 border border-line-strong rounded-xl text-sm text-ink placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                                        th:classappend="${#fields.hasErrors('password')} ? 'border-red-300'"
