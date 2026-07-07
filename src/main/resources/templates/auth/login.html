@@ -16,12 +16,35 @@
 
     <!-- Main -->
     <main class="flex-1 flex items-center justify-center px-4 py-12">
-        <div class="w-full max-w-lg">
+        <div id="login-container" class="w-full max-w-[420px]">
 
             <!-- Header text -->
-            <div class="text-center mb-8">
+            <div class="text-center mb-6">
+                <img th:src="@{/images/logo/logo.png}" alt="이음 로고" class="h-14 w-auto mx-auto mb-4">
                 <h1 class="text-2xl font-extrabold text-ink mb-2">다시 만나서 반가워요</h1>
                 <p class="text-sm text-gray-500">이음 계정으로 로그인하세요</p>
+            </div>
+
+            <!-- 테스트 계정 안내 (포트폴리오 데모용) -->
+            <div class="bg-surface border border-line rounded-2xl p-4 mb-6">
+                <div class="flex items-center justify-between mb-2.5">
+                    <p class="text-xs font-bold text-ink-muted">테스트 계정</p>
+                    <p class="text-[11px] text-gray-400">클릭하면 자동 입력됩니다</p>
+                </div>
+                <div class="space-y-1.5">
+                    <button type="button" onclick="fillTestAccount('d01@test.com')"
+                            class="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-line-strong hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
+                        <span class="text-xs font-semibold text-indigo-600">케어메이트(장애인)</span>
+                    </button>
+                    <button type="button" onclick="fillTestAccount('c01@test.com')"
+                            class="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-line-strong hover:border-teal-300 hover:bg-teal-50 transition-colors">
+                        <span class="text-xs font-semibold text-teal-600">활동지원사</span>
+                    </button>
+                    <button type="button" onclick="fillTestAccount('admin@test.com')"
+                            class="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-line-strong hover:border-gray-400 transition-colors">
+                        <span class="text-xs font-semibold text-ink-muted">관리자</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Card -->
@@ -97,7 +120,7 @@
                                    id="password"
                                    name="password"
                                    autocomplete="current-password"
-                                   placeholder="비밀번호를 입력하세요"
+                                   placeholder="특수문자 포함 8자 이상 비밀번호"
                                    class="w-full pl-10 pr-10 py-3 border border-line-strong rounded-xl text-sm text-ink placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                                    required>
                             <button type="button"
@@ -142,6 +165,11 @@
     </main>
 
     <script>
+        function fillTestAccount(email) {
+            document.getElementById('username').value = email;
+            document.getElementById('password').value = 'test123$';
+        }
+
         function togglePassword() {
             const input = document.getElementById('password');
             const icon = document.getElementById('eye-icon');
