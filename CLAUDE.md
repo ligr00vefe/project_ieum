@@ -51,7 +51,8 @@ Controller → Service → Repository → Entity
 - **Controller**: URL 라우팅 + 뷰 렌더링 / REST JSON 응답 혼용
   - Thymeleaf 뷰 반환: `CaregiverBoardController`, `DisabledBoardController`, `MatchingController` 등
   - REST API: `/api/**` 하위 컨트롤러 (`ChatRestController`, `NotificationController` 등)
-  - STOMP: `ChatStompController`, `PresenceStompController`, `MarketStompController`
+  - STOMP: `ChatStompController`, `PresenceStompController`
+  - SSE: `NotificationController`(`/api/notifications/stream`), `MarketChatRestController`(`/api/market/chat/{id}/stream`)
 - **Service**: 비즈니스 로직 집중. `@Transactional` 기본, 조회 전용은 `readOnly = true`
 - **Repository**: Spring Data JPA 기본 + Querydsl 복합 검색 (`CaregiverSearchRepositoryImpl`)
 
@@ -70,8 +71,8 @@ Controller → Service → Repository → Entity
 1. **매칭**: 장애인이 `HelpRequest` 생성 → 활동지원사가 지원(`HelpRequestApplication`) → 매칭 확정 시 `Conversation` 생성
 2. **추천**: `RecommendationService`가 성격 태그·가용시간·거리 기반 점수 계산 후 활동지원사 순위화
 3. **채팅**: STOMP WebSocket (`/ws` 엔드포인트), 구독 경로 `/topic/conversation/{id}`
-4. **이음마켓**: 활동지원사 간 물품 거래 게시판 + 마켓 전용 채팅 (`/market/**`)
-5. **알림**: `NotificationService` → SSE 또는 DB 저장 후 폴링
+4. **이음마켓**: 활동지원사 간 물품 거래 게시판 + 마켓 전용 채팅 (`/market/**`), 채팅 수신은 SSE (`MarketChatSseService`)
+5. **알림**: `NotificationService`가 DB 저장 후 `NotificationSseService`로 미읽음 개수 SSE 푸시 (뱃지 실시간 갱신)
 
 ### 지오코딩
 
