@@ -326,9 +326,22 @@
                 });
             }
 
-            // 1분마다 뱃지 갱신 + 탭 포커스 복귀 시 즉시 갱신
+            // 뱃지 실시간 갱신 — SSE 구독이 주 경로, 미지원 브라우저만 1분 폴링 폴백
+            function connectBadgeSse() {
+                if (!window.EventSource) {
+                    setInterval(refreshBadge, 60000);
+                    return;
+                }
+                var es = new EventSource('/api/notifications/stream');
+                es.addEventListener('unread', function (e) {
+                    try { updateBadge(JSON.parse(e.data).unreadCount); } catch (err) {}
+                });
+                // 연결이 끊겨도 EventSource가 자동 재연결하므로 별도 처리 불필요
+            }
+
             refreshBadge();
-            setInterval(refreshBadge, 60000);
+            connectBadgeSse();
+            // 탭 포커스 복귀 시 즉시 갱신 (재연결 공백 보정)
             document.addEventListener('visibilitychange', function () {
                 if (document.visibilityState === 'visible') refreshBadge();
             });
