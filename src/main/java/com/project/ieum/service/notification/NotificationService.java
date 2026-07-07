@@ -19,6 +19,7 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final CurrentUserService currentUserService;
+    private final NotificationSseService notificationSseService;
 
     public Notification create(User receiver, NotificationType type, String title, String content, String url) {
         Notification notification = Notification.builder()
@@ -28,7 +29,9 @@ public class NotificationService {
                 .content(content)
                 .url(url)
                 .build();
-        return notificationRepository.save(notification);
+        Notification saved = notificationRepository.save(notification);
+        notificationSseService.pushUnreadCountAfterCommit(receiver.getId());
+        return saved;
     }
 
     @Transactional(readOnly = true)
@@ -46,7 +49,9 @@ public class NotificationService {
 
     public int markAllRead() {
         User currentUser = currentUserService.getCurrentUser();
-        return notificationRepository.markAllRead(currentUser.getId());
+        int updated = notificationRepository.markAllRead(currentUser.getId());
+        notificationSseService.pushUnreadCountAfterCommit(currentUser.getId());
+        return updated;
     }
 
     public void markRead(Long notificationId) {
@@ -54,6 +59,7 @@ public class NotificationService {
         notificationRepository.findById(notificationId).ifPresent(n -> {
             if (n.getReceiver().getId().equals(currentUser.getId())) {
                 n.markRead();
+                notificationSseService.pushUnreadCountAfterCommit(currentUser.getId());
             }
         });
     }
