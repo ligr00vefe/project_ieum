@@ -456,8 +456,8 @@ const PARTNER_FIRST = /*[[${partnerName != null ? partnerName.substring(0,1) : '
 const PARTNER_COLOR = /*[[${isUser ? 'bg-teal-500' : 'bg-indigo-500'}]]*/ 'bg-indigo-500';
 
 const PAGE_SIZE = 25;                 // 한 번에 불러올 메시지 수 (무한 스크롤 단위)
-let polling = null;
 let stompClient = null;
+let lastSentText = '';                // 전송 실패 시 입력값 복원용
 const renderedMessageIds = new Set();
 const messageStore = [];              // 화면에 표시 중인 메시지 (오래된→최신 정렬)
 let oldestLoadedPage = 0;             // 지금까지 불러온 가장 과거 페이지 번호
@@ -534,6 +534,14 @@ function connectPresence() {
             received.mine = String(received.senderId) === String(CURRENT_USER_ID);
             appendMessage(received);
             markRead();
+        });
+
+        // 전송 실패(검증·권한 오류)는 개인 에러 큐로 회신된다.
+        stompClient.subscribe('/user/queue/errors', msg => {
+            const err = JSON.parse(msg.body);
+            alert(err.message || '전송에 실패했습니다.');
+            const input = document.getElementById('messageInput');
+            if (input && !input.value) input.value = lastSentText;
         });
 
         // 끊겨 있던 동안 놓친 메시지를 즉시 따라잡는다.
@@ -781,38 +789,21 @@ function getCsrfToken() {
     return cookie ? decodeURIComponent(cookie.split('=')[1]) : '';
 }
 
-async function sendMessage() {
+// STOMP SEND로 전송한다. 내 메시지 렌더링은 /topic 브로드캐스트 수신으로 일원화된다.
+function sendMessage() {
     const input = document.getElementById('messageInput');
     const text = input.value.trim();
     if (!text) return;
 
-    input.value = '';
-    input.disabled = true;
-
-    try {
-        const res = await fetch(`/api/chat/conversations/${CONVERSATION_ID}/messages`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': getCsrfToken()
-            },
-            body: JSON.stringify({ body: text })
-        });
-        if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            alert(err.message || '전송에 실패했습니다.');
-            input.value = text;
-            return;
-        }
-        const msg = await res.json();
-        appendMessage(msg);
-    } catch (e) {
-        alert('전송에 실패했습니다.');
-        input.value = text;
-    } finally {
-        input.disabled = false;
-        input.focus();
+    if (!stompClient || !stompClient.connected) {
+        alert('연결이 끊어져 있습니다. 잠시 후 다시 시도해주세요.');
+        return;
     }
+
+    lastSentText = text;
+    input.value = '';
+    stompClient.send('/app/chat/' + CONVERSATION_ID + '/send', {}, JSON.stringify({ body: text }));
+    input.focus();
 }
 
 function appendMessage(msg) {
@@ -922,11 +913,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (box.scrollTop < 60 && hasMoreOlder && !loadingOlder) loadOlder();
     });
 
-    // 실시간(STOMP)이 주 경로이며, 누락 대비 안전망으로 최신 페이지만 가볍게 폴링한다.
-    polling = setInterval(async () => {
-        await refreshLatest();
-        await markRead();
-    }, 7000);
 });
 
 // 후기 3건 제한 + 정렬
