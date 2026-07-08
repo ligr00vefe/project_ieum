@@ -4,16 +4,12 @@ import com.project.ieum.dto.chat.AnnouncementResponse;
 import com.project.ieum.dto.chat.ConversationSummaryResponse;
 import com.project.ieum.dto.chat.MessageResponse;
 import com.project.ieum.dto.chat.ReadMessageResponse;
-import com.project.ieum.dto.chat.SendMessageRequest;
 import com.project.ieum.service.chat.ChatService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -24,7 +20,6 @@ import java.util.Map;
 public class ChatRestController {
 
     private final ChatService chatService;
-    private final SimpMessagingTemplate messagingTemplate;
 
     @GetMapping("/conversations")
     public Page<ConversationSummaryResponse> conversations(Pageable pageable) {
@@ -34,21 +29,6 @@ public class ChatRestController {
     @GetMapping("/conversations/{conversationId}/messages")
     public Page<MessageResponse> messages(@PathVariable Long conversationId, Pageable pageable) {
         return chatService.getMessages(conversationId, pageable);
-    }
-
-    @PostMapping("/conversations/{conversationId}/messages")
-    public MessageResponse sendMessage(
-            @PathVariable Long conversationId,
-            @Valid @RequestBody SendMessageRequest request,
-            Authentication authentication) {
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new SecurityException("로그인이 필요합니다.");
-        }
-
-        MessageResponse response = chatService.sendMessage(conversationId, authentication.getName(), request);
-        messagingTemplate.convertAndSend("/topic/conversations/" + conversationId, response);
-        return response;
     }
 
     @PostMapping("/conversations/{conversationId}/read")
