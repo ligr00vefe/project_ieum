@@ -178,25 +178,34 @@ public class CaregiverBoardController {
 
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
-        Long currentUserId = currentUserService.getCurrentUser().getId();
-        boolean alreadyApplied = matchingService.hasApplied(id, currentUserId);
         var helpRequest = helpRequestService.get(id);
         model.addAttribute("title", helpRequest.getTitle());
         model.addAttribute("description", helpRequest.getTitle() + " — 이음 케어 매칭 게시판에서 활동지원사를 찾는 요청입니다.");
         model.addAttribute("request", helpRequest);
         model.addAttribute("applyRequest", new ApplyRequest());
-        model.addAttribute("alreadyApplied", alreadyApplied);
-        if (alreadyApplied) {
-            matchingService.getMyConversationId(id, currentUserId).ifPresent(cid ->
-                model.addAttribute("myConversationId", cid));
-        }
-        model.addAttribute("selectedCaregiver", matchingService.isSelectedCaregiver(id, currentUserId));
-        model.addAttribute("handshake", matchingService.getHandshakeView(id, currentUserId));
         model.addAttribute("recommendations", recommendationService.recommendCaregivers(id, 5));
         model.addAttribute("tmapAppKey", tmapAppKey);
         model.addAttribute("loadTmapSdk", true);
-        matchingService.getMyPendingInvitation(id, currentUserId)
-                .ifPresent(inv -> model.addAttribute("myInvitation", inv));
+
+        // 비로그인 열람 허용 — 지원 여부·핸드셰이크·초대 같은 사용자별 상태는 로그인 시에만 계산한다.
+        var currentUser = currentUserService.getCurrentUserOrEmpty().orElse(null);
+        boolean alreadyApplied = false;
+        if (currentUser != null) {
+            Long currentUserId = currentUser.getId();
+            alreadyApplied = matchingService.hasApplied(id, currentUserId);
+            if (alreadyApplied) {
+                matchingService.getMyConversationId(id, currentUserId).ifPresent(cid ->
+                    model.addAttribute("myConversationId", cid));
+            }
+            model.addAttribute("selectedCaregiver", matchingService.isSelectedCaregiver(id, currentUserId));
+            model.addAttribute("handshake", matchingService.getHandshakeView(id, currentUserId));
+            matchingService.getMyPendingInvitation(id, currentUserId)
+                    .ifPresent(inv -> model.addAttribute("myInvitation", inv));
+        } else {
+            model.addAttribute("selectedCaregiver", false);
+            model.addAttribute("handshake", null);
+        }
+        model.addAttribute("alreadyApplied", alreadyApplied);
         model.addAttribute("content", "caregiver/board/detail");
         return "layout/layout";
     }
