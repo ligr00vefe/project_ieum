@@ -22,6 +22,10 @@ spring:
           starttls:
             enable: true
             required: true
+          # JavaMail 기본값은 무한 대기 — SMTP가 멈추면 발송 스레드가 영영 안 돌아온다
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 server:
   port: 8080
 ieum:
