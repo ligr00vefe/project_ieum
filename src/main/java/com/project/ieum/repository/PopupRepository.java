@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface PopupRepository extends JpaRepository<Popup, Long> {
     List<Popup> findByEnabledTrueAndExpiresAtAfter(java.time.LocalDateTime now);
+    List<Popup> findByEnabledTrue();
     Page<Popup> findAllByOrderByCreatedAtDesc(Pageable pageable);
     long countByEnabledTrueAndExpiresAtAfter(java.time.LocalDateTime now);
 }
