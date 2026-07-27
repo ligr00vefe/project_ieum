@@ -30,12 +30,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,10 +48,7 @@ public class MatchingService {
     @Value("${ieum.base-url:http://localhost:8080}")
     private String baseUrl;
 
-    @Value("${spring.mail.username}")
-    private String fromEmail;
-
-    private final JavaMailSender mailSender;
+    private final AsyncMailService asyncMailService;
     private final HelpRequestRepository helpRequestRepository;
     private final HelpRequestApplicationRepository applicationRepository;
     private final CaregiverProfileRepository caregiverProfileRepository;
@@ -413,17 +407,9 @@ public class MatchingService {
                 </div>
                 """.formatted(caregiverName, req.getTitle(), detailRows, postUrl);
 
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
-            helper.setFrom(fromEmail);
-            helper.setTo(to);
-            helper.setSubject("[이음] 매칭 초대 쪽지가 도착했습니다 — " + req.getTitle());
-            helper.setText(html, true);
-            mailSender.send(message);
-        } catch (Exception e) {
-            log.error("초대 메일 발송 실패: to={}", to, e);
-        }
+        // 본문은 트랜잭션 안에서 완성하고, 발송만 비동기로 넘긴다.
+        // 동기 발송이면 SMTP가 멈추는 동안 이 트랜잭션의 DB 커넥션이 그대로 묶인다.
+        asyncMailService.sendHtml(to, "[이음] 매칭 초대 쪽지가 도착했습니다 — " + req.getTitle(), html);
     }
 
     private String buildDetailRow(String label, String value) {

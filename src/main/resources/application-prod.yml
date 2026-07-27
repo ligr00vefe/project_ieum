@@ -4,6 +4,21 @@ spring:
     url: ${IEUM_DB_URL}
     username: ${IEUM_DB_USERNAME}
     password: ${IEUM_DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 2
+      max-lifetime: 580000        # 9분 40초 — MySQL wait_timeout(기본 600초)보다 짧게
+      connection-timeout: 5000    # 커넥션 대기는 5초까지만 — 30초는 톰캣 스레드까지 말라죽는다
+      validation-timeout: 3000
+      idle-timeout: 300000
+      keepalive-time: 120000      # 2분마다 커넥션 유지 핑 전송
+      connection-test-query: SELECT 1
+      leak-detection-threshold: 20000  # 20초 넘게 안 돌려주면 점유 스레드 스택을 로그로 남긴다
+      # 드라이버 기본값(socketTimeout=0)이면 죽은 커넥션에서 무한 대기 → 커넥션이 영구 점유된다
+      data-source-properties:
+        connectTimeout: 5000
+        socketTimeout: 30000
+        tcpKeepAlive: true
   jpa:
     hibernate:
       ddl-auto: validate

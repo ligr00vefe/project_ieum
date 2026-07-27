@@ -2,12 +2,10 @@ package com.project.ieum.service.password;
 
 import com.project.ieum.entity.User;
 import com.project.ieum.repository.UserRepository;
-import jakarta.mail.internet.MimeMessage;
+import com.project.ieum.service.AsyncMailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,14 +23,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PasswordResetService {
 
     private final UserRepository userRepository;
-    private final JavaMailSender mailSender;
+    private final AsyncMailService asyncMailService;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${ieum.base-url:http://localhost:8080}")
     private String baseUrl;
-
-    @Value("${spring.mail.username}")
-    private String fromEmail;
 
     private static final long COOLDOWN_DAYS = 7;
     private static final String CHARS_UPPER  = "ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -126,17 +121,8 @@ public class PasswordResetService {
                   </p>
                 </div>
                 """.formatted(tempPassword, baseUrl);
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
-            helper.setFrom(fromEmail);
-            helper.setTo(to);
-            helper.setSubject("[이음] 임시 비밀번호가 발급되었습니다");
-            helper.setText(html, true);
-            mailSender.send(message);
-        } catch (Exception e) {
-            log.error("임시 비밀번호 메일 발송 실패: to={}", to, e);
-        }
+        // 발송은 비동기로 — 동기로 보내면 SMTP가 멈추는 동안 이 트랜잭션의 DB 커넥션이 묶인다.
+        asyncMailService.sendHtml(to, "[이음] 임시 비밀번호가 발급되었습니다", html);
     }
 
     public static String formatDateTime(LocalDateTime dt) {
