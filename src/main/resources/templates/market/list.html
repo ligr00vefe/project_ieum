@@ -333,12 +333,17 @@
         } finally {
             isLoading = false;
             spinner.classList.add('hidden');
+            // 로드 후에도 센티넬이 화면 안에 남아 있으면 교차 상태 변화가 없어
+            // 콜백이 다시 오지 않으므로, 화면이 채워질 때까지 이어서 로드
+            if (!isLast && sentinelVisible) loadNextPage();
         }
     }
 
     // ── IntersectionObserver ─────────────────────────────────────────────────
+    let sentinelVisible = false;
     const observer = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) loadNextPage();
+        sentinelVisible = entries[0].isIntersecting;
+        if (sentinelVisible) loadNextPage();
     }, { rootMargin: '200px' });   // 하단 200px 전에 미리 트리거
 
     if (!isLast) observer.observe(sentinel);
