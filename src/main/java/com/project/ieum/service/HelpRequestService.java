@@ -257,8 +257,10 @@ public class HelpRequestService {
     }
 
     @Transactional(readOnly = true)
+    // 상세 화면이 requester·serviceCategory를 그대로 그리므로 조회 시점에 함께 로딩한다.
+    // findById로 두면 뷰 렌더링에서 지연로딩이 일어나고, OSIV 없이는 LazyInitializationException이 된다.
     public HelpRequest get(Long requestId) {
-        return helpRequestRepository.findById(requestId)
+        return helpRequestRepository.getHelpRequestById(requestId)
                 .orElseThrow(() -> new HelpRequestNotFoundException(requestId));
     }
 
