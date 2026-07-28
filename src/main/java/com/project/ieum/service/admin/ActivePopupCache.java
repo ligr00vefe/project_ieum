@@ -5,6 +5,7 @@ import com.project.ieum.repository.PopupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,9 +29,11 @@ public class ActivePopupCache {
 
     private final PopupRepository popupRepository;
 
-    // 트랜잭션을 걸지 않는다 — 캐시 히트에도 트랜잭션이 열려 커넥션을 빌리는 일을 막기 위함이다.
-    // (캐시 미스 때 실제 조회는 SimpleJpaRepository의 readOnly 트랜잭션 안에서 수행된다)
+    // 트랜잭션 필수 — 트랜잭션 없이 파생 쿼리를 실행하면 커넥션이 세션 종료까지 반납되지 않아,
+    // SSE 구독 요청(OSIV로 세션이 30분 유지)에서 캐시 미스가 나면 커넥션이 30분 물린다.
+    // 캐시 히트 시에는 지연 획득(delayed acquisition) 덕에 빈 트랜잭션이 커넥션을 빌리지 않는다.
     @Cacheable(ENABLED_POPUPS)
+    @Transactional(readOnly = true)
     public List<Popup> findEnabled() {
         return popupRepository.findByEnabledTrue();
     }
