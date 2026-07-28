@@ -150,7 +150,7 @@ class HelpRequestServiceTest {
         @DisplayName("존재하지 않는 id 조회는 HelpRequestNotFoundException")
         void get_notFound_throws() {
             // given
-            when(helpRequestRepository.findById(any())).thenReturn(Optional.empty());
+            when(helpRequestRepository.getHelpRequestById(any())).thenReturn(Optional.empty());
 
             // when / then
             assertThatThrownBy(() -> helpRequestService.get(20L))
@@ -166,7 +166,7 @@ class HelpRequestServiceTest {
         void cancel_notOwner_throws() {
             // given — 로그인=2번, 요청 소유자=1번
             loginAsUser(2L);
-            when(helpRequestRepository.findById(any()))
+            when(helpRequestRepository.getHelpRequestById(any()))
                 .thenReturn(Optional.of(helpRequest(1L, HelpRequestStatus.OPEN)));
 
             // when / then
@@ -179,7 +179,7 @@ class HelpRequestServiceTest {
         void cancel_notOpen_throws() {
             // given
             loginAsUser(1L);
-            when(helpRequestRepository.findById(any()))
+            when(helpRequestRepository.getHelpRequestById(any()))
                 .thenReturn(Optional.of(helpRequest(1L, HelpRequestStatus.MATCHED)));
 
             // when / then
@@ -193,7 +193,7 @@ class HelpRequestServiceTest {
             // given
             loginAsUser(1L);
             HelpRequest hr = helpRequest(1L, HelpRequestStatus.OPEN);
-            when(helpRequestRepository.findById(1L)).thenReturn(Optional.of(hr));
+            when(helpRequestRepository.getHelpRequestById(1L)).thenReturn(Optional.of(hr));
 
             // when
             helpRequestService.cancel(1L);
@@ -211,7 +211,7 @@ class HelpRequestServiceTest {
         void delete_notOwner_throws() {
             // given
             loginAsUser(2L);
-            when(helpRequestRepository.findById(any()))
+            when(helpRequestRepository.getHelpRequestById(any()))
                 .thenReturn(Optional.of(helpRequest(1L, HelpRequestStatus.CLOSED)));
 
             // when / then
@@ -225,7 +225,7 @@ class HelpRequestServiceTest {
         void delete_notClosed_throws() {
             // given
             loginAsUser(1L);
-            when(helpRequestRepository.findById(any()))
+            when(helpRequestRepository.getHelpRequestById(any()))
                 .thenReturn(Optional.of(helpRequest(1L, HelpRequestStatus.OPEN)));
 
             // when / then
@@ -240,7 +240,7 @@ class HelpRequestServiceTest {
             // given
             loginAsUser(1L);
             HelpRequest hr = helpRequest(1L, HelpRequestStatus.CLOSED);
-            when(helpRequestRepository.findById(any())).thenReturn(Optional.of(hr));
+            when(helpRequestRepository.getHelpRequestById(any())).thenReturn(Optional.of(hr));
 
             // when
             helpRequestService.delete(1L);
@@ -258,7 +258,7 @@ class HelpRequestServiceTest {
         void repost_notOwner_throws() {
             // given — 로그인=2번, 요청 소유자=1번
             loginAsUser(2L);
-            when(helpRequestRepository.findById(any()))
+            when(helpRequestRepository.getHelpRequestById(any()))
                 .thenReturn(Optional.of(closedRequest(1L)));
 
             // when / then
@@ -271,7 +271,7 @@ class HelpRequestServiceTest {
         void repost_notClosed_throws() {
             // given
             loginAsUser(1L);
-            when(helpRequestRepository.findById(any()))
+            when(helpRequestRepository.getHelpRequestById(any()))
                 .thenReturn(Optional.of(helpRequest(1L, HelpRequestStatus.OPEN)));
 
             // when / then
@@ -284,7 +284,7 @@ class HelpRequestServiceTest {
         void repost_ownerAndClosed_prefillsContentAndClearsPastDates() {
             // given — 희망일시(2026-06-10)는 현재 기준 과거 → @FutureOrPresent 위반이라 비워야 한다.
             loginAsUser(1L);
-            when(helpRequestRepository.findById(1L)).thenReturn(Optional.of(closedRequest(1L)));
+            when(helpRequestRepository.getHelpRequestById(1L)).thenReturn(Optional.of(closedRequest(1L)));
             when(helpRequestPersonalityTagRepository.findByHelpRequest_Id(1L))
                 .thenReturn(java.util.List.of());
 
