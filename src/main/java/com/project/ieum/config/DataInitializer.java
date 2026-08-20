@@ -25,6 +25,7 @@ import com.project.ieum.repository.market.MarketPostImageRepository;
 import com.project.ieum.repository.market.MarketPostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -69,8 +70,36 @@ public class DataInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final PopupRepository popupRepository;
 
+    /**
+     * 데모 계정·더미 콘텐츠 시딩 스위치. 기본 off.
+     *
+     * <p>이 저장소는 공개돼 있어 {@link #initAdminAccount()}가 만드는 관리자 계정의
+     * 비밀번호가 소스만 읽어도 드러난다. 그래서 프로파일 배제({@code @Profile("!prod")})가 아니라
+     * <b>명시적 옵트인</b>으로 막는다 — 프로파일 이름이 바뀌거나 비어 있으면 배제 조건은 조용히 뚫린다.
+     *
+     * <p>로컬에서 켜려면 gitignore 대상인 {@code application-secret.properties}에
+     * {@code ieum.seed.enabled=true}를 넣는다.
+     */
+    @Value("${ieum.seed.enabled:false}")
+    private boolean seedEnabled;
+
     @Override
     public void run(String... args) {
+        initReferenceData();
+
+        if (!seedEnabled) {
+            log.info("데모 계정·더미 데이터 시딩을 건너뜁니다 (ieum.seed.enabled=false). "
+                    + "로컬에서 필요하면 application-secret.properties에 ieum.seed.enabled=true를 추가하십시오.");
+            return;
+        }
+        initSeedData();
+    }
+
+    /**
+     * 기준 데이터 — 자격증명이 없고, 회원가입·요청등록 폼의 선택지가 여기서 나온다.
+     * 비어 있으면 앱이 동작하지 않으므로 시드 스위치와 무관하게 채운다(각각 count()==0일 때만).
+     */
+    private void initReferenceData() {
         if (disabilityTypeRepository.count() == 0) {
             initDisabilityTypes();
         }
@@ -86,14 +115,23 @@ public class DataInitializer implements CommandLineRunner {
         if (serviceCategoryRepository.count() == 0) {
             initServiceCategories();
         }
+        if (marketCategoryRepository.count() == 0) {
+            initMarketCategories();
+        }
+    }
+
+    /**
+     * 데모 계정과 더미 콘텐츠 — {@code ieum.seed.enabled=true}일 때만 실행된다.
+     *
+     * <p>순서 의존성: 더미 콘텐츠 4종은 전부 시드 계정을 {@code orElseThrow}로 조회하므로
+     * 계정 생성이 반드시 앞서야 한다.
+     */
+    private void initSeedData() {
         initAdminAccount();
         initTestAccounts();
         initDummyAccounts();
         if (helpRequestRepository.count() == 0) {
             initDummyHelpRequests();
-        }
-        if (marketCategoryRepository.count() == 0) {
-            initMarketCategories();
         }
         if (noticeRepository.count() == 0) {
             initDummyNotices();
@@ -104,7 +142,6 @@ public class DataInitializer implements CommandLineRunner {
         if (marketPostRepository.count() == 0) {
             initDummyMarketPosts();
         }
-
         if (popupRepository.count() == 0) {
             initializePopups();
         }

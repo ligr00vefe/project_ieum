@@ -18,5 +18,8 @@ matching:
     # 테스트는 결정론적이어야 하므로 자동 전이 비활성(기본값이지만 의도를 명시)
     enabled: false
 ieum:
+  seed:
+    # 테스트는 각자 필요한 데이터를 직접 심는다 — 시드 계정·더미 콘텐츠에 의존하지 않는다.
+    enabled: false
   upload:
     certification-path: ${java.io.tmpdir}/ieum-test-certifications

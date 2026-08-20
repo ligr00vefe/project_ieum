@@ -29,6 +29,10 @@ matching:
   scheduler:
     # 운영 환경에서만 시간 자동 전이 활성화(단일 인스턴스·재시작 배포 전제)
     enabled: true
+ieum:
+  seed:
+    # 데모 계정·더미 데이터는 운영에 절대 심지 않는다(기본값이지만 의도를 명시).
+    enabled: false
 server:
   servlet:
     session:
