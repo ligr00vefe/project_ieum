@@ -16,6 +16,7 @@ import com.project.ieum.repository.ConversationRepository;
 import com.project.ieum.repository.MessageRepository;
 import com.project.ieum.service.common.CurrentUserService;
 import com.project.ieum.service.notification.NotificationService;
+import com.project.ieum.util.UserDisplayName;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -82,7 +83,7 @@ public class ChatService {
                 receiver,
                 NotificationType.MESSAGE,
                 "새 메시지",
-                sender.getEmail() + "님이 메시지를 보냈습니다.",
+                UserDisplayName.of(sender) + "님이 메시지를 보냈습니다.",
                 "/chat/conversations/" + conversationId
         );
 

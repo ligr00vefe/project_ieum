@@ -16,6 +16,7 @@ import com.project.ieum.repository.market.MarketMessageRepository;
 import com.project.ieum.repository.market.MarketPostRepository;
 import com.project.ieum.service.common.CurrentUserService;
 import com.project.ieum.service.notification.NotificationService;
+import com.project.ieum.util.UserDisplayName;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -72,7 +73,7 @@ public class MarketChatService {
                             post.getSeller(),
                             NotificationType.MESSAGE, // 기존 MESSAGE 타입 재사용
                             "새 채팅이 왔어요",
-                            currentUser.getEmail() + "님이 '" + post.getTitle() + "' 상품에 채팅을 시작했습니다.",
+                            UserDisplayName.of(currentUser) + "님이 '" + post.getTitle() + "' 상품에 채팅을 시작했습니다.",
                             "/market/chat/" + chat.getId()
                     );
 
@@ -131,7 +132,7 @@ public class MarketChatService {
                 receiver,
                 NotificationType.MESSAGE,
                 "새 메시지",
-                currentUser.getEmail() + "님이 메시지를 보냈습니다.",
+                UserDisplayName.of(currentUser) + "님이 메시지를 보냈습니다.",
                 "/market/chat/" + chatId
         );
 

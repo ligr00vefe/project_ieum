@@ -26,6 +26,7 @@ import com.project.ieum.repository.*;
 import com.project.ieum.repository.CaregiverInvitationRepository;
 import com.project.ieum.service.common.CurrentUserService;
 import com.project.ieum.service.notification.NotificationService;
+import com.project.ieum.util.UserDisplayName;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -348,7 +349,7 @@ public class MatchingService {
                 caregiver.getUser(),
                 NotificationType.INVITATION,
                 "도움 요청 초대가 왔어요",
-                currentUser.getEmail().split("@")[0] + " 이용자가 '" + helpRequest.getTitle() + "' 요청에 초대했습니다.",
+                UserDisplayName.of(currentUser) + " 이용자가 '" + helpRequest.getTitle() + "' 요청에 초대했습니다.",
                 "/caregiver/board/" + requestId
         );
         sendInvitationEmail(caregiver.getUser().getEmail(), caregiver.getFullName(), helpRequest, requestId);
