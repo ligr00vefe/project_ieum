@@ -78,7 +78,7 @@ class InquiryServiceTest {
     @DisplayName("문의 등록 — 본문의 스크립트가 저장 전에 제거된다")
     void createSanitizesBody() {
         InquiryCreateForm form = new InquiryCreateForm();
-        form.setTitle("제목");
+        form.setTitle("A & B");
         form.setCategory(InquiryCategory.ETC);
         form.setBody(PAYLOAD);
         when(inquiryRepository.save(any(Inquiry.class))).thenAnswer(i -> i.getArgument(0));
@@ -88,6 +88,8 @@ class InquiryServiceTest {
         ArgumentCaptor<Inquiry> captor = ArgumentCaptor.forClass(Inquiry.class);
         verify(inquiryRepository).save(captor.capture());
         assertSanitized(captor.getValue().getBody());
+        // 제목은 등록 경로에서도 그대로여야 한다(수정 경로와 대칭).
+        assertThat(captor.getValue().getTitle()).isEqualTo("A & B");
     }
 
     @Test
