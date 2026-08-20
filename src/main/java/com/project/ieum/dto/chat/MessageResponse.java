@@ -1,6 +1,7 @@
 package com.project.ieum.dto.chat;
 
 import com.project.ieum.entity.conversation.Message;
+import com.project.ieum.util.UserDisplayName;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -26,9 +27,8 @@ public class MessageResponse {
                 .id(message.getId())
                 .conversationId(message.getConversation().getId())
                 .senderId(message.getSender().getId())
-                .senderName(message.getSender().getProfile() != null
-                        ? message.getSender().getProfile().getFullName()
-                        : message.getSender().getEmail())
+                // 프로필이 없는 경우(관리자)에 이메일로 되돌아가면 상대 화면에 계정 주소가 그대로 뜬다.
+                .senderName(UserDisplayName.of(message.getSender()))
                 .body(message.getBody())
                 .attachmentUrl(message.getAttachmentUrl())
                 .attachmentType(message.getAttachmentType())
