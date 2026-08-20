@@ -11,6 +11,7 @@ import com.project.ieum.exception.ForbiddenException;
 import com.project.ieum.exception.NotFoundException;
 import com.project.ieum.repository.InquiryRepository;
 import com.project.ieum.repository.InquiryReplyRepository;
+import com.project.ieum.util.HtmlSanitizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * 문의와 답변을 다룬다.
+ *
+ * <p>본문과 답변은 CKEditor가 만든 HTML이고 상세 화면이 {@code th:utext}로 그대로 그린다.
+ * 저장 직전에 {@link HtmlSanitizer}를 거치게 해 저장형 XSS를 막는다
+ * ({@code NoticeService}·{@code AdminPopupService}와 같은 방식).
+ *
+ * <p>제목은 살균하지 않는다 — 목록·상세·레이아웃 전부 {@code th:text}라 이미 이스케이프되고,
+ * 여기서 한 번 더 변환하면 {@code A & B}가 화면에 {@code A &amp;amp; B}로 보이는 이중 이스케이프가 된다.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -27,6 +38,7 @@ public class InquiryService {
 
     private final InquiryRepository inquiryRepository;
     private final InquiryReplyRepository inquiryReplyRepository;
+    private final HtmlSanitizer htmlSanitizer;
 
     @Transactional(readOnly = true)
     public List<Inquiry> getAll() {
@@ -50,7 +62,7 @@ public class InquiryService {
                 .author(author)
                 .category(form.getCategory())
                 .title(form.getTitle())
-                .body(form.getBody())
+                .body(htmlSanitizer.sanitize(form.getBody()))
                 .isSecret(form.isSecret())
                 .build();
         return inquiryRepository.save(inquiry);
@@ -123,7 +135,8 @@ public class InquiryService {
         if (!inquiry.getAuthor().getId().equals(user.getId())) {
             throw new ForbiddenException("본인의 문의만 수정할 수 있습니다.");
         }
-        inquiry.update(form.getTitle(), form.getBody(), form.getCategory(), form.isSecret());
+        inquiry.update(form.getTitle(), htmlSanitizer.sanitize(form.getBody()),
+                       form.getCategory(), form.isSecret());
     }
 
     /** 문의 삭제 — 작성자 본인 또는 관리자 가능 */
@@ -149,12 +162,12 @@ public class InquiryService {
     public void reply(Long inquiryId, InquiryForm form, User admin) {
         Inquiry inquiry = getById(inquiryId);
         if (inquiry.getReply() != null) {
-            inquiry.getReply().updateBody(form.getBody());
+            inquiry.getReply().updateBody(htmlSanitizer.sanitize(form.getBody()));
         } else {
             InquiryReply reply = InquiryReply.builder()
                     .inquiry(inquiry)
                     .answeredBy(admin)
-                    .body(form.getBody())
+                    .body(htmlSanitizer.sanitize(form.getBody()))
                     .build();
             inquiryReplyRepository.save(reply);
             inquiry.markAnswered();
