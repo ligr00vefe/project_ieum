@@ -25,8 +25,8 @@
                 <p class="text-sm text-gray-500">이음 계정으로 로그인하세요</p>
             </div>
 
-            <!-- 테스트 계정 안내 (포트폴리오 데모용) -->
-            <div class="bg-surface border border-line rounded-2xl p-4 mb-6">
+            <!-- 테스트 계정 안내 (포트폴리오 데모용) — 시드가 켜진 환경에서만 렌더 -->
+            <div th:if="${seedAccountsVisible}" class="bg-surface border border-line rounded-2xl p-4 mb-6">
                 <div class="flex items-center justify-between mb-2.5">
                     <p class="text-xs font-bold text-ink-muted">테스트 계정</p>
                     <p class="text-[11px] text-gray-400">클릭하면 자동 입력됩니다</p>
@@ -164,12 +164,15 @@
         </div>
     </main>
 
-    <script>
+    <!-- 데모 계정 자동입력 — 공통 비밀번호가 들어 있어 시드가 켜진 환경에서만 내려보낸다 -->
+    <script th:if="${seedAccountsVisible}">
         function fillTestAccount(email) {
             document.getElementById('username').value = email;
             document.getElementById('password').value = 'test123$';
         }
+    </script>
 
+    <script>
         function togglePassword() {
             const input = document.getElementById('password');
             const icon = document.getElementById('eye-icon');

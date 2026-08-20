@@ -5,6 +5,7 @@ import com.project.ieum.service.admin.AdminPopupService;
 import com.project.ieum.service.common.CurrentUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
@@ -14,6 +15,9 @@ public class GlobalModelAdvice {
 
     private final CurrentUserService currentUserService;
     private final AdminPopupService adminPopupService;
+
+    @Value("${ieum.seed.enabled:false}")
+    private boolean seedEnabled;
 
     /**
      * {@code /api/**}는 JSON·SSE 응답이라 여기서 넣는 모델 속성을 쓰지 않는다. 그런데도
@@ -46,6 +50,19 @@ public class GlobalModelAdvice {
     public java.util.List<com.project.ieum.entity.popup.Popup> activePopups(HttpServletRequest request) {
         if (skipsModel(request)) return java.util.List.of();
         return adminPopupService.getActivePopups();
+    }
+
+    /**
+     * 데모 계정 자동입력 UI를 렌더할지 여부.
+     *
+     * <p>DataInitializer 시드를 끈 환경에는 그 계정이 존재하지 않는다. 그런데도 버튼을 남기면
+     * 로그인 페이지 HTML이 계정 주소와 공통 비밀번호를 그대로 광고하게 된다 — 이미 계정이
+     * 만들어진 DB에서는 그 조합이 지금도 유효하므로, 시드와 같은 스위치로 함께 감춘다.
+     */
+    @ModelAttribute("seedAccountsVisible")
+    public boolean seedAccountsVisible(HttpServletRequest request) {
+        if (skipsModel(request)) return false;
+        return seedEnabled;
     }
 
     // 로그인 필요 페이지, 폼 페이지는 검색엔진 색인 제외
