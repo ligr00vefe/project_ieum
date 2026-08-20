@@ -32,7 +32,13 @@ matching:
 ieum:
   seed:
     # 데모 계정·더미 데이터는 운영에 절대 심지 않는다(기본값이지만 의도를 명시).
+    # 관리자가 필요하면 시드를 켜지 말고 ieum.admin.bootstrap.* 환경변수를 쓴다 —
+    # 시드를 켜면 소스에 비밀번호가 드러난 데모 계정까지 함께 심어진다.
     enabled: false
+  dev:
+    # 개발용 이메일 인증 우회. application.properties의 test.com을 비워 덮는다 —
+    # 운영에 남으면 해당 도메인 주소로 가입할 때 인증 단계가 통째로 건너뛰어진다.
+    email-verify-skip-domain: ""
 server:
   servlet:
     session:
