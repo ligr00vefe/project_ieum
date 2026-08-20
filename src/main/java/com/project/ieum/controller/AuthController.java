@@ -6,6 +6,7 @@ import com.project.ieum.entity.PersonalityTag;
 import com.project.ieum.entity.Region;
 import com.project.ieum.entity.UserRole;
 import com.project.ieum.entity.user.DisabilityType;
+import com.project.ieum.exception.ClientSafeMessage;
 import com.project.ieum.service.MasterDataService;
 import com.project.ieum.service.UserService;
 import jakarta.servlet.http.HttpSession;
@@ -267,8 +268,11 @@ public class AuthController {
 
         } catch (Exception e) {
             log.error("회원가입 실패: {}", e.getMessage(), e);
+            // /register/**는 비로그인으로 열려 있고 이 값은 step4 화면에 그대로 찍힌다.
+            // 도메인 예외의 안내는 그대로 보여 주되, 제약 위반 같은 프레임워크 예외의 원문
+            // (SQL·제약명·컬럼명)은 화면으로 내보내지 않는다. 원문은 위 로그에 남는다.
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "회원가입 처리 중 오류가 발생했습니다: " + e.getMessage());
+                    ClientSafeMessage.of(e, "회원가입 처리 중 오류가 발생했습니다."));
             return "redirect:/register/" + type + "/step4";
         }
     }
