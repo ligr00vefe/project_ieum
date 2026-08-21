@@ -10,7 +10,10 @@ public class RequestUriInterceptor implements HandlerInterceptor {
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response,
                            Object handler, ModelAndView modelAndView) {
-        if (modelAndView != null) {
+        if (modelAndView != null
+                && modelAndView.getViewName() != null
+                && !modelAndView.getViewName().startsWith("redirect:")
+                && !modelAndView.getViewName().startsWith("forward:")) {
             modelAndView.addObject("requestURI", request.getRequestURI());
         }
     }

@@ -25,28 +25,6 @@
                 <p class="text-sm text-gray-500">이음 계정으로 로그인하세요</p>
             </div>
 
-            <!-- 테스트 계정 안내 (포트폴리오 데모용) -->
-            <div class="bg-surface border border-line rounded-2xl p-4 mb-6">
-                <div class="flex items-center justify-between mb-2.5">
-                    <p class="text-xs font-bold text-ink-muted">테스트 계정</p>
-                    <p class="text-[11px] text-gray-400">클릭하면 자동 입력됩니다</p>
-                </div>
-                <div class="space-y-1.5">
-                    <button type="button" onclick="fillTestAccount('d01@test.com')"
-                            class="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-line-strong hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
-                        <span class="text-xs font-semibold text-indigo-600">케어메이트(장애인)</span>
-                    </button>
-                    <button type="button" onclick="fillTestAccount('c01@test.com')"
-                            class="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-line-strong hover:border-teal-300 hover:bg-teal-50 transition-colors">
-                        <span class="text-xs font-semibold text-teal-600">활동지원사</span>
-                    </button>
-                    <button type="button" onclick="fillTestAccount('admin@test.com')"
-                            class="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-line-strong hover:border-gray-400 transition-colors">
-                        <span class="text-xs font-semibold text-ink-muted">관리자</span>
-                    </button>
-                </div>
-            </div>
-
             <!-- Card -->
             <div class="bg-surface rounded-3xl shadow-sm border border-line p-8">
 
@@ -165,11 +143,6 @@
     </main>
 
     <script>
-        function fillTestAccount(email) {
-            document.getElementById('username').value = email;
-            document.getElementById('password').value = 'test123$';
-        }
-
         function togglePassword() {
             const input = document.getElementById('password');
             const icon = document.getElementById('eye-icon');

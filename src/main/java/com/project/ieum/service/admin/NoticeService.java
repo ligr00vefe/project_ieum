@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import com.project.ieum.util.UploadSecurityValidator;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -113,6 +114,7 @@ public class NoticeService {
     // ── 에디터 인라인 이미지 업로드 ───────────────────────────────
 
     public String uploadEditorImage(MultipartFile file) {
+        UploadSecurityValidator.validateImage(file);
         try {
             Files.createDirectories(EDITOR_IMG_DIR);
             String ext = extractExt(file.getOriginalFilename());
@@ -131,6 +133,7 @@ public class NoticeService {
         if (files == null) return;
         for (MultipartFile file : files) {
             if (file == null || file.isEmpty()) continue;
+            UploadSecurityValidator.validateAttachment(file);
             try {
                 Files.createDirectories(ATTACHMENT_DIR);
                 String ext = extractExt(file.getOriginalFilename());

@@ -52,7 +52,7 @@ public class EmailVerificationController {
             emailVerificationService.sendVerificationCode(email);
             return ResponseEntity.ok(Map.of("ok", true));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return ResponseEntity.internalServerError().body(Map.of("error", "인증 메일을 발송하지 못했습니다."));
         }
     }
 

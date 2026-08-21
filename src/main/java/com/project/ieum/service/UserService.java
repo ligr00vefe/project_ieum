@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import com.project.ieum.util.UploadSecurityValidator;
 
 import com.project.ieum.util.ImageThumbUtil;
 import java.io.ByteArrayInputStream;
@@ -447,6 +448,7 @@ public class UserService {
     }
 
     private String saveProfileImage(Long userId, MultipartFile file) {
+        UploadSecurityValidator.validateImage(file);
         try {
             Path uploadDir = Paths.get("uploads/profiles");
             Files.createDirectories(uploadDir);
@@ -497,6 +499,7 @@ public class UserService {
     private static final Path PROFILE_THUMB_DIR  = Paths.get("uploads/profile_thumb");
 
     public Map<String, String> saveCustomProfileImage(Long userId, MultipartFile file) {
+        UploadSecurityValidator.validateImage(file);
         try {
             Files.createDirectories(PROFILE_CUSTOM_DIR);
             Files.createDirectories(PROFILE_THUMB_DIR);

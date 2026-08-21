@@ -26,7 +26,9 @@ import com.project.ieum.repository.market.MarketPostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +41,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
+@Profile("local | test")
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
@@ -69,6 +72,9 @@ public class DataInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final PopupRepository popupRepository;
 
+    @Value("${IEUM_DEMO_PASSWORD:${ieum.demo.password:}}")
+    private String demoPassword;
+
     @Override
     public void run(String... args) {
         if (disabilityTypeRepository.count() == 0) {
@@ -86,28 +92,29 @@ public class DataInitializer implements CommandLineRunner {
         if (serviceCategoryRepository.count() == 0) {
             initServiceCategories();
         }
-        initAdminAccount();
-        initTestAccounts();
-        initDummyAccounts();
-        if (helpRequestRepository.count() == 0) {
-            initDummyHelpRequests();
-        }
         if (marketCategoryRepository.count() == 0) {
             initMarketCategories();
         }
-        if (noticeRepository.count() == 0) {
-            initDummyNotices();
-        }
-        if (inquiryRepository.count() == 0) {
-            initDummyInquiries();
-        }
-        if (marketPostRepository.count() == 0) {
-            initDummyMarketPosts();
+        if (demoPassword == null || demoPassword.isBlank()) {
+            log.info("데모 계정/샘플 데이터 생략: IEUM_DEMO_PASSWORD가 설정되지 않았습니다.");
+            return;
         }
 
-        if (popupRepository.count() == 0) {
-            initializePopups();
+        initAdminAccount();
+        initTestAccounts();
+        initDummyAccounts();
+        if (helpRequestRepository.count() == 0) initDummyHelpRequests();
+        if (noticeRepository.count() == 0) initDummyNotices();
+        if (inquiryRepository.count() == 0) initDummyInquiries();
+        if (marketPostRepository.count() == 0) initDummyMarketPosts();
+        if (popupRepository.count() == 0) initializePopups();
+    }
+
+    private String encodedDemoPassword() {
+        if (demoPassword.length() < 12) {
+            throw new IllegalStateException("IEUM_DEMO_PASSWORD는 12자 이상이어야 합니다.");
         }
+        return passwordEncoder.encode(demoPassword);
     }
 
     // ─── 기준 데이터 ─────────────────────────────────────────────────────────────
@@ -203,7 +210,7 @@ public class DataInitializer implements CommandLineRunner {
         if (!userRepository.existsByEmail(adminEmail)) {
             userRepository.save(User.builder()
                     .email(adminEmail)
-                    .passwordHash(passwordEncoder.encode("test123$"))
+                    .passwordHash(encodedDemoPassword())
                     .phone(null)
                     .role(UserRole.ADMIN)
                     .status(UserStatus.ACTIVE)
@@ -231,7 +238,7 @@ public class DataInitializer implements CommandLineRunner {
 
         User user = userRepository.save(User.builder()
                 .email(email)
-                .passwordHash(passwordEncoder.encode("test123$"))
+                .passwordHash(encodedDemoPassword())
                 .phone("010-2222-2222")
                 .role(UserRole.USER)
                 .status(UserStatus.ACTIVE)
@@ -278,7 +285,7 @@ public class DataInitializer implements CommandLineRunner {
 
         User user = userRepository.save(User.builder()
                 .email(email)
-                .passwordHash(passwordEncoder.encode("test123$"))
+                .passwordHash(encodedDemoPassword())
                 .phone("010-3333-3333")
                 .role(UserRole.CAREGIVER)
                 .status(UserStatus.ACTIVE)
@@ -337,7 +344,7 @@ public class DataInitializer implements CommandLineRunner {
 
             User user = userRepository.save(User.builder()
                     .email(du.email())
-                    .passwordHash(passwordEncoder.encode("test123$"))
+                    .passwordHash(encodedDemoPassword())
                     .phone(du.phone())
                     .role(UserRole.USER)
                     .status(UserStatus.ACTIVE)
@@ -391,7 +398,7 @@ public class DataInitializer implements CommandLineRunner {
 
             User user = userRepository.save(User.builder()
                     .email(dc.email())
-                    .passwordHash(passwordEncoder.encode("test123$"))
+                    .passwordHash(encodedDemoPassword())
                     .phone(dc.phone())
                     .role(UserRole.CAREGIVER)
                     .status(UserStatus.ACTIVE)

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import com.project.ieum.util.UploadSecurityValidator;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -95,6 +96,7 @@ public class AdminPopupService {
     }
 
     public String uploadEditorImage(MultipartFile file) {
+        UploadSecurityValidator.validateImage(file);
         try {
             Files.createDirectories(EDITOR_IMG_DIR);
             String ext = extractExt(file.getOriginalFilename());

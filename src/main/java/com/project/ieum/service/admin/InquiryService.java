@@ -11,6 +11,7 @@ import com.project.ieum.exception.ForbiddenException;
 import com.project.ieum.exception.NotFoundException;
 import com.project.ieum.repository.InquiryRepository;
 import com.project.ieum.repository.InquiryReplyRepository;
+import com.project.ieum.util.HtmlSanitizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +28,7 @@ public class InquiryService {
 
     private final InquiryRepository inquiryRepository;
     private final InquiryReplyRepository inquiryReplyRepository;
+    private final HtmlSanitizer htmlSanitizer;
 
     @Transactional(readOnly = true)
     public List<Inquiry> getAll() {
@@ -50,7 +52,7 @@ public class InquiryService {
                 .author(author)
                 .category(form.getCategory())
                 .title(form.getTitle())
-                .body(form.getBody())
+                .body(htmlSanitizer.sanitize(form.getBody()))
                 .isSecret(form.isSecret())
                 .build();
         return inquiryRepository.save(inquiry);
@@ -123,7 +125,7 @@ public class InquiryService {
         if (!inquiry.getAuthor().getId().equals(user.getId())) {
             throw new ForbiddenException("본인의 문의만 수정할 수 있습니다.");
         }
-        inquiry.update(form.getTitle(), form.getBody(), form.getCategory(), form.isSecret());
+        inquiry.update(form.getTitle(), htmlSanitizer.sanitize(form.getBody()), form.getCategory(), form.isSecret());
     }
 
     /** 문의 삭제 — 작성자 본인 또는 관리자 가능 */
@@ -154,7 +156,7 @@ public class InquiryService {
             InquiryReply reply = InquiryReply.builder()
                     .inquiry(inquiry)
                     .answeredBy(admin)
-                    .body(form.getBody())
+                    .body(htmlSanitizer.sanitize(form.getBody()))
                     .build();
             inquiryReplyRepository.save(reply);
             inquiry.markAnswered();

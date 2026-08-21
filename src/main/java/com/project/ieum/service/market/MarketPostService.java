@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
+import com.project.ieum.util.UploadSecurityValidator;
 
 import java.io.File;
 import java.io.IOException;
@@ -211,6 +212,7 @@ public class MarketPostService {
 
             // 빈 파일(파일을 선택하지 않은 input) 스킵
             if (file == null || file.isEmpty()) continue;
+            UploadSecurityValidator.validateImage(file);
 
             // 파일 확장자 추출 (예: "jpg", "png")
             String originalName = file.getOriginalFilename();

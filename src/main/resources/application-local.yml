@@ -3,7 +3,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${IEUM_DB_URL:jdbc:mysql://localhost:3306/db7?serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
     username: ${IEUM_DB_USERNAME:db7}
-    password: ${IEUM_DB_PASSWORD:1234}
+    password: ${IEUM_DB_PASSWORD}
     hikari:
       maximum-pool-size: 10
       minimum-idle: 2
@@ -24,7 +24,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
-    show-sql: true
+    show-sql: false
   mail:
     host: ${IEUM_MAIL_HOST:smtp.gmail.com}
     port: ${IEUM_MAIL_PORT:587}
@@ -45,3 +45,6 @@ server:
       cookie:
         http-only: true
         same-site: lax
+ieum:
+  dev:
+    email-verify-skip-domain: ${IEUM_DEV_EMAIL_VERIFY_SKIP_DOMAIN:}

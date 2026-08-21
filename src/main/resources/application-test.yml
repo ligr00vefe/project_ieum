@@ -18,5 +18,7 @@ matching:
     # 테스트는 결정론적이어야 하므로 자동 전이 비활성(기본값이지만 의도를 명시)
     enabled: false
 ieum:
+  demo:
+    password: test-only-demo-password-2026!
   upload:
     certification-path: ${java.io.tmpdir}/ieum-test-certifications

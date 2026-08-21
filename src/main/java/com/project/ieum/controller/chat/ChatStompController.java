@@ -52,6 +52,6 @@ public class ChatStompController {
     @MessageExceptionHandler(Exception.class)
     @SendToUser("/queue/errors")
     public Map<String, String> handleError(Exception e) {
-        return Map.of("message", e.getMessage() != null ? e.getMessage() : "전송에 실패했습니다.");
+        return Map.of("message", "메시지 전송에 실패했습니다.");
     }
 }

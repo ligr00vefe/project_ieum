@@ -74,7 +74,7 @@ public class GlobalExceptionHandler {
         log.warn("Illegal argument: message={}", e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorResponse.of("INVALID_ARGUMENT", e.getMessage()));
+                .body(ErrorResponse.of("INVALID_ARGUMENT", "요청 값이 올바르지 않습니다."));
     }
 
     @ExceptionHandler(IllegalStateException.class)
@@ -82,7 +82,7 @@ public class GlobalExceptionHandler {
         log.warn("Illegal state: message={}", e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorResponse.of("INVALID_STATE", e.getMessage()));
+                .body(ErrorResponse.of("INVALID_STATE", "현재 상태에서는 요청을 처리할 수 없습니다."));
     }
 
     // favicon.ico 등 정적 리소스 미존재 요청 — ERROR 로그 방지

@@ -85,6 +85,8 @@ class LoginFlowTest {
                 .andReturn()
                 .getRequest()
                 .getSession(false);
+        session.setAttribute("emailVerified", "new-caregiver@ieum.test");
+        session.setAttribute("emailVerifiedAt", java.time.LocalDateTime.now());
 
         mockMvc.perform(post("/register/caregiver/step1")
                         .session((org.springframework.mock.web.MockHttpSession) session)
@@ -116,7 +118,7 @@ class LoginFlowTest {
                         .with(csrf())
                         .param("personalityTagIds", "1"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/"));
+                .andExpect(redirectedUrl("/register/complete"));
 
         mockMvc.perform(post("/login")
                         .with(csrf())
